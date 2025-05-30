@@ -2,14 +2,25 @@ import QtQuick
 import Qt.labs.platform
 
 Window {
-  width: 640
-  height: 480
+  width: 320
+  height: 380
   visible: true
   title: qsTr("Hello World")
 
-  Text {
-    text: "Hello, world"
-    anchors.centerIn: parent
+  MyTabs {
+    anchors.fill: parent
+
+    tabs: [
+      {
+        title: "Устройства"
+      },
+      {
+        title: "Сценарии"
+      },
+      {
+        title: "Настройки"
+      }
+    ]
   }
 
   SystemTrayIcon {

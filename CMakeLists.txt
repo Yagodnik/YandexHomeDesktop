@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Quick)
+
 add_subdirectory(src/api)
 
 qt_standard_project_setup(REQUIRES 6.8)
@@ -23,6 +24,8 @@ qt_add_qml_module(appYandexHomeDesktop
     URI YandexHomeDesktop
     VERSION 1.0
     QML_FILES
+        src/qml/MyTab.qml
+        src/qml/MyTabs.qml
         src/qml/Main.qml
 )
 

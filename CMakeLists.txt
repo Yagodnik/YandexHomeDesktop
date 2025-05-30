@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Quick)
+add_subdirectory(src/api)
 
 qt_standard_project_setup(REQUIRES 6.8)
 
@@ -39,7 +40,7 @@ set_target_properties(appYandexHomeDesktop PROPERTIES
 )
 
 target_link_libraries(appYandexHomeDesktop
-    PRIVATE Qt6::Quick
+    PRIVATE Qt6::Quick Qt6::Core YandexHomeApi
 )
 
 include(GNUInstallDirs)

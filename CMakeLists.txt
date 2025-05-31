@@ -24,6 +24,7 @@ qt_add_qml_module(appYandexHomeDesktop
     URI YandexHomeDesktop
     VERSION 1.0
     QML_FILES
+        src/qml/components/SelectDialog.qml
         src/qml/MyTab.qml
         src/qml/MyTabs.qml
         src/qml/Main.qml

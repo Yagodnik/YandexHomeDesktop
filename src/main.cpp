@@ -6,8 +6,6 @@ int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
 
-    YandexHomeApi api;
-
     QQmlApplicationEngine engine;
     QObject::connect(
         &engine,

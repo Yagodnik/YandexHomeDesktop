@@ -1,23 +1,41 @@
 import QtQuick
+import QtQuick.Controls
 
-Row {
-  id: tabBar
+Item {
+  id: tabView
 
-  property var tabs: []
-  property var defaultActiveTab: 0
+  property int activeTab: 0
+  property ListModel tabs: ListModel {}
+  property var pages: []
 
-  property var activeTab: defaultActiveTab
+  function addTab(title, pageComponent) {
+    tabs.append({ title: title })
+    pages.push(pageComponent)
+    if (tabs.count === 1) {
+      activeTab = 0
+    }
+  }
 
-  Repeater {
-    model: tabBar.tabs.length
+  Row {
+    id: tabBar
 
-    delegate: MyTab {
-      text: tabBar.tabs[index].title
-      active: tabBar.activeTab === index
+    Repeater {
+      model: tabView.tabs
 
-      onClicked: {
-        tabBar.activeTab = index
+      delegate: MyTab {
+        text: model.title
+        active: tabView.activeTab === index
+        onClicked: tabView.activeTab = index
       }
     }
+  }
+
+  Loader {
+    id: pageLoader
+    anchors.top: tabBar.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.bottom: parent.bottom
+    sourceComponent: tabView.pages[tabView.activeTab]
   }
 }

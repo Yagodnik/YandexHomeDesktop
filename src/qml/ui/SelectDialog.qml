@@ -8,12 +8,31 @@ Item {
   property Component delegate
   property var selectedIndex: -1
 
+  property var myVisible: false
+
   visible: true
   anchors.left: parent.left
   anchors.right: parent.right
-  anchors.bottom: parent.bottom
+  // anchors.bottom: parent.bottom
   z: 2
-  height: contentColumn.implicitHeight + 50
+  height: contentColumn.implicitHeight + 60
+
+  y: parent.height
+
+  Behavior on y {
+    NumberAnimation {
+      duration: 300
+      easing.type: Easing.InOutQuad
+    }
+  }
+
+  onMyVisibleChanged: {
+    if (myVisible) {
+      root.y = parent.height - root.height // slide in
+    } else {
+      root.y = parent.height              // slide out
+    }
+  }
 
   Rectangle {
     anchors.fill: parent
@@ -38,7 +57,7 @@ Item {
   Column {
     id: contentColumn
     anchors.top: selectTitle.bottom
-    anchors.topMargin: 4
+    anchors.topMargin: 12
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.margins: 16

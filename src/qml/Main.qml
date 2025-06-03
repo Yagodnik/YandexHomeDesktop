@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Controls
 import Qt.labs.platform
 import "./ui/" as UI
 import "./components" as Components

@@ -8,7 +8,6 @@ Item {
     id: roomsText
     text: "Комнаты"
 
-
     font.bold: true
   }
 

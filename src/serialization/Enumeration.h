@@ -59,16 +59,18 @@ enum Type {                                                         \
 JSON_ENUM_VALUES(__VA_ARGS__)                                       \
 };                                                                  \
                                                                     \
-static const std::map<std::string, Type> mapping;                   \
-static Type operator[](const std::string& key) {                    \
+static const QMap<QString, Type> mapping;                           \
+                                                                    \
+static Type operator[](const QString& key) {                        \
   auto it = mapping.find(key);                                      \
   if (it == mapping.end()) {                                        \
-    throw std::out_of_range("Invalid enum string key: " + key);     \
+    throw std::out_of_range("Invalid enum string key: " +           \
+        key.toStdString());                                         \
   }                                                                 \
-  return it->second;                                                \
+  return *it;                                                       \
 }                                                                   \
 };                                                                  \
                                                                     \
-const std::map<std::string, name::Type> name::mapping = {           \
+const QMap<QString, name::Type> name::mapping = {                   \
 JSON_ENUM_PAIRS(__VA_ARGS__)                                        \
 };                                                                  \

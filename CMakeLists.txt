@@ -60,5 +60,8 @@ install(TARGETS appYandexHomeDesktop
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
-target_include_directories(appYandexHomeDesktop PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/libs)
 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
+
+add_subdirectory(tests)

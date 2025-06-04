@@ -3,6 +3,7 @@
 #include <QJsonValue>
 #include <QJsonObject>
 #include "boost/hana.hpp"
+#include "Enumeration.h"
 
 namespace Serialization {
   namespace hana = boost::hana;

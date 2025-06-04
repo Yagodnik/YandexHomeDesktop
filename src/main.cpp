@@ -6,6 +6,13 @@
 #include "api/YandexHomeApi.h"
 #include "serialization/Serialization.h"
 
+JSON_ENUMERATION(MyEnumeration,
+  ("MyEnum::A", A),
+  ("MyEnum::B", B),
+  ("MyEnum::C", C),
+  ("MagicString!", Magic)
+);
+
 JSON_STRUCT(SubStruct,
   (QString, str_value),
   (int, a),
@@ -44,6 +51,11 @@ int main(int argc, char *argv[]) {
   QJsonObject j2 = Serialization::To(p);
   QJsonDocument doc2(j2);
   std::cout << doc2.toJson(QJsonDocument::Indented).toStdString() << std::endl;
+
+  MyEnumeration my_enum;
+  std::cout << (my_enum["MyEnum::A"] == MyEnumeration::A) << std::endl;
+  std::cout << (my_enum["MyEnum::A"] == MyEnumeration::B) << std::endl;
+  std::cout << (my_enum["MagicString!"] == MyEnumeration::Magic) << std::endl;
 
   return 0;
 

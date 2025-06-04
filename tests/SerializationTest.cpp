@@ -14,6 +14,13 @@ JSON_STRUCT(TestStruct2,
   (TestStruct, test)
 );
 
+JSON_ENUMERATION(MyEnumeration,
+  ("MyEnum::A", A),
+  ("MyEnum::B", B),
+  ("MyEnum::C", C),
+  ("MagicString!", Magic)
+);
+
 class TestMyClass final : public QObject {
   Q_OBJECT
 private slots:
@@ -95,6 +102,14 @@ private slots:
     QCOMPARE(object.value("a").toInteger(), 42);
     QCOMPARE(object.value("b").toInteger(), 123);
     QCOMPARE(object.value("c").toInteger(), 213);
+  }
+
+  static void JsonEnumTest() {
+    MyEnumeration my_enum;
+
+    QVERIFY(my_enum["MyEnum::A"] == MyEnumeration::A);
+    QVERIFY(my_enum["MyEnum::A"] != MyEnumeration::B);
+    QVERIFY(my_enum["MagicString!"] == MyEnumeration::Magic);
   }
 };
 

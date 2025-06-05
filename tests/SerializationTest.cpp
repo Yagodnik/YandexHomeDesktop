@@ -3,7 +3,7 @@
 
 JSON_STRUCT(TestStruct,
   (int, a),
-  (int, b),
+  (double, b),
   (int, c)
 );
 
@@ -21,13 +21,23 @@ JSON_ENUMERATION(MyEnumeration,
   ("MagicString!", Magic)
 );
 
+JSON_STRUCT(StructWithEnum,
+  (int, value),
+  (MyEnumeration, enum_value)
+);
+
+JSON_STRUCT(StructWithDoubleEnum,
+  (MyEnumeration, enum_value1),
+  (MyEnumeration, enum_value2)
+);
+
 class TestMyClass final : public QObject {
   Q_OBJECT
 private slots:
   static void FromJsonSimple() {
     QByteArray raw = R"({
       "a": 1,
-      "b": 2,
+      "b": 2.71,
       "c": 3
     })";
 
@@ -36,7 +46,7 @@ private slots:
     auto t = Serialization::From<TestStruct>(doc.object());
 
     QCOMPARE(t.a, 1);
-    QCOMPARE(t.b, 2);
+    QCOMPARE(t.b, 2.71);
     QCOMPARE(t.c, 3);
   }
 
@@ -45,6 +55,7 @@ private slots:
       "a": 1,
       "b": 2,
       "c": 3,
+      "d" : 4,
       "test": {
         "a": 42,
         "b": 123,
@@ -110,6 +121,48 @@ private slots:
     QVERIFY(my_enum["MyEnum::A"] == MyEnumeration::A);
     QVERIFY(my_enum["MyEnum::A"] != MyEnumeration::B);
     QVERIFY(my_enum["MagicString!"] == MyEnumeration::Magic);
+
+    QVERIFY(my_enum[MyEnumeration::A] == "MyEnum::A");
+    QVERIFY(my_enum[MyEnumeration::B] != "MyEnum::A");
+    QVERIFY(my_enum[MyEnumeration::Magic] == "MagicString!");
+  }
+
+  static void JsonEnumSerializationTest() {
+    QByteArray raw = R"({
+      "value": 213,
+      "enum_value": "MagicString!"
+    })";
+
+    QJsonDocument doc = QJsonDocument::fromJson(raw);
+
+    auto t = Serialization::From<StructWithEnum>(doc.object());
+
+    QVERIFY(t.value == 213);
+    QVERIFY(t.enum_value == MyEnumeration::Magic);
+  }
+
+  static void JsonEnumDeserializationTest() {
+    const StructWithEnum s {
+      .value = 213,
+      .enum_value = MyEnumeration::Magic
+    };
+
+    auto j = Serialization::To<StructWithEnum>(s);
+
+    QVERIFY(j.value("value").toInteger() == 213);
+    QVERIFY(j.value("enum_value").toString() == "MagicString!");
+  }
+
+  static void JsonEnumDeserialization2Test() {
+    const StructWithDoubleEnum s {
+      .enum_value1 = MyEnumeration::Magic,
+      .enum_value2 = MyEnumeration::B
+    };
+
+    auto j = Serialization::To<StructWithDoubleEnum>(s);
+
+    QVERIFY(j.value("enum_value1").toString() == "MagicString!");
+    QVERIFY(j.value("enum_value2").toString() == "MyEnum::B");
   }
 };
 

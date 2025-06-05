@@ -8,8 +8,11 @@
 namespace Serialization {
   namespace hana = boost::hana;
 
+  struct ISerializable {};
+
   template<typename T>
   concept Serializable = requires(T t) {
+    std::is_base_of_v<ISerializable, T>;
     std::is_same_v<T, std::decay_t<T>>;
   };
 
@@ -18,6 +21,11 @@ namespace Serialization {
 
   template<Serializable T>
   QJsonObject To(const T& data);
+
+  namespace traits {
+    template<typename T>
+    constexpr bool IsEnumeration = std::is_base_of_v<IEnumeration, T>;
+  }
 
   namespace details {
     template<typename T>
@@ -28,6 +36,8 @@ namespace Serialization {
         return value.toInteger();
       } else if constexpr (std::is_floating_point_v<T>) {
         return value.toDouble();
+      } else if constexpr (traits::IsEnumeration<T>) {
+        return T::operator[](value.toString());
       } else {
         return From<T>(value.toObject());
       }
@@ -41,6 +51,8 @@ namespace Serialization {
         return static_cast<qint64>(value);
       } else if constexpr (std::is_floating_point_v<T>) {
         return static_cast<double>(value);
+      } else if constexpr (traits::IsEnumeration<T>) {
+        return T::operator[](value);
       } else {
         return To<T>(value);
       }
@@ -82,7 +94,7 @@ namespace Serialization {
 }
 
 #define JSON_STRUCT(Name, ...) \
-struct Name { \
+struct Name : Serialization::ISerializable { \
 BOOST_HANA_DEFINE_STRUCT(Name, __VA_ARGS__); \
 };
 

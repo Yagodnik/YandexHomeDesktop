@@ -115,7 +115,7 @@ struct name : IEnumeration {                                        \
     auto it = bi_mapping.find(type);                                \
                                                                     \
     if (it == bi_mapping.end()) {                                   \
-      throw std::out_of_range("Invalid enum string key: ");         \
+      throw std::out_of_range("Invalid enum type");                 \
     }                                                               \
                                                                     \
     return *it;                                                     \

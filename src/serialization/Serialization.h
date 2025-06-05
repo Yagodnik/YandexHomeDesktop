@@ -2,6 +2,8 @@
 
 #include <QJsonValue>
 #include <QJsonObject>
+#include <QJsonArray>
+#include <ranges>
 #include "boost/hana.hpp"
 #include "Enumeration.h"
 
@@ -24,7 +26,16 @@ namespace Serialization {
 
   namespace traits {
     template<typename T>
-    constexpr bool IsEnumeration = std::is_base_of_v<IEnumeration, T>;
+    constexpr bool is_enumeration = std::is_base_of_v<IEnumeration, T>;
+
+    template<typename T>
+    struct is_qlist : std::false_type {};
+
+    template<typename T>
+    struct is_qlist<QList<T>> : std::true_type {};
+
+    template<typename T>
+    constexpr bool is_qlist_v = is_qlist<T>::value;
   }
 
   namespace details {
@@ -36,8 +47,17 @@ namespace Serialization {
         return value.toInteger();
       } else if constexpr (std::is_floating_point_v<T>) {
         return value.toDouble();
-      } else if constexpr (traits::IsEnumeration<T>) {
+      } else if constexpr (traits::is_enumeration<T>) {
         return T::operator[](value.toString());
+      } else if constexpr (traits::is_qlist_v<T>) {
+        using Element = typename T::value_type;
+        const auto arr = value.toArray();
+
+        auto a = arr | std::views::transform([](const QJsonValue& item) {
+          return CastFromJsonValue<Element>(item);
+        });
+
+        return QList<Element>(a.begin(), a.end());
       } else {
         return From<T>(value.toObject());
       }
@@ -51,8 +71,16 @@ namespace Serialization {
         return static_cast<qint64>(value);
       } else if constexpr (std::is_floating_point_v<T>) {
         return static_cast<double>(value);
-      } else if constexpr (traits::IsEnumeration<T>) {
+      } else if constexpr (traits::is_enumeration<T>) {
         return T::operator[](value);
+      } else if constexpr (traits::is_qlist_v<T>) {
+        QJsonArray arr;
+
+        std::ranges::for_each(value, [&arr](const auto& item) {
+          arr.append(CastToJsonValue(item));
+        });
+
+        return QJsonValue(arr);
       } else {
         return To<T>(value);
       }
@@ -93,8 +121,8 @@ namespace Serialization {
   }
 }
 
-#define JSON_STRUCT(Name, ...) \
-struct Name : Serialization::ISerializable { \
-BOOST_HANA_DEFINE_STRUCT(Name, __VA_ARGS__); \
-};
+#define JSON_STRUCT(Name, ...)                  \
+struct Name : Serialization::ISerializable {    \
+  BOOST_HANA_DEFINE_STRUCT(Name, __VA_ARGS__);  \
+};                                              \
 

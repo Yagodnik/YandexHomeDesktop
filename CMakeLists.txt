@@ -6,6 +6,7 @@ project(YandexHomeDesktop VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_AUTOMOC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Quick Network NetworkAuth)
 

@@ -1,0 +1,362 @@
+{
+    "status": "ok",
+    "request_id": "8348dba1-ad56-4984-b953-ccd27e42f009",
+    "rooms": [{
+            "id": "room-id-1",
+            "name": "Гостиная",
+            "household_id": "household-id-1",
+            "devices": [
+                "lamp-id-1",
+                "lamp-id-2",
+                "lamp-id-3",
+                "speaker-id-1"
+            ]
+        },
+        {
+            "id": "room-id-2",
+            "name": "Прихожая",
+            "household_id": "household-id-1",
+            "devices": [
+                "vacuum-cleaner-id-1"
+            ]
+        }
+    ],
+    "groups": [{
+        "id": "light-group-id-1",
+        "name": "Люстра",
+        "aliases": ["Верхний свет"],
+        "household_id": "household-id-1",
+        "type": "devices.types.light",
+        "devices": [
+            "lamp-id-1",
+            "lamp-id-2",
+            "lamp-id-3"
+        ],
+        "capabilities": [{
+                "retrievable": true,
+                "type": "devices.capabilities.color_setting",
+                "parameters": {
+                    "color_model": "hsv",
+                    "temperature_k": {
+                        "min": 1700,
+                        "max": 6500
+                    }
+                },
+                "state": {
+                    "instance": "temperature_k",
+                    "value": 3400
+                }
+            },
+            {
+                "retrievable": true,
+                "type": "devices.capabilities.on_off",
+                "parameters": {
+                    "split": false
+                },
+                "state": {
+                    "instance": "on",
+                    "value": false
+                }
+            },
+            {
+                "retrievable": true,
+                "type": "devices.capabilities.range",
+                "parameters": {
+                    "instance": "brightness",
+                    "unit": "unit.percent",
+                    "random_access": true,
+                    "range": {
+                        "min": 1,
+                        "max": 100,
+                        "precision": 1
+                    }
+                },
+                "state": {
+                    "instance": "brightness",
+                    "value": 100
+                }
+            }
+        ]
+    }],
+    "devices": [{
+            "id": "lamp-id-1",
+            "name": "Лампочка 1",
+            "aliases": [],
+            "type": "devices.types.light",
+            "external_id": "external-lamp-id-1",
+            "skill_id": "skill-id-1",
+            "household_id": "household-id-1",
+            "room": "room-id-1",
+            "groups": [
+                "light-group-id-1"
+            ],
+            "capabilities": [{
+                    "reportable": false,
+                    "retrievable": true,
+                    "type": "devices.capabilities.on_off",
+                    "parameters": {
+                        "split": false
+                    },
+                    "state": {
+                        "instance": "on",
+                        "value": false
+                    },
+                    "last_updated": 1626681729.2964342
+                },
+                {
+                    "reportable": false,
+                    "retrievable": true,
+                    "type": "devices.capabilities.range",
+                    "parameters": {
+                        "instance": "brightness",
+                        "unit": "unit.percent",
+                        "random_access": true,
+                        "range": {
+                            "min": 1,
+                            "max": 100,
+                            "precision": 1
+                        }
+                    },
+                    "state": {
+                        "instance": "brightness",
+                        "value": 100
+                    },
+                    "last_updated": 1626681729.2964342
+                },
+                {
+                    "reportable": false,
+                    "retrievable": true,
+                    "type": "devices.capabilities.color_setting",
+                    "parameters": {
+                        "color_model": "rgb",
+                        "temperature_k": {
+                            "min": 1700,
+                            "max": 6500
+                        }
+                    },
+                    "state": {
+                        "instance": "temperature_k",
+                        "value": 3400
+                    },
+                    "last_updated": 1626681729.2964342
+                }
+            ],
+            "properties": []
+        },
+        {
+            "id": "lamp-id-2",
+            "name": "Лампочка 2",
+            "aliases": [],
+            "type": "devices.types.light",
+            "external_id": "external-lamp-id-2",
+            "skill_id": "skill-id-1",
+            "household_id": "household-id-1",
+            "room": "room-id-1",
+            "groups": [
+                "light-group-id-1"
+            ],
+            "capabilities": [{
+                    "reportable": false,
+                    "retrievable": true,
+                    "type": "devices.capabilities.on_off",
+                    "parameters": {
+                        "split": false
+                    },
+                    "state": {
+                        "instance": "on",
+                        "value": false
+                    },
+                    "last_updated": 1626681729.2964342
+                },
+                {
+                    "reportable": false,
+                    "retrievable": true,
+                    "type": "devices.capabilities.range",
+                    "parameters": {
+                        "instance": "brightness",
+                        "unit": "unit.percent",
+                        "random_access": true,
+                        "range": {
+                            "min": 1,
+                            "max": 100,
+                            "precision": 1
+                        }
+                    },
+                    "state": {
+                        "instance": "brightness",
+                        "value": 100
+                    },
+                    "last_updated": 1626681729.2964342
+                },
+                {
+                    "reportable": false,
+                    "retrievable": true,
+                    "type": "devices.capabilities.color_setting",
+                    "parameters": {
+                        "color_model": "rgb",
+                        "temperature_k": {
+                            "min": 1700,
+                            "max": 6500
+                        }
+                    },
+                    "state": {
+                        "instance": "temperature_k",
+                        "value": 3400
+                    },
+                    "last_updated": 1626681729.2964342
+                }
+            ],
+            "properties": []
+        },
+        {
+            "id": "lamp-id-3",
+            "name": "Лампочка 3",
+            "aliases": [],
+            "type": "devices.types.light",
+            "external_id": "external-lamp-id-3",
+            "skill_id": "skill-id-1",
+            "household_id": "household-id-1",
+            "room": "room-id-1",
+            "groups": [
+                "light-group-id-1"
+            ],
+            "capabilities": [{
+                    "reportable": false,
+                    "retrievable": true,
+                    "type": "devices.capabilities.on_off",
+                    "parameters": {
+                        "split": false
+                    },
+                    "state": {
+                        "instance": "on",
+                        "value": false
+                    },
+                    "last_updated": 1626681729.2964342
+                },
+                {
+                    "reportable": false,
+                    "retrievable": true,
+                    "type": "devices.capabilities.range",
+                    "parameters": {
+                        "instance": "brightness",
+                        "unit": "unit.percent",
+                        "random_access": true,
+                        "range": {
+                            "min": 1,
+                            "max": 100,
+                            "precision": 1
+                        }
+                    },
+                    "state": {
+                        "instance": "brightness",
+                        "value": 100
+                    },
+                    "last_updated": 1626681729.2964342
+                },
+                {
+                    "reportable": false,
+                    "retrievable": true,
+                    "type": "devices.capabilities.color_setting",
+                    "parameters": {
+                        "color_model": "rgb",
+                        "temperature_k": {
+                            "min": 1700,
+                            "max": 6500
+                        }
+                    },
+                    "state": {
+                        "instance": "temperature_k",
+                        "value": 3400
+                    },
+                    "last_updated": 1626681729.2964342
+                }
+            ],
+            "properties": []
+        },
+        {
+            "id": "vacuum-cleaner-id-1",
+            "name": "Пылесос",
+            "aliases": [],
+            "type": "devices.types.vacuum_cleaner",
+            "external_id": "external-vacuum-cleaner-id-1",
+            "skill_id": "skill-id-2",
+            "household_id": "household-id-1",
+            "room": "room-id-2",
+            "groups": [],
+            "capabilities": [{
+                    "reportable": false,
+                    "retrievable": true,
+                    "type": "devices.capabilities.on_off",
+                    "parameters": {
+                        "split": false
+                    },
+                    "state": {
+                        "instance": "on",
+                        "value": false
+                    },
+                    "last_updated": 1626681729.2964342
+                },
+                {
+                    "reportable": false,
+                    "retrievable": true,
+                    "type": "devices.capabilities.toggle",
+                    "parameters": {
+                        "instance": "pause"
+                    },
+                    "state": {
+                        "instance": "pause",
+                        "value": false
+                    },
+                    "last_updated": 1626681729.2964342
+                }
+            ],
+            "properties": [{
+                "type": "devices.properties.float",
+                "reportable": false,
+                "retrievable": true,
+                "parameters": {
+                    "instance": "battery_level",
+                    "unit": "unit.percent"
+                },
+                "state": {
+                    "instance": "battery_level",
+                    "value": 100
+                },
+                "last_updated": 1626681729.2964342
+            }]
+        },
+        {
+            "id": "speaker-id-1",
+            "name": "Яндекс Станция",
+            "aliases": [],
+            "type": "devices.types.smart_speaker.yandex.station",
+            "external_id": "external-speaker-id-1",
+            "skill_id": "Q",
+            "household_id": "household-id-1",
+            "room": "room-id-1",
+            "groups": [],
+            "capabilities": [],
+            "properties": []
+        }
+    ],
+    "scenarios": [{
+            "id": "scenario-id-1",
+            "name": "Световой будильник",
+            "is_active": true
+        },
+        {
+            "id": "scenario-id-2",
+            "name": "Время уборки",
+            "is_active": true
+        },
+        {
+            "id": "scenario-id-3",
+            "name": "Музыка для настолок",
+            "is_active": false
+        }
+    ],
+    "households": [{
+        "id": "household-id-1",
+        "name": "Мой дом"
+    }]
+}

@@ -7,9 +7,13 @@ project(YandexHomeDesktop VERSION 0.1 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Quick)
+find_package(Qt6 REQUIRED COMPONENTS Quick Network NetworkAuth)
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 add_subdirectory(src/api)
+add_subdirectory(src/auth)
 
 qt_standard_project_setup(REQUIRES 6.8)
 
@@ -51,7 +55,7 @@ set_target_properties(appYandexHomeDesktop PROPERTIES
 )
 
 target_link_libraries(appYandexHomeDesktop
-    PRIVATE Qt6::Quick Qt6::Core YandexHomeApi
+    PRIVATE Qt6::Quick Qt6::Core Qt6::NetworkAuth YandexHomeApi YandexAuth
 )
 
 include(GNUInstallDirs)
@@ -60,8 +64,5 @@ install(TARGETS appYandexHomeDesktop
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 add_subdirectory(tests)

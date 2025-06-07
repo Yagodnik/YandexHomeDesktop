@@ -1,75 +1,75 @@
 #include <iostream>
+#include <QFile>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
-#include <QJsonValue>
-#include <QJsonObject>
 #include "api/YandexHomeApi.h"
-#include "serialization/Serialization.h"
-
-JSON_ENUMERATION(MyEnumeration,
-  ("MyEnum::A", A),
-  ("MyEnum::B", B),
-  ("MyEnum::C", C),
-  ("MagicString!", Magic)
-);
-
-JSON_STRUCT(SubStruct,
-  (QString, str_value),
-  (int, a),
-  (int, b),
-  (int, c)
-);
-
-JSON_STRUCT(Person,
-  (QString, name),
-  (int, age),
-  (float, f_value),
-  (SubStruct, sub_struct)
-);
+#include "api/model/UserInfo.h"
+#include "auth/YandexAuth.h"
 
 int main(int argc, char *argv[]) {
-  QByteArray raw = R"({
-    "name":"Abebebeb",
-    "age":30,
-    "f_value": 3.14,
-    "sub_struct": {
-      "str_value": "Hello World!",
-      "a": 1,
-      "b": 2,
-      "c": 3
-    }
-  })";
+  try {
+    YandexAuth yandex_auth;
+  } catch(const std::exception& e) {
+    qDebug() << "Auth failed:" << e.what();
+    return -1;
+  }
 
-  QJsonDocument doc = QJsonDocument::fromJson(raw);
-  QJsonObject j = doc.object();
-
-  auto p = Serialization::From<Person>(j);
-
-  qDebug() << p.name << ", " << p.age  << ", " << p.f_value;
-  qDebug() << p.sub_struct.str_value;
-
-  QJsonObject j2 = Serialization::To(p);
-  QJsonDocument doc2(j2);
-  std::cout << doc2.toJson(QJsonDocument::Indented).toStdString() << std::endl;
-
-  MyEnumeration my_enum;
-  std::cout << (my_enum["MyEnum::A"] == MyEnumeration::A) << std::endl;
-  std::cout << (my_enum["MyEnum::A"] == MyEnumeration::B) << std::endl;
-  std::cout << (my_enum["MagicString!"] == MyEnumeration::Magic) << std::endl;
+  qDebug() << "YandexAuth started";
 
   return 0;
 
-    // QGuiApplication app(argc, argv);
-    //
-    // QQmlApplicationEngine engine;
-    // QObject::connect(
-    //     &engine,
-    //     &QQmlApplicationEngine::objectCreationFailed,
-    //     &app,
-    //     []() { QCoreApplication::exit(-1); },
-    //     Qt::QueuedConnection);
-    // engine.loadFromModule("YandexHomeDesktop", "Main");
-    //
-    // return app.exec();
+  QFile test_file("../../../../resources/UserInfoTest.txt");
+  if (!test_file.open(QIODevice::ReadOnly)) {
+    qDebug() << "Failed to open file";
+    return 1;
+  }
+
+  QJsonDocument testDoc = QJsonDocument::fromJson(test_file.readAll());
+  QJsonObject response_json = testDoc.object();
+
+  auto response = Serialization::From<UserInfo>(response_json);
+
+  qDebug() << "Status: " << (response.status == Status::Ok ? "Ok" : "Error");
+
+  qDebug() << "Request ID:" << response.request_id;
+
+  for (const auto& room : response.rooms) {
+    qDebug() << "Room ID:" << room.id << "Name:" << room.name;
+  }
+  qDebug() << "";
+
+  for (const auto& group : response.groups) {
+    qDebug() << "Group ID:" << group.id << "Name:" << group.name;
+  }
+  qDebug() << "";
+
+  for (const auto& device : response.devices) {
+    qDebug() << "Device ID:" << device.id << "Name:" << "WOP";
+  }
+  qDebug() << "";
+
+  for (const auto& scenario : response.scenarios) {
+    qDebug() << "Scenario ID:" << scenario.id << "Name:" << scenario.name;
+  }
+  qDebug() << "";
+
+  for (const auto& household : response.households) {
+    qDebug() << "Households ID:" << household.id << "Name:" << household.name;
+  }
+
+  return 0;
+
+  QGuiApplication app(argc, argv);
+
+  QQmlApplicationEngine engine;
+  QObject::connect(
+    &engine,
+    &QQmlApplicationEngine::objectCreationFailed,
+    &app,
+    []() { QCoreApplication::exit(-1); },
+    Qt::QueuedConnection);
+  engine.loadFromModule("YandexHomeDesktop", "Main");
+
+  return app.exec();
 }
 

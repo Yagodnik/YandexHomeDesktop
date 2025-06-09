@@ -40,6 +40,9 @@ qt_add_qml_module(appYandexHomeDesktop
         src/qml/pages/DevicesPage.qml
         src/qml/pages/ScenariosPage.qml
         src/qml/pages/SettingsPage.qml
+        src/qml/pages/AuthPage.qml
+        src/qml/pages/LoadingPage.qml
+        src/qml/pages/MainPage.qml
         src/qml/MyTab.qml
         src/qml/MyTabs.qml
         src/qml/Main.qml

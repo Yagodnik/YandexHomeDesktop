@@ -1,54 +1,118 @@
-import QtQuick
-import QtQuick.Layouts
+import QtQuick 2.15
+import QtQuick.Layouts 2.15
+import Qt5Compat.GraphicalEffects
 import "../ui/" as UI
 
 Item {
-  Layout.fillWidth: true
-  Layout.fillHeight: true
-
-  width: parent.width
-
-  Rectangle {
+  Flickable {
+    id: flickable
     anchors.fill: parent
-    color: "red"  // light gray background, or any visible color
-  }
+    contentWidth: parent.width
+    contentHeight: contentItem.implicitHeight
 
-  UI.HeadingText {
-    id: heading
-    text: "Все сценарии"
-  }
+    interactive: true
+    flickableDirection: Flickable.VerticalFlick
 
-  ListView {
-    id: scenariouses
+    Column {
+      id: contentItem
+      width: flickable.width
 
-    anchors.top: heading.bottom
-    anchors.topMargin: 12
-    anchors.left: parent.left
-    anchors.right: parent.right
-    anchors.bottom: parent.bottom
+      spacing: 12
 
-    model: ListModel {
-      ListElement { name: "Будильник" }
-      ListElement { name: "Сделать все четко" }
-    }
-
-    delegate: Item {
-      width: parent.width
-      height: 48
-
-      anchors.margins: 5
-
-      Rectangle {
-        anchors.fill: parent
-        color: "#FFF"
-        radius: 12
+      UI.HeadingText {
+        id: heading
+        text: "Все сценарии"
+        width: parent.width
       }
 
-      UI.DefaultText {
-        text: name
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.left: parent.left
-        anchors.leftMargin: 16
+      ListView {
+        id: scenariouses
+        width: parent.width
+        height: 48 * model.count + (scenariouses.spacing * (model.count - 1))
+
+        model: ListModel {
+          ListElement { name: "Будильник"; acting: false }
+          ListElement { name: "Сделать все четко"; acting: false }
+          ListElement { name: "Будильник"; acting: true }
+          ListElement { name: "Сделать все четко"; acting: true }
+          ListElement { name: "Будильник"; acting: false }
+          ListElement { name: "Сделать все четко"; acting: false }
+          ListElement { name: "Будильник"; acting: false }
+          ListElement { name: "Сделать все четко"; acting: false }
+        }
+
+        spacing: 5
+        interactive: false
+        clip: true
+
+        delegate: Item {
+          id: delegateItem
+          width: scenariouses.width
+          height: 48
+
+          DropShadow {
+            anchors.fill: background
+            source: background
+            horizontalOffset: 0
+            verticalOffset: 2
+            radius: 6
+            samples: 16
+            color: Qt.rgba(0, 32 / 255, 128 / 255, 0.04)
+          }
+
+          Rectangle {
+            id: background
+            anchors.fill: parent
+            color: "#FFF"
+            radius: 12
+          }
+
+          UI.DefaultText {
+            text: model.name
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            anchors.leftMargin: 16
+          }
+
+          property var show: false
+
+          UI.MyProgressIndicator {
+            width: 30
+            height: 30
+            strokeWidth: 2
+            anchors.right: parent.right
+            anchors.rightMargin: 9
+            anchors.verticalCenter: parent.verticalCenter
+            visible: model.acting
+          }
+
+          Image {
+            id: startButton
+            source: "qrc:/images/play.svg"
+
+            antialiasing: true
+            layer.enabled: true
+            layer.smooth: true
+            layer.samples: 8
+
+            fillMode: Image.PreserveAspectFit
+            scale: 0.5
+
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.right: parent.right
+            anchors.rightMargin: 8
+
+            MouseArea {
+              anchors.fill: parent
+              cursorShape: Qt.PointingHandCursor
+
+              onClicked: {
+                console.log("Playing...")
+                show = true;
+              }
+            }
+          }
+        }
       }
     }
   }

@@ -60,7 +60,6 @@ AuthorizationService::AuthorizationService(QObject *parent) :
   oauth2_.setAuthorizationUrl({auth_secrets.auth_url});
   oauth2_.setTokenUrl({auth_secrets.access_token_url});
   oauth2_.setClientIdentifier(auth_secrets.client_id);
-  oauth2_.setClientIdentifierSharedKey(auth_secrets.client_secret);
   oauth2_.setRequestedScopeTokens(GetScopes(auth_secrets.scopes));
 
   connect(&oauth2_,
@@ -84,6 +83,7 @@ void AuthorizationService::AttemptAuthorization() {
 
 void AuthorizationService::Logout() {
   token_.reset();
+  delete_job_.start();
 }
 
 void AuthorizationService::TestWrite() {

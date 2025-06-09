@@ -2,6 +2,7 @@
   <qresource prefix="/">
     <file>images/icon.png</file>
     <file>images/login_github.svg</file>
+    <file>images/play.svg</file>
     <file>auth/secrets.json</file>
     <file>callback/index.html</file>
   </qresource>

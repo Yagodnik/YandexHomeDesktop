@@ -1,89 +1,56 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Shapes
+import QtQuick 2.15
 
 Item {
   id: spinner
-  width: 40
-  height: 40
+  width: 24
+  height: 24
 
   property color trackColor: Qt.rgba(0, 0, 0, 0.1)
   property color arcColor: Qt.rgba(104 / 255, 57 / 255, 207 / 255, 1)
-  property real strokeWidth: 4
+  property real strokeWidth: 3
   property real arcSpan: 90
 
-  Shape {
+  Canvas {
     anchors.fill: parent
     antialiasing: true
 
-    layer.enabled: true
-    layer.smooth: true
-    layer.samples: 8
+    onPaint: {
+      var ctx = getContext("2d");
+      ctx.reset();
+      var centerX = width / 2;
+      var centerY = height / 2;
+      var radius = (width - strokeWidth) / 2;
 
-    ShapePath {
-      strokeWidth: spinner.strokeWidth
-      strokeColor: spinner.trackColor
-      fillColor: "transparent"
-      capStyle: ShapePath.RoundCap
+      ctx.clearRect(0, 0, width, height);
 
-      startX: width / 2
-      startY: height / 2
+      ctx.beginPath();
+      ctx.strokeStyle = spinner.trackColor;
+      ctx.lineWidth = strokeWidth;
+      ctx.lineCap = "round";
+      ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+      ctx.stroke();
 
-      PathAngleArc {
-        centerX: width / 2
-        centerY: height / 2
-        radiusX: (width - strokeWidth) / 2
-        radiusY: (height - strokeWidth) / 2
-        startAngle: 0
-        sweepAngle: 360
-      }
+      // Draw arc
+      ctx.beginPath();
+      ctx.strokeStyle = spinner.arcColor;
+      ctx.lineWidth = strokeWidth;
+      ctx.lineCap = "round";
+
+      var startAngle = -Math.PI / 2;  // start at top
+      var endAngle = startAngle + (spinner.arcSpan * Math.PI / 180);
+
+      ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+      ctx.stroke();
     }
   }
 
-  Item {
-    id: rotatingArc
-    anchors.fill: parent
-    transform: Rotation {
-      id: rot
-      origin.x: spinner.width / 2
-      origin.y: spinner.height / 2
-      angle: 0
-
-      NumberAnimation on angle {
-        from: 0
-        to: 360
-        duration: 1000
-        loops: Animation.Infinite
-        easing.type: Easing.InOutQuint
-      }
-    }
-
-    Shape {
-      anchors.fill: parent
-      antialiasing: true
-
-      layer.enabled: true
-      layer.smooth: true
-      layer.samples: 8
-
-      ShapePath {
-        strokeWidth: spinner.strokeWidth
-        strokeColor: spinner.arcColor
-        fillColor: "transparent"
-        capStyle: ShapePath.RoundCap
-
-        startX: width / 2
-        startY: height / 2
-
-        PathAngleArc {
-          centerX: width / 2
-          centerY: height / 2
-          radiusX: (width - strokeWidth) / 2
-          radiusY: (height - strokeWidth) / 2
-          startAngle: 0
-          sweepAngle: spinner.arcSpan
-        }
-      }
-    }
+  RotationAnimator on rotation {
+    from: 0
+    to: 360
+    duration: 1000
+    loops: Animation.Infinite
+    running: true
+    easing.type: Easing.InOutQuint
+    target: spinner
   }
 }

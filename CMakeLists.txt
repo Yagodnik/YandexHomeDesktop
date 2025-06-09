@@ -35,6 +35,7 @@ qt_add_qml_module(appYandexHomeDesktop
         src/qml/ui/SelectDialog.qml
         src/qml/ui/MyButton.qml
         src/qml/ui/MyProgressIndicator.qml
+        src/qml/ui/MySwitch.qml
         src/qml/ui/AnimatedText.qml
         src/qml/components/TopBar.qml
         src/qml/pages/DevicesPage.qml

@@ -64,7 +64,7 @@ Item {
             id: background
             anchors.fill: parent
             color: "#FFF"
-            radius: 12
+            radius: 16
           }
 
           UI.DefaultText {

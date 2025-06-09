@@ -83,7 +83,7 @@ Item {
 
         currentIndex: topBar.activeTab
 
-        // Pages.DevicesPage {}
+        Pages.DevicesPage {}
 
         Pages.ScenariosPage {}
 

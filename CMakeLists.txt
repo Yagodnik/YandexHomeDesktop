@@ -33,6 +33,9 @@ qt_add_qml_module(appYandexHomeDesktop
         src/qml/ui/DefaultText.qml
         src/qml/ui/SubheadingText.qml
         src/qml/ui/SelectDialog.qml
+        src/qml/ui/MyButton.qml
+        src/qml/ui/MyProgressIndicator.qml
+        src/qml/ui/AnimatedText.qml
         src/qml/components/TopBar.qml
         src/qml/pages/DevicesPage.qml
         src/qml/pages/ScenariosPage.qml
@@ -55,8 +58,12 @@ set_target_properties(appYandexHomeDesktop PROPERTIES
     WIN32_EXECUTABLE TRUE
 )
 
-target_link_libraries(appYandexHomeDesktop
-    PRIVATE Qt6::Quick Qt6::Core Qt6::NetworkAuth YandexHomeApi YandexAuth
+target_link_libraries(appYandexHomeDesktop PRIVATE
+        Qt6::Quick
+        Qt6::Core
+        Qt6::NetworkAuth
+        YandexHomeApi
+        YandexAuth
 )
 
 include(GNUInstallDirs)

@@ -13,133 +13,87 @@ Window {
   title: qsTr("Yandex Home Desktop")
   // flags: Qt.FramelessWindowHint
 
-  Connections {
-    target: authorizationService
-
-    function onAuthorized() {
-      console.log("Auth: Ok!");
-    }
-
-    function onAuthorizationFailed() {
-      console.log("Auth: Failed!");
-    }
-
-    function onInitializationFailed() {
-      console.log("Auth: Init Failed!");
-      Qt.quit();
-    }
-  }
-
-  Button {
-    text: "Auth!"
-    x: 100
-    y: 100
-    z: 200
-
-    onClicked: authorizationService.AttemptAuthorization();
-  }
-
-  Button {
-    text: "Write!"
-    x: 100
-    y: 200
-    z: 200
-
-    onClicked: authorizationService.TestWrite();
-  }
-
-  Button {
-    text: "Read!"
-    x: 100
-    y: 300
-    z: 200
-
-    onClicked: authorizationService.TestRead();
-  }
-
-  Button {
-    text: "Delete!"
-    x: 100
-    y: 400
-    z: 200
-
-    onClicked: authorizationService.TestDelete();
-  }
-
-
   Rectangle {
-    id: backdrop
     anchors.fill: parent
-    color: "#80000000"
-    visible: householdSelectDialog.myVisible
-    z: 1
-
-    MouseArea {
-      anchors.fill: parent
-      onClicked: householdSelectDialog.myVisible = false
-    }
+    color: Qt.rgba(242 / 255, 243 / 255, 245 / 255, 1)
   }
 
-  UI.SelectDialog {
-    id: householdSelectDialog
+  Column {
+    id: col
+    anchors.centerIn: parent
+    spacing: 10
 
-    title: "Выберите Дом"
+    UI.AnimatedText {
+      text: "Yandex Home Desktop"
+      color: "#6839CF"
+      pointSize: 24
+      anchors.horizontalCenter: col.horizontalCenter
+    }
 
-    model: [
-      { text: "Мой дом" },
-      { text: "Дача" },
-      { text: "Сарай" }
-    ]
+    UI.AnimatedText {
+      text: qsTr("Необходимо войти в аккаунт, чтобы\nприложение могло получить доступ\nк вашим устройствам")
 
-    delegate: Item {
-      width: parent.width
-      height: 48
+      color: Qt.rgba(145 / 255, 156 / 255, 181 / 255, 1);
+      pointSize: 16
+      anchors.horizontalCenter: col.horizontalCenter
+    }
 
-      UI.DefaultText {
-        id: houseName
-        text: modelData.text
-
-      }
-
-      UI.SubheadingText {
-        id: houseAddress
-
-        anchors.top: houseName.bottom
-        anchors.topMargin: 4
-
-        text: "Адрес не указан"
-      }
+    UI.MyButton {
+      text: "Авторизоваться"
+      anchors.horizontalCenter: col.horizontalCenter
     }
   }
 
   Item {
-    id: appRoot
+    id: githubFooter
 
-    anchors.fill: parent
-    anchors.top: parent.top
-    anchors.topMargin: 20
+    height: 48
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.bottom: parent.bottom
 
-    Rectangle {
-      anchors.fill: parent
-      color: Qt.rgba(242 / 255, 243 / 255, 245 / 255, 1)
-    }
+    Item {
+      anchors.horizontalCenter: githubFooter.horizontalCenter
+      anchors.verticalCenter: githubFooter.verticalCenter
 
-    Components.TopBar {
-      id: topBar
-    }
+      Image {
+        id: githubLogo
+        source: "qrc:/images/login_github.svg"
 
-    StackLayout {
-      anchors.top: topBar.bottom
-      anchors.topMargin: 20
-      anchors.left: parent.left
-      anchors.leftMargin: 16
-      currentIndex: topBar.activeTab
+        antialiasing: true
+        layer.enabled: true
+        layer.smooth: true
+        layer.samples: 8
 
-      Pages.DevicesPage {}
+        // width: 20
+        // height: 20
+        fillMode: Image.PreserveAspectFit
+        scale: 0.9
 
-      Pages.ScenariosPage {}
+        // anchors.verticalCenter: githubFooter.verticalCenter
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.right: githubLink.left
+        anchors.rightMargin: 8
+      }
 
-      Pages.SettingsPage {}
+      UI.DefaultText {
+        id: githubLink
+
+        color: Qt.rgba(145 / 255, 156 / 255, 181 / 255, 1);
+        // anchors.horizontalCenter: githubFooter.horizontalCenter
+        anchors.verticalCenter: parent.verticalCenter
+
+        text: "GitHub"
+
+        MouseArea {
+          anchors.fill: parent
+          cursorShape: Qt.PointingHandCursor
+
+          onClicked: {
+            Qt.openUrlExternally("https://github.com/Yagodnik/YandexHomeDesktop")
+          }
+        }
+      }
     }
   }
 }

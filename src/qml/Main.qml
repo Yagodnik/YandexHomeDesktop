@@ -5,7 +5,6 @@ import Qt.labs.platform
 import "./ui/" as UI
 import "./components" as Components
 import "./pages/" as Pages
-import Yandex 1.0
 
 Window {
   width: 350
@@ -14,18 +13,18 @@ Window {
   title: qsTr("Yandex Home Desktop")
   // flags: Qt.FramelessWindowHint
 
-  YandexAuth {
-    id: authorization
+  Connections {
+    target: authorizationService
 
-    onAuthorized: {
+    function onAuthorized() {
       console.log("Auth: Ok!");
     }
 
-    onAuthorizationFailed: {
+    function onAuthorizationFailed() {
       console.log("Auth: Failed!");
     }
 
-    onInitializationFailed: {
+    function onInitializationFailed() {
       console.log("Auth: Init Failed!");
       Qt.quit();
     }
@@ -37,8 +36,36 @@ Window {
     y: 100
     z: 200
 
-    onClicked: authorization.AttemptAuthorization();
+    onClicked: authorizationService.AttemptAuthorization();
   }
+
+  Button {
+    text: "Write!"
+    x: 100
+    y: 200
+    z: 200
+
+    onClicked: authorizationService.TestWrite();
+  }
+
+  Button {
+    text: "Read!"
+    x: 100
+    y: 300
+    z: 200
+
+    onClicked: authorizationService.TestRead();
+  }
+
+  Button {
+    text: "Delete!"
+    x: 100
+    y: 400
+    z: 200
+
+    onClicked: authorizationService.TestDelete();
+  }
+
 
   Rectangle {
     id: backdrop

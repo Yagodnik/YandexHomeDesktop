@@ -5,6 +5,7 @@ import Qt.labs.platform
 import "./ui/" as UI
 import "./components" as Components
 import "./pages/" as Pages
+import Qt5Compat.GraphicalEffects
 
 Window {
   width: 350
@@ -18,29 +19,56 @@ Window {
     color: Qt.rgba(242 / 255, 243 / 255, 245 / 255, 1)
   }
 
-  Column {
-    id: col
+  Item {
+    id: content
     anchors.centerIn: parent
-    spacing: 10
 
-    UI.AnimatedText {
-      text: "Yandex Home Desktop"
-      color: "#6839CF"
-      pointSize: 24
-      anchors.horizontalCenter: col.horizontalCenter
+    Rectangle {
+      id: background
+      color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 1)
+      radius: 16
+      anchors.centerIn: parent
+
+      Column {
+        id: col
+        spacing: 10
+        anchors.centerIn: parent
+
+        UI.AnimatedText {
+          text: "Yandex Home Desktop"
+          color: "#6839CF"
+          pointSize: 24
+
+          anchors.horizontalCenter: col.horizontalCenter
+        }
+
+        UI.AnimatedText {
+          text: qsTr("Необходимо войти в аккаунт, чтобы\nприложение могло получить доступ\nк вашим устройствам")
+          color: Qt.rgba(145 / 255, 156 / 255, 181 / 255, 1)
+          pointSize: 16
+
+          anchors.horizontalCenter: col.horizontalCenter
+        }
+
+        UI.MyButton {
+          text: "Авторизоваться"
+
+          anchors.horizontalCenter: col.horizontalCenter
+        }
+      }
+
+      width: col.implicitWidth + 40
+      height: col.implicitHeight + 40
     }
 
-    UI.AnimatedText {
-      text: qsTr("Необходимо войти в аккаунт, чтобы\nприложение могло получить доступ\nк вашим устройствам")
-
-      color: Qt.rgba(145 / 255, 156 / 255, 181 / 255, 1);
-      pointSize: 16
-      anchors.horizontalCenter: col.horizontalCenter
-    }
-
-    UI.MyButton {
-      text: "Авторизоваться"
-      anchors.horizontalCenter: col.horizontalCenter
+    DropShadow {
+      anchors.fill: background
+      source: background
+      horizontalOffset: 0
+      verticalOffset: 2
+      radius: 6
+      samples: 16
+      color: Qt.rgba(0, 32 / 255, 128 / 255, 0.04)
     }
   }
 
@@ -65,12 +93,9 @@ Window {
         layer.smooth: true
         layer.samples: 8
 
-        // width: 20
-        // height: 20
         fillMode: Image.PreserveAspectFit
         scale: 0.9
 
-        // anchors.verticalCenter: githubFooter.verticalCenter
         anchors.verticalCenter: parent.verticalCenter
         anchors.right: githubLink.left
         anchors.rightMargin: 8
@@ -80,7 +105,7 @@ Window {
         id: githubLink
 
         color: Qt.rgba(145 / 255, 156 / 255, 181 / 255, 1);
-        // anchors.horizontalCenter: githubFooter.horizontalCenter
+
         anchors.verticalCenter: parent.verticalCenter
 
         text: "GitHub"

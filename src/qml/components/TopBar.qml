@@ -1,5 +1,5 @@
 import QtQuick
-import "../ui/" as UI
+import YandexHomeDesktop.Ui as UI
 
 Item {
   id: topBar

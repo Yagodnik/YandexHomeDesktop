@@ -8,6 +8,11 @@
     <file>callback/index.html</file>
 
     <file>shaders/highlight.frag.qsb</file>
-    <file>shaders/highlight.vert.qsb</file>
+  </qresource>
+
+  <qresource prefix="/pages">
+    <file alias="AuthPage.qml">../src/qml/pages/AuthPage.qml</file>
+    <file alias="LoadingPage.qml">../src/qml/pages/LoadingPage.qml</file>
+    <file alias="MainPage.qml">../src/qml/pages/MainPage.qml</file>
   </qresource>
 </RCC>

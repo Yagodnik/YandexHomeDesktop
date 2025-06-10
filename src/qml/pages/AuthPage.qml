@@ -1,11 +1,19 @@
 import QtQuick
 import Qt5Compat.GraphicalEffects
-import "../ui/" as UI
+import YandexHomeDesktop.Ui as UI
 
 Item {
   Rectangle {
     anchors.fill: parent
     color: Qt.rgba(242 / 255, 243 / 255, 245 / 255, 1)
+  }
+
+  Connections {
+    target: authorizationService
+
+    function onAuthorized() {
+      router.navigateTo("main");
+    }
   }
 
   Item {

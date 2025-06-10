@@ -22,13 +22,15 @@ qt_add_resources(RESOURCES resources/resources.qrc)
 
 qt_add_executable(appYandexHomeDesktop
     src/main.cpp
+        src/Router.cpp
     ${RESOURCES}
 )
 
-qt_add_qml_module(appYandexHomeDesktop
-    URI YandexHomeDesktop
-    VERSION 1.0
-    QML_FILES
+qt_add_qml_module(YandexHomeDesktopUi
+        URI YandexHomeDesktop.Ui
+        OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/YandexHomeDesktop/Ui"
+        VERSION 1.0
+        QML_FILES
         src/qml/ui/HeadingText.qml
         src/qml/ui/DefaultText.qml
         src/qml/ui/SubheadingText.qml
@@ -37,17 +39,34 @@ qt_add_qml_module(appYandexHomeDesktop
         src/qml/ui/MyProgressIndicator.qml
         src/qml/ui/MySwitch.qml
         src/qml/ui/AnimatedText.qml
-        src/qml/components/TopBar.qml
+)
+
+qt_add_qml_module(YandexHomeDesktopPages
+        URI YandexHomeDesktop.Pages
+        OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/YandexHomeDesktop/Pages"
+        VERSION 1.0
+        QML_FILES
         src/qml/pages/DevicesPage.qml
         src/qml/pages/ScenariosPage.qml
         src/qml/pages/SettingsPage.qml
         src/qml/pages/AuthPage.qml
         src/qml/pages/LoadingPage.qml
         src/qml/pages/MainPage.qml
+)
+
+qt_add_qml_module(appYandexHomeDesktop
+        URI YandexHomeDesktop
+        VERSION 1.0
+        QML_FILES
+        src/qml/components/TopBar.qml
         src/qml/MyTab.qml
         src/qml/MyTabs.qml
         src/qml/Main.qml
 )
+
+
+set_source_files_properties(src/qml/Router.qml
+        PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
 qt_add_resources(RESOURCES resources.qrc)
 
@@ -66,6 +85,10 @@ target_link_libraries(appYandexHomeDesktop PRIVATE
         Qt6::Quick
         Qt6::Core
         Qt6::NetworkAuth
+
+        YandexHomeDesktopUi
+        YandexHomeDesktopPages
+
         YandexHomeApi
         YandexAuth
 )

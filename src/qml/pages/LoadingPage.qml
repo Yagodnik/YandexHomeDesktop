@@ -1,5 +1,5 @@
 import QtQuick
-import "../ui/" as UI
+import YandexHomeDesktop.Ui as UI
 
 Item {
   UI.MyProgressIndicator {
@@ -17,5 +17,13 @@ Item {
     color: "#6839CF"
 
     text: "Загрузка..."
+  }
+
+  UI.MyButton {
+    text: "Nav"
+
+    onClicked: {
+      router.navigateTo("auth");
+    }
   }
 }

@@ -6,6 +6,7 @@
 #include "api/YandexHomeApi.h"
 #include "api/model/UserInfo.h"
 #include "auth/AuthorizationService.h"
+#include "Router.h"
 
 int main(int argc, char *argv[]) {
   QGuiApplication app(argc, argv);
@@ -14,6 +15,7 @@ int main(int argc, char *argv[]) {
   const auto root_context = engine.rootContext();
 
   root_context->setContextProperty("authorizationService", new AuthorizationService());
+  root_context->setContextProperty("router", new Router());
 
   QObject::connect(
     &engine,
@@ -21,6 +23,7 @@ int main(int argc, char *argv[]) {
     &app,
     []() { QCoreApplication::exit(-1); },
     Qt::QueuedConnection);
+
   engine.loadFromModule("YandexHomeDesktop", "Main");
 
   return app.exec();

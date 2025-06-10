@@ -2,9 +2,9 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
 import Qt.labs.platform
-import "../ui/" as UI
-import "../components" as Components
-import "./" as Pages
+import YandexHomeDesktop.Ui as UI
+import YandexHomeDesktop.Pages as Pages
+import YandexHomeDesktop as Components
 
 Item {
   Rectangle {

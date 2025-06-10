@@ -1,10 +1,8 @@
 import QtQuick
-import QtQuick.Layouts
 import QtQuick.Controls
 import Qt.labs.platform
-import "./ui/" as UI
-import "./components" as Components
-import "./pages/" as Pages
+import YandexHomeDesktop.Pages
+import YandexHomeDesktop.Ui
 
 Window {
   width: 350
@@ -13,16 +11,48 @@ Window {
   title: qsTr("Yandex Home Desktop")
   // flags: Qt.FramelessWindowHint
 
-  StackLayout {
+  QtObject {
+    id: routerHelper
+
+    function push(path) {
+      pages.push(path);
+    }
+
+    function pop() {
+      if (pages.depth > 1) {
+        pages.pop()
+      }
+    }
+  }
+
+  StackView {
     id: pages
     anchors.fill: parent
 
-    currentIndex: 0
+    pushEnter: Transition {
+      NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 200 }
+    }
 
-    Pages.MainPage {}
+    pushExit: Transition {
+      NumberAnimation { property: "opacity"; from: 1; to: 0; duration: 200 }
+    }
 
-    Pages.LoadingPage {}
+    popEnter: Transition {
+      NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 200 }
+    }
 
-    Pages.AuthPage {}
+    popExit: Transition {
+      NumberAnimation { property: "opacity"; from: 1; to: 0; duration: 200 }
+    }
+
+    Component.onCompleted: {
+      router.setView(routerHelper);
+
+      router.addRoute("loading", "qrc:/pages/LoadingPage.qml");
+      router.addRoute("auth", "qrc:/pages/AuthPage.qml");
+      router.addRoute("main", "qrc:/pages/MainPage.qml");
+
+      router.navigateTo("loading");
+    }
   }
 }

@@ -6,5 +6,8 @@
     <file>images/logout.svg</file>
     <file>auth/secrets.json</file>
     <file>callback/index.html</file>
+
+    <file>shaders/highlight.frag.qsb</file>
+    <file>shaders/highlight.vert.qsb</file>
   </qresource>
 </RCC>

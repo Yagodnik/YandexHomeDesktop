@@ -70,6 +70,30 @@ target_link_libraries(appYandexHomeDesktop PRIVATE
         YandexAuth
 )
 
+set(SHADER_SRC
+  "src/qml/shaders/highlight.frag"
+)
+set(SHADER_OUT
+  "resources/shaders/highlight.frag.qsb"
+)
+
+add_custom_command(
+        OUTPUT ${SHADER_OUT}
+        COMMAND qsb
+        "${CMAKE_CURRENT_SOURCE_DIR}/${SHADER_SRC}"
+        -o "${CMAKE_CURRENT_SOURCE_DIR}/${SHADER_OUT}"
+        --glsl 310es
+        --hlsl 50
+        --msl 21
+        DEPENDS ${SHADER_SRC}
+        COMMENT "Compiling shader ${SHADER_SRC} to ${SHADER_OUT}"
+        VERBATIM
+)
+
+add_custom_target(compile_shaders ALL DEPENDS ${SHADER_OUT})
+
+add_dependencies(appYandexHomeDesktop compile_shaders)
+
 include(GNUInstallDirs)
 install(TARGETS appYandexHomeDesktop
     BUNDLE DESTINATION .

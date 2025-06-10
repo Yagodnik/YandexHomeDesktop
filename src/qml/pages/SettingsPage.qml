@@ -4,6 +4,25 @@ import Qt5Compat.GraphicalEffects
 import "../ui/" as UI
 
 Item {
+  QtObject {
+    id: shaderParams
+    property real t: 0
+
+    SequentialAnimation on t {
+      loops: Animation.Infinite
+      NumberAnimation {
+        to: 1
+        duration: 600
+        easing.type: Easing.InBack
+      }
+      NumberAnimation {
+        to: 0
+        duration: 600
+        easing.type: Easing.InBack
+      }
+    }
+  }
+
   Flickable {
     id: flickable
     anchors.fill: parent
@@ -25,7 +44,7 @@ Item {
 
       Rectangle {
         id: background
-        anchors.fill: items
+        anchors.fill: userDetails
         color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 1)
         radius: 16
       }
@@ -41,22 +60,31 @@ Item {
       }
 
       Item {
-        id: items
+        id: userDetails
         width: parent.width
         anchors.top: heading.bottom
         anchors.topMargin: 12
-        height: details.height + 20
+        height: 56
+
+        property bool loading: true
 
         Rectangle {
           id: avatar
-          color: "red"
-          radius: 45
           width: 32
           height: 32
+          radius: 45
+          color: userDetails.loading ? "#e0e0e0" : "red"
 
           anchors.left: parent.left
           anchors.leftMargin: 5
           anchors.verticalCenter: parent.verticalCenter
+
+          layer.enabled: userDetails.loading
+          layer.smooth: true
+          layer.effect: ShaderEffect {
+            property real t: shaderParams.t
+            fragmentShader: "qrc:/shaders/highlight.frag.qsb"
+          }
         }
 
         Column {
@@ -64,12 +92,45 @@ Item {
           anchors.left: avatar.right
           anchors.leftMargin: 6
           anchors.verticalCenter: parent.verticalCenter
+          spacing: 4
+
+          Rectangle {
+            width: userDetails.loading ? 120 : 0
+            height: userDetails.loading ? 14 : 0
+            visible: userDetails.loading
+            color: "#e0e0e0"
+            radius: 16
+
+            layer.enabled: userDetails.loading
+            layer.smooth: true
+            layer.effect: ShaderEffect {
+              property real t: shaderParams.t
+              fragmentShader: "qrc:/shaders/highlight.frag.qsb"
+            }
+          }
+
+          Rectangle {
+            width: userDetails.loading ? 180 : 0
+            height: userDetails.loading ? 12 : 0
+            visible: userDetails.loading
+            color: "#e0e0e0"
+            radius: 16
+
+            layer.enabled: userDetails.loading
+            layer.smooth: true
+            layer.effect: ShaderEffect {
+              property real t: shaderParams.t
+              fragmentShader: "qrc:/shaders/highlight.frag.qsb"
+            }
+          }
 
           UI.DefaultText {
+            visible: !userDetails.loading
             text: "Artem Yagodnik"
           }
 
           UI.SubheadingText {
+            visible: !userDetails.loading
             text: "YagodnikArtem2@yandex.ru"
           }
         }
@@ -77,6 +138,7 @@ Item {
         Image {
           id: logoutButton
           source: "qrc:/images/logout.svg"
+          visible: !userDetails.loading
 
           antialiasing: true
           layer.enabled: true
@@ -92,7 +154,6 @@ Item {
           MouseArea {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
-
             onClicked: {
               console.log("Logout...")
             }

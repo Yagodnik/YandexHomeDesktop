@@ -52,6 +52,7 @@ qt_add_qml_module(YandexHomeDesktopPages
         src/qml/pages/SettingsPage.qml
         src/qml/pages/AuthPage.qml
         src/qml/pages/ErrorPage.qml
+        src/qml/pages/AuthCanceledPage.qml
         src/qml/pages/LoadingPage.qml
         src/qml/pages/MainPage.qml
 )

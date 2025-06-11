@@ -15,5 +15,6 @@
     <file alias="LoadingPage.qml">../src/qml/pages/LoadingPage.qml</file>
     <file alias="MainPage.qml">../src/qml/pages/MainPage.qml</file>
     <file alias="ErrorPage.qml">../src/qml/pages/ErrorPage.qml</file>
+    <file alias="AuthCanceledPage.qml">../src/qml/pages/AuthCanceledPage.qml</file>
   </qresource>
 </RCC>

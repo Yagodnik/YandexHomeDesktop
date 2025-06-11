@@ -48,6 +48,10 @@ Window {
       console.log("App is broken!");
       Qt.quit();
     }
+
+    function onAuthorizationCanceled() {
+      router.navigateTo("authCanceled");
+    }
   }
 
   StackView {
@@ -77,6 +81,7 @@ Window {
       router.addRoute("auth", "qrc:/pages/AuthPage.qml");
       router.addRoute("main", "qrc:/pages/MainPage.qml");
       router.addRoute("error", "qrc:/pages/ErrorPage.qml");
+      router.addRoute("authCanceled", "qrc:/pages/AuthCanceledPage.qml");
 
       router.navigateTo("loading");
     }

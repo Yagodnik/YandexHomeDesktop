@@ -19,6 +19,10 @@ Item {
     text: "Загрузка..."
   }
 
+  Component.onCompleted: {
+    authorizationService.AttemptLocalAuthorization();
+  }
+
   // UI.MyButton {
   //   text: "Nav"
   //

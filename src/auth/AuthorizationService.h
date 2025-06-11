@@ -14,12 +14,11 @@ public:
   Q_INVOKABLE [[nodiscard]] bool IsAuthorized() const;
   Q_INVOKABLE void AttemptAuthorization();
   Q_INVOKABLE void Logout();
-  Q_INVOKABLE void TestWrite();
-  Q_INVOKABLE void TestRead();
-  Q_INVOKABLE void TestDelete();
 
 signals:
   void authorized();
+  void unauthorized();
+  void logout();
   void authorizationFailed();
   void initializationFailed();
 
@@ -45,6 +44,10 @@ private:
     (QStringList, scopes)
   );
 
+  void TryWrite(const QString& key);
+  void TryRead();
+  void TryDelete();
+
   [[nodiscard]] std::optional<QJsonObject> GetAuthSecrets() const;
   [[nodiscard]] static QSet<QByteArray> GetScopes(const QStringList& list);
   [[nodiscard]] bool PrepareCallbackPage();
@@ -57,4 +60,7 @@ private:
 private slots:
   void HandleAuthorizationStatus(QAbstractOAuth::Status status);
   static void AuthorizeWithBrowser(QUrl url);
+  void ReadTokenHandler();
+  void WriteTokenHandler() const;
+  void DeleteTokenHandler() const;
 };

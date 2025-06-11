@@ -120,35 +120,4 @@ Item {
       }
     }
   }
-
-
-  Row {
-    z: 200
-    spacing: 10
-
-    UI.MyButton {
-      text: "Auth!"
-
-      onClicked: authorizationService.AttemptAuthorization();
-    }
-
-    UI.MyButton {
-      text: "Write!"
-
-      onClicked: authorizationService.TestWrite();
-    }
-
-    UI.MyButton {
-      text: "Read!"
-
-      onClicked: authorizationService.TestRead();
-    }
-
-    UI.MyButton {
-      text: "Delete!"
-
-      onClicked: authorizationService.TestDelete();
-    }
-  }
-
 }

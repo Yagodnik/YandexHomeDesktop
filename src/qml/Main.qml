@@ -25,6 +25,31 @@ Window {
     }
   }
 
+  Connections {
+    target: authorizationService
+
+    function onAuthorized() {
+      router.navigateTo("main");
+    }
+
+    function onUnauthorized() {
+      router.navigateTo("auth");
+    }
+
+    function onLogout() {
+      router.navigateTo("auth");
+    }
+
+    function onAuthorizationFailed() {
+      router.navigateTo("error");
+    }
+
+    function onInitializationFailed() {
+      console.log("App is broken!");
+      Qt.quit();
+    }
+  }
+
   StackView {
     id: pages
     anchors.fill: parent
@@ -51,6 +76,7 @@ Window {
       router.addRoute("loading", "qrc:/pages/LoadingPage.qml");
       router.addRoute("auth", "qrc:/pages/AuthPage.qml");
       router.addRoute("main", "qrc:/pages/MainPage.qml");
+      router.addRoute("error", "qrc:/pages/ErrorPage.qml");
 
       router.navigateTo("loading");
     }

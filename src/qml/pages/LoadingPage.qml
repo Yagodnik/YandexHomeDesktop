@@ -19,11 +19,11 @@ Item {
     text: "Загрузка..."
   }
 
-  UI.MyButton {
-    text: "Nav"
-
-    onClicked: {
-      router.navigateTo("auth");
-    }
-  }
+  // UI.MyButton {
+  //   text: "Nav"
+  //
+  //   onClicked: {
+  //     router.navigateTo("auth");
+  //   }
+  // }
 }

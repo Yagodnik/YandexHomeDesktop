@@ -13,38 +13,27 @@ AuthorizationService::AuthorizationService(QObject *parent) :
   reply_handler_(kDefaultPort)
 {
   read_job_.setAutoDelete(false);
-  read_job_.setKey(kSecureKey);
-
-  connect(&read_job_, &QKeychain::ReadPasswordJob::finished, [&]() {
-    if (read_job_.error()) {
-      qDebug() << "AuthorizationService: Token read error -" << read_job_.errorString();
-      return;
-    }
-
-    qDebug() << "AuthorizationService: Token -" <<  read_job_.textData();
-  });
-
   write_job_.setAutoDelete(false);
-  write_job_.setKey(kSecureKey);
-
-  connect(&write_job_, &QKeychain::WritePasswordJob::finished, [&]() {
-    if (write_job_.error()) {
-      qWarning() << "AuthorizationService: Token write error -" << write_job_.errorString();
-    } else {
-      qDebug() << "AuthorizationService: Token stored successfully!";
-    }
-  });
-
   delete_job_.setAutoDelete(false);
+
+  read_job_.setKey(kSecureKey);
+  write_job_.setKey(kSecureKey);
   delete_job_.setKey(kSecureKey);
 
-  connect(&delete_job_, &QKeychain::DeletePasswordJob::finished, [&]() {
-    if (delete_job_.error()) {
-      qWarning() << "AuthorizationService: Token delete error -" << delete_job_.errorString();
-    } else {
-      qDebug() << "AuthorizationService: Token deleted successfully!";
-    }
-  });
+  connect(&read_job_,
+    &QKeychain::ReadPasswordJob::finished,
+    this,
+    &AuthorizationService::ReadTokenHandler);
+
+  connect(&write_job_,
+    &QKeychain::WritePasswordJob::finished,
+    this,
+    &AuthorizationService::WriteTokenHandler);
+
+  connect(&delete_job_,
+    &QKeychain::DeletePasswordJob::finished,
+    this,
+    &AuthorizationService::DeleteTokenHandler);
 
   const auto auth_secrets_object = GetAuthSecrets();
 
@@ -71,6 +60,8 @@ AuthorizationService::AuthorizationService(QObject *parent) :
     &QOAuth2AuthorizationCodeFlow::authorizeWithBrowser,
     this,
     &AuthorizationService::AuthorizeWithBrowser);
+
+  TryRead();
 }
 
 bool AuthorizationService::IsAuthorized() const {
@@ -84,18 +75,20 @@ void AuthorizationService::AttemptAuthorization() {
 void AuthorizationService::Logout() {
   token_.reset();
   delete_job_.start();
+
+  emit logout();
 }
 
-void AuthorizationService::TestWrite() {
-  write_job_.setTextData("Hello world write!");
+void AuthorizationService::TryWrite(const QString& key) {
+  write_job_.setTextData(key);
   write_job_.start();
 }
 
-void AuthorizationService::TestRead() {
+void AuthorizationService::TryRead() {
   read_job_.start();
 }
 
-void AuthorizationService::TestDelete() {
+void AuthorizationService::TryDelete() {
   delete_job_.start();
 }
 
@@ -139,8 +132,7 @@ void AuthorizationService::HandleAuthorizationStatus(const QAbstractOAuth::Statu
     case QAbstractOAuth::Status::Granted:
       token_ = oauth2_.token();
 
-      write_job_.setTextData(oauth2_.token());
-      write_job_.start();
+      TryWrite(oauth2_.token());
 
       emit authorized();
     break;
@@ -162,4 +154,39 @@ void AuthorizationService::AuthorizeWithBrowser(QUrl url) {
   url.setQuery(query);
 
   QDesktopServices::openUrl(url);
+}
+
+void AuthorizationService::ReadTokenHandler() {
+  if (read_job_.error() == QKeychain::EntryNotFound) {
+    qDebug() << "AuthorizationService: Key does NOT exist.";
+
+    emit unauthorized();
+    return;
+  }
+
+  if (read_job_.error()) {
+    qDebug() << "AuthorizationService: Token read error -" << read_job_.errorString();
+
+    emit authorizationFailed();
+    return;
+  }
+
+  token_ = read_job_.textData();
+  emit authorized();
+}
+
+void AuthorizationService::WriteTokenHandler() const {
+  if (write_job_.error()) {
+    qWarning() << "AuthorizationService: Token write error -" << write_job_.errorString();
+  } else {
+    qDebug() << "AuthorizationService: Token stored successfully!";
+  }
+}
+
+void AuthorizationService::DeleteTokenHandler() const {
+  if (delete_job_.error()) {
+    qWarning() << "AuthorizationService: Token delete error -" << delete_job_.errorString();
+  } else {
+    qDebug() << "AuthorizationService: Token deleted successfully!";
+  }
 }

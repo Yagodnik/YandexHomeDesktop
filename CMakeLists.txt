@@ -22,7 +22,8 @@ qt_add_resources(RESOURCES resources/resources.qrc)
 
 qt_add_executable(appYandexHomeDesktop
     src/main.cpp
-        src/Router.cpp
+    src/Router.cpp
+
     ${RESOURCES}
 )
 
@@ -50,6 +51,7 @@ qt_add_qml_module(YandexHomeDesktopPages
         src/qml/pages/ScenariosPage.qml
         src/qml/pages/SettingsPage.qml
         src/qml/pages/AuthPage.qml
+        src/qml/pages/ErrorPage.qml
         src/qml/pages/LoadingPage.qml
         src/qml/pages/MainPage.qml
 )

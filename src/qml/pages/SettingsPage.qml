@@ -138,7 +138,7 @@ Item {
         Image {
           id: logoutButton
           source: "qrc:/images/logout.svg"
-          visible: !userDetails.loading
+          // visible: !userDetails.loading
 
           antialiasing: true
           layer.enabled: true
@@ -155,6 +155,8 @@ Item {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
             onClicked: {
+              authorizationService.Logout();
+
               console.log("Logout...")
             }
           }

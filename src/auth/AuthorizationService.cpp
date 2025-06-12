@@ -55,6 +55,15 @@ void AuthorizationService::Logout() {
   emit logout();
 }
 
+const QString& AuthorizationService::GetToken() const {
+  if (!token_.has_value()) {
+    qDebug() << "AuthorizationService::GetToken: no token provided";
+    return QString();
+  }
+
+  return token_.value();
+}
+
 void AuthorizationService::TryWrite(const QString& key) {
   auto *job = new QKeychain::WritePasswordJob(kAppName);
   job->setKey(kSecureKey);

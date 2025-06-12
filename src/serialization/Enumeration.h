@@ -93,8 +93,13 @@ struct name : IEnumeration {                                        \
   constexpr name(Type v) : value(v) {}                              \
   constexpr operator Type() const { return value; }                 \
                                                                     \
-  static const QMap<QString, Type> mapping;                         \
-  static const QMap<Type, QString> bi_mapping;                      \
+  inline static const QMap<QString, Type> mapping = {               \
+    JSON_ENUM_PAIRS(__VA_ARGS__)                                    \
+  };                                                                \
+                                                                    \
+  inline static const QMap<Type, QString> bi_mapping = {            \
+    JSON_ENUM_BI_PAIRS(__VA_ARGS__)                                 \
+  };                                                                \
                                                                     \
   static Type operator[](const QString& key) {                      \
     auto it = mapping.find(key);                                    \
@@ -120,12 +125,4 @@ struct name : IEnumeration {                                        \
                                                                     \
     return *it;                                                     \
   }                                                                 \
-};                                                                  \
-                                                                    \
-const QMap<QString, name::Type> name::mapping = {                   \
-  JSON_ENUM_PAIRS(__VA_ARGS__)                                      \
-};                                                                  \
-                                                                    \
-const QMap<name::Type, QString> name::bi_mapping = {                \
-  JSON_ENUM_BI_PAIRS(__VA_ARGS__)                                   \
 };                                                                  \

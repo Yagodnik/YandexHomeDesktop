@@ -49,4 +49,12 @@ Item {
       }
     }
   }
+
+  UI.MyButton {
+    text: "Do request"
+
+    onClicked: {
+      yandex_api.RequestInfo();
+    }
+  }
 }

@@ -13,9 +13,14 @@ int main(int argc, char *argv[]) {
   QQmlApplicationEngine engine;
 
   const auto root_context = engine.rootContext();
+  const auto authorization_service = new AuthorizationService();
+  const auto yandex_api = new YandexHomeApi([authorization_service] {
+    return authorization_service->GetToken();
+  });
 
-  root_context->setContextProperty("authorizationService", new AuthorizationService());
+  root_context->setContextProperty("authorizationService", authorization_service);
   root_context->setContextProperty("router", new Router());
+  root_context->setContextProperty("yandex_api", yandex_api);
 
   QObject::connect(
     &engine,

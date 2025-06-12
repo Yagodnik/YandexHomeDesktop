@@ -15,6 +15,7 @@ public:
   Q_INVOKABLE [[nodiscard]] bool IsAuthorized() const;
   Q_INVOKABLE void AttemptAuthorization();
   Q_INVOKABLE void Logout();
+  const QString& GetToken() const;
 
 signals:
   void authorized();

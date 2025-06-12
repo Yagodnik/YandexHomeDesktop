@@ -1,6 +1,10 @@
 #include "YandexHomeApi.h"
+
+#include <qcommandlineparser.h>
 #include <QDebug>
 #include <QNetworkReply>
+
+#include "qtkeychain/include/qtkeychain/keychain.h"
 
 QNetworkRequest RequestFactory::Create(const QString &endpoint, const QString &token) {
   QNetworkRequest request(endpoint);
@@ -22,11 +26,14 @@ void YandexHomeApi::RequestInfo() {
 
   QNetworkReply *reply = network_access_manager_.get(request);
 
-  connect(reply, &QNetworkReply::finished, [reply]() {
+  connect(reply, &QNetworkReply::finished, [reply, this]() {
     ReplyGuard guard(reply);
 
     if (reply->error() != QNetworkReply::NoError) {
       qDebug() << "YandexHomeApi::RequestInfo Error:" << reply->errorString();
+
+      emit errorReceived(reply->errorString());
+
       return;
     }
 
@@ -38,12 +45,19 @@ void YandexHomeApi::RequestInfo() {
 
     if (json_error.error != QJsonParseError::NoError) {
       qWarning() << "Failed to parse JSON:" << json_error.errorString();
+      emit errorReceived(json_error.errorString());
       return;
     }
 
     const QJsonObject response_object = json_response.object();
 
     const auto response = Serialization::From<UserInfo>(response_object);
+
+    if (response.status == Status::Ok) {
+      emit infoReceived(response);
+    } else {
+      emit errorReceived(response.message);
+    }
 
     qDebug() << "User info:";
 

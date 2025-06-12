@@ -56,6 +56,7 @@ JSON_STRUCT(HouseholdObject,
 
 JSON_STRUCT(UserInfo,
   (Status, status),
+  (QString, message),
   (QString, request_id),
   (QList<RoomObject>, rooms),
   (QList<GroupObject>, groups),

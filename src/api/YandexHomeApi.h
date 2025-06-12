@@ -20,6 +20,7 @@ public:
 
 signals:
   void infoReceived(const UserInfo& info);
+  void errorReceived(const QString& error);
 
 private:
   using ReplyGuard = QScopedPointer<QNetworkReply, QScopedPointerDeleteLater>;

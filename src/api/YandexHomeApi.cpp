@@ -23,7 +23,7 @@ YandexHomeApi::YandexHomeApi(TokenProvider token_provider, QObject *parent)
 {}
 
 void YandexHomeApi::RequestInfo() {
-  MakeApiRequest<UserInfo>(kInfoEndpoint, [this](auto& user_info) {
+  MakeGetRequest<UserInfo>(kInfoEndpoint, [this](auto& user_info) {
     if (user_info.status == Status::Ok) {
       emit infoReceived(user_info);
     } else {
@@ -37,7 +37,7 @@ void YandexHomeApi::RequestInfo() {
 }
 
 void YandexHomeApi::GetScenarios() {
-  MakeApiRequest<UserInfo>(kInfoEndpoint, [this](auto& user_info) {
+  MakeGetRequest<UserInfo>(kInfoEndpoint, [this](auto& user_info) {
     if (user_info.status == Status::Ok) {
       qDebug() << "Received " << user_info.scenarios.length() << " scenarios";
 
@@ -48,9 +48,28 @@ void YandexHomeApi::GetScenarios() {
   });
 }
 
-void YandexHomeApi::ExecuteScenario(const QString &scenario_id) {
-  QString url = QStringLiteral("https://api.iot.yandex.net/v1.0/scenarios/%1/actions").arg(scenario_id);
+void YandexHomeApi::ExecuteScenario(const QString &scenario_id, const std::function<void(const Response&)>& callback) {
+  const QString url = kExecuteScenatioEndpoint.arg(scenario_id);
 
-  const auto request = RequestFactory::Create(url, token_provider_());
-  QNetworkReply *reply = network_access_manager_.post(request, nullptr);
+  MakePostRequest<Response>(url, [this, scenario_id, callback](auto& response) {
+    if (response.status == Status::Ok) {
+      qDebug() << "Scenario" << scenario_id << "executing finished";
+      emit scenarioFinished(scenario_id);
+      callback(response);
+    } else {
+      emit errorReceived(response.message);
+    }
+  });
+}
+
+std::expected<QJsonObject, QString> YandexHomeApi::ParseResponseAsObject(const QByteArray &response) {
+  QJsonParseError json_error;
+  const QJsonDocument json_response = QJsonDocument::fromJson(
+    response, &json_error);
+
+  if (json_error.error != QJsonParseError::NoError) {
+    return std::unexpected(json_error.errorString());
+  }
+
+  return json_response.object();
 }

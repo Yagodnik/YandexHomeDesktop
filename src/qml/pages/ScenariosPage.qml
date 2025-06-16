@@ -89,7 +89,15 @@ Item {
             anchors.right: parent.right
             anchors.rightMargin: 9
             anchors.verticalCenter: parent.verticalCenter
-            visible: acting
+            opacity: is_waiting_response ? 1 : 0
+            visible: opacity > 0
+
+            Behavior on opacity {
+              NumberAnimation {
+                duration: 200
+                easing.type: Easing.InOutQuad
+              }
+            }
           }
 
           Image {
@@ -114,7 +122,7 @@ Item {
 
               onClicked: {
                 console.log("Executing " + scenario_id);
-                yandex_api.ExecuteScenario(scenario_id);
+                scenariosModel.ExecuteScenario(index);
               }
             }
           }

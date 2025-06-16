@@ -6,10 +6,16 @@
 class ScenariosModel : public QAbstractListModel {
   Q_OBJECT
 public:
+  struct ScenarioModel {
+    ScenarioObject data;
+    mutable bool is_executing;
+  };
+
   enum Roles {
     IdRole = Qt::UserRole + 1,
     NameRole,
-    ActingRole
+    ActingRole,
+    IsWaitingResponseRole
   };
 
   explicit ScenariosModel(YandexHomeApi *api, QObject *parent = nullptr);
@@ -19,10 +25,11 @@ public:
   [[nodiscard]] QHash<int, QByteArray> roleNames() const override;
 
   Q_INVOKABLE void RequestData() const;
+  Q_INVOKABLE void ExecuteScenario(int index);
 
 private:
   YandexHomeApi *api_;
-  QList<ScenarioObject> scenarios_;
+  QList<ScenarioModel> scenarios_;
 
 private slots:
   void OnScenariosReceived(const QList<ScenarioObject> &scenarios);

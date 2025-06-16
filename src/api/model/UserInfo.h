@@ -1,11 +1,7 @@
 #pragma once
 
 #include "serialization/Serialization.h"
-
-JSON_ENUMERATION(Status,
-  ("ok", Ok),
-  ("error", Error)
-);
+#include "Status.h"
 
 JSON_ENUMERATION(DeviceType,
   ("devices.types.{type}", Lamp),

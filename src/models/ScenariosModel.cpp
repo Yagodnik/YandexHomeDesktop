@@ -18,18 +18,20 @@ int ScenariosModel::rowCount(const QModelIndex &parent) const {
 }
 
 QVariant ScenariosModel::data(const QModelIndex &index, int role) const {
-  if (!index.isValid() || index.row() >= 10)
+  if (!index.isValid() || index.row() >= scenarios_.size()) {
     return {};
+  }
 
   const auto& scenario = scenarios_[index.row()];
   switch (role) {
     case NameRole:
-      return scenario.name;
+      return scenario.data.name;
     case ActingRole:
-      qDebug() << scenario.name << " / " << scenario.is_active;
-      return scenario.is_active;
+      return scenario.is_executing;
     case IdRole:
-      return scenario.id;
+      return scenario.data.id;
+    case IsWaitingResponseRole:
+      return scenario.is_executing;
     default:
       return {};
   }
@@ -39,7 +41,8 @@ QHash<int, QByteArray> ScenariosModel::roleNames() const {
   return {
   { NameRole, "name" },
   { ActingRole, "acting" },
-  { IdRole, "scenario_id" }
+  { IdRole, "scenario_id" },
+  { IsWaitingResponseRole, "is_waiting_response" }
   };
 }
 
@@ -47,10 +50,41 @@ void ScenariosModel::RequestData() const {
   api_->GetScenarios();
 }
 
+void ScenariosModel::ExecuteScenario(int index) {
+  if (index < 0 || index >= scenarios_.size())
+    return;
+
+  auto& scenario = scenarios_[index];
+  scenario.is_executing = true;
+
+  QModelIndex model_index = createIndex(index, 0);
+  emit dataChanged(model_index, model_index, {IsWaitingResponseRole});
+
+  const QString scenarioId = scenario.data.id;
+
+  api_->ExecuteScenario(scenarioId, [this, index, &scenario](const Response& response) {
+    scenario.is_executing = false;
+
+    QModelIndex updated_index = createIndex(index, 0);
+    emit dataChanged(updated_index, updated_index, {IsWaitingResponseRole});
+
+    qDebug() << "Scenario" << scenario.data.id << "finished executing.";
+  });
+}
+
+
+
 void ScenariosModel::OnScenariosReceived(const QList<ScenarioObject> &scenarios) {
   beginResetModel();
 
-  scenarios_ = scenarios;
+  scenarios_.clear();
+
+  for (const auto& scenario : scenarios) {
+    scenarios_.append({
+      .data = scenario,
+      .is_executing = false
+    });
+  }
 
   endResetModel();
 }

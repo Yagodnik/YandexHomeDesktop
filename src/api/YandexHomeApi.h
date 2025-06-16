@@ -1,9 +1,11 @@
 #pragma once
 
+#include <expected>
 #include <QObject>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 
+#include "model/Response.h"
 #include "model/UserInfo.h"
 
 struct RequestFactory {
@@ -20,20 +22,24 @@ public:
 
   Q_INVOKABLE void RequestInfo();
   Q_INVOKABLE void GetScenarios();
-  Q_INVOKABLE void ExecuteScenario(const QString& scenario_id);
+  void ExecuteScenario(const QString& scenario_id, const std::function<void(const Response&)>& callback);
 
 signals:
   void infoReceived(const UserInfo& info);
   void scenariosReceived(const QList<ScenarioObject>& scenarios);
   void errorReceived(const QString& error);
+  void scenarioFinished(const QString& scenario_id);
 
 private:
   using ReplyGuard = QScopedPointer<QNetworkReply, QScopedPointerDeleteLater>;
 
   const QString kInfoEndpoint = "https://api.iot.yandex.net/v1.0/user/info";
+  const QString kExecuteScenatioEndpoint = "https://api.iot.yandex.net/v1.0/scenarios/%1/actions";
+
+  static std::expected<QJsonObject, QString> ParseResponseAsObject(const QByteArray& response);
 
   template<Serialization::Serializable T>
-  void MakeApiRequest(const QString& endpoint, std::function<void(const T&)> callback) {
+  void MakeGetRequest(const QString& endpoint, std::function<void(const T&)> callback) {
     const auto request = RequestFactory::Create(endpoint, token_provider_());
 
     QNetworkReply *reply = network_access_manager_.get(request);
@@ -42,28 +48,52 @@ private:
       ReplyGuard guard(reply);
 
       if (reply->error() != QNetworkReply::NoError) {
-        qDebug() << "YandexHomeApi::RequestInfo Error:" << reply->errorString();
-
+        qDebug() << "YandexHomeApi::RequestInfo Network Error:" << reply->errorString();
         emit errorReceived(reply->errorString());
 
         return;
       }
 
-      const QByteArray response_bytes = reply->readAll();
+      const auto response_bytes = reply->readAll();
+      const auto response_object = ParseResponseAsObject(response_bytes);
+      if (!response_object.has_value()) {
+        qDebug() << "YandexHomeApi::RequestInfo Parsing Error:" << response_object.error();
+        emit errorReceived(response_object.error());
 
-      QJsonParseError json_error;
-      const QJsonDocument json_response = QJsonDocument::fromJson(
-        response_bytes, &json_error);
-
-      if (json_error.error != QJsonParseError::NoError) {
-        qWarning() << "Failed to parse JSON:" << json_error.errorString();
-        emit errorReceived(json_error.errorString());
         return;
       }
 
-      const QJsonObject response_object = json_response.object();
-      const auto response = Serialization::From<T>(response_object);
+      const auto response = Serialization::From<T>(response_object.value());
+      callback(response);
+    });
+  }
 
+  template<Serialization::Serializable T>
+  void MakePostRequest(const QString& endpoint, std::function<void(const T&)> callback) {
+    const auto request = RequestFactory::Create(endpoint, token_provider_());
+
+    QNetworkReply *reply = network_access_manager_.post(request, nullptr);
+
+    connect(reply, &QNetworkReply::finished, [reply, this, callback]() {
+      ReplyGuard guard(reply);
+
+      if (reply->error() != QNetworkReply::NoError) {
+        qDebug() << "YandexHomeApi::RequestInfo Network Error:" << reply->errorString();
+        emit errorReceived(reply->errorString());
+
+        return;
+      }
+
+      const auto response_bytes = reply->readAll();
+      const auto response_object = ParseResponseAsObject(response_bytes);
+      if (!response_object.has_value()) {
+        qDebug() << "YandexHomeApi::RequestInfo Parsing Error:" << response_object.error();
+        emit errorReceived(response_object.error());
+
+        return;
+      }
+
+      const auto response = Serialization::From<T>(response_object.value());
       callback(response);
     });
   }

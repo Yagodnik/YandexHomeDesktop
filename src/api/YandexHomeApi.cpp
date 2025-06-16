@@ -60,7 +60,6 @@ void YandexHomeApi::RequestInfo() {
     }
 
     qDebug() << "User info:";
-
     qDebug() << "Status:" << (response.status == Status::Ok ? "Ok" : "Error");
     qDebug() << "Request ID:" << response.request_id;
   });

@@ -43,6 +43,8 @@ namespace Serialization {
     T CastFromJsonValue(const QJsonValue& value) {
       if constexpr (std::is_same_v<T, QString>) {
         return value.toString();
+      } else if constexpr (std::is_same_v<T, bool>) {
+        return value.toBool();
       } else if constexpr (std::is_integral_v<T>) {
         return value.toInteger();
       } else if constexpr (std::is_floating_point_v<T>) {
@@ -67,6 +69,8 @@ namespace Serialization {
     auto CastToJsonValue(const T& value) {
       if constexpr (std::is_same_v<T, QString>) {
         return value;
+      } else if constexpr (std::is_same_v<T, bool>) {
+        return static_cast<bool>(value);
       } else if constexpr (std::is_integral_v<T>) {
         return static_cast<qint64>(value);
       } else if constexpr (std::is_floating_point_v<T>) {

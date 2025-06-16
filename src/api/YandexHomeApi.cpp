@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QNetworkReply>
 
+#include "model/Response.h"
 #include "qtkeychain/include/qtkeychain/keychain.h"
 
 QNetworkRequest RequestFactory::Create(const QString &endpoint, const QString &token) {
@@ -22,45 +23,34 @@ YandexHomeApi::YandexHomeApi(TokenProvider token_provider, QObject *parent)
 {}
 
 void YandexHomeApi::RequestInfo() {
-  const auto request = RequestFactory::Create(kInfoEndpoint, token_provider_());
-
-  QNetworkReply *reply = network_access_manager_.get(request);
-
-  connect(reply, &QNetworkReply::finished, [reply, this]() {
-    ReplyGuard guard(reply);
-
-    if (reply->error() != QNetworkReply::NoError) {
-      qDebug() << "YandexHomeApi::RequestInfo Error:" << reply->errorString();
-
-      emit errorReceived(reply->errorString());
-
-      return;
-    }
-
-    const QByteArray response_bytes = reply->readAll();
-
-    QJsonParseError json_error;
-    const QJsonDocument json_response = QJsonDocument::fromJson(
-      response_bytes, &json_error);
-
-    if (json_error.error != QJsonParseError::NoError) {
-      qWarning() << "Failed to parse JSON:" << json_error.errorString();
-      emit errorReceived(json_error.errorString());
-      return;
-    }
-
-    const QJsonObject response_object = json_response.object();
-
-    const auto response = Serialization::From<UserInfo>(response_object);
-
-    if (response.status == Status::Ok) {
-      emit infoReceived(response);
+  MakeApiRequest<UserInfo>(kInfoEndpoint, [this](auto& user_info) {
+    if (user_info.status == Status::Ok) {
+      emit infoReceived(user_info);
     } else {
-      emit errorReceived(response.message);
+      emit errorReceived(user_info.message);
     }
 
     qDebug() << "User info:";
-    qDebug() << "Status:" << (response.status == Status::Ok ? "Ok" : "Error");
-    qDebug() << "Request ID:" << response.request_id;
+    qDebug() << "Status:" << (user_info.status == Status::Ok ? "Ok" : "Error");
+    qDebug() << "Request ID:" << user_info.request_id;
   });
+}
+
+void YandexHomeApi::GetScenarios() {
+  MakeApiRequest<UserInfo>(kInfoEndpoint, [this](auto& user_info) {
+    if (user_info.status == Status::Ok) {
+      qDebug() << "Received " << user_info.scenarios.length() << " scenarios";
+
+      emit scenariosReceived(user_info.scenarios);
+    } else {
+      emit errorReceived(user_info.message);
+    }
+  });
+}
+
+void YandexHomeApi::ExecuteScenario(const QString &scenario_id) {
+  QString url = QStringLiteral("https://api.iot.yandex.net/v1.0/scenarios/%1/actions").arg(scenario_id);
+
+  const auto request = RequestFactory::Create(url, token_provider_());
+  QNetworkReply *reply = network_access_manager_.post(request, nullptr);
 }

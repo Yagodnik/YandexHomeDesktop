@@ -15,6 +15,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 add_subdirectory(src/api)
 add_subdirectory(src/auth)
+add_subdirectory(src/models)
 
 qt_standard_project_setup(REQUIRES 6.8)
 
@@ -94,6 +95,7 @@ target_link_libraries(appYandexHomeDesktop PRIVATE
 
         YandexHomeApi
         YandexAuth
+        Models
 )
 
 set(SHADER_SRC

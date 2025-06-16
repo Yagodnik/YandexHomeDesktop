@@ -28,17 +28,23 @@ Item {
       ListView {
         id: scenariouses
         width: parent.width
-        height: 48 * model.count + (scenariouses.spacing * (model.count - 1))
+        // height: 48 * model.count + (scenariouses.spacing * (model.count - 1))
+        implicitHeight: contentHeight
 
-        model: ListModel {
-          ListElement { name: "Будильник"; acting: false }
-          ListElement { name: "Сделать все четко"; acting: false }
-          ListElement { name: "Будильник"; acting: true }
-          ListElement { name: "Сделать все четко"; acting: true }
-          ListElement { name: "Будильник"; acting: false }
-          ListElement { name: "Сделать все четко"; acting: false }
-          ListElement { name: "Будильник"; acting: false }
-          ListElement { name: "Сделать все четко"; acting: false }
+        // model: ListModel {
+        //   ListElement { name: "Будильник"; acting: false }
+        //   ListElement { name: "Сделать все четко"; acting: false }
+        //   ListElement { name: "Будильник"; acting: true }
+        //   ListElement { name: "Сделать все четко"; acting: true }
+        //   ListElement { name: "Будильник"; acting: false }
+        //   ListElement { name: "Сделать все четко"; acting: false }
+        //   ListElement { name: "Будильник"; acting: false }
+        //   ListElement { name: "Сделать все четко"; acting: false }
+        // }
+        model: scenariosModel
+
+        Component.onCompleted: {
+          scenariosModel.RequestData();
         }
 
         spacing: 5
@@ -68,7 +74,7 @@ Item {
           }
 
           UI.DefaultText {
-            text: model.name
+            text: name
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
             anchors.leftMargin: 16
@@ -83,7 +89,7 @@ Item {
             anchors.right: parent.right
             anchors.rightMargin: 9
             anchors.verticalCenter: parent.verticalCenter
-            visible: model.acting
+            visible: acting
           }
 
           Image {
@@ -107,8 +113,8 @@ Item {
               cursorShape: Qt.PointingHandCursor
 
               onClicked: {
-                console.log("Playing...")
-                show = true;
+                console.log("Executing " + scenario_id);
+                yandex_api.ExecuteScenario(scenario_id);
               }
             }
           }

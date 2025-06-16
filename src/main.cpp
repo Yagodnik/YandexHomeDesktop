@@ -1,11 +1,10 @@
-#include <iostream>
-#include <QFile>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include "api/YandexHomeApi.h"
 #include "api/model/UserInfo.h"
 #include "auth/AuthorizationService.h"
+#include "models/ScenariosModel.h"
 #include "Router.h"
 
 int main(int argc, char *argv[]) {
@@ -20,6 +19,7 @@ int main(int argc, char *argv[]) {
 
   root_context->setContextProperty("authorizationService", authorization_service);
   root_context->setContextProperty("router", new Router());
+  root_context->setContextProperty("scenariosModel", new ScenariosModel(yandex_api));
   root_context->setContextProperty("yandex_api", yandex_api);
 
   QObject::connect(

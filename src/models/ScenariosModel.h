@@ -14,7 +14,6 @@ public:
   enum Roles {
     IdRole = Qt::UserRole + 1,
     NameRole,
-    ActingRole,
     IsWaitingResponseRole
   };
 
@@ -27,10 +26,14 @@ public:
   Q_INVOKABLE void RequestData() const;
   Q_INVOKABLE void ExecuteScenario(int index);
 
+signals:
+  void dataLoaded();
+
 private:
   YandexHomeApi *api_;
   QList<ScenarioModel> scenarios_;
 
 private slots:
   void OnScenariosReceived(const QList<ScenarioObject> &scenarios);
+  void OnScenarioFinished(const QString& scenario_id);
 };

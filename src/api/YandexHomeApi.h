@@ -34,7 +34,7 @@ private:
   using ReplyGuard = QScopedPointer<QNetworkReply, QScopedPointerDeleteLater>;
 
   const QString kInfoEndpoint = "https://api.iot.yandex.net/v1.0/user/info";
-  const QString kExecuteScenatioEndpoint = "https://api.iot.yandex.net/v1.0/scenarios/%1/actions";
+  const QString kExecuteScenarioEndpoint = "https://api.iot.yandex.net/v1.0/scenarios/%1/actions";
 
   static std::expected<QJsonObject, QString> ParseResponseAsObject(const QByteArray& response);
 

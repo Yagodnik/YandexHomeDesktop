@@ -4,6 +4,26 @@ import Qt5Compat.GraphicalEffects
 import YandexHomeDesktop.Ui as UI
 
 Item {
+  UI.MyProgressIndicator {
+    anchors.centerIn: parent
+
+    property bool isLoaded: false
+
+    id: loadingProgress
+    width: 30
+    height: 30
+    strokeWidth: 2
+    opacity: !isLoaded ? 1 : 0
+    visible: opacity > 0
+
+    Behavior on opacity {
+      NumberAnimation {
+        duration: 200
+        easing.type: Easing.InOutQuad
+      }
+    }
+  }
+
   Flickable {
     id: flickable
     anchors.fill: parent
@@ -25,22 +45,20 @@ Item {
         width: parent.width
       }
 
+      Connections {
+        target: scenariosModel
+
+        function onDataLoaded() {
+          console.log("We are done!");
+          loadingProgress.isLoaded = true
+        }
+      }
+
       ListView {
         id: scenariouses
         width: parent.width
-        // height: 48 * model.count + (scenariouses.spacing * (model.count - 1))
         implicitHeight: contentHeight
 
-        // model: ListModel {
-        //   ListElement { name: "Будильник"; acting: false }
-        //   ListElement { name: "Сделать все четко"; acting: false }
-        //   ListElement { name: "Будильник"; acting: true }
-        //   ListElement { name: "Сделать все четко"; acting: true }
-        //   ListElement { name: "Будильник"; acting: false }
-        //   ListElement { name: "Сделать все четко"; acting: false }
-        //   ListElement { name: "Будильник"; acting: false }
-        //   ListElement { name: "Сделать все четко"; acting: false }
-        // }
         model: scenariosModel
 
         Component.onCompleted: {

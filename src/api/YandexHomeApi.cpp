@@ -49,7 +49,7 @@ void YandexHomeApi::GetScenarios() {
 }
 
 void YandexHomeApi::ExecuteScenario(const QString &scenario_id, const std::function<void(const Response&)>& callback) {
-  const QString url = kExecuteScenatioEndpoint.arg(scenario_id);
+  const QString url = kExecuteScenarioEndpoint.arg(scenario_id);
 
   MakePostRequest<Response>(url, [this, scenario_id, callback](auto& response) {
     if (response.status == Status::Ok) {

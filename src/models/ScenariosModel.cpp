@@ -4,14 +4,19 @@ ScenariosModel::ScenariosModel(YandexHomeApi *api, QObject *parent)
   : QAbstractListModel(parent), api_(api)
 {
   connect(api_,
-  &YandexHomeApi::scenariosReceived,
-  this,
-  &ScenariosModel::OnScenariosReceived);
+    &YandexHomeApi::scenariosReceivedSuccessfully,
+    this,
+    &ScenariosModel::OnScenariosReceived);
 
   connect(api_,
-  &YandexHomeApi::scenarioExecutionFinished,
-  this,
-  &ScenariosModel::OnScenarioFinished);
+    &YandexHomeApi::scenarioExecutionFinishedSuccessfully,
+    this,
+    &ScenariosModel::OnScenarioExecutionFinishedSuccessfully);
+
+  connect(api_,
+    &YandexHomeApi::scenarioExecutionFailed,
+    this,
+    &ScenariosModel::OnScenarioExecutionFailed);
 }
 
 int ScenariosModel::rowCount(const QModelIndex &parent) const {
@@ -73,15 +78,9 @@ void ScenariosModel::ExecuteScenario(int index) {
   emit dataChanged(model_index, model_index, {IsWaitingResponseRole});
 
   const QString scenario_id = scenario.data.id;
+  const QVariant user_data = index;
 
-  api_->ExecuteScenario(scenario_id, [this, index, &scenario](const Response& response) {
-    scenario.is_executing = false;
-
-    const QModelIndex updated_index = createIndex(index, 0);
-    emit dataChanged(updated_index, updated_index, {IsWaitingResponseRole});
-
-    qDebug() << "Scenario" << scenario.data.id << "finished executing.";
-  });
+  api_->ExecuteScenario(scenario_id, user_data);
 }
 
 void ScenariosModel::OnScenariosReceived(const QList<ScenarioObject> &scenarios) {
@@ -101,6 +100,30 @@ void ScenariosModel::OnScenariosReceived(const QList<ScenarioObject> &scenarios)
   emit dataLoaded();
 }
 
-void ScenariosModel::OnScenarioFinished(const QString &scenario_id) {
-  // TODO: Implement
+void ScenariosModel::OnScenarioExecutionFinishedSuccessfully(
+  const QString &scenario_id, const QVariant &user_data
+) {
+  const int index = user_data.toInt();
+  auto& scenario = scenarios_[index];
+
+  scenario.is_executing = false;
+
+  const QModelIndex updated_index = createIndex(index, 0);
+  emit dataChanged(updated_index, updated_index, {IsWaitingResponseRole});
+
+  qDebug() << "Model: Scenario" << scenario_id << "(" << index << ") finished executing.";
+}
+
+void ScenariosModel::OnScenarioExecutionFailed(
+  const QString &scenario_id, const QVariant &user_data
+) {
+  const int index = user_data.toInt();
+  auto& scenario = scenarios_[index];
+
+  scenario.is_executing = false;
+
+  const QModelIndex updated_index = createIndex(index, 0);
+  emit dataChanged(updated_index, updated_index, {IsWaitingResponseRole});
+
+  qDebug() << "Model: Scenario" << scenario_id << "(" << index << ") failed.";
 }

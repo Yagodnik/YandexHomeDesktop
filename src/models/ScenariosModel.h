@@ -8,7 +8,7 @@ class ScenariosModel : public QAbstractListModel {
 public:
   struct ScenarioModel {
     ScenarioObject data;
-    mutable bool is_executing;
+    mutable bool is_executing { false };
   };
 
   enum Roles {
@@ -20,7 +20,7 @@ public:
 
   explicit ScenariosModel(YandexHomeApi *api, QObject *parent = nullptr);
 
-  [[nodiscard]] int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+  [[nodiscard]] int rowCount(const QModelIndex &parent) const override;
   [[nodiscard]] QVariant data(const QModelIndex &index, int role) const override;
   [[nodiscard]] QHash<int, QByteArray> roleNames() const override;
 
@@ -36,5 +36,6 @@ private:
 
 private slots:
   void OnScenariosReceived(const QList<ScenarioObject> &scenarios);
-  void OnScenarioFinished(const QString& scenario_id);
+  void OnScenarioExecutionFinishedSuccessfully(const QString& scenario_id, const QVariant &user_data);
+  void OnScenarioExecutionFailed(const QString& scenario_id, const QVariant &user_data);
 };

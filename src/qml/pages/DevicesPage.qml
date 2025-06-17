@@ -50,11 +50,29 @@ Item {
     }
   }
 
-  UI.MyButton {
-    text: "Do request"
+  Column {
+    UI.MyButton {
+      text: "Do request"
 
-    onClicked: {
-      yandex_api.RequestInfo();
+      onClicked: {
+        yandex_api.RequestInfo();
+      }
+    }
+
+    UI.MyButton {
+      text: "Show"
+
+      onClicked: {
+        platformService.ShowAsApp();
+      }
+    }
+
+    UI.MyButton {
+      text: "Hide"
+
+      onClicked: {
+        platformService.ShowOnlyInTray();
+      }
     }
   }
 }

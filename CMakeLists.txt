@@ -24,17 +24,30 @@ qt_add_resources(RESOURCES resources/resources.qrc)
 set(MAC_FRAMEWORKS "")
 set(MAC_SOURCES "")
 
+if(APPLE)
+  set_source_files_properties(src/platform/macos/MacOSIntegration.mm PROPERTIES
+    COMPILE_FLAGS "-x objective-c++"
+  )
+
+  set(MAC_FRAMEWORKS "-framework Cocoa")
+  set(MAC_SOURCES "src/platform/macos/MacOSIntegration.mm")
+endif()
+
 qt_add_executable(appYandexHomeDesktop
     src/main.cpp
     src/Router.cpp
 
     ${RESOURCES}
     ${MAC_SOURCES}
+        src/platform/PlatformService.cpp
+        src/platform/PlatformService.h
+        src/platform/PlatformServiceMac.cpp
+        src/platform/PlatformServiceMac.h
 )
 
 if(APPLE)
   set_target_properties(appYandexHomeDesktop PROPERTIES
-    MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/src/macos/Info.plist"
+    MACOSX_BUNDLE_INFO_PLIST "src/platform/macos/Info.plist"
   )
 endif()
 

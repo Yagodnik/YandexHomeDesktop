@@ -17,8 +17,10 @@
   <string>0.1</string>
 
   <!-- Hide dock icon and prevent Cmd+Tab presence -->
+  <!--
   <key>LSUIElement</key>
   <string>1</string>
+  -->
 
   <!-- Optional: icon file (if you have one in your bundle) -->
   <!--

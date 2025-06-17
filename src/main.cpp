@@ -4,6 +4,7 @@
 #include "api/YandexHomeApi.h"
 #include "auth/AuthorizationService.h"
 #include "models/ScenariosModel.h"
+#include "platform/PlatformService.h"
 #include "Router.h"
 
 int main(int argc, char *argv[]) {
@@ -14,10 +15,12 @@ int main(int argc, char *argv[]) {
 
   const auto root_context = engine.rootContext();
   const auto authorization_service = new AuthorizationService();
+  const auto platform_service = new PlatformService();
   const auto yandex_api = new YandexHomeApi([authorization_service] {
     return authorization_service->GetToken();
   });
 
+  root_context->setContextProperty("platformService", platform_service);
   root_context->setContextProperty("authorizationService", authorization_service);
   root_context->setContextProperty("router", new Router());
   root_context->setContextProperty("scenariosModel", new ScenariosModel(yandex_api));
@@ -34,4 +37,3 @@ int main(int argc, char *argv[]) {
 
   return app.exec();
 }
-

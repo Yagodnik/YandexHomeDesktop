@@ -6,16 +6,7 @@
 #include "models/ScenariosModel.h"
 #include "Router.h"
 
-#ifdef __APPLE__
-#include "macos/MacOSIntegration.h"
-#endif
-
-
 int main(int argc, char *argv[]) {
-#ifdef __APPLE__
-  MacOSIntegration::HideAppFromTheDock();
-#endif
-
   QGuiApplication app(argc, argv);
   app.setQuitOnLastWindowClosed(false);
 

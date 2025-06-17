@@ -24,15 +24,6 @@ qt_add_resources(RESOURCES resources/resources.qrc)
 set(MAC_FRAMEWORKS "")
 set(MAC_SOURCES "")
 
-if(APPLE)
-  set_source_files_properties(src/macos/MacOSIntegration.mm PROPERTIES
-    COMPILE_FLAGS "-x objective-c++"
-  )
-
-  set(MAC_FRAMEWORKS "-framework Cocoa")
-  set(MAC_SOURCES "src/macos/MacOSIntegration.mm")
-endif()
-
 qt_add_executable(appYandexHomeDesktop
     src/main.cpp
     src/Router.cpp

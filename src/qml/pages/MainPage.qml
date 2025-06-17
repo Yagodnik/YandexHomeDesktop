@@ -4,7 +4,7 @@ import QtQuick.Controls
 import Qt.labs.platform
 import YandexHomeDesktop.Ui as UI
 import YandexHomeDesktop.Pages as Pages
-import YandexHomeDesktop as Components
+import YandexHomeDesktop.Components as Components
 
 Item {
   Rectangle {

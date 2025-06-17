@@ -52,21 +52,21 @@ Item {
       anchors.leftMargin: 16
       width: parent.width
 
-      MyTab {
+      UI.MyTab {
         text: "Устройства"
         leftCorner: true
         active: topBar.activeTab === 0
         onClicked: topBar.activeTab = 0
       }
 
-      MyTab {
+      UI.MyTab {
         text: "Сценарии"
         leftCorner: true
         active: topBar.activeTab === 1
         onClicked: topBar.activeTab = 1
       }
 
-      MyTab {
+      UI.MyTab {
         text: "Настройки"
         leftCorner: true
         active: topBar.activeTab === 2

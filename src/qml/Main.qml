@@ -5,11 +5,29 @@ import YandexHomeDesktop.Pages
 import YandexHomeDesktop.Ui
 
 Window {
+  id: window
   width: 350
   height: 460
   visible: true
   title: qsTr("Yandex Home Desktop")
   // flags: Qt.FramelessWindowHint
+
+  SystemTrayIcon {
+    visible: true
+    icon.name: "Yandex Home Desktop"
+    icon.source: "qrc:/images/icon.png"
+
+    onActivated: function(reason) {
+      console.log("Position:", geometry.x, geometry.y);
+
+      window.x = geometry.x - window.width / 2 + geometry.width / 2
+      window.y = geometry.y + 10;
+
+      window.show()
+      window.raise()
+      window.requestActivate()
+    }
+  }
 
   QtObject {
     id: routerHelper

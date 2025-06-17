@@ -2,13 +2,23 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include "api/YandexHomeApi.h"
-#include "api/model/UserInfo.h"
 #include "auth/AuthorizationService.h"
 #include "models/ScenariosModel.h"
 #include "Router.h"
 
+#ifdef __APPLE__
+#include "macos/MacOSIntegration.h"
+#endif
+
+
 int main(int argc, char *argv[]) {
+#ifdef __APPLE__
+  MacOSIntegration::HideAppFromTheDock();
+#endif
+
   QGuiApplication app(argc, argv);
+  app.setQuitOnLastWindowClosed(false);
+
   QQmlApplicationEngine engine;
 
   const auto root_context = engine.rootContext();

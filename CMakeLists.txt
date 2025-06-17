@@ -21,12 +21,31 @@ qt_standard_project_setup(REQUIRES 6.8)
 
 qt_add_resources(RESOURCES resources/resources.qrc)
 
+set(MAC_FRAMEWORKS "")
+set(MAC_SOURCES "")
+
+if(APPLE)
+  set_source_files_properties(src/macos/MacOSIntegration.mm PROPERTIES
+    COMPILE_FLAGS "-x objective-c++"
+  )
+
+  set(MAC_FRAMEWORKS "-framework Cocoa")
+  set(MAC_SOURCES "src/macos/MacOSIntegration.mm")
+endif()
+
 qt_add_executable(appYandexHomeDesktop
     src/main.cpp
     src/Router.cpp
 
     ${RESOURCES}
+    ${MAC_SOURCES}
 )
+
+if(APPLE)
+  set_target_properties(appYandexHomeDesktop PROPERTIES
+    MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/src/macos/Info.plist"
+  )
+endif()
 
 qt_add_qml_module(YandexHomeDesktopUi
         URI YandexHomeDesktop.Ui
@@ -101,6 +120,8 @@ target_link_libraries(appYandexHomeDesktop PRIVATE
         YandexHomeApi
         YandexAuth
         Models
+
+        ${MAC_FRAMEWORKS}
 )
 
 set(SHADER_SRC

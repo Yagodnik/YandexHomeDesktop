@@ -6,8 +6,11 @@
 #include "models/ScenariosModel.h"
 #include "platform/PlatformService.h"
 #include "Router.h"
+#include <QQuickStyle>
 
 int main(int argc, char *argv[]) {
+  QQuickStyle::setStyle("Basic");
+
   QGuiApplication app(argc, argv);
   app.setQuitOnLastWindowClosed(false);
 

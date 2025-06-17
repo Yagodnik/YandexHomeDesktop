@@ -52,40 +52,75 @@ Item {
         Components.AccountDetails {}
 
         Item {
+          id: basicSettings
           width: parent.width
-          height: details2.height + 20
+          height: elements.implicitHeight
 
           Rectangle {
+            id: background2
             anchors.fill: parent
             color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 1)
             radius: 16
           }
 
           Column {
-            id: details2
-            anchors.left: parent.left
-            anchors.leftMargin: 10
-            anchors.verticalCenter: parent.verticalCenter
+            id: elements
+            anchors.fill: parent
 
-            UI.DefaultText {
-              text: "Tray-режим"
+            Item {
+              width: parent.width
+              height: details2.height + 20
+
+              Column {
+                id: details2
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+                anchors.verticalCenter: parent.verticalCenter
+
+                UI.DefaultText {
+                  text: "Тема"
+                }
+
+                UI.SubheadingText {
+                  text: "Приложение будет отображаться\nкак иконка на панели задач"
+                }
+              }
+
+              UI.MySwitch {
+                anchors.right: parent.right
+                anchors.rightMargin: 10
+                anchors.verticalCenter: parent.verticalCenter
+
+                onToggled: function (checked) {
+                  if (checked) {
+                    platformService.ShowOnlyInTray();
+                  } else {
+                    platformService.ShowAsApp();
+                  }
+                }
+              }
             }
 
-            UI.SubheadingText {
-              text: "Приложение будет отображаться\nкак иконка на панели задач"
-            }
-          }
+            Item {
+              width: parent.width
+              height: 50
 
-          UI.MySwitch {
-            anchors.right: parent.right
-            anchors.rightMargin: 10
-            anchors.verticalCenter: parent.verticalCenter
+              UI.DefaultText {
+                text: "Тема"
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+                anchors.verticalCenter: parent.verticalCenter
+              }
 
-            onToggled: function(checked) {
-              if (checked) {
-                platformService.ShowOnlyInTray();
-              } else {
-                platformService.ShowAsApp();
+              UI.MyComboBox {
+                anchors.right: parent.right
+                anchors.rightMargin: 10
+                anchors.verticalCenter: parent.verticalCenter
+
+                model: ["Светлая", "Тёмная"]
+                onActivated: {
+                  console.log("Selected index:", currentIndex, "value:", currentText)
+                }
               }
             }
           }

@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Quick Network NetworkAuth)
+find_package(Qt6 REQUIRED COMPONENTS Quick Network NetworkAuth QuickControls2)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -66,6 +66,7 @@ qt_add_qml_module(YandexHomeDesktopUi
         src/qml/ui/AnimatedText.qml
         src/qml/ui/MyTab.qml
         src/qml/ui/MyTabs.qml
+        src/qml/ui/MyComboBox.qml
 )
 
 qt_add_qml_module(YandexHomeDesktopPages
@@ -117,6 +118,7 @@ target_link_libraries(appYandexHomeDesktop PRIVATE
         Qt6::Quick
         Qt6::Core
         Qt6::NetworkAuth
+        Qt6::QuickControls2
 
         YandexHomeDesktopUi
         YandexHomeDesktopPages

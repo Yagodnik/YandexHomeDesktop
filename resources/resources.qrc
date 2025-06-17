@@ -4,6 +4,7 @@
     <file>images/login_github.svg</file>
     <file>images/play.svg</file>
     <file>images/logout.svg</file>
+    <file>images/reload.svg</file>
     <file>auth/secrets.json</file>
     <file>callback/index.html</file>
 

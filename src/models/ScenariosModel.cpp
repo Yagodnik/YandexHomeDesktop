@@ -9,7 +9,7 @@ ScenariosModel::ScenariosModel(YandexHomeApi *api, QObject *parent)
   &ScenariosModel::OnScenariosReceived);
 
   connect(api_,
-  &YandexHomeApi::scenarioFinished,
+  &YandexHomeApi::scenarioExecutionFinished,
   this,
   &ScenariosModel::OnScenarioFinished);
 }
@@ -35,6 +35,8 @@ QVariant ScenariosModel::data(const QModelIndex &index, int role) const {
       return scenario.data.id;
     case IsWaitingResponseRole:
       return scenario.is_executing;
+    case IsActiveRole:
+      return scenario.data.is_active;
     default:
       return {};
   }
@@ -42,13 +44,20 @@ QVariant ScenariosModel::data(const QModelIndex &index, int role) const {
 
 QHash<int, QByteArray> ScenariosModel::roleNames() const {
   return {
-  { NameRole, "name" },
-  { IdRole, "scenario_id" },
-  { IsWaitingResponseRole, "is_waiting_response" }
+    { NameRole, "name" },
+    { IdRole, "scenario_id" },
+    { IsWaitingResponseRole, "is_waiting_response" },
+    { IsActiveRole, "is_active"}
   };
 }
 
-void ScenariosModel::RequestData() const {
+void ScenariosModel::RequestData() {
+  beginResetModel();
+
+  scenarios_.clear();
+
+  endResetModel();
+
   api_->GetScenarios();
 }
 

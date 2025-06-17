@@ -19,8 +19,7 @@ QNetworkRequest RequestFactory::Create(const QString &endpoint, const QString &t
 }
 
 YandexHomeApi::YandexHomeApi(TokenProvider token_provider, QObject *parent)
-  : QObject(parent), token_provider_(std::move(token_provider))
-{}
+  : QObject(parent), token_provider_(std::move(token_provider)) {}
 
 void YandexHomeApi::RequestInfo() {
   MakeGetRequest<UserInfo>(kInfoEndpoint, [this](auto& user_info) {
@@ -54,11 +53,12 @@ void YandexHomeApi::ExecuteScenario(const QString &scenario_id, const std::funct
   MakePostRequest<Response>(url, [this, scenario_id, callback](auto& response) {
     if (response.status == Status::Ok) {
       qDebug() << "Scenario" << scenario_id << "executing finished";
-      emit scenarioFinished(scenario_id);
-      callback(response);
+      emit scenarioExecutionFinished(scenario_id);
     } else {
       emit errorReceived(response.message);
     }
+
+    callback(response);
   });
 }
 

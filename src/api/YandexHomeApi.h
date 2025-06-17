@@ -28,7 +28,7 @@ signals:
   void infoReceived(const UserInfo& info);
   void scenariosReceived(const QList<ScenarioObject>& scenarios);
   void errorReceived(const QString& error);
-  void scenarioFinished(const QString& scenario_id);
+  void scenarioExecutionFinished(const QString& scenario_id);
 
 private:
   using ReplyGuard = QScopedPointer<QNetworkReply, QScopedPointerDeleteLater>;
@@ -80,6 +80,10 @@ private:
       if (reply->error() != QNetworkReply::NoError) {
         qDebug() << "YandexHomeApi::RequestInfo Network Error:" << reply->errorString();
         emit errorReceived(reply->errorString());
+
+        callback({
+          .status = Status::Error,
+        });
 
         return;
       }

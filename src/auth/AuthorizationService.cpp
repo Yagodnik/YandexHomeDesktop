@@ -67,6 +67,7 @@ const QString& AuthorizationService::GetToken() const {
 void AuthorizationService::TryWrite(const QString& key) {
   auto *job = new QKeychain::WritePasswordJob(kAppName);
   job->setKey(kSecureKey);
+  job->setTextData(key);
 
   connect(job, &QKeychain::Job::finished, [job, this]() {
     WriteTokenHandler(job);
@@ -189,6 +190,9 @@ void AuthorizationService::ReadTokenHandler(QKeychain::ReadPasswordJob *job) {
   }
 
   token_ = job->textData();
+
+  qDebug() << "AuthorizationService: Token:" << token_.value();
+
   emit authorized();
 }
 

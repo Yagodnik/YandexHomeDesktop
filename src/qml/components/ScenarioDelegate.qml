@@ -7,6 +7,41 @@ Item {
   width: scenariouses.width
   height: 48
 
+  opacity: 0
+
+  Behavior on opacity {
+    NumberAnimation {
+      duration: 300
+      easing.type: Easing.InOutQuad
+    }
+  }
+
+  Component.onCompleted: {
+    opacity = 1
+  }
+
+  Rectangle {
+    id: darkOverlay
+    anchors.fill: parent
+    color: Qt.rgba(0, 0, 0, 0.1)
+    visible: !is_active
+    radius: 16
+    z: 100
+
+    MouseArea {
+      anchors.fill: parent
+      enabled: true
+      hoverEnabled: true
+      preventStealing: true
+    }
+
+    Behavior on opacity {
+      NumberAnimation { duration: 150 }
+    }
+
+    opacity: visible ? 1 : 0
+  }
+
   DropShadow {
     anchors.fill: background
     source: background

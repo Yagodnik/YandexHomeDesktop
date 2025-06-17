@@ -6,7 +6,7 @@
 class PlatformService : public QObject {
   Q_OBJECT
 public:
-  PlatformService(QObject *parent = nullptr);
+  explicit PlatformService(QObject *parent = nullptr);
 
   Q_INVOKABLE void ShowAsApp() const;
   Q_INVOKABLE void ShowOnlyInTray() const;

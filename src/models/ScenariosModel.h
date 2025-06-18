@@ -5,6 +5,7 @@
 
 class ScenariosModel : public QAbstractListModel {
   Q_OBJECT
+  Q_PROPERTY(int count READ Count NOTIFY dataLoaded)
 public:
   struct ScenarioModel {
     ScenarioObject data;
@@ -26,6 +27,8 @@ public:
 
   Q_INVOKABLE void RequestData();
   Q_INVOKABLE void ExecuteScenario(int index);
+
+  [[nodiscard]] int Count() const;
 
 signals:
   void dataLoaded();

@@ -88,6 +88,10 @@ void ScenariosModel::ExecuteScenario(int index) {
   api_->ExecuteScenario(scenario_id, user_data);
 }
 
+int ScenariosModel::Count() const {
+  return scenarios_.size();
+}
+
 void ScenariosModel::OnScenariosReceived(const QList<ScenarioObject> &scenarios) {
   beginResetModel();
 

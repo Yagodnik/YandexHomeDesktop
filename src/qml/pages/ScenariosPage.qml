@@ -148,11 +148,19 @@ Item {
     Item {
       clip: true
 
+      UI.DefaultText {
+        anchors.centerIn: parent
+        text: "Пока что у вас нет сценариев"
+
+        visible: scenariosModel.count === 0
+      }
+
       Flickable {
         id: flickable
         anchors.fill: parent
         contentWidth: parent.width
         contentHeight: scenariosList.implicitHeight
+        visible: scenariosModel.count !== 0
 
         interactive: true
         flickableDirection: Flickable.VerticalFlick

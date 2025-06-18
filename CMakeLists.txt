@@ -91,6 +91,7 @@ qt_add_qml_module(YandexHomeDesktopComponents
         QML_FILES
         src/qml/components/TopBar.qml
         src/qml/components/ScenarioDelegate.qml
+        src/qml/components/ScenariosList.qml
         src/qml/components/AccountDetails.qml
 )
 

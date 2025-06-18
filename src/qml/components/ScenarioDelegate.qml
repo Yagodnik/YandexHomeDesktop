@@ -4,7 +4,6 @@ import YandexHomeDesktop.Ui as UI
 
 Item {
   id: delegateItem
-  width: scenariouses.width
   height: 48
 
   opacity: 0

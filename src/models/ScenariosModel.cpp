@@ -9,6 +9,11 @@ ScenariosModel::ScenariosModel(YandexHomeApi *api, QObject *parent)
     &ScenariosModel::OnScenariosReceived);
 
   connect(api_,
+    &YandexHomeApi::scenariosReceivingFailed,
+    this,
+    &ScenariosModel::OnScenariosReceivingFailed);
+
+  connect(api_,
     &YandexHomeApi::scenarioExecutionFinishedSuccessfully,
     this,
     &ScenariosModel::OnScenarioExecutionFinishedSuccessfully);
@@ -71,7 +76,7 @@ void ScenariosModel::ExecuteScenario(int index) {
     return;
   }
 
-  auto& scenario = scenarios_[index];
+  auto& scenario = scenarios_.at(index);
   scenario.is_executing = true;
 
   const QModelIndex model_index = createIndex(index, 0);
@@ -100,10 +105,20 @@ void ScenariosModel::OnScenariosReceived(const QList<ScenarioObject> &scenarios)
   emit dataLoaded();
 }
 
+void ScenariosModel::OnScenariosReceivingFailed(const QString &message) {
+  emit dataLoadingFailed();
+
+  qDebug() << "Model: Loading scenarios failed:" << message;
+}
+
 void ScenariosModel::OnScenarioExecutionFinishedSuccessfully(
   const QString &scenario_id, const QVariant &user_data
 ) {
   const int index = user_data.toInt();
+  if (index < 0 || index >= scenarios_.size()) {
+    return;
+  }
+
   auto& scenario = scenarios_[index];
 
   scenario.is_executing = false;
@@ -115,15 +130,19 @@ void ScenariosModel::OnScenarioExecutionFinishedSuccessfully(
 }
 
 void ScenariosModel::OnScenarioExecutionFailed(
-  const QString &scenario_id, const QVariant &user_data
+  const QString &message, const QVariant &user_data
 ) {
   const int index = user_data.toInt();
-  auto& scenario = scenarios_[index];
+  if (index < 0 || index >= scenarios_.size()) {
+    return;
+  }
+
+  auto& scenario = scenarios_.at(index);
 
   scenario.is_executing = false;
 
   const QModelIndex updated_index = createIndex(index, 0);
   emit dataChanged(updated_index, updated_index, {IsWaitingResponseRole});
 
-  qDebug() << "Model: Scenario" << scenario_id << "(" << index << ") failed.";
+  qDebug() << "Model: Scenario" << message << "(" << index << ") failed.";
 }

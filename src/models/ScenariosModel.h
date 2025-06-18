@@ -29,6 +29,7 @@ public:
 
 signals:
   void dataLoaded();
+  void dataLoadingFailed();
 
 private:
   YandexHomeApi *api_;
@@ -36,6 +37,7 @@ private:
 
 private slots:
   void OnScenariosReceived(const QList<ScenarioObject> &scenarios);
+  void OnScenariosReceivingFailed(const QString& message);
   void OnScenarioExecutionFinishedSuccessfully(const QString& scenario_id, const QVariant &user_data);
-  void OnScenarioExecutionFailed(const QString& scenario_id, const QVariant &user_data);
+  void OnScenarioExecutionFailed(const QString& message, const QVariant &user_data);
 };

@@ -1,125 +1,165 @@
-import QtQuick 2.15
+import QtQuick
 import QtQuick.Layouts 2.15
 import YandexHomeDesktop.Ui as UI
 import YandexHomeDesktop.Components as Components
 
 Item {
-  UI.MyProgressIndicator {
-    anchors.centerIn: parent
+  id: root
 
-    property bool isLoaded: false
+  Component.onCompleted: {
+    isLoading = true;
+    scenariosModel.RequestData();
+  }
 
-    id: loadingProgress
-    width: 30
-    height: 30
-    strokeWidth: 2
-    opacity: !isLoaded ? 1 : 0
-    visible: opacity > 0
+  property var isLoading: false
 
-    Behavior on opacity {
-      NumberAnimation {
-        duration: 200
-        easing.type: Easing.InOutQuad
+  Connections {
+    target: scenariosModel
+
+    function onDataLoadingFailed() {
+      root.isLoading = false;
+      console.log("Scenarios Model: Data Load - FAIL");
+      scenariosStack.currentIndex = 1;
+    }
+
+    function onDataLoaded() {
+      root.isLoading = false;
+      console.log("Scenarios Model: Data Load - OK");
+      scenariosStack.currentIndex = 2;
+    }
+  }
+
+  Item {
+    id: heading
+    width: parent.width
+    height: 32
+
+    UI.HeadingText {
+      id: headingTitle
+      text: "Все сценарии"
+      anchors.left: parent.left
+      anchors.verticalCenter: parent.verticalCenter
+    }
+
+    Image {
+      id: reloadButton
+      source: "qrc:/images/reload.svg"
+
+      property real rotationAngle: 0
+
+      antialiasing: true
+      layer.enabled: true
+      layer.smooth: true
+      layer.samples: 8
+
+      fillMode: Image.PreserveAspectFit
+      transform: Rotation {
+        id: rot
+        origin.x: reloadButton.width / 2
+        origin.y: reloadButton.height / 2
+        angle: reloadButton.rotationAngle
+      }
+
+      anchors.verticalCenter: parent.verticalCenter
+      anchors.right: parent.right
+      anchors.rightMargin: 8
+
+      MouseArea {
+        anchors.fill: parent
+        cursorShape: Qt.PointingHandCursor
+
+        onClicked: {
+          if (root.isLoading) {
+            return;
+          }
+
+          root.isLoading = true;
+          scenariosStack.currentIndex = 0;
+          scenariosModel.RequestData();
+
+          reloadButton.rotationAngle += 360;
+        }
+      }
+
+      Behavior on rotationAngle {
+        NumberAnimation {
+          duration: 500
+          easing.type: Easing.InOutCubic
+        }
       }
     }
   }
 
-  Flickable {
-    id: flickable
-    anchors.fill: parent
-    contentWidth: parent.width
-    contentHeight: contentItem.implicitHeight
+  StackLayout {
+    id: scenariosStack
 
-    interactive: true
-    flickableDirection: Flickable.VerticalFlick
+    width: parent.width
+    anchors.top: heading.bottom
+    anchors.topMargin: 4
+    anchors.bottom: parent.bottom
 
-    Column {
-      id: contentItem
-      width: flickable.width
+    currentIndex: 0
 
-      spacing: 12
+    Item {
+      UI.MyProgressIndicator {
+        id: loadingProgress
 
-      Item {
-        id: heading
-        width: parent.width
-        height: 32
+        anchors.centerIn: parent
+        width: 30
+        height: 30
+        strokeWidth: 2
+        opacity: (scenariosStack.currentIndex === 0) ? 1 : 0
+        visible: opacity > 0
 
-        UI.HeadingText {
-          id: headingTitle
-          text: "Все сценарии"
-          anchors.left: parent.left
-          anchors.verticalCenter: parent.verticalCenter
-        }
-
-        Image {
-          id: reloadButton
-          source: "qrc:/images/reload.svg"
-
-          property real rotationAngle: 0
-
-          antialiasing: true
-          layer.enabled: true
-          layer.smooth: true
-          layer.samples: 8
-
-          fillMode: Image.PreserveAspectFit
-          transform: Rotation {
-            id: rot
-            origin.x: reloadButton.width / 2
-            origin.y: reloadButton.height / 2
-            angle: reloadButton.rotationAngle
-          }
-
-          anchors.verticalCenter: parent.verticalCenter
-          anchors.right: parent.right
-          anchors.rightMargin: 8
-
-          MouseArea {
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-
-            onClicked: {
-              scenariosModel.RequestData();
-              loadingProgress.isLoaded = false;
-
-              reloadButton.rotationAngle += 360;
-            }
-          }
-
-          Behavior on rotationAngle {
-            NumberAnimation {
-              duration: 500
-              easing.type: Easing.InOutCubic
-            }
+        Behavior on opacity {
+          NumberAnimation {
+            duration: 200
+            easing.type: Easing.InOutQuad
           }
         }
       }
+    }
 
-      Connections {
-        target: scenariosModel
+    Item {
+      opacity: (scenariosStack.currentIndex === 1) ? 1 : 0
+      visible: opacity > 0
 
-        function onDataLoaded() {
-          console.log("We are done!");
-          loadingProgress.isLoaded = true
+      Behavior on opacity {
+        NumberAnimation {
+          duration: 200
+          easing.type: Easing.InOutQuad
         }
       }
 
-      ListView {
-        id: scenariouses
-        width: parent.width
-        implicitHeight: contentHeight
+      Column {
+        id: errorMessage
+        anchors.centerIn: parent
+        spacing: 15
 
-        model: scenariosModel
+        UI.DefaultText {
+          text: qsTr("Что-то пошло не так!")
+          color: Qt.rgba(145 / 255, 156 / 255, 181 / 255, 1)
 
-        Component.onCompleted: {
-          scenariosModel.RequestData();
+          anchors.horizontalCenter: errorMessage.horizontalCenter
         }
+      }
+    }
 
-        spacing: 5
-        interactive: false
-        clip: true
+    Item {
+      clip: true
 
-        delegate: Components.ScenarioDelegate {}
+      Flickable {
+        id: flickable
+        anchors.fill: parent
+        contentWidth: parent.width
+        contentHeight: scenariosList.implicitHeight
+
+        interactive: true
+        flickableDirection: Flickable.VerticalFlick
+
+        Components.ScenariosList {
+          id: scenariosList
+        }
       }
     }
   }

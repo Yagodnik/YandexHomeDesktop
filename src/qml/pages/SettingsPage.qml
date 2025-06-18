@@ -78,7 +78,7 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
 
                 UI.DefaultText {
-                  text: "Тема"
+                  text: "Tray-режим"
                 }
 
                 UI.SubheadingText {

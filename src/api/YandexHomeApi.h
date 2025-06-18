@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <QTimer>
 
 #include "model/Response.h"
 #include "model/UserInfo.h"
@@ -40,22 +41,33 @@ signals:
 private:
   using ReplyGuard = QScopedPointer<QNetworkReply, QScopedPointerDeleteLater>;
 
+  static constexpr int kApiTimeout = 5000;
   const QString kInfoEndpoint = "https://api.iot.yandex.net/v1.0/user/info";
   const QString kExecuteScenarioEndpoint = "https://api.iot.yandex.net/v1.0/scenarios/%1/actions";
 
   static std::expected<QJsonObject, QString> ParseResponseAsObject(const QByteArray& response);
 
   template<Serialization::Serializable T>
-  void MakeGetRequest(
-    const QString& endpoint,
+  void PerformRequest(
+    const QNetworkRequest &request,
+    std::function<QNetworkReply*()> send_fn,
     std::function<void(const T&)> ok_callback,
     std::function<void(const QString&)> error_callback
   ) {
-    const auto request = RequestFactory::Create(endpoint, token_provider_());
+    QNetworkReply *reply = send_fn();
 
-    QNetworkReply *reply = network_access_manager_.get(request);
+    QTimer *timeout = new QTimer(reply);
+    timeout->setSingleShot(true);
+    timeout->start(kApiTimeout);
 
-    connect(reply, &QNetworkReply::finished, [reply, this, ok_callback, error_callback]() {
+    connect(timeout, &QTimer::timeout, reply, [reply, error_callback]() {
+      if (reply->isRunning()) {
+        reply->abort();
+        error_callback("Timeout reached!");
+      }
+    });
+
+    connect(reply, &QNetworkReply::finished, [reply, ok_callback, error_callback]() {
       ReplyGuard guard(reply);
 
       if (reply->error() != QNetworkReply::NoError) {
@@ -77,35 +89,37 @@ private:
   }
 
   template<Serialization::Serializable T>
-  void MakePostRequest(
-    const QString& endpoint,
+  void MakeGetRequest(
+    const QString &endpoint,
     std::function<void(const T&)> ok_callback,
     std::function<void(const QString&)> error_callback
   ) {
     const auto request = RequestFactory::Create(endpoint, token_provider_());
 
-    QNetworkReply *reply = network_access_manager_.post(request, nullptr);
-
-    connect(reply, &QNetworkReply::finished, [reply, this, ok_callback, error_callback]() {
-      ReplyGuard guard(reply);
-
-      if (reply->error() != QNetworkReply::NoError) {
-        error_callback(reply->errorString());
-        return;
-      }
-
-      const auto response_bytes = reply->readAll();
-      const auto response_object = ParseResponseAsObject(response_bytes);
-
-      if (!response_object.has_value()) {
-        error_callback(response_object.error());
-        return;
-      }
-
-      const auto response = Serialization::From<T>(response_object.value());
-      ok_callback(response);
-    });
+    PerformRequest<T>(
+      request,
+      [this, &request]() { return network_access_manager_.get(request); },
+      std::move(ok_callback),
+      std::move(error_callback)
+    );
   }
+
+  template<Serialization::Serializable T>
+  void MakePostRequest(
+    const QString &endpoint,
+    std::function<void(const T&)> ok_callback,
+    std::function<void(const QString&)> error_callback
+  ) {
+    const auto request = RequestFactory::Create(endpoint, token_provider_());
+
+    PerformRequest<T>(
+      request,
+      [this, &request]() { return network_access_manager_.post(request, nullptr); },
+      std::move(ok_callback),
+      std::move(error_callback)
+    );
+  }
+
 
   QNetworkAccessManager network_access_manager_;
   TokenProvider token_provider_;

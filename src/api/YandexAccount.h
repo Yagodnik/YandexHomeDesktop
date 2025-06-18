@@ -2,6 +2,7 @@
 
 #include <QNetworkAccessManager>
 #include <QObject>
+#include <QImage>
 
 #include "serialization/Serialization.h"
 
@@ -12,7 +13,7 @@ public:
   explicit YandexAccount(TokenProvider token_provider, QObject *parent = nullptr);
 
   Q_INVOKABLE void LoadData();
-  Q_INVOKABLE [[nodiscard]] const QString& GetName() const;
+  Q_INVOKABLE [[nodiscard]] QString GetName() const;
   Q_INVOKABLE [[nodiscard]] QString GetAvatarUrl() const;
 
 signals:
@@ -20,6 +21,8 @@ signals:
   void dataLoadingFailed();
 
 private:
+  void LoadImage(const QString &url);
+
   JSON_STRUCT(AccountInfo,
     (QString, login),
     (QString, display_name),
@@ -27,7 +30,7 @@ private:
   );
 
   const QString kAccountInfoEndpoint = "https://login.yandex.ru/info";
-  const QString kAvatarUrl = "https://avatars.yandex.net/get-yapic/%1/islands-middle";
+  const QString kAvatarUrl = "https://avatars.yandex.net/get-yapic/%1/";
 
   QNetworkAccessManager network_manager_;
 

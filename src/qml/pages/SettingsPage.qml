@@ -47,7 +47,7 @@ Item {
         width: parent.width
         anchors.top: heading.bottom
         anchors.topMargin: 12
-        spacing: 4
+        spacing: 8
 
         Components.AccountDetails {}
 
@@ -59,7 +59,7 @@ Item {
           Rectangle {
             id: background2
             anchors.fill: parent
-            color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 1)
+            color: themes.GetHeaderBackground()
             radius: 16
           }
 
@@ -120,6 +120,30 @@ Item {
                 model: ["Светлая", "Тёмная"]
                 onActivated: {
                   console.log("Selected index:", currentIndex, "value:", currentText)
+                }
+              }
+            }
+
+            Item {
+              width: parent.width
+              height: 48
+
+              UI.DefaultText {
+                id: githubLink
+
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+
+                text: "GitHub"
+
+                MouseArea {
+                  anchors.fill: parent
+                  cursorShape: Qt.PointingHandCursor
+
+                  onClicked: {
+                    Qt.openUrlExternally("https://github.com/Yagodnik/YandexHomeDesktop")
+                  }
                 }
               }
             }

@@ -54,7 +54,7 @@ Item {
   Rectangle {
     id: background
     anchors.fill: parent
-    color: "#FFF"
+    color: themes.GetHeaderBackground()
     radius: 16
   }
 

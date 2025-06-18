@@ -56,11 +56,10 @@ Item {
     id: appRoot
 
     anchors.fill: parent
-    anchors.topMargin: 20
 
     Rectangle {
       anchors.fill: parent
-      color: Qt.rgba(242 / 255, 243 / 255, 245 / 255, 1)
+      color: themes.GetBackground()
     }
 
     Components.TopBar {

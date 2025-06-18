@@ -16,8 +16,7 @@ Item {
     anchors.fill: parent
     radius: height / 2
     color: checked ?
-      Qt.rgba(88 / 255, 196 / 255, 106 / 255, 1) :
-      Qt.rgba(199 / 255, 204 / 255, 217 / 255, 1)
+      themes.GetSwitchActive() : themes.GetSwitchInactive()
 
     Behavior on color { ColorAnimation { duration: 200 } }
   }
@@ -27,7 +26,7 @@ Item {
     width: 18
     height: 18
     radius: 12
-    color: "#FFF"
+    color: themes.GetControlText()
     anchors.verticalCenter: parent.verticalCenter
     x: checked ? root.width - width : 0
 

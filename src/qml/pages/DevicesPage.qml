@@ -21,7 +21,7 @@ Item {
       Text {
         id: roomTitle
         text: "Лампа"
-        color: Qt.rgba(145 / 255, 156 / 255, 181 / 255, 1)
+        color: themes.GetInactive()
 
         font.pointSize: 14
         font.bold: true

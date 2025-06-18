@@ -5,7 +5,7 @@ import YandexHomeDesktop.Ui as UI
 Item {
   Rectangle {
     anchors.fill: parent
-    color: Qt.rgba(242 / 255, 243 / 255, 245 / 255, 1)
+    color: themes.GetBackground()
   }
 
   Connections {
@@ -22,7 +22,7 @@ Item {
 
     Rectangle {
       id: background
-      color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 1)
+      color: themes.GetHeaderBackground()
       radius: 16
       anchors.centerIn: parent
 
@@ -33,7 +33,7 @@ Item {
 
         UI.AnimatedText {
           text: "Yandex Home Desktop"
-          color: "#6839CF"
+          color: themes.GetAccent()
           pointSize: 24
 
           anchors.horizontalCenter: col.horizontalCenter
@@ -41,7 +41,7 @@ Item {
 
         UI.AnimatedText {
           text: qsTr("Необходимо войти в аккаунт, чтобы\nприложение могло получить доступ\nк вашим устройствам")
-          color: Qt.rgba(145 / 255, 156 / 255, 181 / 255, 1)
+          color: themes.GetInactive()
           pointSize: 16
 
           anchors.horizontalCenter: col.horizontalCenter
@@ -103,7 +103,7 @@ Item {
       UI.DefaultText {
         id: githubLink
 
-        color: Qt.rgba(145 / 255, 156 / 255, 181 / 255, 1);
+        color: themes.GetInactive()
 
         anchors.verticalCenter: parent.verticalCenter
 

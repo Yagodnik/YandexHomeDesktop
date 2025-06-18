@@ -1,5 +1,13 @@
 #include "RequestFactory.h"
 
+QNetworkRequest RequestFactory::CreatePlain(const QString &endpoint) {
+  QNetworkRequest request(endpoint);
+
+  request.setRawHeader("User-Agent", "YandexHomeApi");
+
+  return request;
+}
+
 QNetworkRequest RequestFactory::CreateBearer(const QString &endpoint, const QString &token) {
   return Create(endpoint, token, kBearer);
 }

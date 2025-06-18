@@ -5,8 +5,9 @@ Item {
   width: 24
   height: 24
 
-  property color trackColor: Qt.rgba(0, 0, 0, 0.1)
-  property color arcColor: Qt.rgba(104 / 255, 57 / 255, 207 / 255, 1)
+  // property color trackColor: Qt.rgba(0, 0, 0, 0.1)
+  property color trackColor: themes.GetTrackColor()
+  property color arcColor: themes.GetAccent()
   property real strokeWidth: 3
   property real arcSpan: 90
 

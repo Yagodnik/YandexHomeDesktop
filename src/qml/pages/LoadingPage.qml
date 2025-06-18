@@ -2,6 +2,11 @@ import QtQuick
 import YandexHomeDesktop.Ui as UI
 
 Item {
+  Rectangle {
+    anchors.fill: parent
+    color: themes.GetBackground()
+  }
+
   UI.MyProgressIndicator {
     id: progress
     width: 48

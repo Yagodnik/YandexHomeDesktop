@@ -4,8 +4,8 @@ import QtQuick.Layouts 1.15
 
 ComboBox {
   id: root
-  width: 150
-  height: 40
+  width: 80
+  height: 32
 
   property color normalColor: Qt.rgba(104 / 255, 57 / 255, 207 / 255, 1)
   property color pressedColor: Qt.rgba(84 / 255, 45 / 255, 168 / 255, 1)
@@ -19,6 +19,7 @@ ComboBox {
     text: root.displayText
     color: root.textColor
     verticalAlignment: Text.AlignVCenter
+    anchors.centerIn: root
     leftPadding: 12
   }
 
@@ -57,7 +58,7 @@ ComboBox {
       delegate: Item {
         id: delegateRect
         width: root.width
-        height: 36
+        height: 32
 
         Rectangle {
           anchors.fill: parent

@@ -1,0 +1,15 @@
+{
+  "main_text": "#f0f1f3",
+  "background": "#1b1c1f",
+  "header_background": "#26282c",
+  "accent": "#693acf",
+  "accent2": "#542da8",
+  "control_text": "#ffffff",
+  "inactive": "#9099ab",
+  "switch_inactive": "#32343a",
+  "switch_active": "#5bd174",
+  "track_color": {
+    "hex": "#9099ab",
+    "alpha": 0.08
+  }
+}

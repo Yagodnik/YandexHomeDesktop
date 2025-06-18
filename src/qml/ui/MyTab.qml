@@ -10,8 +10,8 @@ Item {
   property var active: false
 
   property var tabHeight: 48
-  property var inactiveColor: Qt.rgba(145/255, 156/255, 181/255, 1)
-  property var activeColor: Qt.rgba(104/255, 58/255, 207/255, 1)
+  property var inactiveColor: themes.GetInactive()
+  property var activeColor: themes.GetAccent()
   property var currentColor: active ? activeColor : inactiveColor
 
   signal clicked

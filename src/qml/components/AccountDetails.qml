@@ -8,11 +8,29 @@ Item {
   height: 56
 
   property bool loading: true
+  property bool dataLoaded: false
+
+  Component.onCompleted: {
+    yandexAccount.LoadData();
+  }
+
+
+  Connections {
+    target: yandexAccount
+
+    function onDataLoaded() {
+      console.log("Data loaded!")
+      userDetails.dataLoaded = true;
+
+      userName.text = yandexAccount.GetName();
+      avatarImage.source = yandexAccount.GetAvatarUrl();
+    }
+  }
 
   Rectangle {
     id: background
     anchors.fill: parent
-    color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 1)
+    color: themes.GetHeaderBackground()
     radius: 16
   }
 
@@ -27,15 +45,11 @@ Item {
   }
 
   Rectangle {
-    id: avatar
-    width: 32
-    height: 32
+    anchors.fill: avatar
     radius: 45
-    color: userDetails.loading ? "#e0e0e0" : "red"
-
-    anchors.left: parent.left
-    anchors.leftMargin: 5
-    anchors.verticalCenter: parent.verticalCenter
+    z: 200
+    visible: userDetails.loading
+    color: "#e0e0e0"
 
     layer.enabled: userDetails.loading
     layer.smooth: true
@@ -44,6 +58,37 @@ Item {
       fragmentShader: "qrc:/shaders/highlight.frag.qsb"
     }
   }
+
+  Rectangle {
+    id: avatar
+
+    width: 36
+    height: 36
+    radius: 45
+
+    anchors.left: parent.left
+    anchors.leftMargin: 8
+    anchors.verticalCenter: parent.verticalCenter
+
+    Image {
+      id: avatarImage
+      anchors.fill: parent
+
+      fillMode: Image.PreserveAspectCrop
+      layer.enabled: true
+      layer.effect: OpacityMask {
+        maskSource: avatar
+      }
+
+      onStatusChanged: {
+        if (status === Image.Ready && userDetails.dataLoaded) {
+          userDetails.loading = false;
+          console.log("Avatar loaded!")
+        }
+      }
+    }
+  }
+
 
   Column {
     id: details
@@ -83,11 +128,13 @@ Item {
     }
 
     UI.DefaultText {
+      id: userName
       visible: !userDetails.loading
-      text: "Artem Yagodnik"
+      text: "Artem Yagodnik22222"
     }
 
     UI.SubheadingText {
+      id: userEmail
       visible: !userDetails.loading
       text: "YagodnikArtem2@yandex.ru"
     }
@@ -96,7 +143,7 @@ Item {
   Image {
     id: logoutButton
     source: "qrc:/images/logout.svg"
-    // visible: !userDetails.loading
+    visible: !userDetails.loading
 
     antialiasing: true
     layer.enabled: true

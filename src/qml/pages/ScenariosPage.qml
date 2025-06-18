@@ -138,7 +138,7 @@ Item {
 
         UI.DefaultText {
           text: qsTr("Что-то пошло не так!")
-          color: Qt.rgba(145 / 255, 156 / 255, 181 / 255, 1)
+          color: themes.GetInactive()
 
           anchors.horizontalCenter: errorMessage.horizontalCenter
         }

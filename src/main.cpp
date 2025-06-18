@@ -7,6 +7,7 @@
 #include "models/ScenariosModel.h"
 #include "platform/PlatformService.h"
 #include "Router.h"
+#include "Themes.h"
 #include <QQuickStyle>
 
 int main(int argc, char *argv[]) {
@@ -22,10 +23,10 @@ int main(int argc, char *argv[]) {
   const auto token_provider = [authorization_service] {
     return authorization_service->GetToken();
   };
-
   const auto platform_service = new PlatformService();
   const auto yandex_api = new YandexHomeApi(token_provider);
   const auto yandex_account = new YandexAccount(token_provider);
+  const auto themes = new Themes();
 
   root_context->setContextProperty("platformService", platform_service);
   root_context->setContextProperty("authorizationService", authorization_service);
@@ -33,6 +34,7 @@ int main(int argc, char *argv[]) {
   root_context->setContextProperty("scenariosModel", new ScenariosModel(yandex_api));
   root_context->setContextProperty("yandexApi", yandex_api);
   root_context->setContextProperty("yandexAccount", yandex_account);
+  root_context->setContextProperty("themes", themes);
 
   QObject::connect(
     &engine,

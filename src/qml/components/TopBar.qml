@@ -9,7 +9,7 @@ Item {
 
   Rectangle {
     anchors.fill: parent
-    color: "#FFF"
+    color: themes.GetHeaderBackground()
   }
 
   property int activeTab: 0
@@ -17,7 +17,7 @@ Item {
   Column {
     id: layout
     anchors.fill: parent
-    spacing: 4
+    spacing: 12
 
     Item {
       id: householdSelect
@@ -27,18 +27,18 @@ Item {
       anchors.left: parent.left
       anchors.leftMargin: 16
 
-      Row {
-        UI.HeadingText {
-          text: "Мой дом"
-          font.pointSize: 24
-          font.bold: true
+      UI.HeadingText {
+        text: "Мой дом"
+        font.pointSize: 24
+        font.bold: true
+        anchors.top: parent.top
+        anchors.topMargin: 20
 
-          MouseArea {
-            anchors.fill: parent
+        MouseArea {
+          anchors.fill: parent
 
-            onClicked: {
-              householdSelectDialog.myVisible = true
-            }
+          onClicked: {
+            householdSelectDialog.myVisible = true
           }
         }
       }

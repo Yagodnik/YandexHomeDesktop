@@ -26,6 +26,8 @@ qt_add_executable(appYandexHomeDesktop
         src/Router.cpp
 
         ${RESOURCES}
+        src/Themes.cpp
+        src/Themes.h
 )
 
 if(APPLE)

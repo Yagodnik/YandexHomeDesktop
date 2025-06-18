@@ -4,7 +4,7 @@ import QtQuick.Controls 2.15
 Item {
   id: root
   property alias text: label.text
-  property color color: "black"
+  property color color: themes.GetMainText();
   property var pointSize: 20
 
   width: label.implicitWidth

@@ -7,6 +7,7 @@ struct RequestFactory {
   inline static const QString kBearer = "Bearer ";
   inline static const QString kOAuth2 = "OAuth2 ";
 
+  static QNetworkRequest CreatePlain(const QString& endpoint);
   static QNetworkRequest CreateBearer(const QString& endpoint, const QString& token);
   static QNetworkRequest CreateOAuth2(const QString& endpoint, const QString& token);
 

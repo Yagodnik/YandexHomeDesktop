@@ -9,6 +9,9 @@
     <file>callback/index.html</file>
 
     <file>shaders/highlight.frag.qsb</file>
+
+    <file>themes/light.json</file>
+    <file>themes/dark.json</file>
   </qresource>
 
   <qresource prefix="/pages">

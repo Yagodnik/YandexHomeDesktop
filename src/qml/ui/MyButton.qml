@@ -13,8 +13,8 @@ Item {
   implicitWidth: label.implicitWidth + 2 * horizontalMargin
   implicitHeight: label.implicitHeight + 2 * verticalMargin
 
-  property color normalColor: Qt.rgba(104 / 255, 57 / 255, 207 / 255, 1)
-  property color pressedColor: Qt.rgba(84 / 255, 45 / 255, 168 / 255, 1)
+  property color normalColor: themes.GetAccent()
+  property color pressedColor: themes.GetAccent2()
 
   Rectangle {
     id: background
@@ -32,7 +32,7 @@ Item {
   Text {
     id: label
     anchors.centerIn: parent
-    color: "white"
+    color: themes.GetControlText()
     font.pointSize: 16
   }
 

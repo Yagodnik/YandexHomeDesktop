@@ -2,6 +2,7 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include "api/YandexHomeApi.h"
+#include "api/YandexAccount.h"
 #include "auth/AuthorizationService.h"
 #include "models/ScenariosModel.h"
 #include "platform/PlatformService.h"
@@ -18,16 +19,20 @@ int main(int argc, char *argv[]) {
 
   const auto root_context = engine.rootContext();
   const auto authorization_service = new AuthorizationService();
-  const auto platform_service = new PlatformService();
-  const auto yandex_api = new YandexHomeApi([authorization_service] {
+  const auto token_provider = [authorization_service] {
     return authorization_service->GetToken();
-  });
+  };
+
+  const auto platform_service = new PlatformService();
+  const auto yandex_api = new YandexHomeApi(token_provider);
+  const auto yandex_account = new YandexAccount(token_provider);
 
   root_context->setContextProperty("platformService", platform_service);
   root_context->setContextProperty("authorizationService", authorization_service);
   root_context->setContextProperty("router", new Router());
   root_context->setContextProperty("scenariosModel", new ScenariosModel(yandex_api));
-  root_context->setContextProperty("yandex_api", yandex_api);
+  root_context->setContextProperty("yandexApi", yandex_api);
+  root_context->setContextProperty("yandexAccount", yandex_account);
 
   QObject::connect(
     &engine,

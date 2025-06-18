@@ -1,22 +1,10 @@
 #include "YandexHomeApi.h"
 
-#include <qcommandlineparser.h>
 #include <QDebug>
 #include <QNetworkReply>
 
 #include "model/Response.h"
-#include "qtkeychain/include/qtkeychain/keychain.h"
-
-QNetworkRequest RequestFactory::Create(const QString &endpoint, const QString &token) {
-  QNetworkRequest request(endpoint);
-  const QString token_string = kBearer + token;
-  const QByteArray token_bytes = token_string.toUtf8();
-
-  request.setRawHeader("User-Agent", "YandexHomeApi");
-  request.setRawHeader("Authorization", token_bytes);
-
-  return request;
-}
+#include "RequestFactory.h"
 
 YandexHomeApi::YandexHomeApi(TokenProvider token_provider, QObject *parent)
   : QObject(parent), token_provider_(std::move(token_provider)) {}

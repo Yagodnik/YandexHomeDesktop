@@ -10,109 +10,42 @@ set(CMAKE_AUTOMOC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Quick Network NetworkAuth QuickControls2)
 
+qt_standard_project_setup(REQUIRES 6.8)
+qt_add_resources(RESOURCES resources/resources.qrc)
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 add_subdirectory(src/api)
 add_subdirectory(src/auth)
 add_subdirectory(src/models)
-
-qt_standard_project_setup(REQUIRES 6.8)
-
-qt_add_resources(RESOURCES resources/resources.qrc)
-
-set(MAC_FRAMEWORKS "")
-set(MAC_SOURCES "")
-
-if(APPLE)
-  set_source_files_properties(src/platform/macos/MacOSIntegration.mm PROPERTIES
-    COMPILE_FLAGS "-x objective-c++"
-  )
-
-  set(MAC_FRAMEWORKS "-framework Cocoa")
-  set(MAC_SOURCES "src/platform/macos/MacOSIntegration.mm")
-endif()
+add_subdirectory(src/platform)
 
 qt_add_executable(appYandexHomeDesktop
-    src/main.cpp
-    src/Router.cpp
+        src/main.cpp
+        src/Router.cpp
 
-    ${RESOURCES}
-    ${MAC_SOURCES}
-        src/platform/PlatformService.cpp
-        src/platform/PlatformService.h
-        src/platform/PlatformServiceMac.cpp
-        src/platform/PlatformServiceMac.h
+        ${RESOURCES}
 )
 
 if(APPLE)
   set_target_properties(appYandexHomeDesktop PROPERTIES
-    MACOSX_BUNDLE_INFO_PLIST "src/platform/macos/Info.plist"
+          MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/src/platform/macos/Info.plist"
   )
 endif()
 
-qt_add_qml_module(YandexHomeDesktopUi
-        URI YandexHomeDesktop.Ui
-        OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/YandexHomeDesktop/Ui"
-        VERSION 1.0
-        QML_FILES
-        src/qml/ui/HeadingText.qml
-        src/qml/ui/DefaultText.qml
-        src/qml/ui/SubheadingText.qml
-        src/qml/ui/SelectDialog.qml
-        src/qml/ui/MyButton.qml
-        src/qml/ui/MyProgressIndicator.qml
-        src/qml/ui/MySwitch.qml
-        src/qml/ui/AnimatedText.qml
-        src/qml/ui/MyTab.qml
-        src/qml/ui/MyTabs.qml
-        src/qml/ui/MyComboBox.qml
-)
-
-qt_add_qml_module(YandexHomeDesktopPages
-        URI YandexHomeDesktop.Pages
-        OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/YandexHomeDesktop/Pages"
-        VERSION 1.0
-        QML_FILES
-        src/qml/pages/DevicesPage.qml
-        src/qml/pages/ScenariosPage.qml
-        src/qml/pages/SettingsPage.qml
-        src/qml/pages/AuthPage.qml
-        src/qml/pages/ErrorPage.qml
-        src/qml/pages/AuthCanceledPage.qml
-        src/qml/pages/LoadingPage.qml
-        src/qml/pages/MainPage.qml
-)
-
-qt_add_qml_module(YandexHomeDesktopComponents
-        URI YandexHomeDesktop.Components
-        OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/YandexHomeDesktop/Components"
-        VERSION 1.0
-        QML_FILES
-        src/qml/components/TopBar.qml
-        src/qml/components/ScenarioDelegate.qml
-        src/qml/components/ScenariosList.qml
-        src/qml/components/AccountDetails.qml
-)
-
-qt_add_qml_module(appYandexHomeDesktop
-        URI YandexHomeDesktop
-        VERSION 1.0
-        QML_FILES
-        src/qml/Main.qml
-)
-
-qt_add_resources(RESOURCES resources.qrc)
+add_subdirectory(src/qml)
+add_subdirectory(src/qml/shaders)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
 # explicit, fixed bundle identifier manually though.
 set_target_properties(appYandexHomeDesktop PROPERTIES
-#    MACOSX_BUNDLE_GUI_IDENTIFIER com.example.appYandexHomeDesktop
-    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
-    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
-    MACOSX_BUNDLE TRUE
-    WIN32_EXECUTABLE TRUE
+        #    MACOSX_BUNDLE_GUI_IDENTIFIER com.example.appYandexHomeDesktop
+        MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
+        MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+        MACOSX_BUNDLE TRUE
+        WIN32_EXECUTABLE TRUE
 )
 
 target_link_libraries(appYandexHomeDesktop PRIVATE
@@ -128,39 +61,16 @@ target_link_libraries(appYandexHomeDesktop PRIVATE
         YandexHomeApi
         YandexAuth
         Models
-
-        ${MAC_FRAMEWORKS}
+        PlatformService
 )
-
-set(SHADER_SRC
-  "src/qml/shaders/highlight.frag"
-)
-set(SHADER_OUT
-  "resources/shaders/highlight.frag.qsb"
-)
-
-add_custom_command(
-        OUTPUT ${SHADER_OUT}
-        COMMAND qsb
-        "${CMAKE_CURRENT_SOURCE_DIR}/${SHADER_SRC}"
-        -o "${CMAKE_CURRENT_SOURCE_DIR}/${SHADER_OUT}"
-        --glsl 310es
-        --hlsl 50
-        --msl 21
-        DEPENDS ${SHADER_SRC}
-        COMMENT "Compiling shader ${SHADER_SRC} to ${SHADER_OUT}"
-        VERBATIM
-)
-
-add_custom_target(compile_shaders ALL DEPENDS ${SHADER_OUT})
 
 add_dependencies(appYandexHomeDesktop compile_shaders)
 
 include(GNUInstallDirs)
 install(TARGETS appYandexHomeDesktop
-    BUNDLE DESTINATION .
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        BUNDLE DESTINATION .
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
 add_subdirectory(tests)

@@ -6,14 +6,9 @@
 #include <QNetworkReply>
 #include <QTimer>
 
+#include "RequestFactory.h"
 #include "model/Response.h"
 #include "model/UserInfo.h"
-
-struct RequestFactory {
-  inline static const QString kBearer = "Bearer ";
-
-  static QNetworkRequest Create(const QString& endpoint, const QString& token);
-};
 
 class YandexHomeApi final : public QObject {
   Q_OBJECT
@@ -48,15 +43,14 @@ private:
   static std::expected<QJsonObject, QString> ParseResponseAsObject(const QByteArray& response);
 
   template<Serialization::Serializable T>
-  void PerformRequest(
-    const QNetworkRequest &request,
+  static void PerformRequest(
     std::function<QNetworkReply*()> send_fn,
     std::function<void(const T&)> ok_callback,
     std::function<void(const QString&)> error_callback
   ) {
     QNetworkReply *reply = send_fn();
 
-    QTimer *timeout = new QTimer(reply);
+    auto timeout = new QTimer(reply);
     timeout->setSingleShot(true);
     timeout->start(kApiTimeout);
 
@@ -94,10 +88,9 @@ private:
     std::function<void(const T&)> ok_callback,
     std::function<void(const QString&)> error_callback
   ) {
-    const auto request = RequestFactory::Create(endpoint, token_provider_());
+    const auto request = RequestFactory::CreateBearer(endpoint, token_provider_());
 
     PerformRequest<T>(
-      request,
       [this, &request]() { return network_access_manager_.get(request); },
       std::move(ok_callback),
       std::move(error_callback)
@@ -110,10 +103,9 @@ private:
     std::function<void(const T&)> ok_callback,
     std::function<void(const QString&)> error_callback
   ) {
-    const auto request = RequestFactory::Create(endpoint, token_provider_());
+    const auto request = RequestFactory::CreateBearer(endpoint, token_provider_());
 
     PerformRequest<T>(
-      request,
       [this, &request]() { return network_access_manager_.post(request, nullptr); },
       std::move(ok_callback),
       std::move(error_callback)

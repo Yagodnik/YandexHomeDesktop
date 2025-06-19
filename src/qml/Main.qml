@@ -12,6 +12,12 @@ Window {
   title: qsTr("Yandex Home Desktop")
   // flags: Qt.FramelessWindowHint
 
+  Rectangle {
+    anchors.fill: parent
+    radius: 16
+    color: themes.GetBackground()
+  }
+
   SystemTrayIcon {
     visible: true
     icon.name: "Yandex Home Desktop"

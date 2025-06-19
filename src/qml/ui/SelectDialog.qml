@@ -1,4 +1,5 @@
 import QtQuick
+import YandexHomeDesktop.Ui as UI
 
 Item {
   id: root
@@ -14,7 +15,7 @@ Item {
   anchors.left: parent.left
   anchors.right: parent.right
   // anchors.bottom: parent.bottom
-  z: 2
+  z: 600
   height: contentColumn.implicitHeight + 60
 
   y: parent.height
@@ -36,11 +37,11 @@ Item {
 
   Rectangle {
     anchors.fill: parent
-    color: "white"
+    color: themes.GetHeaderBackground()
     radius: 16
   }
 
-  Text {
+  UI.HeadingText {
     id: selectTitle
     text: title
 

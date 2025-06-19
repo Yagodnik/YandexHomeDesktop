@@ -1,78 +1,116 @@
 import QtQuick
 import YandexHomeDesktop.Ui as UI
+import YandexHomeDesktop.Components as Components
 
 Item {
   id: rooms
 
-  UI.DefaultText {
-    id: roomsText
-    text: "Комнаты"
+  Item {
+    id: heading
+    width: parent.width
+    height: 32
 
-    font.bold: true
-  }
+    UI.HeadingText {
+      id: roomsText
+      text: "Комнаты"
+      anchors.left: parent.left
+      anchors.verticalCenter: parent.verticalCenter
+    }
 
-  Column {
-    anchors.top: roomsText.bottom
-    anchors.topMargin: 2
+    Image {
+      id: reloadButton
+      source: "qrc:/images/reload.svg"
 
-    Item {
-      id: room
+      property real rotationAngle: 0
 
-      Text {
-        id: roomTitle
-        text: "Лампа"
-        color: themes.GetInactive()
+      antialiasing: true
+      layer.enabled: true
+      layer.smooth: true
+      layer.samples: 8
 
-        font.pointSize: 14
-        font.bold: true
+      fillMode: Image.PreserveAspectFit
+      transform: Rotation {
+        id: rot
+        origin.x: reloadButton.width / 2
+        origin.y: reloadButton.height / 2
+        angle: reloadButton.rotationAngle
       }
 
-      Column {
-        anchors.top: roomTitle.bottom
-        anchors.topMargin: 8
+      anchors.verticalCenter: parent.verticalCenter
+      anchors.right: parent.right
+      anchors.rightMargin: 8
 
-        Item {
-          id: deviceDelegate
-          width: parent.width
-          height: 64
+      MouseArea {
+        anchors.fill: parent
+        cursorShape: Qt.PointingHandCursor
 
-          Rectangle {
-            anchors.fill: parent
-            color: "red"
-            radius: 16
-          }
+        onClicked: {
+          console.log("Reloading devices")
+          reloadButton.rotationAngle += 360;
+        }
+      }
 
-          Text {
-            text: "Лампочка"
-          }
+      Behavior on rotationAngle {
+        NumberAnimation {
+          duration: 500
+          easing.type: Easing.InOutCubic
         }
       }
     }
   }
 
-  Column {
-    UI.MyButton {
-      text: "Do request"
+  ListView {
+    width: parent.width
 
-      onClicked: {
-        yandex_api.RequestInfo();
+    anchors.top: heading.bottom
+    anchors.topMargin: 2
+    anchors.bottom: parent.bottom
+
+    clip: true
+    // interactive: false
+
+    spacing: 8
+
+    model: ListModel {
+      ListElement {
+        name: "Завод"
+      }
+
+      ListElement {
+        name: "Лампа"
+      }
+
+      ListElement {
+        name: "Сарайчик"
       }
     }
 
-    UI.MyButton {
-      text: "Show"
-
-      onClicked: {
-        platformService.ShowAsApp();
-      }
-    }
-
-    UI.MyButton {
-      text: "Hide"
-
-      onClicked: {
-        platformService.ShowOnlyInTray();
-      }
-    }
+    delegate: Components.RoomDevicesList {}
   }
+
+  // Column {
+  //   UI.MyButton {
+  //     text: "Do request"
+  //
+  //     onClicked: {
+  //       yandex_api.RequestInfo();
+  //     }
+  //   }
+  //
+  //   UI.MyButton {
+  //     text: "Show"
+  //
+  //     onClicked: {
+  //       platformService.ShowAsApp();
+  //     }
+  //   }
+  //
+  //   UI.MyButton {
+  //     text: "Hide"
+  //
+  //     onClicked: {
+  //       platformService.ShowOnlyInTray();
+  //     }
+  //   }
+  // }
 }

@@ -1,13 +1,14 @@
 #include "Themes.h"
 
-#include <qcolor.h>
+#include <QColor>
 #include <QFile>
 
 Themes::Themes(QObject *parent)
   : QObject(parent)
 {
-  QFile theme_file(":/themes/light.json");
-  // QFile theme_file(":/themes/dark.json");
+  // QFile theme_file(":/themes/light.json");
+  QFile theme_file(":/themes/dark.json");
+
   if (!theme_file.open(QIODevice::ReadOnly)) {
     qDebug() << "Themes: unable to load theme";
     return;

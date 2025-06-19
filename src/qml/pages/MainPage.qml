@@ -12,11 +12,13 @@ Item {
     anchors.fill: parent
     color: "#80000000"
     visible: householdSelectDialog.myVisible
-    z: 1
+    enabled: householdSelectDialog.myVisible
+    z: 500
 
     MouseArea {
       anchors.fill: parent
       onClicked: householdSelectDialog.myVisible = false
+      enabled: true
     }
   }
 

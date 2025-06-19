@@ -40,6 +40,8 @@ qt_add_qml_module(YandexHomeDesktopComponents
         components/ScenarioDelegate.qml
         components/ScenariosList.qml
         components/AccountDetails.qml
+        components/DeviceDelegate.qml
+        components/RoomDevicesList.qml
 )
 
 qt_add_qml_module(appYandexHomeDesktop

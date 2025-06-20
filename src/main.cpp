@@ -5,6 +5,7 @@
 #include "api/YandexAccount.h"
 #include "auth/AuthorizationService.h"
 #include "models/ScenariosModel.h"
+#include "models/DevicesModel.h"
 #include "platform/PlatformService.h"
 #include "Router.h"
 #include "Themes.h"
@@ -27,11 +28,15 @@ int main(int argc, char *argv[]) {
   const auto yandex_api = new YandexHomeApi(token_provider);
   const auto yandex_account = new YandexAccount(token_provider);
   const auto themes = new Themes();
+  const auto router = new Router();
+  const auto scenarios_model = new ScenariosModel(yandex_api);
+  const auto devices_model = new DevicesModel(yandex_api);
 
   root_context->setContextProperty("platformService", platform_service);
   root_context->setContextProperty("authorizationService", authorization_service);
-  root_context->setContextProperty("router", new Router());
-  root_context->setContextProperty("scenariosModel", new ScenariosModel(yandex_api));
+  root_context->setContextProperty("router", router);
+  root_context->setContextProperty("scenariosModel", scenarios_model);
+  root_context->setContextProperty("devicesModel", devices_model);
   root_context->setContextProperty("yandexApi", yandex_api);
   root_context->setContextProperty("yandexAccount", yandex_account);
   root_context->setContextProperty("themes", themes);

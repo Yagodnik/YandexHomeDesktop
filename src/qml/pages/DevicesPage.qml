@@ -59,6 +59,10 @@ Item {
     }
   }
 
+  Component.onCompleted: {
+    devicesModel.RequestData();
+  }
+
   ListView {
     width: parent.width
 
@@ -71,21 +75,24 @@ Item {
 
     spacing: 8
 
-    model: ListModel {
-      ListElement {
-        name: "Завод"
-      }
+    // model: ListModel {
+    //   ListElement {
+    //     name: "Завод"
+    //   }
+    //
+    //   ListElement {
+    //     name: "Лампа"
+    //   }
+    //
+    //   ListElement {
+    //     name: "Сарайчик"
+    //   }
+    // }
 
-      ListElement {
-        name: "Лампа"
-      }
+    model: devicesModel
 
-      ListElement {
-        name: "Сарайчик"
-      }
-    }
-
-    delegate: Components.RoomDevicesList {}
+    // delegate: Components.RoomDevicesList {}
+    delegate: Components.DeviceDelegate {}
   }
 
   // Column {

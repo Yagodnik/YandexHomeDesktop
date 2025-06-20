@@ -9,12 +9,12 @@
 YandexHomeApi::YandexHomeApi(TokenProvider token_provider, QObject *parent)
   : QObject(parent), token_provider_(std::move(token_provider)) {}
 
-void YandexHomeApi::RequestInfo() {
+void YandexHomeApi::GetUserInfo() {
   auto ok_callback = [this](auto& user_info) {
     if (user_info.status == Status::Ok) {
-      emit infoReceived(user_info);
+      emit userInfoReceived(user_info);
     } else {
-      emit infoReceivingFailed(user_info.message);
+      emit userInfoReceivingFailed(user_info.message);
     }
 
     qDebug() << "User info:";
@@ -25,7 +25,7 @@ void YandexHomeApi::RequestInfo() {
   auto error_callback = [this](const QString& message) {
     qDebug() << "YandexHomeApi: Interal error: " << message;
 
-    emit infoReceivingFailed(message);
+    emit userInfoReceivingFailed(message);
   };
 
   MakeGetRequest<UserInfo>(

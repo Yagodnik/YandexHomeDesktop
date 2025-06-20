@@ -32,7 +32,7 @@ Column {
         name: "Устройство"
       }
     }
+
     delegate: Components.DeviceDelegate {}
   }
 }
-

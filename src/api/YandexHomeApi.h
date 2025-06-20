@@ -16,13 +16,13 @@ public:
   using TokenProvider = std::function<QString()>;
   explicit YandexHomeApi(TokenProvider token_provider, QObject *parent = nullptr);
 
-  Q_INVOKABLE void RequestInfo();
+  Q_INVOKABLE void GetUserInfo();
   Q_INVOKABLE void GetScenarios();
   void ExecuteScenario(const QString& scenario_id, const QVariant& user_data = QVariant());
 
 signals:
-  void infoReceived(const UserInfo& info);
-  void infoReceivingFailed(const QString& message);
+  void userInfoReceived(const UserInfo& info);
+  void userInfoReceivingFailed(const QString& message);
 
   void scenariosReceivedSuccessfully(const QList<ScenarioObject>& scenarios);
   void scenariosReceivingFailed(const QString& message);

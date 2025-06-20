@@ -36,7 +36,11 @@ JSON_STRUCT(GroupObject,
 );
 
 JSON_STRUCT(DeviceObject,
-  (QString, id)
+  (QString, id),
+  (QString, name),
+  (QStringList, aliases),
+  (QString, room),
+  (QString, household_id)
 );
 
 JSON_STRUCT(ScenarioObject,

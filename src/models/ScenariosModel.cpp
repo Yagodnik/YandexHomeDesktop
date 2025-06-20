@@ -112,7 +112,7 @@ void ScenariosModel::OnScenariosReceived(const QList<ScenarioObject> &scenarios)
 void ScenariosModel::OnScenariosReceivingFailed(const QString &message) {
   emit dataLoadingFailed();
 
-  qDebug() << "Model: Loading scenarios failed:" << message;
+  qDebug() << "Scenarios Model: Loading scenarios failed:" << message;
 }
 
 void ScenariosModel::OnScenarioExecutionFinishedSuccessfully(
@@ -130,7 +130,7 @@ void ScenariosModel::OnScenarioExecutionFinishedSuccessfully(
   const QModelIndex updated_index = createIndex(index, 0);
   emit dataChanged(updated_index, updated_index, {IsWaitingResponseRole});
 
-  qDebug() << "Model: Scenario" << scenario_id << "(" << index << ") finished executing.";
+  qDebug() << "Scenarios Model: Scenario" << scenario_id << "(" << index << ") finished executing.";
 }
 
 void ScenariosModel::OnScenarioExecutionFailed(
@@ -148,5 +148,5 @@ void ScenariosModel::OnScenarioExecutionFailed(
   const QModelIndex updated_index = createIndex(index, 0);
   emit dataChanged(updated_index, updated_index, {IsWaitingResponseRole});
 
-  qDebug() << "Model: Scenario" << message << "(" << index << ") failed.";
+  qDebug() << "Scenarios Model: Scenario" << message << "(" << index << ") failed.";
 }

@@ -1,11 +1,13 @@
 import QtQuick
 import YandexHomeDesktop.Ui as UI
 import YandexHomeDesktop.Components as Components
+import YandexHomeDesktop.Models 1.0
 
 Column {
   id: room
   width: parent.width
   spacing: 8
+
   Text {
     id: roomTitle
     text: name
@@ -23,14 +25,10 @@ Column {
     width: parent.width
     height: contentHeight
 
-    model: ListModel {
-      ListElement {
-        name: "Устройство"
-      }
-
-      ListElement {
-        name: "Устройство"
-      }
+    model: DevicesFilterModel {
+      sourceModel: devicesModel
+      householdId: model.householdId
+      roomId: model.roomId
     }
 
     delegate: Components.DeviceDelegate {}

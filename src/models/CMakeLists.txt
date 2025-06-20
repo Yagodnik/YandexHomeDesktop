@@ -6,6 +6,8 @@ add_library(Models SHARED
         ScenariosModel.cpp ScenariosModel.h
         DevicesModel.cpp
         DevicesModel.h
+        DevicesFilterModel.cpp
+        DevicesFilterModel.h
 )
 
 target_link_libraries(Models PRIVATE Qt6::Core Qt6::Network YandexHomeApi)

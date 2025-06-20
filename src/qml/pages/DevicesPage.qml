@@ -75,24 +75,23 @@ Item {
 
     spacing: 8
 
-    // model: ListModel {
-    //   ListElement {
-    //     name: "Завод"
-    //   }
-    //
-    //   ListElement {
-    //     name: "Лампа"
-    //   }
-    //
-    //   ListElement {
-    //     name: "Сарайчик"
-    //   }
-    // }
+    model: ListModel {
+      ListElement {
+        name: "Завод"
+        roomId: "925fadea-bfb9-4ddf-868a-b5ba52e74ac5"
+        householdId: "393c92a2-000d-4ae4-b2dc-f3cd0dc00188"
+      }
 
-    model: devicesModel
+      ListElement {
+        name: "Лампа"
+        roomId: "75d43bd0-41be-4846-9b9a-a7eba83d2353"
+        householdId: "393c92a2-000d-4ae4-b2dc-f3cd0dc00188"
+      }
+    }
+    delegate: Components.RoomDevicesList {}
 
-    // delegate: Components.RoomDevicesList {}
-    delegate: Components.DeviceDelegate {}
+    // model: devicesModel
+    // delegate: Components.DeviceDelegate {}
   }
 
   // Column {

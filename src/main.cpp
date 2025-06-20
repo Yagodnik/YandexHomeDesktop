@@ -6,6 +6,7 @@
 #include "auth/AuthorizationService.h"
 #include "models/ScenariosModel.h"
 #include "models/DevicesModel.h"
+#include "models/DevicesFilterModel.h"
 #include "platform/PlatformService.h"
 #include "Router.h"
 #include "Themes.h"
@@ -40,6 +41,9 @@ int main(int argc, char *argv[]) {
   root_context->setContextProperty("yandexApi", yandex_api);
   root_context->setContextProperty("yandexAccount", yandex_account);
   root_context->setContextProperty("themes", themes);
+
+  qmlRegisterType<DevicesFilterModel>("YandexHomeDesktop.Models", 1, 0, "DevicesFilterModel");
+
 
   QObject::connect(
     &engine,

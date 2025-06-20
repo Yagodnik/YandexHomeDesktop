@@ -36,5 +36,10 @@ Item {
   MouseArea {
     anchors.fill: parent
     cursorShape: Qt.PointingHandCursor
+
+    onClicked: {
+      console.log("Device Id: ", deviceId, " Room Id: ", deviceRoomId, " Household Id: ", deviceHouseholdId)
+      router.navigateTo("device");
+    }
   }
 }

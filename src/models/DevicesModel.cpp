@@ -46,9 +46,9 @@ QVariant DevicesModel::data(const QModelIndex &index, int role) const {
 QHash<int, QByteArray> DevicesModel::roleNames() const {
   return {
   { NameRole, "name" },
-  { IdRole, "device_id" },
-  { RoomIdRole, "device_room_id" },
-  { HouseholdIdRole, "device_household_id" }
+  { IdRole, "deviceId" },
+  { RoomIdRole, "deviceRoomId" },
+  { HouseholdIdRole, "deviceHouseholdId" }
   };
 }
 

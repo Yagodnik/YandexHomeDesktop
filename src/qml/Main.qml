@@ -14,7 +14,6 @@ Window {
 
   Rectangle {
     anchors.fill: parent
-    radius: 16
     color: themes.GetBackground()
   }
 
@@ -105,6 +104,7 @@ Window {
       router.addRoute("auth", "qrc:/pages/AuthPage.qml");
       router.addRoute("main", "qrc:/pages/MainPage.qml");
       router.addRoute("error", "qrc:/pages/ErrorPage.qml");
+      router.addRoute("device", "qrc:/pages/DevicePage.qml");
       router.addRoute("authCanceled", "qrc:/pages/AuthCanceledPage.qml");
 
       router.navigateTo("loading");

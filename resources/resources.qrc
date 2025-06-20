@@ -6,6 +6,8 @@
     <file>images/logout.svg</file>
     <file>images/reload.svg</file>
     <file>images/light.svg</file>
+    <file>images/back.svg</file>
+
     <file>auth/secrets.json</file>
     <file>callback/index.html</file>
 
@@ -21,5 +23,13 @@
     <file alias="MainPage.qml">../src/qml/pages/MainPage.qml</file>
     <file alias="ErrorPage.qml">../src/qml/pages/ErrorPage.qml</file>
     <file alias="AuthCanceledPage.qml">../src/qml/pages/AuthCanceledPage.qml</file>
+    <file alias="DevicePage.qml">../src/qml/pages/DevicePage.qml</file>
+  </qresource>
+
+  <qresource prefix="/controls">
+    <file alias="OnOff.qml">../src/qml/controls/OnOff.qml</file>
+    <file alias="Range.qml">../src/qml/controls/Range.qml</file>
+    <file alias="Mode.qml">../src/qml/controls/Mode.qml</file>
+    <file alias="ColorSetting.qml">../src/qml/controls/ColorSetting.qml</file>
   </qresource>
 </RCC>

@@ -7,6 +7,8 @@
 #include "models/ScenariosModel.h"
 #include "models/DevicesModel.h"
 #include "models/DevicesFilterModel.h"
+#include "models/RoomsModel.h"
+#include "models/RoomsFilterModel.h"
 #include "platform/PlatformService.h"
 #include "Router.h"
 #include "Themes.h"
@@ -32,17 +34,20 @@ int main(int argc, char *argv[]) {
   const auto router = new Router();
   const auto scenarios_model = new ScenariosModel(yandex_api);
   const auto devices_model = new DevicesModel(yandex_api);
+  const auto rooms_model = new RoomsModel(yandex_api);
 
   root_context->setContextProperty("platformService", platform_service);
   root_context->setContextProperty("authorizationService", authorization_service);
   root_context->setContextProperty("router", router);
   root_context->setContextProperty("scenariosModel", scenarios_model);
   root_context->setContextProperty("devicesModel", devices_model);
+  root_context->setContextProperty("roomsModel", rooms_model);
   root_context->setContextProperty("yandexApi", yandex_api);
   root_context->setContextProperty("yandexAccount", yandex_account);
   root_context->setContextProperty("themes", themes);
 
   qmlRegisterType<DevicesFilterModel>("YandexHomeDesktop.Models", 1, 0, "DevicesFilterModel");
+  qmlRegisterType<RoomsFilterModel>("YandexHomeDesktop.Models", 1, 0, "RoomsFilterModel");
 
 
   QObject::connect(

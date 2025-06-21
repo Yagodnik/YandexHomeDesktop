@@ -43,6 +43,7 @@ qt_add_qml_module(YandexHomeDesktopComponents
         components/AccountDetails.qml
         components/DeviceDelegate.qml
         components/RoomDevicesList.qml
+        components/AdaptiveGrid.qml
 )
 
 

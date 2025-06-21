@@ -34,7 +34,7 @@ Item {
 
       anchors.verticalCenter: parent.verticalCenter
       anchors.left: parent.left
-      anchors.leftMargin: 8
+      anchors.leftMargin: 12
 
       MouseArea {
         anchors.fill: parent
@@ -50,7 +50,7 @@ Item {
       text: "НУ ВОТ ПРЯМ ДЛИННОЕ НАЗВАНИЕ"
       anchors.verticalCenter: parent.verticalCenter
       anchors.horizontalCenter: parent.horizontalCenter
-      color: themes.GetAccent()
+      color: themes.GetControlText()
     }
   }
 
@@ -58,6 +58,7 @@ Item {
     anchors.top: topHeader.bottom
     anchors.topMargin: 16
     anchors.bottom: parent.bottom
+    anchors.bottomMargin: 10
 
     anchors.left: parent.left
     anchors.leftMargin: 16
@@ -75,12 +76,12 @@ Item {
       }
 
       ListElement {
-        name: "Температура"
-        delegateSource: "qrc:/controls/OnOff.qml"
+        name: "Цвета"
+        delegateSource: "qrc:/controls/ColorSetting.qml"
       }
 
       ListElement {
-        name: "Цвета"
+        name: "Температура"
         delegateSource: "qrc:/controls/OnOff.qml"
       }
     }

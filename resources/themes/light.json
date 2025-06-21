@@ -4,7 +4,7 @@
   "header_background": "#FFF",
   "accent": "#693acf",
   "accent2": "#542da8",
-  "control_text": "#FFF",
+  "control_text": "#000",
   "inactive": "#919cb5",
   "switch_inactive": "#c7ccd9",
   "switch_active": "#58c46a",

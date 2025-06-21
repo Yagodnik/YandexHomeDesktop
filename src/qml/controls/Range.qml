@@ -3,7 +3,7 @@ import YandexHomeDesktop.Ui as UI
 
 Item {
   id: rangeControl
-  height: 52
+  height: 74
 
   Rectangle {
     anchors.fill: parent
@@ -15,14 +15,14 @@ Item {
     id: top
 
     anchors.top: rangeControl.top
-    anchors.topMargin: 4
+    anchors.topMargin: 16
 
     anchors.left: parent.left
-    anchors.leftMargin: 8
+    anchors.leftMargin: 12
     anchors.right: parent.right
-    anchors.rightMargin: 8
+    anchors.rightMargin: 12
 
-    height: 24
+    height: 20
 
     UI.DefaultText {
       id: propertyTitle
@@ -48,12 +48,13 @@ Item {
   UI.MySlider {
     id: rangeSlider
     anchors.top: top.bottom
+    anchors.topMargin: 10
     anchors.left: parent.left
-    anchors.leftMargin: 8
+    anchors.leftMargin: 12
     anchors.right: parent.right
-    anchors.rightMargin: 8
+    anchors.rightMargin: 12
 
-    height: 20
+    height: 12
 
     from: 0
     to: 100

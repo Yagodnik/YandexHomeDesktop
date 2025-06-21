@@ -12,7 +12,7 @@ Item {
 
   UI.DefaultText {
     anchors.left: parent.left
-    anchors.leftMargin: 8
+    anchors.leftMargin: 12
     anchors.verticalCenter: parent.verticalCenter
 
     text: name
@@ -22,7 +22,7 @@ Item {
     model: []
 
     anchors.right: parent.right
-    anchors.rightMargin: 8
+    anchors.rightMargin: 12
     anchors.verticalCenter: parent.verticalCenter
   }
 }

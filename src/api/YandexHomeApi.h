@@ -18,6 +18,8 @@ public:
 
   Q_INVOKABLE void GetUserInfo();
   Q_INVOKABLE void GetScenarios();
+  Q_INVOKABLE void GetDeviceInfo(const QString& id);
+
   void ExecuteScenario(const QString& scenario_id, const QVariant& user_data = QVariant());
 
 signals:
@@ -26,6 +28,9 @@ signals:
 
   void scenariosReceivedSuccessfully(const QList<ScenarioObject>& scenarios);
   void scenariosReceivingFailed(const QString& message);
+
+  void deviceInfoReceived(const DeviceObject& info);
+  void deviceInfoReceivingFailed(const QString& message);
 
   void errorReceived(const QString& error);
 
@@ -40,6 +45,7 @@ private:
   const QString kInfoEndpoint = "https://api.iot.yandex.net/v1.0/user/info";
   const QString kExecuteScenarioEndpoint = "https://api.iot.yandex.net/v1.0/scenarios/%1/actions";
   const QString kUseCapabilityEndpoint = "https://api.iot.yandex.net/v1.0/devices/actions";
+  const QString kDeviceInfoEndpoint = "https://api.iot.yandex.net/v1.0/devices/%1";
 
   static std::expected<QJsonObject, QString> ParseResponseAsObject(const QByteArray& response);
 

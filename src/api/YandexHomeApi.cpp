@@ -62,6 +62,36 @@ void YandexHomeApi::GetScenarios() {
   );
 }
 
+void YandexHomeApi::GetDeviceInfo(const QString &id) {
+  const auto url = kDeviceInfoEndpoint.arg(id);
+
+  auto ok_callback = [this](auto& info) {
+    if (info.status == Status::Ok) {
+      qDebug() << "YandexHomeApi: Received device info";
+
+      emit deviceInfoReceived({
+        .capabilities = info.capabilities
+      });
+    } else {
+      qDebug() << "YandexHomeApi: Error getting during getting scenarios";
+
+      emit deviceInfoReceivingFailed(info.message);
+    }
+  };
+
+  auto error_callback = [this](const QString& message) {
+    qDebug() << "YandexHomeApi: Interal error: " << message;
+
+    emit deviceInfoReceivingFailed(message);
+  };
+
+  MakeGetRequest<DeviceInfo>(
+    url,
+    ok_callback,
+    error_callback
+  );
+}
+
 void YandexHomeApi::ExecuteScenario(const QString &scenario_id, const QVariant& user_data) {
   const QString url = kExecuteScenarioEndpoint.arg(scenario_id);
 

@@ -55,6 +55,7 @@ qt_add_qml_module(YandexHomeDesktopIotControls
         controls/OnOff.qml
         controls/Range.qml
         controls/Mode.qml
+        controls/Unsupported.qml
 )
 
 qt_add_qml_module(appYandexHomeDesktop

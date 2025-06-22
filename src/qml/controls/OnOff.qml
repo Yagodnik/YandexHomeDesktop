@@ -25,23 +25,18 @@ Item {
     anchors.verticalCenter: parent.verticalCenter
 
     onToggled: function(checked) {
-      console.log("On/Off", index, root.index, model.index);
+      const capability_info = deviceModel.GetCapabilityInfo(model.index);
+
+      deviceModel.Test(capability_info);
 
       /*
-      * var capability = deviceModel.GetOnOffCapability(model.index);
-      * capability.SetValue(true);
-      * */
-
-      /*
-      * var capability = deviceModel.GetColorSettingCapability(model.index);
-      * capability.SetColor(true);
-      * */
-
-      /*
-      * deviceModel.UseCapability(model.index, true);
-      * deviceModel.UseCapability(model.index, 50);
-      * deviceModel.UseCapability(model.index, "#ababeb");
-      *
+      * var capability_info = deviceModel.GetCapabilityInfo(model.index);
+      * deviceModel.UseCapability(
+      *   model.index,
+      *   actionFactory.CreateOnOffAction(
+      *     capability_info, true
+      *   )
+      * );
       * */
     }
   }

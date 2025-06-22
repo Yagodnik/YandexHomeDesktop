@@ -36,6 +36,13 @@ JSON_STRUCT(DeviceObject,
   (QList<CapabilityObject>, capabilities)
 );
 
+JSON_STRUCT(DeviceInfo,
+  (Status, status),
+  (QString, message),
+  (QString, request_id),
+  (QList<CapabilityObject>, capabilities)
+);
+
 JSON_STRUCT(ScenarioObject,
   (QString, id),
   (QString, name),

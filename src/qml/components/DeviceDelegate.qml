@@ -39,6 +39,9 @@ Item {
 
     onClicked: {
       console.log("Device Id: ", deviceId, " Room Id: ", deviceRoomId, " Household Id: ", deviceHouseholdId)
+
+      deviceModel.RequestData(deviceId);
+
       router.navigateTo("device");
     }
   }

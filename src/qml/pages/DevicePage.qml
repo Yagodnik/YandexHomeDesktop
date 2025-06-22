@@ -69,26 +69,40 @@ Item {
 
     spacing: 10
 
-    model: ListModel {
-      ListElement {
-        name: "Вкл/выкл"
-        delegateSource: "qrc:/controls/OnOff.qml"
-      }
+    // model: ListModel {
+    //   ListElement {
+    //     name: "Вкл/выкл"
+    //     delegateSource: "qrc:/controls/OnOff.qml"
+    //   }
+    //
+    //   ListElement {
+    //     name: "Яркость"
+    //     delegateSource: "qrc:/controls/Range.qml"
+    //   }
+    //
+    //   // ListElement {
+    //   //   name: "Цвета"
+    //   //   delegateSource: "qrc:/controls/ColorSetting.qml"
+    //   // }
+    // }
 
-      ListElement {
-        name: "Яркость"
-        delegateSource: "qrc:/controls/Range.qml"
-      }
-
-      // ListElement {
-      //   name: "Цвета"
-      //   delegateSource: "qrc:/controls/ColorSetting.qml"
-      // }
-    }
+    model: deviceModel
 
     delegate: Loader {
       source: delegateSource
       width: parent.width
+    }
+  }
+
+  Connections {
+    target: deviceModel
+
+    function onDataLoaded() {
+      console.log("Device data loading - OK");
+    }
+
+    function onDataLoadingFailed() {
+      console.log("Device data loading - FAILED");
     }
   }
 }

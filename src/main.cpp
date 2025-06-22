@@ -9,6 +9,7 @@
 #include "models/DevicesFilterModel.h"
 #include "models/RoomsModel.h"
 #include "models/RoomsFilterModel.h"
+#include "models/DeviceModel.h"
 #include "platform/PlatformService.h"
 #include "Router.h"
 #include "Themes.h"
@@ -35,6 +36,7 @@ int main(int argc, char *argv[]) {
   const auto scenarios_model = new ScenariosModel(yandex_api);
   const auto devices_model = new DevicesModel(yandex_api);
   const auto rooms_model = new RoomsModel(yandex_api);
+  const auto device_model = new DeviceModel(yandex_api);
 
   root_context->setContextProperty("platformService", platform_service);
   root_context->setContextProperty("authorizationService", authorization_service);
@@ -45,6 +47,7 @@ int main(int argc, char *argv[]) {
   root_context->setContextProperty("yandexApi", yandex_api);
   root_context->setContextProperty("yandexAccount", yandex_account);
   root_context->setContextProperty("themes", themes);
+  root_context->setContextProperty("deviceModel", device_model);
 
   qmlRegisterType<DevicesFilterModel>("YandexHomeDesktop.Models", 1, 0, "DevicesFilterModel");
   qmlRegisterType<RoomsFilterModel>("YandexHomeDesktop.Models", 1, 0, "RoomsFilterModel");

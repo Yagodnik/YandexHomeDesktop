@@ -32,14 +32,13 @@ QVariant DeviceModel::data(const QModelIndex &index, int role) const {
       return capability.type;
     case LastUpdateTimeRole:
       return capability.last_updated;
-    case DelegateSourceRole:
-      if (capability.type == "devices.capabilities.range") {
-        return "qrc:/controls/Range.qml";
-      } else if (capability.type == "devices.capabilities.on_off") {
-        return "qrc:/controls/OnOff.qml";
-      } else {
-        return "qrc:/controls/Unsupported.qml";
+    case DelegateSourceRole: {
+      if (kDelegates.contains(capability.type)) {
+        return kDelegates[capability.type];
       }
+
+      return kUnsupportedDelegate;
+    }
     default:
       return {};
   }
@@ -66,7 +65,7 @@ void DeviceModel::UseCapability(const int index, const QVariant &action_data) {
 }
 
 void DeviceModel::Test(const CapabilityObject &c) const {
-  qDebug() << "DeviceModel::Test;" << c.type;
+  qDebug() << "Testing capability type: " << c.type;
 }
 
 void DeviceModel::RequestData(const QString& device_id) {

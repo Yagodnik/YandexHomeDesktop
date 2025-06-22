@@ -30,6 +30,17 @@ signals:
   void dataLoadingFailed();
 
 private:
+  const QString kUnsupportedDelegate = "qrc:/controls/Unsupported.qml";
+  const QMap<QString, QString> kDelegates = {
+    { "devices.capabilities.on_off", "qrc:/controls/OnOff.qml" },
+    { "devices.capabilities.color_seting", kUnsupportedDelegate },
+    { "devices.capabilities.video_stream", kUnsupportedDelegate },
+    { "devices.capabilities.color_seting", kUnsupportedDelegate },
+    { "devices.capabilities.mode", "qrc:/controls/Mode.qml" },
+    { "devices.capabilities.range", "qrc:/controls/Range.qml" },
+    { "devices.capabilities.toggle", "qrc:/controls/Toggle.qml" },
+  };
+
   QString device_id_;
   YandexHomeApi *api_;
   QList<CapabilityObject> capabilities_;

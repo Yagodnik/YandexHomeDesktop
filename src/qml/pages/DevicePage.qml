@@ -8,6 +8,18 @@ Item {
     color: themes.GetBackground()
   }
 
+  Connections {
+    target: deviceModel
+
+    function onDataLoaded() {
+      console.log("Device data loading - OK");
+    }
+
+    function onDataLoadingFailed() {
+      console.log("Device data loading - FAILED");
+    }
+  }
+
   Item {
     id: topHeader
 
@@ -91,18 +103,6 @@ Item {
     delegate: Loader {
       source: delegateSource
       width: parent.width
-    }
-  }
-
-  Connections {
-    target: deviceModel
-
-    function onDataLoaded() {
-      console.log("Device data loading - OK");
-    }
-
-    function onDataLoadingFailed() {
-      console.log("Device data loading - FAILED");
     }
   }
 }

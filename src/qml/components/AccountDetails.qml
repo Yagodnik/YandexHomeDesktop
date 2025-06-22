@@ -59,12 +59,10 @@ Item {
     }
   }
 
-  Rectangle {
+  Item {
     id: avatar
-
-    width: 36
-    height: 36
-    radius: 45
+    width: avatarImage.width
+    height: avatarImage.height
 
     anchors.left: parent.left
     anchors.leftMargin: 8
@@ -72,12 +70,20 @@ Item {
 
     Image {
       id: avatarImage
-      anchors.fill: parent
-
+      width: 36
+      height: 36
+      source: "your-image.png"
       fillMode: Image.PreserveAspectCrop
+
       layer.enabled: true
       layer.effect: OpacityMask {
-        maskSource: avatar
+        maskSource: Rectangle {
+          width: avatarImage.width
+          height: avatarImage.height
+          radius: width / 2
+          color: "white"
+          visible: false
+        }
       }
 
       onStatusChanged: {
@@ -88,7 +94,6 @@ Item {
       }
     }
   }
-
 
   Column {
     id: details

@@ -15,6 +15,7 @@ qt_add_qml_module(YandexHomeDesktopUi
         ui/MyTabs.qml
         ui/MyComboBox.qml
         ui/MySlider.qml
+        ui/ImageButton.qml
 )
 
 qt_add_qml_module(YandexHomeDesktopPages

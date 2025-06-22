@@ -19,18 +19,12 @@ Item {
       anchors.verticalCenter: parent.verticalCenter
     }
 
-    Image {
+    UI.ImageButton {
       id: reloadButton
       source: "qrc:/images/reload.svg"
 
       property real rotationAngle: 0
 
-      antialiasing: true
-      layer.enabled: true
-      layer.smooth: true
-      layer.samples: 8
-
-      fillMode: Image.PreserveAspectFit
       transform: Rotation {
         id: rot
         origin.x: reloadButton.width / 2
@@ -42,21 +36,16 @@ Item {
       anchors.right: parent.right
       anchors.rightMargin: 8
 
-      MouseArea {
-        anchors.fill: parent
-        cursorShape: Qt.PointingHandCursor
-
-        onClicked: {
-          if (rooms.isLoading) {
-            return;
-          }
-
-          rooms.isLoading = true;
-          devicesStack.currentIndex = 0;
-          devicesModel.RequestData();
-
-          reloadButton.rotationAngle += 360;
+      onClicked: {
+        if (rooms.isLoading) {
+          return;
         }
+
+        rooms.isLoading = true;
+        devicesStack.currentIndex = 0;
+        devicesModel.RequestData();
+
+        reloadButton.rotationAngle += 360;
       }
 
       Behavior on rotationAngle {

@@ -52,7 +52,6 @@ int main(int argc, char *argv[]) {
   qmlRegisterType<DevicesFilterModel>("YandexHomeDesktop.Models", 1, 0, "DevicesFilterModel");
   qmlRegisterType<RoomsFilterModel>("YandexHomeDesktop.Models", 1, 0, "RoomsFilterModel");
 
-
   QObject::connect(
     &engine,
     &QQmlApplicationEngine::objectCreationFailed,

@@ -5,7 +5,6 @@ import YandexHomeDesktop.Models 1.0
 
 Column {
   id: room
-  width: parent.width
   spacing: 8
 
   Text {
@@ -18,6 +17,7 @@ Column {
   }
 
   ListView {
+    id: devicesList
     clip: true
     interactive: false
     spacing: 8
@@ -31,6 +31,8 @@ Column {
       roomId: model.roomId
     }
 
-    delegate: Components.DeviceDelegate {}
+    delegate: Components.DeviceDelegate {
+      width: devicesList.width
+    }
   }
 }

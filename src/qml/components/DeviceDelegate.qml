@@ -2,8 +2,20 @@ import QtQuick
 import YandexHomeDesktop.Ui as UI
 
 Item {
-  width: parent.width
   height: 64
+
+  opacity: 0
+
+  Behavior on opacity {
+    NumberAnimation {
+      duration: 300
+      easing.type: Easing.InOutQuad
+    }
+  }
+
+  Component.onCompleted: {
+    opacity = 1
+  }
 
   Rectangle {
     anchors.fill: parent

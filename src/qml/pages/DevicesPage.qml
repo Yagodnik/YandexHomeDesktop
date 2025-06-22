@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Layouts
 import YandexHomeDesktop.Ui as UI
 import YandexHomeDesktop.Components as Components
 import YandexHomeDesktop.Models 1.0
@@ -46,7 +47,14 @@ Item {
         cursorShape: Qt.PointingHandCursor
 
         onClicked: {
-          console.log("Reloading devices")
+          if (rooms.isLoading) {
+            return;
+          }
+
+          rooms.isLoading = true;
+          devicesStack.currentIndex = 0;
+          devicesModel.RequestData();
+
           reloadButton.rotationAngle += 360;
         }
       }
@@ -61,76 +69,107 @@ Item {
   }
 
   Component.onCompleted: {
+    isLoading = true;
     devicesModel.RequestData();
   }
 
-  ListView {
+  property var isLoading: false
+
+  Connections {
+    target: devicesModel
+
+    function onDataLoadingFailed() {
+      rooms.isLoading = false;
+      console.log("Devices Model: Data Load - FAIL");
+      devicesStack.currentIndex = 1;
+    }
+
+    function onDataLoaded() {
+      rooms.isLoading = false;
+      console.log("Devices Model: Data Load - OK");
+      devicesStack.currentIndex = 2;
+    }
+  }
+
+  StackLayout {
+    id: devicesStack
     width: parent.width
 
     anchors.top: heading.bottom
     anchors.topMargin: 2
     anchors.bottom: parent.bottom
 
-    clip: true
-    // interactive: false
+    Item {
+      UI.MyProgressIndicator {
+        id: loadingProgress
 
-    spacing: 8
+        anchors.centerIn: parent
+        width: 30
+        height: 30
+        strokeWidth: 2
+        opacity: (devicesStack.currentIndex === 0) ? 1 : 0
+        visible: opacity > 0
 
-    // model: ListModel {
-    //   ListElement {
-    //     name: "Завод"
-    //     roomId: "925fadea-bfb9-4ddf-868a-b5ba52e74ac5"
-    //     householdId: "393c92a2-000d-4ae4-b2dc-f3cd0dc00188"
-    //   }
-    //
-    //   ListElement {
-    //     name: "Лампа"
-    //     roomId: "75d43bd0-41be-4846-9b9a-a7eba83d2353"
-    //     householdId: "393c92a2-000d-4ae4-b2dc-f3cd0dc00188"
-    //   }
-    // }
-    model: RoomsFilterModel {
-      sourceModel: roomsModel
-      householdId: "393c92a2-000d-4ae4-b2dc-f3cd0dc00188"
+        Behavior on opacity {
+          NumberAnimation {
+            duration: 200
+            easing.type: Easing.InOutQuad
+          }
+        }
+      }
     }
 
-    delegate: Components.RoomDevicesList {}
+    Item {
+      opacity: (devicesStack.currentIndex === 1) ? 1 : 0
+      visible: opacity > 0
 
-    // model: devicesModel
-    // delegate: Components.DeviceDelegate {}
+      Behavior on opacity {
+        NumberAnimation {
+          duration: 200
+          easing.type: Easing.InOutQuad
+        }
+      }
+
+      Column {
+        id: errorMessage
+        anchors.centerIn: parent
+        spacing: 15
+
+        UI.DefaultText {
+          text: qsTr("Что-то пошло не так!")
+          color: themes.GetInactive()
+
+          anchors.horizontalCenter: errorMessage.horizontalCenter
+        }
+      }
+    }
+
+    Item {
+      // TODO: Add this
+      // UI.DefaultText {
+      //   anchors.centerIn: parent
+      //   text: "Пока что у вас нет устройств"
+      //
+      //   visible: deviceModel.count === 0
+      // }
+
+      ListView {
+        id: roomsList
+        anchors.fill: parent
+
+        clip: true
+
+        spacing: 8
+
+        model: RoomsFilterModel {
+          sourceModel: roomsModel
+          householdId: "393c92a2-000d-4ae4-b2dc-f3cd0dc00188"
+        }
+
+        delegate: Components.RoomDevicesList {
+          width: roomsList.width
+        }
+      }
+    }
   }
-
-  // Connections {
-  //   target: roomsModel
-  //
-  //   function onDataLoaded() {
-  //     devicesModel.RequestData();
-  //   }
-  // }
-
-  // Column {
-  //   UI.MyButton {
-  //     text: "Do request"
-  //
-  //     onClicked: {
-  //       yandex_api.RequestInfo();
-  //     }
-  //   }
-  //
-  //   UI.MyButton {
-  //     text: "Show"
-  //
-  //     onClicked: {
-  //       platformService.ShowAsApp();
-  //     }
-  //   }
-  //
-  //   UI.MyButton {
-  //     text: "Hide"
-  //
-  //     onClicked: {
-  //       platformService.ShowOnlyInTray();
-  //     }
-  //   }
-  // }
 }

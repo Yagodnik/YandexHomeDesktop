@@ -24,19 +24,19 @@ int main(int argc, char *argv[]) {
   QQmlApplicationEngine engine;
 
   const auto root_context = engine.rootContext();
-  const auto authorization_service = new AuthorizationService();
+  const auto authorization_service = new AuthorizationService(&app);
   const auto token_provider = [authorization_service] {
     return authorization_service->GetToken();
   };
-  const auto platform_service = new PlatformService();
-  const auto yandex_api = new YandexHomeApi(token_provider);
-  const auto yandex_account = new YandexAccount(token_provider);
-  const auto themes = new Themes();
-  const auto router = new Router();
-  const auto scenarios_model = new ScenariosModel(yandex_api);
-  const auto devices_model = new DevicesModel(yandex_api);
-  const auto rooms_model = new RoomsModel(yandex_api);
-  const auto device_model = new DeviceModel(yandex_api);
+  const auto platform_service = new PlatformService(&app);
+  const auto yandex_api = new YandexHomeApi(token_provider, &app);
+  const auto yandex_account = new YandexAccount(token_provider, &app);
+  const auto themes = new Themes(&app);
+  const auto router = new Router(&app);
+  const auto scenarios_model = new ScenariosModel(yandex_api, &app);
+  const auto devices_model = new DevicesModel(yandex_api, &app);
+  const auto rooms_model = new RoomsModel(yandex_api, &app);
+  const auto device_model = new DeviceModel(yandex_api, &app);
 
   root_context->setContextProperty("platformService", platform_service);
   root_context->setContextProperty("authorizationService", authorization_service);

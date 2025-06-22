@@ -72,7 +72,7 @@ Item {
       id: avatarImage
       width: 36
       height: 36
-      source: "your-image.png"
+
       fillMode: Image.PreserveAspectCrop
 
       layer.enabled: true

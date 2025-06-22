@@ -71,19 +71,19 @@ Item {
 
     model: ListModel {
       ListElement {
+        name: "Вкл/выкл"
+        delegateSource: "qrc:/controls/OnOff.qml"
+      }
+
+      ListElement {
         name: "Яркость"
         delegateSource: "qrc:/controls/Range.qml"
       }
 
-      ListElement {
-        name: "Цвета"
-        delegateSource: "qrc:/controls/ColorSetting.qml"
-      }
-
-      ListElement {
-        name: "Температура"
-        delegateSource: "qrc:/controls/OnOff.qml"
-      }
+      // ListElement {
+      //   name: "Цвета"
+      //   delegateSource: "qrc:/controls/ColorSetting.qml"
+      // }
     }
 
     delegate: Loader {

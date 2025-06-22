@@ -5,6 +5,7 @@
 
 #include "model/Response.h"
 #include "RequestFactory.h"
+#include "model/Actions.h"
 
 YandexHomeApi::YandexHomeApi(TokenProvider token_provider, QObject *parent)
   : QObject(parent), token_provider_(std::move(token_provider)) {}

@@ -12,6 +12,8 @@ add_library(Models SHARED
         RoomsModel.h
         RoomsFilterModel.cpp
         RoomsFilterModel.h
+        DeviceModel.cpp
+        DeviceModel.h
 )
 
 target_link_libraries(Models PRIVATE Qt6::Core Qt6::Network YandexHomeApi)

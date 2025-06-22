@@ -39,6 +39,7 @@ private:
   static constexpr int kApiTimeout = 5000;
   const QString kInfoEndpoint = "https://api.iot.yandex.net/v1.0/user/info";
   const QString kExecuteScenarioEndpoint = "https://api.iot.yandex.net/v1.0/scenarios/%1/actions";
+  const QString kUseCapabilityEndpoint = "https://api.iot.yandex.net/v1.0/devices/actions";
 
   static std::expected<QJsonObject, QString> ParseResponseAsObject(const QByteArray& response);
 

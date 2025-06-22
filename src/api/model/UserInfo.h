@@ -2,16 +2,13 @@
 
 #include "serialization/Serialization.h"
 #include "Status.h"
+#include "Capabilites.h"
 
 JSON_ENUMERATION(DeviceType,
   ("devices.types.{type}", Lamp),
   ("devices.types.{type2}", Lamp2)
 );
 
-JSON_ENUMERATION(CapabilityType,
-  ("devices.capabilities.{type}", Cap1),
-  ("devices.capabilities.{type2}", Cap2)
-);
 
 JSON_STRUCT(RoomObject,
   (QString, id),
@@ -20,11 +17,6 @@ JSON_STRUCT(RoomObject,
   (QStringList, devices)
 );
 
-JSON_STRUCT(CapabilityObject,
-  (bool, retrievable),
-  (QString, type)
-  /* TODO: Parameters + State */
-);
 
 JSON_STRUCT(GroupObject,
   (QString, id),
@@ -40,7 +32,8 @@ JSON_STRUCT(DeviceObject,
   (QString, name),
   (QStringList, aliases),
   (QString, room),
-  (QString, household_id)
+  (QString, household_id),
+  (QList<CapabilityObject>, capabilities)
 );
 
 JSON_STRUCT(ScenarioObject,

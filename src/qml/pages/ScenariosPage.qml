@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts 2.15
+import QtQuick.Dialogs
 import YandexHomeDesktop.Ui as UI
 import YandexHomeDesktop.Components as Components
 
@@ -9,6 +10,13 @@ Item {
   Component.onCompleted: {
     isLoading = true;
     scenariosModel.RequestData();
+  }
+
+  UI.ErrorDialog {
+    id: scenarioErrorDialog
+
+    dialogTitle: "Ошибка"
+    dialogMessage: "Не удалось выполнить сценарий"
   }
 
   property var isLoading: false
@@ -26,6 +34,10 @@ Item {
       root.isLoading = false;
       console.log("Scenarios Model: Data Load - OK");
       scenariosStack.currentIndex = 2;
+    }
+
+    function onScenarioExecutionFailed() {
+      scenarioErrorDialog.openDialog();
     }
   }
 

@@ -149,4 +149,5 @@ void ScenariosModel::OnScenarioExecutionFailed(
   emit dataChanged(updated_index, updated_index, {IsWaitingResponseRole});
 
   qDebug() << "Scenarios Model: Scenario" << message << "(" << index << ") failed.";
+  emit scenarioExecutionFailed();
 }

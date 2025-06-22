@@ -33,6 +33,7 @@ public:
 signals:
   void dataLoaded();
   void dataLoadingFailed();
+  void scenarioExecutionFailed();
 
 private:
   YandexHomeApi *api_;

@@ -16,6 +16,7 @@ qt_add_qml_module(YandexHomeDesktopUi
         ui/MyComboBox.qml
         ui/MySlider.qml
         ui/ImageButton.qml
+        ui/ErrorDialog.qml
 )
 
 qt_add_qml_module(YandexHomeDesktopPages

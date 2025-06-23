@@ -39,15 +39,15 @@ DeviceModel::DeviceModel(YandexHomeApi *api, QObject *parent)
 }
 
 int DeviceModel::rowCount(const QModelIndex &parent) const {
-  return capabilities_.size();
+  return capabilities_data_.size();
 }
 
 QVariant DeviceModel::data(const QModelIndex &index, int role) const {
-  if (!index.isValid() || index.row() >= capabilities_.size()) {
+  if (!index.isValid() || index.row() >= capabilities_data_.size()) {
     return {};
   }
 
-  const auto& capability = capabilities_.at(index.row());
+  const auto& capability = capabilities_data_.at(index.row()).data;
 
   switch (role) {
     case IdRole:
@@ -64,7 +64,8 @@ QVariant DeviceModel::data(const QModelIndex &index, int role) const {
       return kUnsupportedDelegate;
     }
     case BusyRole:
-      return pending_[index.row()].is_pending;
+      return capabilities_data_[index.row()].is_pending;
+      // return pending_[index.row()].is_pending;
     default:
       return {};
   }
@@ -82,14 +83,6 @@ QHash<int, QByteArray> DeviceModel::roleNames() const {
 void DeviceModel::RequestData(const QString& device_id) {
   device_id_ = device_id;
 
-  // beginResetModel();
-  //
-  // capabilities_.clear();
-  //
-  // endResetModel();
-
-  // capabilities_.clear();
-
   last_update_start_time_ = static_cast<double>(QDateTime::currentMSecsSinceEpoch()) / 1000;
 
   qDebug() << "Update requested:" << QString::number(
@@ -100,29 +93,29 @@ void DeviceModel::RequestData(const QString& device_id) {
 }
 
 CapabilityObject DeviceModel::GetCapabilityInfo(const int index) const {
-  return capabilities_.at(index);
+  return capabilities_data_.at(index).data;
 }
 
 QVariantMap DeviceModel::GetState(const int index) const {
-  const auto& capability = capabilities_.at(index);
+  const auto& capability = capabilities_data_.at(index).data;
 
   return capability.state;
 }
 
 QVariantMap DeviceModel::GetParameters(const int index) const {
-  const auto& capability = capabilities_.at(index);
+  const auto& capability = capabilities_data_.at(index).data;
 
   return capability.parameters;
 }
 
 void DeviceModel::UseCapability(const int index, const QVariantMap &state) {
-  pending_[index].is_pending = true;
-  pending_[index].action_start_time = static_cast<double>(QDateTime::currentMSecsSinceEpoch()) / 1000;
+  capabilities_data_[index].SetPending(true);
+  capabilities_data_[index].SetStartTime();
 
   const auto model_index = createIndex(index, 0);
   emit dataChanged(model_index, model_index);
 
-  auto& capability = capabilities_[index];
+  auto& capability = capabilities_data_[index].data;
 
   qDebug() << "Previously updated:" << QString::number(capability.last_updated, 'f', 3);
 
@@ -153,45 +146,37 @@ void DeviceModel::OnDeviceInfoReceived(const DeviceObject &info) {
     receive_time, 'f', 3
   );
 
-  bool empty = capabilities_.empty();
+  bool empty = capabilities_data_.empty();
 
   if (empty) {
     beginResetModel();
   }
 
-  if (empty) {
-    pending_.resize(info.capabilities.size());
-    pending_.fill({});
-  }
-
-  if (empty) {
-    capabilities_.resize(info.capabilities.size());
-  }
+  capabilities_data_.resize(info.capabilities.size());
 
   const double ignore_delta = 0.8;
 
-  for (int i = 0; i < capabilities_.size(); ++i) {
+  for (int i = 0; i < info.capabilities.size(); ++i) {
+    auto& capability = capabilities_data_[i];
     const auto& incoming = info.capabilities[i];
-    auto& pending = pending_[i];
 
-    if (pending.is_pending) {
+    if (capability.is_pending) {
       qDebug() << "Blocking update because it is processing";
       continue;
     }
 
-    if (receive_time >= pending.action_start_time - ignore_delta
-      && receive_time <= pending.action_finish_time + ignore_delta) {
+    if (capability.IsInside(receive_time, ignore_delta)) {
       qDebug() << "Blocking update because it was received during action processing";
       continue;
     }
 
-    if (last_update_start_time_ <= pending.action_finish_time + ignore_delta
-      && last_update_start_time_ >= pending.action_start_time - ignore_delta) {
+    if (capability.IsInside(last_update_start_time_, ignore_delta)) {
       qDebug() << "Blocking update because it was requested during action processing";
       continue;
     }
 
-    capabilities_[i] = incoming;
+    capability.data = incoming;
+
     emit dataUpdated(i);
   }
 
@@ -199,10 +184,10 @@ void DeviceModel::OnDeviceInfoReceived(const DeviceObject &info) {
     endResetModel();
   }
 
-  qDebug() << "DeviceModel::OnDeviceInfoReceived" << capabilities_.size();
+  qDebug() << "DeviceModel::OnDeviceInfoReceived" << capabilities_data_.size();
 
   const auto top_left = createIndex(0, 0);
-  const auto bottom_right = createIndex(capabilities_.size() - 1, 0);
+  const auto bottom_right = createIndex(capabilities_data_.size() - 1, 0);
 
   emit dataChanged(top_left, bottom_right);
 
@@ -220,12 +205,8 @@ void DeviceModel::OnDeviceInfoReceivingFailed(const QString &message) {
 void DeviceModel::OnActionExecutionFinishedSuccessfully(const QVariant &user_data) {
   const int index = user_data.toInt();
 
-  pending_[index].is_pending = false;
-  pending_[index].action_finish_time = static_cast<double>(QDateTime::currentMSecsSinceEpoch()) / 1000;
-
-  qDebug() << "Action finished:" << QString::number(index) << "at" << QString::number(
-    pending_[index].action_finish_time, 'f', 3
-  );
+  capabilities_data_[index].SetPending(false);
+  capabilities_data_[index].SetFinishTime();
 
   const auto model_index = createIndex(index, 0);
   emit dataChanged(model_index, model_index);
@@ -236,12 +217,8 @@ void DeviceModel::OnActionExecutionFailed(const QString &message, const QVariant
 
   const int index = user_data.toInt();
 
-  pending_[index].is_pending = false;
-  pending_[index].action_finish_time = static_cast<double>(QDateTime::currentMSecsSinceEpoch()) / 1000;
-
-  qDebug() << "Action !finished! :" << QString::number(index) << "at" << QString::number(
-    pending_[index].action_finish_time, 'f', 3
-  );
+  capabilities_data_[index].SetPending(false);
+  capabilities_data_[index].SetFinishTime();
 
   const auto model_index = createIndex(index, 0);
   emit dataChanged(model_index, model_index);

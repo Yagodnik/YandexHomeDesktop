@@ -3,6 +3,39 @@
 #include <QAbstractListModel>
 #include "api/YandexHomeApi.h"
 
+struct CapabilityData {
+  CapabilityObject data;
+
+  CapabilityData() = default;
+  explicit CapabilityData(const CapabilityObject& cap) : data(cap) {}
+
+  bool is_pending = false;
+  double action_start_time {};
+  double action_finish_time {};
+
+  void SetPending(bool value) {
+    is_pending = value;
+  }
+
+  void SetStartTime() {
+    action_start_time = static_cast<double>(QDateTime::currentMSecsSinceEpoch()) / 1000;
+  }
+
+  void SetFinishTime() {
+    action_finish_time = static_cast<double>(QDateTime::currentMSecsSinceEpoch()) / 1000;
+  }
+
+  [[nodiscard]] bool IsInside(double time, double delta) const {
+    return time >= (action_start_time - delta)
+        && time < (action_finish_time + delta);
+  }
+
+  [[nodiscard]] bool IsInside(double time, double l_delta, double r_delta) const {
+    return time >= (action_start_time - l_delta)
+        && time < (action_finish_time + r_delta);
+  }
+};
+
 class DeviceModel : public QAbstractListModel {
   Q_OBJECT
 public:
@@ -33,12 +66,6 @@ signals:
   void dataUpdated(int index);
 
 private:
-  struct Pending {
-    bool is_pending = false;
-    double action_start_time {};
-    double action_finish_time {};
-  };
-
   const QString kUnsupportedDelegate = "qrc:/controls/Unsupported.qml";
   const QMap<CapabilityType, QString> kDelegates = {
     { CapabilityType::OnOff,        "qrc:/controls/OnOff.qml" },
@@ -53,9 +80,8 @@ private:
   QString device_id_;
   YandexHomeApi *api_;
 
-  QList<CapabilityObject> capabilities_;
+  QList<CapabilityData> capabilities_data_;
 
-  QList<Pending> pending_;
   double last_update_start_time_;
 
   QTimer timer_;

@@ -116,18 +116,21 @@ void YandexHomeApi::ExecuteScenario(const QString &scenario_id, const QVariant& 
   );
 }
 
-void YandexHomeApi::PerformActions(const QList<DeviceActionsObject> &actions) {
-  auto ok_callback = [this](auto& response) {
+void YandexHomeApi::PerformActions(const QList<DeviceActionsObject> &actions, const QVariant& user_data) {
+  auto ok_callback = [this, user_data](auto& response) {
     if (response.status == Status::Ok) {
       qDebug() << "Action " << response.request_id << "executing finished";
+      emit actionExecutingFinishedSuccessfully(user_data);
     } else {
       qDebug() << "Action " << response.request_id << "executing failed";
       qDebug() << response.message;
+      emit actionExecutingFailed(response.message, user_data);
     }
   };
 
-  auto error_callback = [this](const QString& message) {
+  auto error_callback = [this, user_data](const QString& message) {
     qDebug() << "YandexHomeApi: Internal error: " << message;
+    emit actionExecutingFailed(message, user_data);
   };
 
   QJsonArray json_actions;

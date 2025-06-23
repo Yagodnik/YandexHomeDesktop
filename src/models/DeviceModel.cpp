@@ -1,5 +1,7 @@
 #include "DeviceModel.h"
 
+#include <sys/fcntl.h>
+
 DeviceModel::DeviceModel(YandexHomeApi *api, QObject *parent)
   : QAbstractListModel(parent), api_(api)
 {
@@ -12,6 +14,16 @@ DeviceModel::DeviceModel(YandexHomeApi *api, QObject *parent)
     &YandexHomeApi::deviceInfoReceivingFailed,
     this,
     &DeviceModel::OnDeviceInfoReceivingFailed);
+
+  connect(api_,
+    &YandexHomeApi::actionExecutingFinishedSuccessfully,
+    this,
+    &DeviceModel::OnActionExecutionFinishedSuccessfully);
+
+  connect(api_,
+    &YandexHomeApi::actionExecutingFailed,
+    this,
+    &DeviceModel::OnActionExecutionFailed);
 
   timer_.setInterval(3000);
   timer_.setSingleShot(false);
@@ -51,6 +63,8 @@ QVariant DeviceModel::data(const QModelIndex &index, int role) const {
 
       return kUnsupportedDelegate;
     }
+    case BusyRole:
+      return pending_[index.row()].is_pending;
     default:
       return {};
   }
@@ -60,21 +74,53 @@ QHash<int, QByteArray> DeviceModel::roleNames() const {
   return {
     { IdRole, "deviceId" },
     { NameRole, "name"},
-    { DelegateSourceRole, "delegateSource" }
+    { DelegateSourceRole, "delegateSource" },
+    { BusyRole, "busy"}
   };
 }
 
-void DeviceModel::SetId(const QString &device_id) {
+void DeviceModel::RequestData(const QString& device_id) {
   device_id_ = device_id;
+
+  // beginResetModel();
+  //
+  // capabilities_.clear();
+  //
+  // endResetModel();
+
+  // capabilities_.clear();
+
+  last_update_start_time_ = static_cast<double>(QDateTime::currentMSecsSinceEpoch()) / 1000;
+
+  qDebug() << "Update requested:" << QString::number(
+    last_update_start_time_, 'f', 3
+  );
+
+  api_->GetDeviceInfo(device_id_);
 }
 
 CapabilityObject DeviceModel::GetCapabilityInfo(const int index) const {
   return capabilities_.at(index);
 }
 
+QVariantMap DeviceModel::GetState(const int index) const {
+  const auto& capability = capabilities_.at(index);
+
+  return capability.state;
+}
+
+QVariantMap DeviceModel::GetParameters(const int index) const {
+  const auto& capability = capabilities_.at(index);
+
+  return capability.parameters;
+}
+
 void DeviceModel::UseCapability(const int index, const QVariantMap &state) {
-  qDebug() << "Capability index:" << index;
-  qDebug() << "Capability instance:" << state["instance"].toString();
+  pending_[index].is_pending = true;
+  pending_[index].action_start_time = static_cast<double>(QDateTime::currentMSecsSinceEpoch()) / 1000;
+
+  const auto model_index = createIndex(index, 0);
+  emit dataChanged(model_index, model_index);
 
   auto& capability = capabilities_[index];
 
@@ -92,51 +138,111 @@ void DeviceModel::UseCapability(const int index, const QVariantMap &state) {
 
   api_->PerformActions({
     action_object
-  });
+  }, index);
 
   capability.last_updated = static_cast<double>(QDateTime::currentMSecsSinceEpoch()) / 1000.0;
 
-  qDebug() << "New update time:" << QString::number(capability.last_updated, 'f', 3);
+  qDebug() << "Action request time:" << QString::number(capability.last_updated, 'f', 3);
 }
 
-void DeviceModel::Test(const CapabilityObject &c) const {
-  qDebug() << "Testing capability type: " << c.type;
-}
-
-void DeviceModel::RequestData(const QString& device_id) {
-  device_id_ = device_id;
-
-  beginResetModel();
-
-  capabilities_.clear();
-
-  endResetModel();
-
-  api_->GetDeviceInfo(device_id_);
-}
-
-QVariant DeviceModel::GetValue(int index) const {
-  const auto& capability = capabilities_.at(index);
-
-  return capability.state["value"];
-}
 
 void DeviceModel::OnDeviceInfoReceived(const DeviceObject &info) {
-  beginResetModel();
+  const double receive_time = static_cast<double>(QDateTime::currentMSecsSinceEpoch()) / 1000;
 
-  capabilities_.clear();
-  capabilities_ = info.capabilities;
+  qDebug() << "Update received:" << QString::number(
+    receive_time, 'f', 3
+  );
 
-  endResetModel();
+  bool empty = capabilities_.empty();
+
+  if (empty) {
+    beginResetModel();
+  }
+
+  if (empty) {
+    pending_.resize(info.capabilities.size());
+    pending_.fill({});
+  }
+
+  if (empty) {
+    capabilities_.resize(info.capabilities.size());
+  }
+
+  const double ignore_delta = 0.8;
+
+  for (int i = 0; i < capabilities_.size(); ++i) {
+    const auto& incoming = info.capabilities[i];
+    auto& pending = pending_[i];
+
+    if (pending.is_pending) {
+      qDebug() << "Blocking update because it is processing";
+      continue;
+    }
+
+    if (receive_time >= pending.action_start_time - ignore_delta
+      && receive_time <= pending.action_finish_time + ignore_delta) {
+      qDebug() << "Blocking update because it was received during action processing";
+      continue;
+    }
+
+    if (last_update_start_time_ <= pending.action_finish_time + ignore_delta
+      && last_update_start_time_ >= pending.action_start_time - ignore_delta) {
+      qDebug() << "Blocking update because it was requested during action processing";
+      continue;
+    }
+
+    capabilities_[i] = incoming;
+    emit dataUpdated(i);
+  }
+
+  if (empty) {
+    endResetModel();
+  }
 
   qDebug() << "DeviceModel::OnDeviceInfoReceived" << capabilities_.size();
 
+  const auto top_left = createIndex(0, 0);
+  const auto bottom_right = createIndex(capabilities_.size() - 1, 0);
+
+  emit dataChanged(top_left, bottom_right);
+
   emit dataLoaded();
-  emit dataUpdated();
+
+  timer_.start();
 }
 
 void DeviceModel::OnDeviceInfoReceivingFailed(const QString &message) {
   qDebug() << "Devices Model: Error receiving devices:" << message;
 
   emit dataLoadingFailed();
+}
+
+void DeviceModel::OnActionExecutionFinishedSuccessfully(const QVariant &user_data) {
+  const int index = user_data.toInt();
+
+  pending_[index].is_pending = false;
+  pending_[index].action_finish_time = static_cast<double>(QDateTime::currentMSecsSinceEpoch()) / 1000;
+
+  qDebug() << "Action finished:" << QString::number(index) << "at" << QString::number(
+    pending_[index].action_finish_time, 'f', 3
+  );
+
+  const auto model_index = createIndex(index, 0);
+  emit dataChanged(model_index, model_index);
+}
+
+void DeviceModel::OnActionExecutionFailed(const QString &message, const QVariant &user_data) {
+  qDebug() << "Devices Model: Error executing action:" << message;
+
+  const int index = user_data.toInt();
+
+  pending_[index].is_pending = false;
+  pending_[index].action_finish_time = static_cast<double>(QDateTime::currentMSecsSinceEpoch()) / 1000;
+
+  qDebug() << "Action !finished! :" << QString::number(index) << "at" << QString::number(
+    pending_[index].action_finish_time, 'f', 3
+  );
+
+  const auto model_index = createIndex(index, 0);
+  emit dataChanged(model_index, model_index);
 }

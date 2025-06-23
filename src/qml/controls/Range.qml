@@ -8,10 +8,19 @@ Item {
   Connections {
     target: deviceModel
 
-    function onDataUpdated() {
-      const value = deviceModel.GetValue(model.index);
+    function onDataUpdated(index) {
+      if (index !== model.index) {
+        return;
+      }
+      // if (busy) {
+      //   return;
+      // }
 
-      rangeSlider.value = value;
+      const state = deviceModel.GetState(model.index);
+
+      console.log("Assigning new value = ", state["value"]);
+
+      rangeSlider.value = state["value"];
     }
   }
 
@@ -72,10 +81,11 @@ Item {
 
     onPressedChanged: {
       if (!pressed) {
+        console.log("Applying slider updates")
+
         const capability_info = deviceModel.GetCapabilityInfo(model.index);
         const capability_action = capabilityFactory.CreateRange(capability_info, value);
 
-        deviceModel.Test(capability_info);
         deviceModel.UseCapability(model.index, capability_action);
       }
     }

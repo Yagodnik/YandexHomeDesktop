@@ -22,7 +22,7 @@ public:
   Q_INVOKABLE void GetDeviceInfo(const QString& id);
 
   void ExecuteScenario(const QString& scenario_id, const QVariant& user_data = QVariant());
-  void PerformActions(const QList<DeviceActionsObject>& actions);
+  void PerformActions(const QList<DeviceActionsObject>& actions, const QVariant& user_data = QVariant());
 
 signals:
   void userInfoReceived(const UserInfo& info);
@@ -39,6 +39,9 @@ signals:
   void scenarioExecutionFinished(const QString& scenario_id);
   void scenarioExecutionFinishedSuccessfully(const QString& scenario_id, const QVariant& user_data);
   void scenarioExecutionFailed(const QString& scenario_id, const QVariant& user_data);
+
+  void actionExecutingFinishedSuccessfully(const QVariant& user_data);
+  void actionExecutingFailed(const QString& message, const QVariant& user_data);
 
 private:
   using ReplyGuard = QScopedPointer<QNetworkReply, QScopedPointerDeleteLater>;

@@ -70,6 +70,8 @@ Column {
     anchors.right: parent.right
     currentIndex: root.currentTab
 
+    implicitHeight: currentItem ? currentItem.implicitHeight : 0
+
     Item {
       id: colorsPage
       implicitHeight: colorsGrid.implicitHeight

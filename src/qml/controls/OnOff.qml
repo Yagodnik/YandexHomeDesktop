@@ -8,10 +8,17 @@ Item {
   Connections {
     target: deviceModel
 
-    function onDataUpdated() {
-      const value = deviceModel.GetValue(model.index);
+    function onDataUpdated(index) {
+      if (index !== model.index) {
+        return;
+      }
 
-      switchControl.checked = value;
+      if (busy) {
+        return;
+      }
+
+      const state = deviceModel.GetState(model.index);
+      switchControl.checked = state["value"];
     }
   }
 
@@ -29,18 +36,32 @@ Item {
     text: name
   }
 
-  UI.MySwitch {
-    id: switchControl
+  Item {
     anchors.right: parent.right
     anchors.rightMargin: 12
     anchors.verticalCenter: parent.verticalCenter
+    width: switchControl.width
+    height: switchControl.height
 
-    onToggled: function(checked) {
-      const capability_info = deviceModel.GetCapabilityInfo(model.index);
-      const capability_action = capabilityFactory.CreateOnOff(capability_info, checked);
+    UI.MySwitch {
+      id: switchControl
+      anchors.fill: parent
+      // enabled: !model.busy
 
-      deviceModel.Test(capability_info);
-      deviceModel.UseCapability(model.index, capability_action);
+      onToggled: function(checked) {
+        const capability_info = deviceModel.GetCapabilityInfo(model.index);
+        const capability_action = capabilityFactory.CreateOnOff(capability_info, checked);
+
+        deviceModel.UseCapability(model.index, capability_action);
+      }
     }
+
+    // UI.MyProgressIndicator {
+    //   anchors.centerIn: parent
+    //   visible: model.busy
+    //
+    //   width: 32
+    //   height: 32
+    // }
   }
 }

@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
   QQuickStyle::setStyle("Basic");
 
   QGuiApplication app(argc, argv);
-  app.setQuitOnLastWindowClosed(false);
+  // app.setQuitOnLastWindowClosed(false);
 
   QQmlApplicationEngine engine;
 

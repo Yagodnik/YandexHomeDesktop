@@ -12,30 +12,38 @@ public:
     IdRole = Qt::UserRole + 1,
     NameRole,
     LastUpdateTimeRole,
-    DelegateSourceRole
+    DelegateSourceRole,
+    BusyRole
   };
 
   [[nodiscard]] int rowCount(const QModelIndex &parent) const override;
   [[nodiscard]] QVariant data(const QModelIndex &index, int role) const override;
   [[nodiscard]] QHash<int, QByteArray> roleNames() const override;
 
-  Q_INVOKABLE void SetId(const QString& device_id);
-  Q_INVOKABLE [[nodiscard]] CapabilityObject GetCapabilityInfo(int index) const;
-  Q_INVOKABLE void UseCapability(int index, const QVariantMap& state);
-  Q_INVOKABLE void Test(const CapabilityObject& c) const;
   Q_INVOKABLE void RequestData(const QString& device_id);
-  Q_INVOKABLE QVariant GetValue(int index) const;
+
+  Q_INVOKABLE [[nodiscard]] CapabilityObject GetCapabilityInfo(int index) const;
+  Q_INVOKABLE [[nodiscard]] QVariantMap GetState(int index) const;
+  Q_INVOKABLE [[nodiscard]] QVariantMap GetParameters(int index) const;
+  Q_INVOKABLE void UseCapability(int index, const QVariantMap& state);
 
 signals:
   void dataLoaded();
   void dataLoadingFailed();
-  void dataUpdated();
+  void dataUpdated(int index);
 
 private:
+  struct Pending {
+    bool is_pending = false;
+    double action_start_time {};
+    double action_finish_time {};
+  };
+
   const QString kUnsupportedDelegate = "qrc:/controls/Unsupported.qml";
   const QMap<CapabilityType, QString> kDelegates = {
     { CapabilityType::OnOff,        "qrc:/controls/OnOff.qml" },
     { CapabilityType::VideoStream,  kUnsupportedDelegate },
+    // { CapabilityType::ColorSetting, "qrc:/controls/ColorSetting.qml" },
     { CapabilityType::ColorSetting, kUnsupportedDelegate },
     { CapabilityType::Mode,         "qrc:/controls/Mode.qml" },
     { CapabilityType::Range,        "qrc:/controls/Range.qml" },
@@ -44,10 +52,18 @@ private:
 
   QString device_id_;
   YandexHomeApi *api_;
+
   QList<CapabilityObject> capabilities_;
+
+  QList<Pending> pending_;
+  double last_update_start_time_;
+
   QTimer timer_;
 
 private slots:
   void OnDeviceInfoReceived(const DeviceObject& info);
   void OnDeviceInfoReceivingFailed(const QString& message);
+
+  void OnActionExecutionFinishedSuccessfully(const QVariant& user_data);
+  void OnActionExecutionFailed(const QString& message, const QVariant& user_data);
 };

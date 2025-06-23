@@ -36,6 +36,15 @@ namespace Serialization {
 
     template<typename T>
     constexpr bool is_qlist_v = is_qlist<T>::value;
+
+    template<typename T>
+    struct is_qvmap : std::false_type {};
+
+    template<>
+    struct is_qvmap<QVariantMap> : std::true_type {};
+
+    template<typename T>
+    constexpr bool is_qvmap_v = is_qvmap<T>::value;
   }
 
   namespace details {
@@ -60,6 +69,8 @@ namespace Serialization {
         });
 
         return QList<Element>(a.begin(), a.end());
+      } else if constexpr (traits::is_qvmap_v<T>) {
+        return value.toObject().toVariantMap();
       } else {
         return From<T>(value.toObject());
       }
@@ -85,6 +96,8 @@ namespace Serialization {
         });
 
         return QJsonValue(arr);
+      } else if constexpr (traits::is_qvmap_v<T>) {
+        return QJsonObject::fromVariantMap(value);
       } else {
         return To<T>(value);
       }

@@ -7,6 +7,7 @@
 #include <QTimer>
 
 #include "RequestFactory.h"
+#include "model/Actions.h"
 #include "model/Response.h"
 #include "model/UserInfo.h"
 
@@ -21,6 +22,7 @@ public:
   Q_INVOKABLE void GetDeviceInfo(const QString& id);
 
   void ExecuteScenario(const QString& scenario_id, const QVariant& user_data = QVariant());
+  void PerformActions(const QList<DeviceActionsObject>& actions);
 
 signals:
   void userInfoReceived(const UserInfo& info);
@@ -46,6 +48,7 @@ private:
   const QString kExecuteScenarioEndpoint = "https://api.iot.yandex.net/v1.0/scenarios/%1/actions";
   const QString kUseCapabilityEndpoint = "https://api.iot.yandex.net/v1.0/devices/actions";
   const QString kDeviceInfoEndpoint = "https://api.iot.yandex.net/v1.0/devices/%1";
+  const QString kDevicesActionsEndpoint = "https://api.iot.yandex.net/v1.0/devices/actions";
 
   static std::expected<QJsonObject, QString> ParseResponseAsObject(const QByteArray& response);
 
@@ -119,6 +122,21 @@ private:
     );
   }
 
+  template<Serialization::Serializable T>
+  void MakePostRequest(
+    const QString &endpoint,
+    std::function<void(const T&)> ok_callback,
+    std::function<void(const QString&)> error_callback,
+    const QByteArray& data
+  ) {
+    const auto request = RequestFactory::CreateBearer(endpoint, token_provider_());
+
+    PerformRequest<T>(
+      [this, &request, data]() { return network_access_manager_.post(request, data); },
+      std::move(ok_callback),
+      std::move(error_callback)
+    );
+  }
 
   QNetworkAccessManager network_access_manager_;
   TokenProvider token_provider_;

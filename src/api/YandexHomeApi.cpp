@@ -116,6 +116,38 @@ void YandexHomeApi::ExecuteScenario(const QString &scenario_id, const QVariant& 
   );
 }
 
+void YandexHomeApi::PerformActions(const QList<DeviceActionsObject> &actions) {
+  auto ok_callback = [this](auto& response) {
+    if (response.status == Status::Ok) {
+      qDebug() << "Action " << response.request_id << "executing finished";
+    } else {
+      qDebug() << "Action " << response.request_id << "executing failed";
+      qDebug() << response.message;
+    }
+  };
+
+  auto error_callback = [this](const QString& message) {
+    qDebug() << "YandexHomeApi: Internal error: " << message;
+  };
+
+  QJsonArray json_actions;
+  for (const auto& action : actions) {
+    json_actions.push_back(Serialization::To<DeviceActionsObject>(action));
+  }
+
+  QJsonObject json_payload;
+  json_payload["devices"] = json_actions;
+
+  const QByteArray payload = QJsonDocument(json_payload).toJson();
+
+  MakePostRequest<Response>(
+    kDevicesActionsEndpoint,
+    ok_callback,
+    error_callback,
+    payload
+  );
+}
+
 std::expected<QJsonObject, QString> YandexHomeApi::ParseResponseAsObject(const QByteArray &response) {
   QJsonParseError json_error;
   const QJsonDocument json_response = QJsonDocument::fromJson(

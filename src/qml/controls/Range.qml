@@ -5,6 +5,16 @@ Item {
   id: rangeControl
   height: 74
 
+  Connections {
+    target: deviceModel
+
+    function onDataUpdated() {
+      const value = deviceModel.GetValue(model.index);
+
+      rangeSlider.value = value;
+    }
+  }
+
   Rectangle {
     anchors.fill: parent
     color: themes.GetHeaderBackground()
@@ -60,10 +70,14 @@ Item {
     to: 100
     stepSize: 1
 
-    onValueChanged: {
-      const capability_info = deviceModel.GetCapabilityInfo(model.index);
+    onPressedChanged: {
+      if (!pressed) {
+        const capability_info = deviceModel.GetCapabilityInfo(model.index);
+        const capability_action = capabilityFactory.CreateRange(capability_info, value);
 
-      deviceModel.Test(capability_info);
+        deviceModel.Test(capability_info);
+        deviceModel.UseCapability(model.index, capability_action);
+      }
     }
   }
 }

@@ -5,6 +5,16 @@ Item {
   id: root
   height: 48
 
+  Connections {
+    target: deviceModel
+
+    function onDataUpdated() {
+      const value = deviceModel.GetValue(model.index);
+
+      switchControl.checked = value;
+    }
+  }
+
   Rectangle {
     anchors.fill: parent
     color: themes.GetHeaderBackground()
@@ -20,24 +30,17 @@ Item {
   }
 
   UI.MySwitch {
+    id: switchControl
     anchors.right: parent.right
     anchors.rightMargin: 12
     anchors.verticalCenter: parent.verticalCenter
 
     onToggled: function(checked) {
       const capability_info = deviceModel.GetCapabilityInfo(model.index);
+      const capability_action = capabilityFactory.CreateOnOff(capability_info, checked);
 
       deviceModel.Test(capability_info);
-
-      /*
-      * var capability_info = deviceModel.GetCapabilityInfo(model.index);
-      * deviceModel.UseCapability(
-      *   model.index,
-      *   actionFactory.CreateOnOffAction(
-      *     capability_info, true
-      *   )
-      * );
-      * */
+      deviceModel.UseCapability(model.index, capability_action);
     }
   }
 }

@@ -25,6 +25,7 @@ QNetworkRequest RequestFactory::Create(
 
   request.setRawHeader("User-Agent", "YandexHomeApi");
   request.setRawHeader("Authorization", token_bytes);
+  request.setRawHeader("Content-Type", "application/json");
 
   return request;
 }

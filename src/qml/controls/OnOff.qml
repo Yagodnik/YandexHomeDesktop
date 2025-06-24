@@ -17,8 +17,8 @@ Item {
         return;
       }
 
-      const state = deviceModel.GetState(model.index);
-      switchControl.checked = state["value"];
+      // const state = deviceModel.GetState(model.index);
+      // switchControl.checked = device["value"];
     }
   }
 
@@ -46,6 +46,7 @@ Item {
     UI.MySwitch {
       id: switchControl
       anchors.fill: parent
+      checked: model.deviceState["value"]
       // enabled: !model.busy
 
       onToggled: function(checked) {

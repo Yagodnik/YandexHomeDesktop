@@ -117,14 +117,30 @@ void YandexHomeApi::ExecuteScenario(const QString &scenario_id, const QVariant& 
 }
 
 void YandexHomeApi::PerformActions(const QList<DeviceActionsObject> &actions, const QVariant& user_data) {
-  auto ok_callback = [this, user_data](auto& response) {
-    if (response.status == Status::Ok) {
-      qDebug() << "Action " << response.request_id << "executing finished";
-      emit actionExecutingFinishedSuccessfully(user_data);
-    } else {
+  auto ok_callback = [this, user_data](const DeviceActionResponse& response) {
+    if (response.status == Status::Error) {
       qDebug() << "Action " << response.request_id << "executing failed";
-      qDebug() << response.message;
+
       emit actionExecutingFailed(response.message, user_data);
+      return;
+    }
+
+    qDebug() << "Action " << response.request_id << "executing finished";
+
+    for (const auto& device : response.devices) {
+      for (const auto& capability : device.capabilities) {
+        const auto& state = capability.state;
+        const auto& action_result = state.action_result;
+
+        if (action_result.status == "DONE") {
+          emit actionExecutingFinishedSuccessfully(user_data);
+        } else {
+          qDebug() << "Action " << response.request_id << "executing failed with:";
+          qDebug() << "Code:" << action_result.error_code;
+          qDebug() << "Message:" << action_result.error_message;
+          emit actionExecutingFailed(action_result.error_message, user_data);
+        }
+      }
     }
   };
 
@@ -143,7 +159,7 @@ void YandexHomeApi::PerformActions(const QList<DeviceActionsObject> &actions, co
 
   const QByteArray payload = QJsonDocument(json_payload).toJson();
 
-  MakePostRequest<Response>(
+  MakePostRequest<DeviceActionResponse>(
     kDevicesActionsEndpoint,
     ok_callback,
     error_callback,

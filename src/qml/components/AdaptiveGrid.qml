@@ -1,30 +1,43 @@
 import QtQuick
+import QtQuick.Layouts
 
-Flow {
-  id: content
-  spacing: 8
+Item {
+  id: root
 
-  property Component delegate
-  property var count
   property int minItemWidth: 74
   property int maxItemWidth: 100
+  property int spacing: 8
+  property int count: 0
+  property Component delegate
+  property int itemHeight: 85
 
-  Repeater {
-    model: content.count
+  property int columns: Math.max(1,
+    Math.floor((width + spacing) / (minItemWidth + spacing)))
 
-    delegate: Item {
-      readonly property int usableWidth: content.width
-      readonly property int idealColumns: Math.floor((usableWidth + content.spacing) / (content.minItemWidth + content.spacing))
-      readonly property int columns: Math.max(1, idealColumns)
-      readonly property int totalSpacing: (columns - 1) * content.spacing
-      readonly property int itemWidth: Math.floor((usableWidth - totalSpacing) / columns)
+  property int rows: Math.ceil(count / columns)
+  implicitHeight: (rows * itemHeight) + ((rows - 1) * spacing)
 
-      width: Math.max(content.minItemWidth, Math.min(itemWidth, content.maxItemWidth))
-      height: 85
+  GridLayout {
+    id: grid
+    anchors.fill: parent
+    columns: root.columns
+    rowSpacing: root.spacing
+    columnSpacing: root.spacing
 
-      Loader {
-        anchors.fill: parent
-        sourceComponent: content.delegate
+    Repeater {
+      model: root.count
+
+      delegate: Item {
+        Layout.preferredWidth: Math.min(
+          root.maxItemWidth,
+          Math.floor((root.width - (root.columns - 1) * root.spacing) / root.columns)
+        )
+        Layout.preferredHeight: root.itemHeight
+
+        Loader {
+          anchors.fill: parent
+          sourceComponent: root.delegate
+        }
       }
     }
   }

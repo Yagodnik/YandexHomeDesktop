@@ -8,6 +8,13 @@ Item {
     color: themes.GetBackground()
   }
 
+  UI.ErrorDialog {
+    id: actionErrorDialog
+
+    dialogTitle: "Ошибка"
+    dialogMessage: "!"
+  }
+
   Connections {
     target: deviceModel
 
@@ -17,6 +24,11 @@ Item {
 
     function onDataLoadingFailed() {
       console.log("Device data loading - FAILED");
+    }
+
+    function onErrorOccured(message) {
+      actionErrorDialog.dialogMessage = "Произошла ошибка!\n" + message
+      actionErrorDialog.openDialog();
     }
   }
 

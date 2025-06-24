@@ -46,7 +46,8 @@ public:
     NameRole,
     LastUpdateTimeRole,
     DelegateSourceRole,
-    BusyRole
+    BusyRole,
+    StateRole
   };
 
   [[nodiscard]] int rowCount(const QModelIndex &parent) const override;
@@ -64,14 +65,15 @@ signals:
   void dataLoaded();
   void dataLoadingFailed();
   void dataUpdated(int index);
+  void errorOccured(const QString& error_message);
 
 private:
   const QString kUnsupportedDelegate = "qrc:/controls/Unsupported.qml";
   const QMap<CapabilityType, QString> kDelegates = {
     { CapabilityType::OnOff,        "qrc:/controls/OnOff.qml" },
     { CapabilityType::VideoStream,  kUnsupportedDelegate },
-    // { CapabilityType::ColorSetting, "qrc:/controls/ColorSetting.qml" },
-    { CapabilityType::ColorSetting, kUnsupportedDelegate },
+    { CapabilityType::ColorSetting, "qrc:/controls/ColorSetting.qml" },
+    // { CapabilityType::ColorSetting, kUnsupportedDelegate },
     { CapabilityType::Mode,         "qrc:/controls/Mode.qml" },
     { CapabilityType::Range,        "qrc:/controls/Range.qml" },
     { CapabilityType::Toggle,       "qrc:/controls/Toggle.qml" },

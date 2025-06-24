@@ -16,11 +16,11 @@ Item {
       //   return;
       // }
 
-      const state = deviceModel.GetState(model.index);
-
-      console.log("Assigning new value = ", state["value"]);
-
-      rangeSlider.value = state["value"];
+      // const state = deviceModel.GetState(model.index);
+      //
+      // console.log("Assigning new value = ", state["value"]);
+      //
+      // rangeSlider.value = state["value"];
     }
   }
 
@@ -78,6 +78,8 @@ Item {
     from: 0
     to: 100
     stepSize: 1
+
+    value: deviceState["value"]
 
     onPressedChanged: {
       if (!pressed) {

@@ -66,7 +66,11 @@ QVariant DeviceModel::data(const QModelIndex &index, int role) const {
     case BusyRole:
       return capabilities_data_[index.row()].is_pending;
       // return pending_[index.row()].is_pending;
-    default:
+    case StateRole: {
+      const auto& c = capabilities_data_.at(index.row()).data;
+      qDebug() << "Value for " << index.row() << "=" << c.state["value"];
+      return c.state;
+    } default:
       return {};
   }
 }
@@ -76,7 +80,8 @@ QHash<int, QByteArray> DeviceModel::roleNames() const {
     { IdRole, "deviceId" },
     { NameRole, "name"},
     { DelegateSourceRole, "delegateSource" },
-    { BusyRole, "busy"}
+    { BusyRole, "busy"},
+    { StateRole, "deviceState" }
   };
 }
 
@@ -112,12 +117,14 @@ void DeviceModel::UseCapability(const int index, const QVariantMap &state) {
   capabilities_data_[index].SetPending(true);
   capabilities_data_[index].SetStartTime();
 
+  auto& capability = capabilities_data_[index].data;
+  capability.state = state;
+
   const auto model_index = createIndex(index, 0);
   emit dataChanged(model_index, model_index);
 
-  auto& capability = capabilities_data_[index].data;
-
   qDebug() << "Previously updated:" << QString::number(capability.last_updated, 'f', 3);
+  qDebug() << "Requesting update value to" << state["value"];
 
   const CapabilityObject action = {
     .type = capability.type,
@@ -159,6 +166,8 @@ void DeviceModel::OnDeviceInfoReceived(const DeviceObject &info) {
   for (int i = 0; i < info.capabilities.size(); ++i) {
     auto& capability = capabilities_data_[i];
     const auto& incoming = info.capabilities[i];
+
+    qDebug() << "Updating value for" << i << "=" << incoming.state["value"];
 
     if (capability.is_pending) {
       qDebug() << "Blocking update because it is processing";
@@ -208,12 +217,15 @@ void DeviceModel::OnActionExecutionFinishedSuccessfully(const QVariant &user_dat
   capabilities_data_[index].SetPending(false);
   capabilities_data_[index].SetFinishTime();
 
+  qDebug() << "Device Model: Action finished at" << QString::number(
+    capabilities_data_[index].action_finish_time, 'f', 3);
+
   const auto model_index = createIndex(index, 0);
   emit dataChanged(model_index, model_index);
 }
 
 void DeviceModel::OnActionExecutionFailed(const QString &message, const QVariant &user_data) {
-  qDebug() << "Devices Model: Error executing action:" << message;
+  qDebug() << "Device Model: Error executing action:" << message;
 
   const int index = user_data.toInt();
 
@@ -222,4 +234,6 @@ void DeviceModel::OnActionExecutionFailed(const QString &message, const QVariant
 
   const auto model_index = createIndex(index, 0);
   emit dataChanged(model_index, model_index);
+
+  emit errorOccured(message);
 }

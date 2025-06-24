@@ -1,0 +1,109 @@
+{
+  "errorCodes": [
+    {
+      "error_code": "DOOR_OPEN",
+      "short_description": "Открыта дверца",
+      "full_description": "Не забудьте закрыть дверцу."
+    },
+    {
+      "error_code": "LID_OPEN",
+      "short_description": "Открыта крышка",
+      "full_description": "Не забудьте закрыть крышку."
+    },
+    {
+      "error_code": "REMOTE_CONTROL_DISABLED",
+      "short_description": "Удаленное управление устройством отключено",
+      "full_description": "Сначала нужно спросить разрешения у самого устройства: проверьте, на нём должна быть специальная кнопка."
+    },
+    {
+      "error_code": "NOT_ENOUGH_WATER",
+      "short_description": "Недостаточно воды",
+      "full_description": "Попробуйте долить воды."
+    },
+    {
+      "error_code": "LOW_CHARGE_LEVEL",
+      "short_description": "Низкий уровень заряда",
+      "full_description": "Устройство нужно зарядить."
+    },
+    {
+      "error_code": "CONTAINER_FULL",
+      "short_description": "Контейнер полон",
+      "full_description": "Сначала нужно очистить контейнер."
+    },
+    {
+      "error_code": "CONTAINER_EMPTY",
+      "short_description": "Контейнер пуст",
+      "full_description": "В контейнер нужно что-нибудь положить."
+    },
+    {
+      "error_code": "DRIP_TRAY_FULL",
+      "short_description": "Сливной поддон полон",
+      "full_description": "Нужно очистить поддон."
+    },
+    {
+      "error_code": "DEVICE_STUCK",
+      "short_description": "Устройство застряло",
+      "full_description": "Кажется, на пути препятствие, его нужно убрать."
+    },
+    {
+      "error_code": "DEVICE_OFF",
+      "short_description": "Устройство выключено",
+      "full_description": "Сначала нужно включить устройство."
+    },
+    {
+      "error_code": "FIRMWARE_OUT_OF_DATE",
+      "short_description": "Прошивка устарела",
+      "full_description": "Нужно обновить прошивку устройства, которым хотите управлять."
+    },
+    {
+      "error_code": "NOT_ENOUGH_DETERGENT",
+      "short_description": "Недостаточно моющего средства",
+      "full_description": "Добавьте моющее средство."
+    },
+    {
+      "error_code": "HUMAN_INVOLVEMENT_NEEDED",
+      "short_description": "Требуется вмешательство человека",
+      "full_description": "Что-то не так с устройством: пожалуйста, осмотрите его."
+    },
+    {
+      "error_code": "DEVICE_UNREACHABLE",
+      "short_description": "Устройство недоступно",
+      "full_description": "Устройство не отвечает. Проверьте, вдруг оно выключено или пропал интернет."
+    },
+    {
+      "error_code": "DEVICE_BUSY",
+      "short_description": "Устройство занято",
+      "full_description": "Устройство уже работает. Подождите, пока оно закончит."
+    },
+    {
+      "error_code": "INTERNAL_ERROR",
+      "short_description": "Неизвестная внутренняя ошибка",
+      "full_description": "Случилось что-то непонятное. Подождите немного и попробуйте ещё раз."
+    },
+    {
+      "error_code": "INVALID_ACTION",
+      "short_description": "Недопустимое действие",
+      "full_description": "Это устройство так не умеет. Попробуйте что-нибудь другое."
+    },
+    {
+      "error_code": "INVALID_VALUE",
+      "short_description": "Недопустимое значение",
+      "full_description": "Какое-то незнакомое значение. Попробуйте другое."
+    },
+    {
+      "error_code": "NOT_SUPPORTED_IN_CURRENT_MODE",
+      "short_description": "Не поддерживается в текущем режиме работы устройства",
+      "full_description": "В этом режиме такая команда не работает."
+    },
+    {
+      "error_code": "ACCOUNT_LINKING_ERROR",
+      "short_description": "Ошибка в OAuth2 токене пользователя",
+      "full_description": "Попробуйте привязать устройство заново, а то оно отвязалось."
+    },
+    {
+      "error_code": "DEVICE_NOT_FOUND",
+      "short_description": "Устройство не найдено",
+      "full_description": "Данное устройство вам не принадлежит."
+    }
+  ]
+}

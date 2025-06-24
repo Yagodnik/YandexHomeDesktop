@@ -138,7 +138,7 @@ void YandexHomeApi::PerformActions(const QList<DeviceActionsObject> &actions, co
           qDebug() << "Action " << response.request_id << "executing failed with:";
           qDebug() << "Code:" << action_result.error_code;
           qDebug() << "Message:" << action_result.error_message;
-          emit actionExecutingFailed(action_result.error_message, user_data);
+          emit actionExecutingFailed(action_result.error_code, user_data);
         }
       }
     }

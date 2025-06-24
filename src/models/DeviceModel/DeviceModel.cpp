@@ -1,7 +1,5 @@
 #include "DeviceModel.h"
 
-#include <sys/fcntl.h>
-
 DeviceModel::DeviceModel(YandexHomeApi *api, QObject *parent)
   : QAbstractListModel(parent), api_(api)
 {

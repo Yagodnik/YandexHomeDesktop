@@ -63,6 +63,22 @@
     {
       "id": "reading",
       "name": "Чтение"
+    },
+    {
+      "id": "dinner",
+      "name": "Ужин"
+    },
+    {
+      "id": "garland",
+      "name": "Гирлядна"
+    },
+    {
+      "id": "movie",
+      "name": "Кино"
+    },
+    {
+      "id": "rest",
+      "name": "Отдых"
     }
   ]
 }

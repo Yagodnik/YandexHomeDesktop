@@ -11,6 +11,10 @@
 #include "models/RoomsModel.h"
 #include "models/RoomsFilterModel.h"
 #include "models/DeviceModel.h"
+#include "models/ColorsModel.h"
+#include "models/ModesModel.h"
+#include "models/ColorsFilterModel.h"
+#include "models/ModesFilterModel.h"
 #include "platform/PlatformService.h"
 #include "utils/Router.h"
 #include "utils/Themes.h"
@@ -41,6 +45,8 @@ int main(int argc, char *argv[]) {
   const auto device_model = new DeviceModel(yandex_api, &app);
   const auto capability_factory = new CapabilityFactory(&app);
   const auto error_codes = new ErrorCodes(&app);
+  const auto color_model = new ColorsModel(&app);
+  const auto modes_model = new ModesModel(&app);
 
   root_context->setContextProperty("platformService", platform_service);
   root_context->setContextProperty("authorizationService", authorization_service);
@@ -54,9 +60,13 @@ int main(int argc, char *argv[]) {
   root_context->setContextProperty("deviceModel", device_model);
   root_context->setContextProperty("capabilityFactory", capability_factory);
   root_context->setContextProperty("errorCodes", error_codes);
+  root_context->setContextProperty("colorModel", color_model);
+  root_context->setContextProperty("modesModel", modes_model);
 
   qmlRegisterType<DevicesFilterModel>("YandexHomeDesktop.Models", 1, 0, "DevicesFilterModel");
   qmlRegisterType<RoomsFilterModel>("YandexHomeDesktop.Models", 1, 0, "RoomsFilterModel");
+  qmlRegisterType<ColorsFilterModel>("YandexHomeDesktop.Models", 1, 0, "ColorsFilterModel");
+  qmlRegisterType<ModesFilterModel>("YandexHomeDesktop.Models", 1, 0, "ModesFilterModel");
 
   QObject::connect(
     &engine,

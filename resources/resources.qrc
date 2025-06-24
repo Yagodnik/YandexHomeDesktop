@@ -17,6 +17,28 @@
     <file>themes/dark.json</file>
 
     <file>data/errorCodes.json</file>
+    <file>data/colors.json</file>
+    <file>data/colorModes.json</file>
+
+    <file>images/modes/alarm.svg</file>
+    <file>images/modes/alice.svg</file>
+    <file>images/modes/candle.svg</file>
+    <file>images/modes/dinner.svg</file>
+    <file>images/modes/fantasy.svg</file>
+    <file>images/modes/garland.svg</file>
+    <file>images/modes/jungle.svg</file>
+    <file>images/modes/movie.svg</file>
+    <file>images/modes/neon.svg</file>
+    <file>images/modes/night.svg</file>
+    <file>images/modes/ocean.svg</file>
+    <file>images/modes/party.svg</file>
+    <file>images/modes/reading.svg</file>
+    <file>images/modes/rest.svg</file>
+    <file>images/modes/romance.svg</file>
+    <file>images/modes/siren.svg</file>
+    <file>images/modes/sunrise.svg</file>
+    <file>images/modes/sunset.svg</file>
+    <file>images/modes/unknown.svg</file>
   </qresource>
 
   <qresource prefix="/pages">

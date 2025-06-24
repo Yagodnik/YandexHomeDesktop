@@ -5,23 +5,6 @@ Item {
   id: root
   height: 48
 
-  Connections {
-    target: deviceModel
-
-    function onDataUpdated(index) {
-      if (index !== model.index) {
-        return;
-      }
-
-      if (busy) {
-        return;
-      }
-
-      // const state = deviceModel.GetState(model.index);
-      // switchControl.checked = device["value"];
-    }
-  }
-
   Rectangle {
     anchors.fill: parent
     color: themes.GetHeaderBackground()

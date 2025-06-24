@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
 import YandexHomeDesktop.Ui as UI
+import YandexHomeDesktop.Models as Models
 
 Item {
   id: root
@@ -38,9 +39,12 @@ Item {
 
           UI.DefaultText {
             anchors.centerIn: parent
+            width: parent.width
             text: modelData.label
             font.pointSize: 14
+            wrapMode: Text.WordWrap
             color: themes.GetControlText()
+            horizontalAlignment: Text.AlignHCenter
           }
 
           MouseArea {
@@ -68,7 +72,19 @@ Item {
       height: childrenRect.height
 
       Repeater {
-        model: 20
+        // model: 20
+        // model: colorModel
+
+        model: Models.ColorsFilterModel {
+          min: deviceModel.GetParameters(deviceModelData.index).temperature_k.min
+          max: deviceModel.GetParameters(deviceModelData.index).temperature_k.max
+
+          sourceModel: colorModel
+
+          Component.onCompleted: {
+            console.log("Colors Min/Max: ", min, max);
+          }
+        }
 
         delegate: Rectangle {
           width: Math.max(72, root.width / 5 - 10)
@@ -84,16 +100,20 @@ Item {
               width: 32
               height: 32
               radius: 16
-              color: Qt.hsla(index / 20.0, 1.0, 0.5, 1.0)
+              // color: Qt.hsla(index / 20.0, 1.0, 0.5, 1.0)
+              color: model.color
 
               anchors.horizontalCenter: parent.horizontalCenter
             }
 
             UI.DefaultText {
-              text: "Цвет " + index
+              width: parent.width
+              text: model.name
               font.pointSize: 10
               color: themes.GetControlText()
+              wrapMode: Text.WordWrap
               anchors.horizontalCenter: parent.horizontalCenter
+              horizontalAlignment: Text.AlignHCenter
             }
           }
 
@@ -101,12 +121,18 @@ Item {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
             onClicked: {
-              const color = Qt.hsla(index / 20.0, 1.0, 0.5, 1.0);
-              console.log("Selected color:", index, color);
+              console.log("Selected color:", index, model.color);
               console.log("Model index:", deviceModelData.index);
 
               const capability_info = deviceModel.GetCapabilityInfo(deviceModelData.index);
-              const capability_action = capabilityFactory.CreateColorSetting(capability_info, color);
+
+              let capability_action = null;
+
+              if (isTemperature) {
+                capability_action = capabilityFactory.CreateColorSetting(capability_info, model.temperature);
+              } else {
+                capability_action = capabilityFactory.CreateColorSetting(capability_info, model.color);
+              }
 
               deviceModel.UseCapability(deviceModelData.index, capability_action);
             }
@@ -125,7 +151,13 @@ Item {
       height: childrenRect.height
 
       Repeater {
-        model: 12
+        // model: 12
+        // model: modesModel
+
+        model: Models.ModesFilterModel {
+          allowedScenes: deviceModel.GetParameters(deviceModelData.index).color_scene.scenes
+          sourceModel: modesModel
+        }
 
         delegate: Rectangle {
           width: Math.max(90, root.width / 4 - 10)
@@ -137,17 +169,34 @@ Item {
             anchors.centerIn: parent
             spacing: 6
 
-            Rectangle {
+            // Rectangle {
+            //   width: 32
+            //   height: 32
+            //   radius: 16
+            //   color: "red"
+            //
+            //   anchors.horizontalCenter: parent.horizontalCenter
+            // }
+
+            Image {
+              id: icon
               width: 32
               height: 32
-              radius: 16
-              color: "red"
-
               anchors.horizontalCenter: parent.horizontalCenter
+
+              source: image
+
+              onStatusChanged: {
+                if (status === Image.Error) {
+                  console.warn("Image failed to load:", source);
+                  source = "qrc:/images/modes/unknown.svg";
+                }
+              }
             }
 
+
             UI.DefaultText {
-              text: "Режим " + index
+              text: name
               font.pointSize: 10
               color: themes.GetControlText()
 
@@ -159,28 +208,13 @@ Item {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
             onClicked: {
-              console.log("Selected mode:", index, color);
+              console.log("Selected mode:", index, modeId);
               console.log("Model index:", deviceModelData.index);
 
-              const modes = [
-                "northern",
-                "christmas",
-                "fairy",
-                "snake",
-                "alice",
-                "party",
-                "jungle",
-                "neon",
-                "night",
-                "ocean",
-                "romance"
-              ];
-              const mode_name = modes[index];
-
-              console.log("Selected mode:", mode_name);
+              console.log("Selected mode:", modeId);
 
               const capability_info = deviceModel.GetCapabilityInfo(deviceModelData.index);
-              const capability_action = capabilityFactory.CreateColorSetting(capability_info, mode_name);
+              const capability_action = capabilityFactory.CreateColorSetting(capability_info, modeId);
 
               deviceModel.UseCapability(deviceModelData.index, capability_action);
             }

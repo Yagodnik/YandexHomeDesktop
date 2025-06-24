@@ -1,27 +1,25 @@
 #include "Themes.h"
 
 #include <QColor>
-#include <QFile>
+
+#include "JsonLoader.h"
 
 Themes::Themes(QObject *parent)
   : QObject(parent)
 {
-  // QFile theme_file(":/themes/light.json");
-  QFile theme_file(":/themes/dark.json");
+  // const QString theme_path = ":/themes/light.json";
+  const QString theme_path = ":/themes/dark.json";
 
-  if (!theme_file.open(QIODevice::ReadOnly)) {
-    qDebug() << "Themes: unable to load theme";
+  const auto theme_opt = JsonLoader::Load<Theme>(theme_path);
+
+  if (!theme_opt.has_value()) {
+    qWarning() << "Failed to load theme: " << theme_path;
     return;
   }
 
-  auto bytes = theme_file.readAll();
+  const auto& theme = theme_opt.value();
 
-  theme_file.close();
-
-  QJsonDocument json = QJsonDocument::fromJson(bytes);
-  QJsonObject json_theme = json.object();
-
-  themes_.insert("light", Serialization::From<Theme>(json_theme));
+  themes_.insert("light", theme);
   current_theme_ = "light";
 }
 

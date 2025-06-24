@@ -1,5 +1,5 @@
 {
-  "errorCodes": [
+  "error_codes": [
     {
       "error_code": "DOOR_OPEN",
       "short_description": "Открыта дверца",

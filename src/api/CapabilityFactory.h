@@ -11,4 +11,7 @@ public:
 
   Q_INVOKABLE static QVariantMap CreateOnOff(const CapabilityObject& info, bool value);
   Q_INVOKABLE static QVariantMap CreateRange(const CapabilityObject& info, int value);
+  Q_INVOKABLE static QVariantMap CreateColorSetting(const CapabilityObject& info, const QColor& value);
+  Q_INVOKABLE static QVariantMap CreateColorSetting(const CapabilityObject& info, int value);
+  Q_INVOKABLE static QVariantMap CreateColorSetting(const CapabilityObject& info, const QString& value);
 };

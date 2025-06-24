@@ -23,11 +23,13 @@ add_subdirectory(src/platform)
 
 qt_add_executable(appYandexHomeDesktop
         src/main.cpp
-        src/Router.cpp
+        src/utils/Router.cpp
 
         ${RESOURCES}
-        src/Themes.cpp
-        src/Themes.h
+        src/utils/Themes.cpp
+        src/utils/Themes.h
+        src/utils/ErrorCodes.cpp
+        src/utils/ErrorCodes.h
 )
 
 if(APPLE)

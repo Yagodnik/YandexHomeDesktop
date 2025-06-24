@@ -1,0 +1,68 @@
+{
+  "color_modes": [
+    {
+      "id": "northern",
+      "name": "Северное Сияние"
+    },
+    {
+      "id": "christmas",
+      "name": "Рождество"
+    },
+    {
+      "id": "fairy",
+      "name": "Сказочные огни"
+    },
+    {
+      "id": "snake",
+      "name": "Год змеи"
+    },
+    {
+      "id": "alice",
+      "name": "Алиса"
+    },
+    {
+      "id": "party",
+      "name": "Вечеринка"
+    },
+    {
+      "id": "jungle",
+      "name": "Джунгли"
+    },
+    {
+      "id": "neon",
+      "name": "Неон"
+    },
+    {
+      "id": "night",
+      "name": "Ночь"
+    },
+    {
+      "id": "ocean",
+      "name": "Океан"
+    },
+    {
+      "id": "romance",
+      "name": "Романтика"
+    },
+    {
+      "id": "candle",
+      "name": "Свеча"
+    },
+    {
+      "id": "siren",
+      "name": "Сирена"
+    },
+    {
+      "id": "alarm",
+      "name": "Тревога"
+    },
+    {
+      "id": "fantasy",
+      "name": "Фантазия"
+    },
+    {
+      "id": "reading",
+      "name": "Чтение"
+    }
+  ]
+}

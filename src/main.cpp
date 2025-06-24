@@ -12,8 +12,9 @@
 #include "models/RoomsFilterModel.h"
 #include "models/DeviceModel.h"
 #include "platform/PlatformService.h"
-#include "Router.h"
-#include "Themes.h"
+#include "utils/Router.h"
+#include "utils/Themes.h"
+#include "utils/ErrorCodes.h"
 #include <QQuickStyle>
 
 int main(int argc, char *argv[]) {
@@ -39,6 +40,7 @@ int main(int argc, char *argv[]) {
   const auto rooms_model = new RoomsModel(yandex_api, &app);
   const auto device_model = new DeviceModel(yandex_api, &app);
   const auto capability_factory = new CapabilityFactory(&app);
+  const auto error_codes = new ErrorCodes(&app);
 
   root_context->setContextProperty("platformService", platform_service);
   root_context->setContextProperty("authorizationService", authorization_service);
@@ -51,6 +53,7 @@ int main(int argc, char *argv[]) {
   root_context->setContextProperty("themes", themes);
   root_context->setContextProperty("deviceModel", device_model);
   root_context->setContextProperty("capabilityFactory", capability_factory);
+  root_context->setContextProperty("errorCodes", error_codes);
 
   qmlRegisterType<DevicesFilterModel>("YandexHomeDesktop.Models", 1, 0, "DevicesFilterModel");
   qmlRegisterType<RoomsFilterModel>("YandexHomeDesktop.Models", 1, 0, "RoomsFilterModel");

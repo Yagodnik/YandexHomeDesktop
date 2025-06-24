@@ -3,12 +3,12 @@
 #include <QObject>
 #include <QColor>
 
-#include "serialization/Serialization.h"
+#include "../serialization/Serialization.h"
 
 class Themes : public QObject {
   Q_OBJECT
 public:
-  Themes(QObject* parent = nullptr);
+  explicit Themes(QObject* parent = nullptr);
 
   Q_INVOKABLE [[nodiscard]] QString GetMainText() const;
   Q_INVOKABLE [[nodiscard]] QString GetBackground() const;

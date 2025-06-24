@@ -26,8 +26,15 @@ Item {
       console.log("Device data loading - FAILED");
     }
 
-    function onErrorOccured(message) {
-      actionErrorDialog.dialogMessage = "Произошла ошибка!\n" + message
+    function onErrorOccured(errorCode) {
+      const error = errorCodes.GetDeviceError(errorCode);
+
+      if (error == null) {
+        actionErrorDialog.dialogMessage = "Произошла ошибка!";
+      } else {
+        actionErrorDialog.dialogMessage = error.short_description + "\n\n" + error.full_description;
+      }
+
       actionErrorDialog.openDialog();
     }
   }

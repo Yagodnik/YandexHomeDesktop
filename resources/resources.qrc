@@ -15,6 +15,8 @@
 
     <file>themes/light.json</file>
     <file>themes/dark.json</file>
+
+    <file>data/errorCodes.json</file>
   </qresource>
 
   <qresource prefix="/pages">

@@ -6,6 +6,7 @@
 #include "api/YandexAccount.h"
 #include "api/CapabilityFactory.h"
 #include "auth/AuthorizationService.h"
+#include "capabilities/ColorSettingCapability.h"
 #include "models/ScenariosModel/ScenariosModel.h"
 #include "models/DevicesModel//DevicesModel.h"
 #include "models/DevicesModel/DevicesFilterModel.h"
@@ -23,6 +24,7 @@
 #include "capabilities/OnOffCapability.h"
 #include "capabilities/RangeCapability.h"
 #include "capabilities/ToggleCapability.h"
+#include "capabilities/ColorSettingCapability.h"
 
 int main(int argc, char *argv[]) {
   QQuickStyle::setStyle("Basic");
@@ -74,6 +76,7 @@ int main(int argc, char *argv[]) {
   qmlRegisterType<OnOffCapability>("YandexHomeDesktop.Capabilities", 1, 0, "OnOff");
   qmlRegisterType<RangeCapability>("YandexHomeDesktop.Capabilities", 1, 0, "Range");
   qmlRegisterType<ToggleCapability>("YandexHomeDesktop.Capabilities", 1, 0, "Toggle");
+  qmlRegisterType<ColorSettingCapability>("YandexHomeDesktop.Capabilities", 1, 0, "ColorSetting");
 
   QObject::connect(
     &engine,

@@ -38,6 +38,8 @@ qt_add_executable(appYandexHomeDesktop
         src/capabilities/ICapability.h
         src/capabilities/ToggleCapability.cpp
         src/capabilities/ToggleCapability.h
+        src/capabilities/ColorSettingCapability.cpp
+        src/capabilities/ColorSettingCapability.h
 )
 
 if(APPLE)

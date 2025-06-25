@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import QtQuick.Controls
 import YandexHomeDesktop.Ui as UI
 import YandexHomeDesktop.Models as Models
+import YandexHomeDesktop.Capabilities as Capabilities
 
 Item {
   id: root
@@ -11,6 +12,13 @@ Item {
   property int currentTab: 0
 
   property var deviceModelData: model
+
+  Capabilities.ColorSetting {
+    id: colorSettingCapability
+
+    state: model.deviceState
+    parameters: model.deviceParameters
+  }
 
   ColumnLayout {
     id: contentColumn
@@ -76,8 +84,8 @@ Item {
         // model: colorModel
 
         model: Models.ColorsFilterModel {
-          min: deviceModel.GetParameters(deviceModelData.index).temperature_k.min
-          max: deviceModel.GetParameters(deviceModelData.index).temperature_k.max
+          min: colorSettingCapability.GetTemperatureMin()
+          max: colorSettingCapability.GetTemperatureMax()
 
           sourceModel: colorModel
 
@@ -124,14 +132,12 @@ Item {
               console.log("Selected color:", index, model.color);
               console.log("Model index:", deviceModelData.index);
 
-              const capability_info = deviceModel.GetCapabilityInfo(deviceModelData.index);
-
               let capability_action = null;
 
               if (isTemperature) {
-                capability_action = capabilityFactory.CreateColorSetting(capability_info, model.temperature);
+                capability_action = colorSettingCapability.Create(model.temperature);
               } else {
-                capability_action = capabilityFactory.CreateColorSetting(capability_info, model.color);
+                capability_action = colorSettingCapability.Create(model.color);
               }
 
               deviceModel.UseCapability(deviceModelData.index, capability_action);
@@ -155,7 +161,7 @@ Item {
         // model: modesModel
 
         model: Models.ModesFilterModel {
-          allowedScenes: deviceModel.GetParameters(deviceModelData.index).color_scene.scenes
+          allowedScenes: colorSettingCapability.GetAvailableScenes()
           sourceModel: modesModel
         }
 
@@ -210,12 +216,9 @@ Item {
             onClicked: {
               console.log("Selected mode:", index, modeId);
               console.log("Model index:", deviceModelData.index);
-
               console.log("Selected mode:", modeId);
 
-              const capability_info = deviceModel.GetCapabilityInfo(deviceModelData.index);
-              const capability_action = capabilityFactory.CreateColorSetting(capability_info, modeId);
-
+              const capability_action = colorSettingCapability.Create(modeId);
               deviceModel.UseCapability(deviceModelData.index, capability_action);
             }
           }

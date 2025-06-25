@@ -4,6 +4,24 @@
 
 class ColorSettingCapability : public ICapability {
   Q_OBJECT
+  Q_PROPERTY(
+    int temperatureMin
+    READ GetTemperatureMin
+    WRITE SetTemperatureMin
+    NOTIFY temperatureMinChanged
+  )
+  Q_PROPERTY(
+    int temperatureMax
+    READ GetTemperatureMax
+    WRITE SetTemperatureMax
+    NOTIFY temperatureMaxChanged
+  )
+  Q_PROPERTY(
+    QVariantList availableScenes
+    READ GetAvailableScenes
+    WRITE SetAvailableScenes
+    NOTIFY availableScenesChanged
+  )
 public:
   explicit ColorSettingCapability(QObject *parent = nullptr);
 
@@ -14,8 +32,20 @@ public:
   Q_INVOKABLE [[nodiscard]] QVariantMap Create(int value);
   Q_INVOKABLE [[nodiscard]] QVariantMap Create(const QString& value);
 
-  Q_INVOKABLE [[nodiscard]] int GetTemperatureMin() const;
-  Q_INVOKABLE [[nodiscard]] int GetTemperatureMax() const;
-  Q_INVOKABLE [[nodiscard]] QVariantList GetAvailableScenes() const;
+  [[nodiscard]] int GetTemperatureMin() const;
+  [[nodiscard]] int GetTemperatureMax() const;
+  [[nodiscard]] QVariantList GetAvailableScenes() const;
+
+  void SetParameters(const QVariantMap& parameters) override;
+
+signals:
+  void temperatureMinChanged();
+  void temperatureMaxChanged();
+  void availableScenesChanged();
+
+public slots:
+  void SetTemperatureMin(int value);
+  void SetTemperatureMax(int value);
+  void SetAvailableScenes(const QVariantList& value);
 };
 

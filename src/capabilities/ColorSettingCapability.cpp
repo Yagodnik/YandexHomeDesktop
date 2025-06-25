@@ -79,3 +79,35 @@ QVariantList ColorSettingCapability::GetAvailableScenes() const {
   const auto color_scene = parameters_["color_scene"].toMap();
   return color_scene["scenes"].toList();
 }
+
+void ColorSettingCapability::SetParameters(const QVariantMap &parameters) {
+  ICapability::SetParameters(parameters);
+
+  emit temperatureMinChanged();
+  emit temperatureMaxChanged();
+  emit availableScenesChanged();
+}
+
+void ColorSettingCapability::SetTemperatureMin(int value) {
+  const auto temperature_k = parameters_["temperature_k"].toMap();
+  temperature_k["min"] = value;
+  parameters_["temperature_k"] = temperature_k;
+
+  emit temperatureMinChanged();
+}
+
+void ColorSettingCapability::SetTemperatureMax(int value) {
+  const auto temperature_k = parameters_["temperature_k"].toMap();
+  temperature_k["max"] = value;
+  parameters_["temperature_k"] = temperature_k;
+
+  emit temperatureMinChanged();
+}
+
+void ColorSettingCapability::SetAvailableScenes(const QVariantList &value) {
+  const auto temperature_k = parameters_["color_scene"].toMap();
+  temperature_k["scenes"] = value;
+  parameters_["color_scene"] = temperature_k;
+
+  emit availableScenesChanged();
+}

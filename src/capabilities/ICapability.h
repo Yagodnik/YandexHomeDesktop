@@ -10,14 +10,14 @@ class ICapability : public QObject {
 public:
   explicit ICapability(QObject *parent = nullptr);
 
-  [[nodiscard]] QVariantMap GetState() const;
-  [[nodiscard]] QVariantMap GetParameters() const;
+  virtual QVariantMap GetState() const;
+  virtual QVariantMap GetParameters() const;
 
   virtual void SetValue(const QVariant& value) = 0;
 
 public slots:
-  void SetState(const QVariantMap& state);
-  void SetParameters(const QVariantMap& parameters);
+  virtual void SetState(const QVariantMap& state);
+  virtual void SetParameters(const QVariantMap& parameters);
   virtual QVariant GetValue() const = 0;
 
 signals:

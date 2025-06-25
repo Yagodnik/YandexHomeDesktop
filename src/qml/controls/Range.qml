@@ -64,24 +64,16 @@ Item {
 
     height: 12
 
-    from: 0
-    to: 100
-    stepSize: 1
+    from: rangeCapability.min
+    to: rangeCapability.max
+    stepSize: rangeCapability.precision
 
-    // value: deviceState["value"]
     value: rangeCapability.value
 
     onPressedChanged: {
       if (!pressed) {
         const capability_action = rangeCapability.Create(value);
         deviceModel.UseCapability(model.index, capability_action);
-
-        // console.log("Applying slider updates")
-        //
-        // const capability_info = deviceModel.GetCapabilityInfo(model.index);
-        // const capability_action = capabilityFactory.CreateRange(capability_info, value);
-        //
-        // deviceModel.UseCapability(model.index, capability_action);
       }
     }
   }

@@ -84,8 +84,11 @@ Item {
         // model: colorModel
 
         model: Models.ColorsFilterModel {
-          min: colorSettingCapability.GetTemperatureMin()
-          max: colorSettingCapability.GetTemperatureMax()
+          // min: colorSettingCapability.GetTemperatureMin()
+          // max: colorSettingCapability.GetTemperatureMax()
+
+          min: colorSettingCapability.temperatureMin
+          max: colorSettingCapability.temperatureMax
 
           sourceModel: colorModel
 
@@ -161,7 +164,8 @@ Item {
         // model: modesModel
 
         model: Models.ModesFilterModel {
-          allowedScenes: colorSettingCapability.GetAvailableScenes()
+          // allowedScenes: colorSettingCapability.GetAvailableScenes()
+          allowedScenes: colorSettingCapability.availableScenes
           sourceModel: modesModel
         }
 

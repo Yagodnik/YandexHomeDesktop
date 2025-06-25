@@ -3,11 +3,11 @@
 RangeCapability::RangeCapability(QObject *parent) : ICapability(parent) {}
 
 void RangeCapability::SetValue(const QVariant& value) {
-  if (GetValue().toInt() == value.toInt()) {
+  if (GetValue().toDouble() == value.toDouble()) {
     return;
   }
 
-  state_["value"] = value.toInt();
+  state_["value"] = value.toDouble();
 
   emit valueChanged();
   emit stateChanged();
@@ -18,14 +18,64 @@ QVariant RangeCapability::GetValue() const {
     return 0;
   }
 
-  return state_["value"].toInt();
+  return state_["value"].toDouble();
 }
 
-QVariantMap RangeCapability::Create(int value) {
+double RangeCapability::GetMin() const {
+  const auto range = parameters_["range"].toMap();
+  return range["min"].toDouble();
+}
+
+double RangeCapability::GetMax() const {
+  const auto range = parameters_["range"].toMap();
+  return range["max"].toDouble();
+}
+
+double RangeCapability::GetPrecision() const {
+  const auto range = parameters_["range"].toMap();
+  return range["precision"].toDouble();
+}
+
+QVariantMap RangeCapability::Create(double value) {
   const auto instance = state_["instance"].toString();
 
   return {
     { "instance", instance },
     { "value", value }
   };
+}
+
+void RangeCapability::SetMin(double value) {
+  QVariantMap range = parameters_.value("range").toMap();
+  range["min"] = value;
+  parameters_["range"] = range;
+
+  emit parametersChanged();
+  emit minChanged();
+}
+
+void RangeCapability::SetMax(double value) {
+  QVariantMap range = parameters_.value("range").toMap();
+  range["max"] = value;
+  parameters_["range"] = range;
+
+  emit parametersChanged();
+  emit maxChanged();
+}
+
+void RangeCapability::SetPrecision(double value) {
+  QVariantMap range = parameters_.value("range").toMap();
+  range["precision"] = value;
+  parameters_["range"] = range;
+
+  emit parametersChanged();
+  emit precisionChanged();
+}
+
+void RangeCapability::SetParameters(const QVariantMap &parameters) {
+  ICapability::SetParameters(parameters);
+
+  emit minChanged();
+  emit maxChanged();
+  emit precisionChanged();
 }

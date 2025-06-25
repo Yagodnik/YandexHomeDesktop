@@ -1,8 +1,17 @@
 import QtQuick
 import YandexHomeDesktop.Ui as UI
+import YandexHomeDesktop.Capabilities as Capabilities
 
 Item {
+  id: root
   height: 48
+
+  Capabilities.Toggle {
+    id: toggleCapability
+
+    state: model.deviceState
+    parameters: model.deviceParameters
+  }
 
   Rectangle {
     anchors.fill: parent
@@ -12,9 +21,28 @@ Item {
 
   UI.DefaultText {
     anchors.left: parent.left
-    anchors.leftMargin: 8
+    anchors.leftMargin: 12
     anchors.verticalCenter: parent.verticalCenter
 
-    text: "Вкл/выкл"
+    text: name
+  }
+
+  Item {
+    anchors.right: parent.right
+    anchors.rightMargin: 12
+    anchors.verticalCenter: parent.verticalCenter
+    width: switchControl.width
+    height: switchControl.height
+
+    UI.MySwitch {
+      id: switchControl
+      anchors.fill: parent
+      checked: toggleCapability.value
+
+      onToggled: function(checked) {
+        const capability_action = toggleCapability.Create(checked);
+        deviceModel.UseCapability(model.index, capability_action);
+      }
+    }
   }
 }

@@ -1,16 +1,19 @@
 #include "RangeCapability.h"
 
-RangeCapability::RangeCapability(QObject *parent) : QObject(parent) {}
+RangeCapability::RangeCapability(QObject *parent) : ICapability(parent) {}
 
-QVariantMap RangeCapability::GetState() const {
-  return state_;
+void RangeCapability::SetValue(const QVariant& value) {
+  if (GetValue().toInt() == value.toInt()) {
+    return;
+  }
+
+  state_["value"] = value.toInt();
+
+  emit valueChanged();
+  emit stateChanged();
 }
 
-QVariantMap RangeCapability::GetParameters() const {
-  return parameters_;
-}
-
-int RangeCapability::GetValue() const {
+QVariant RangeCapability::GetValue() const {
   if (state_.isEmpty()) {
     return 0;
   }
@@ -25,31 +28,4 @@ QVariantMap RangeCapability::Create(int value) {
     { "instance", instance },
     { "value", value }
   };
-}
-
-void RangeCapability::SetState(const QVariantMap &state) {
-  const bool old_value = GetValue();
-  state_ = state;
-  emit stateChanged();
-
-  if (GetValue() != old_value) {
-    qDebug() << "Value update";
-    emit valueChanged();
-  }
-}
-
-void RangeCapability::SetParameters(const QVariantMap &parameters) {
-  parameters_ = parameters;
-  emit parametersChanged();
-}
-
-void RangeCapability::SetValue(const int value) {
-  if (GetValue() == value) {
-    return;
-  }
-
-  state_["value"] = value;
-
-  emit valueChanged();
-  emit stateChanged();
 }

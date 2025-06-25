@@ -23,9 +23,9 @@ QVariant OnOffCapability::GetValue() const {
   return state_["value"].toBool();
 }
 
-QVariantMap OnOffCapability::Create(const QVariant &data) {
+QVariantMap OnOffCapability::Create(const bool value) {
   return {
     { "instance", "on" },
-    { "value", data.toBool() }
+    { "value", value }
   };
 }

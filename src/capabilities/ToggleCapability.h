@@ -3,13 +3,13 @@
 #include <QMap>
 #include "ICapability.h"
 
-class OnOffCapability : public ICapability {
+class ToggleCapability : public ICapability {
   Q_OBJECT
 public:
-  explicit OnOffCapability(QObject *parent = nullptr);
+  explicit ToggleCapability(QObject *parent = nullptr);
 
   void SetValue(const QVariant& value) override;
   QVariant GetValue() const override;
 
-  Q_INVOKABLE [[nodiscard]] QVariantMap Create(bool data);
+  Q_INVOKABLE [[nodiscard]] QVariantMap Create(bool value);
 };

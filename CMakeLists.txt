@@ -36,6 +36,8 @@ qt_add_executable(appYandexHomeDesktop
         src/capabilities/RangeCapability.h
         src/capabilities/ICapability.cpp
         src/capabilities/ICapability.h
+        src/capabilities/ToggleCapability.cpp
+        src/capabilities/ToggleCapability.h
 )
 
 if(APPLE)

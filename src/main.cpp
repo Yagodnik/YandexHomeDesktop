@@ -1,6 +1,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QQuickStyle>
 #include "api/YandexHomeApi.h"
 #include "api/YandexAccount.h"
 #include "api/CapabilityFactory.h"
@@ -21,7 +22,7 @@
 #include "utils/ErrorCodes.h"
 #include "capabilities/OnOffCapability.h"
 #include "capabilities/RangeCapability.h"
-#include <QQuickStyle>
+#include "capabilities/ToggleCapability.h"
 
 int main(int argc, char *argv[]) {
   QQuickStyle::setStyle("Basic");
@@ -72,6 +73,7 @@ int main(int argc, char *argv[]) {
 
   qmlRegisterType<OnOffCapability>("YandexHomeDesktop.Capabilities", 1, 0, "OnOff");
   qmlRegisterType<RangeCapability>("YandexHomeDesktop.Capabilities", 1, 0, "Range");
+  qmlRegisterType<ToggleCapability>("YandexHomeDesktop.Capabilities", 1, 0, "Toggle");
 
   QObject::connect(
     &engine,

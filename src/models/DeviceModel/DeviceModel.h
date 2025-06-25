@@ -47,7 +47,8 @@ public:
     LastUpdateTimeRole,
     DelegateSourceRole,
     BusyRole,
-    StateRole
+    StateRole,
+    ParametersRole
   };
 
   [[nodiscard]] int rowCount(const QModelIndex &parent) const override;

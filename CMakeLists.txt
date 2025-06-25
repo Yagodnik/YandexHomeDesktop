@@ -30,6 +30,12 @@ qt_add_executable(appYandexHomeDesktop
         src/utils/Themes.h
         src/utils/ErrorCodes.cpp
         src/utils/ErrorCodes.h
+        src/capabilities/OnOffCapability.cpp
+        src/capabilities/OnOffCapability.h
+        src/capabilities/RangeCapability.cpp
+        src/capabilities/RangeCapability.h
+        src/capabilities/ICapability.cpp
+        src/capabilities/ICapability.h
 )
 
 if(APPLE)

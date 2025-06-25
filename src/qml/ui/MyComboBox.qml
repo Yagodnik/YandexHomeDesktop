@@ -15,6 +15,8 @@ ComboBox {
 
   font.pointSize: 14
 
+  signal indexSelected(int index)
+
   contentItem: Text {
     text: root.displayText
     color: root.textColor
@@ -69,7 +71,6 @@ ComboBox {
         Text {
           text: modelData
           anchors.verticalCenter: parent.verticalCenter
-
           color: "#000"
           font.pointSize: 14
         }
@@ -79,7 +80,7 @@ ComboBox {
           cursorShape: Qt.PointingHandCursor
 
           onClicked: {
-            root.currentIndex = index
+            root.indexSelected(index)
             root.popup.close()
           }
         }

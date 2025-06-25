@@ -19,6 +19,8 @@
 #include "utils/Router.h"
 #include "utils/Themes.h"
 #include "utils/ErrorCodes.h"
+#include "capabilities/OnOffCapability.h"
+#include "capabilities/RangeCapability.h"
 #include <QQuickStyle>
 
 int main(int argc, char *argv[]) {
@@ -67,6 +69,9 @@ int main(int argc, char *argv[]) {
   qmlRegisterType<RoomsFilterModel>("YandexHomeDesktop.Models", 1, 0, "RoomsFilterModel");
   qmlRegisterType<ColorsFilterModel>("YandexHomeDesktop.Models", 1, 0, "ColorsFilterModel");
   qmlRegisterType<ModesFilterModel>("YandexHomeDesktop.Models", 1, 0, "ModesFilterModel");
+
+  qmlRegisterType<OnOffCapability>("YandexHomeDesktop.Capabilities", 1, 0, "OnOff");
+  qmlRegisterType<RangeCapability>("YandexHomeDesktop.Capabilities", 1, 0, "Range");
 
   QObject::connect(
     &engine,

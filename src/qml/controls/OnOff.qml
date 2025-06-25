@@ -1,9 +1,17 @@
 import QtQuick
 import YandexHomeDesktop.Ui as UI
+import YandexHomeDesktop.Capabilities as Capabilities
 
 Item {
   id: root
   height: 48
+
+  Capabilities.OnOff {
+    id: onOffCapability
+
+    state: model.deviceState
+    parameters: model.deviceParameters
+  }
 
   Rectangle {
     anchors.fill: parent
@@ -29,23 +37,13 @@ Item {
     UI.MySwitch {
       id: switchControl
       anchors.fill: parent
-      checked: model.deviceState["value"]
+      checked: onOffCapability.value
       // enabled: !model.busy
 
       onToggled: function(checked) {
-        const capability_info = deviceModel.GetCapabilityInfo(model.index);
-        const capability_action = capabilityFactory.CreateOnOff(capability_info, checked);
-
+        const capability_action = onOffCapability.Create(checked);
         deviceModel.UseCapability(model.index, capability_action);
       }
     }
-
-    // UI.MyProgressIndicator {
-    //   anchors.centerIn: parent
-    //   visible: model.busy
-    //
-    //   width: 32
-    //   height: 32
-    // }
   }
 }

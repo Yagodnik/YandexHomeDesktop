@@ -27,10 +27,10 @@ DeviceModel::DeviceModel(YandexHomeApi *api, QObject *parent)
   timer_.setSingleShot(false);
 
   connect(&timer_, &QTimer::timeout, [this]() {
-    qDebug() << "Requesting update:" << QString::number(
-      static_cast<double>(QDateTime::currentMSecsSinceEpoch()) / 1000,
-      'f', 3
-    );
+    // qDebug() << "Requesting update:" << QString::number(
+    //   static_cast<double>(QDateTime::currentMSecsSinceEpoch()) / 1000,
+    //   'f', 3
+    // );
 
     RequestData(device_id_);
   });
@@ -66,8 +66,11 @@ QVariant DeviceModel::data(const QModelIndex &index, int role) const {
       // return pending_[index.row()].is_pending;
     case StateRole: {
       const auto& c = capabilities_data_.at(index.row()).data;
-      qDebug() << "Value for " << index.row() << "=" << c.state["value"];
+      // qDebug() << "Value for " << index.row() << "=" << c.state["value"];
       return c.state;
+    } case ParametersRole: {
+      const auto& c = capabilities_data_.at(index.row()).data;
+      return c.parameters;
     } default:
       return {};
   }
@@ -79,7 +82,8 @@ QHash<int, QByteArray> DeviceModel::roleNames() const {
     { NameRole, "name"},
     { DelegateSourceRole, "delegateSource" },
     { BusyRole, "busy"},
-    { StateRole, "deviceState" }
+    { StateRole, "deviceState" },
+    { ParametersRole, "deviceParameters" }
   };
 }
 
@@ -88,9 +92,9 @@ void DeviceModel::RequestData(const QString& device_id) {
 
   last_update_start_time_ = static_cast<double>(QDateTime::currentMSecsSinceEpoch()) / 1000;
 
-  qDebug() << "Update requested:" << QString::number(
-    last_update_start_time_, 'f', 3
-  );
+  // qDebug() << "Update requested:" << QString::number(
+  //   last_update_start_time_, 'f', 3
+  // );
 
   api_->GetDeviceInfo(device_id_);
 }
@@ -121,8 +125,8 @@ void DeviceModel::UseCapability(const int index, const QVariantMap &state) {
   const auto model_index = createIndex(index, 0);
   emit dataChanged(model_index, model_index);
 
-  qDebug() << "Previously updated:" << QString::number(capability.last_updated, 'f', 3);
-  qDebug() << "Requesting update value to" << state["value"];
+  // qDebug() << "Previously updated:" << QString::number(capability.last_updated, 'f', 3);
+  // qDebug() << "Requesting update value to" << state["value"];
 
   const CapabilityObject action = {
     .type = capability.type,
@@ -140,16 +144,16 @@ void DeviceModel::UseCapability(const int index, const QVariantMap &state) {
 
   capability.last_updated = static_cast<double>(QDateTime::currentMSecsSinceEpoch()) / 1000.0;
 
-  qDebug() << "Action request time:" << QString::number(capability.last_updated, 'f', 3);
+  // qDebug() << "Action request time:" << QString::number(capability.last_updated, 'f', 3);
 }
 
 
 void DeviceModel::OnDeviceInfoReceived(const DeviceObject &info) {
   const double receive_time = static_cast<double>(QDateTime::currentMSecsSinceEpoch()) / 1000;
 
-  qDebug() << "Update received:" << QString::number(
-    receive_time, 'f', 3
-  );
+  // qDebug() << "Update received:" << QString::number(
+  //   receive_time, 'f', 3
+  // );
 
   bool empty = capabilities_data_.empty();
 
@@ -165,7 +169,7 @@ void DeviceModel::OnDeviceInfoReceived(const DeviceObject &info) {
     auto& capability = capabilities_data_[i];
     const auto& incoming = info.capabilities[i];
 
-    qDebug() << "Updating value for" << i << "=" << incoming.state["value"];
+    // qDebug() << "Updating value for" << i << "=" << incoming.state["value"];
 
     if (capability.is_pending) {
       qDebug() << "Blocking update because it is processing";
@@ -191,7 +195,7 @@ void DeviceModel::OnDeviceInfoReceived(const DeviceObject &info) {
     endResetModel();
   }
 
-  qDebug() << "DeviceModel::OnDeviceInfoReceived" << capabilities_data_.size();
+  // qDebug() << "DeviceModel::OnDeviceInfoReceived" << capabilities_data_.size();
 
   const auto top_left = createIndex(0, 0);
   const auto bottom_right = createIndex(capabilities_data_.size() - 1, 0);

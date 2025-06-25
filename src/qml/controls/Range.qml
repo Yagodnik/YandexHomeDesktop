@@ -1,27 +1,16 @@
 import QtQuick
 import YandexHomeDesktop.Ui as UI
+import YandexHomeDesktop.Capabilities as Capabilities
 
 Item {
   id: rangeControl
   height: 74
 
-  Connections {
-    target: deviceModel
+  Capabilities.Range {
+    id: rangeCapability
 
-    function onDataUpdated(index) {
-      if (index !== model.index) {
-        return;
-      }
-      // if (busy) {
-      //   return;
-      // }
-
-      // const state = deviceModel.GetState(model.index);
-      //
-      // console.log("Assigning new value = ", state["value"]);
-      //
-      // rangeSlider.value = state["value"];
-    }
+    state: model.deviceState
+    parameters: model.deviceParameters
   }
 
   Rectangle {
@@ -79,16 +68,20 @@ Item {
     to: 100
     stepSize: 1
 
-    value: deviceState["value"]
+    // value: deviceState["value"]
+    value: rangeCapability.value
 
     onPressedChanged: {
       if (!pressed) {
-        console.log("Applying slider updates")
-
-        const capability_info = deviceModel.GetCapabilityInfo(model.index);
-        const capability_action = capabilityFactory.CreateRange(capability_info, value);
-
+        const capability_action = rangeCapability.Create(value);
         deviceModel.UseCapability(model.index, capability_action);
+
+        // console.log("Applying slider updates")
+        //
+        // const capability_info = deviceModel.GetCapabilityInfo(model.index);
+        // const capability_action = capabilityFactory.CreateRange(capability_info, value);
+        //
+        // deviceModel.UseCapability(model.index, capability_action);
       }
     }
   }

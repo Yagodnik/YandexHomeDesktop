@@ -8,16 +8,21 @@ Item {
   width: 32
   height: 12
 
-  property var checked: false
+  property bool checked: false
+
+  property bool internalChecked: checked
+
   signal toggled(bool checked)
+
+  onCheckedChanged: {
+    internalChecked = checked
+  }
 
   Rectangle {
     id: track
     anchors.fill: parent
     radius: height / 2
-    color: checked ?
-      themes.GetSwitchActive() : themes.GetSwitchInactive()
-
+    color: internalChecked ? themes.GetSwitchActive() : themes.GetSwitchInactive()
     Behavior on color { ColorAnimation { duration: 200 } }
   }
 
@@ -28,10 +33,8 @@ Item {
     radius: 12
     color: themes.GetControlText()
     anchors.verticalCenter: parent.verticalCenter
-    x: checked ? root.width - width : 0
-
+    x: internalChecked ? root.width - width : 0
     Behavior on x { NumberAnimation { duration: 200; easing.type: Easing.InOutQuad } }
-
     layer.enabled: true
     layer.effect: DropShadow {
       source: thumb
@@ -48,8 +51,8 @@ Item {
     cursorShape: Qt.PointingHandCursor
 
     onClicked: {
-      checked = !checked
-      toggled(checked)
+      internalChecked = !internalChecked
+      toggled(internalChecked)
     }
   }
 }

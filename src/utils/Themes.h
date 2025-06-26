@@ -7,19 +7,58 @@
 
 class Themes : public QObject {
   Q_OBJECT
+
+  Q_PROPERTY(QString mainText READ GetMainText WRITE SetMainText NOTIFY mainTextChanged)
+  Q_PROPERTY(QString background READ GetBackground WRITE SetBackground NOTIFY backgroundChanged)
+  Q_PROPERTY(QString headerBackground READ GetHeaderBackground WRITE SetHeaderBackground NOTIFY headerBackgroundChanged)
+  Q_PROPERTY(QString accent READ GetAccent WRITE SetAccent NOTIFY accentChanged)
+  Q_PROPERTY(QString accent2 READ GetAccent2 WRITE SetAccent2 NOTIFY accent2Changed)
+  Q_PROPERTY(QString controlText READ GetControlText WRITE SetControlText NOTIFY controlTextChanged)
+  Q_PROPERTY(QString inactive READ GetInactive WRITE SetInactive NOTIFY inactiveChanged)
+  Q_PROPERTY(QString switchInactive READ GetSwitchInactive WRITE SetSwitchInactive NOTIFY switchInactiveChanged)
+  Q_PROPERTY(QString switchActive READ GetSwitchActive WRITE SetSwitchActive NOTIFY switchActiveChanged)
+  Q_PROPERTY(QColor trackColor READ GetTrackColor WRITE SetTrackColor NOTIFY trackColorChanged)
+
 public:
   explicit Themes(QObject* parent = nullptr);
 
-  Q_INVOKABLE [[nodiscard]] QString GetMainText() const;
-  Q_INVOKABLE [[nodiscard]] QString GetBackground() const;
-  Q_INVOKABLE [[nodiscard]] QString GetHeaderBackground() const;
-  Q_INVOKABLE [[nodiscard]] QString GetAccent() const;
-  Q_INVOKABLE [[nodiscard]] QString GetAccent2() const;
-  Q_INVOKABLE [[nodiscard]] QString GetControlText() const;
-  Q_INVOKABLE [[nodiscard]] QString GetInactive() const;
-  Q_INVOKABLE [[nodiscard]] QString GetSwitchInactive() const;
-  Q_INVOKABLE [[nodiscard]] QString GetSwitchActive() const;
-  Q_INVOKABLE [[nodiscard]] QColor GetTrackColor() const;
+  // Getters
+  [[nodiscard]] QString GetMainText() const;
+  [[nodiscard]] QString GetBackground() const;
+  [[nodiscard]] QString GetHeaderBackground() const;
+  [[nodiscard]] QString GetAccent() const;
+  [[nodiscard]] QString GetAccent2() const;
+  [[nodiscard]] QString GetControlText() const;
+  [[nodiscard]] QString GetInactive() const;
+  [[nodiscard]] QString GetSwitchInactive() const;
+  [[nodiscard]] QString GetSwitchActive() const;
+  [[nodiscard]] QColor GetTrackColor() const;
+
+  Q_INVOKABLE void SetTheme(const QString& theme);
+
+signals:
+  void mainTextChanged();
+  void backgroundChanged();
+  void headerBackgroundChanged();
+  void accentChanged();
+  void accent2Changed();
+  void controlTextChanged();
+  void inactiveChanged();
+  void switchInactiveChanged();
+  void switchActiveChanged();
+  void trackColorChanged();
+
+public slots:
+  void SetMainText(const QString& text);
+  void SetBackground(const QString& background);
+  void SetHeaderBackground(const QString& background);
+  void SetAccent(const QString& accent);
+  void SetAccent2(const QString& accent2);
+  void SetControlText(const QString& text);
+  void SetInactive(const QString& text);
+  void SetSwitchInactive(const QString& text);
+  void SetSwitchActive(const QString& text);
+  void SetTrackColor(QColor color);
 
 private:
   JSON_STRUCT(Color,
@@ -42,4 +81,6 @@ private:
 
   QString current_theme_;
   QHash<QString, Theme> themes_;
+
+  Theme active_theme_;
 };

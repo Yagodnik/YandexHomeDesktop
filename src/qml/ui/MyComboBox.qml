@@ -8,10 +8,10 @@ ComboBox {
   width: 80
   height: 32
 
-  property color normalColor: themes.GetAccent()
-  property color pressedColor: themes.GetAccent2()
-  property color textColor: themes.GetControlText()
-  property color popupBackground: themes.GetHeaderBackground()
+  property color normalColor: themes.accent
+  property color pressedColor: themes.accent2
+  property color textColor: themes.controlText
+  property color popupBackground: themes.headerBackground
 
   font.pointSize: 14
 
@@ -44,7 +44,7 @@ ComboBox {
     background: Rectangle {
       anchors.fill: parent
       radius: 8
-      color: highlighted ? themes.GetAccent() : "transparent"
+      color: highlighted ? themes.accent : "transparent"
     }
 
     contentItem: Text {

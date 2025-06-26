@@ -22,7 +22,7 @@ Item {
     id: track
     anchors.fill: parent
     radius: height / 2
-    color: internalChecked ? themes.GetSwitchActive() : themes.GetSwitchInactive()
+    color: internalChecked ? themes.switchActive : themes.switchInactive
     Behavior on color { ColorAnimation { duration: 200 } }
   }
 
@@ -31,7 +31,7 @@ Item {
     width: 18
     height: 18
     radius: 12
-    color: themes.GetControlText()
+    color: themes.controlText
     anchors.verticalCenter: parent.verticalCenter
     x: internalChecked ? root.width - width : 0
     Behavior on x { NumberAnimation { duration: 200; easing.type: Easing.InOutQuad } }

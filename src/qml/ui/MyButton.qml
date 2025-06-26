@@ -13,8 +13,8 @@ Item {
   implicitWidth: label.implicitWidth + 2 * horizontalMargin
   implicitHeight: label.implicitHeight + 2 * verticalMargin
 
-  property color normalColor: themes.GetAccent()
-  property color pressedColor: themes.GetAccent2()
+  property color normalColor: themes.accent
+  property color pressedColor: themes.accent2
 
   Rectangle {
     id: background
@@ -32,7 +32,7 @@ Item {
   Text {
     id: label
     anchors.centerIn: parent
-    color: themes.GetControlText()
+    color: themes.controlText
     font.pointSize: 16
   }
 

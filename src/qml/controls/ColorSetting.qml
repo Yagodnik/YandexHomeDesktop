@@ -42,7 +42,7 @@ Item {
           Rectangle {
             anchors.fill: parent
             radius: 45
-            color: root.currentTab === index ? themes.GetAccent() : themes.GetInactive()
+            color: root.currentTab === index ? themes.accent : themes.inactive
           }
 
           UI.DefaultText {
@@ -51,7 +51,7 @@ Item {
             text: modelData.label
             font.pointSize: 14
             wrapMode: Text.WordWrap
-            color: themes.GetControlText()
+            color: themes.controlText
             horizontalAlignment: Text.AlignHCenter
           }
 
@@ -101,7 +101,7 @@ Item {
           width: Math.max(72, root.width / 5 - 10)
           height: 90
           radius: 12
-          color: themes.GetHeaderBackground()
+          color: themes.headerBackground
 
           Column {
             anchors.centerIn: parent
@@ -121,7 +121,7 @@ Item {
               width: parent.width
               text: model.name
               font.pointSize: 10
-              color: themes.GetControlText()
+              color: themes.controlText
               wrapMode: Text.WordWrap
               anchors.horizontalCenter: parent.horizontalCenter
               horizontalAlignment: Text.AlignHCenter
@@ -173,7 +173,7 @@ Item {
           width: Math.max(90, root.width / 4 - 10)
           height: 90
           radius: 12
-          color: themes.GetHeaderBackground()
+          color: themes.headerBackground
 
           Column {
             anchors.centerIn: parent
@@ -208,7 +208,7 @@ Item {
             UI.DefaultText {
               text: name
               font.pointSize: 10
-              color: themes.GetControlText()
+              color: themes.controlText
 
               anchors.horizontalCenter: parent.horizontalCenter
             }

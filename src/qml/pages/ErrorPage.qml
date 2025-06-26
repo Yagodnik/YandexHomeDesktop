@@ -4,7 +4,7 @@ import YandexHomeDesktop.Ui as UI
 Item {
   Rectangle {
     anchors.fill: parent
-    color: themes.GetBackground()
+    color: themes.background
   }
 
   Column {
@@ -14,7 +14,7 @@ Item {
 
     UI.AnimatedText {
       text: qsTr("Что-то пошло не так!")
-      color: themes.GetInactive()
+      color: themes.inactive
       pointSize: 24
 
       anchors.horizontalCenter: col.horizontalCenter

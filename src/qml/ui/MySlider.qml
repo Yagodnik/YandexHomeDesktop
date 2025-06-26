@@ -6,10 +6,10 @@ import YandexHomeDesktop.Ui as UI
 Slider {
   id: root
 
-  property color trackColor: themes.GetTrackColor()
-  property color fillColor: themes.GetAccent()
-  property color handleColor: themes.GetAccent2()
-  property color handleBorderColor: themes.GetBackground()
+  property color trackColor: themes.trackColor
+  property color fillColor: themes.accent
+  property color handleColor: themes.accent2
+  property color handleBorderColor: themes.background
 
   implicitWidth: 200
   implicitHeight: 40

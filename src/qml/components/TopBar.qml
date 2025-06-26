@@ -9,7 +9,7 @@ Item {
 
   Rectangle {
     anchors.fill: parent
-    color: themes.GetHeaderBackground()
+    color: themes.headerBackground
   }
 
   property int activeTab: 0

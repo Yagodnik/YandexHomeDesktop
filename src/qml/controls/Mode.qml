@@ -6,7 +6,7 @@ Item {
 
   Rectangle {
     anchors.fill: parent
-    color: themes.GetHeaderBackground()
+    color: themes.beaderBackground
     radius: 16
   }
 

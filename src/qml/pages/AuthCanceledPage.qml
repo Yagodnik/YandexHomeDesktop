@@ -4,7 +4,7 @@ import YandexHomeDesktop.Ui as UI
 Item {
   Rectangle {
     anchors.fill: parent
-    color: themes.GetBackground()
+    color: themes.background
   }
 
   Column {
@@ -18,7 +18,7 @@ Item {
 
       UI.AnimatedText {
         text: qsTr("Не удалось получить доступ к хранилищу!")
-        color: themes.GetInactive()
+        color: themes.inactive
         pointSize: 16
 
         anchors.horizontalCenter: parent.horizontalCenter
@@ -26,7 +26,7 @@ Item {
 
       UI.AnimatedText {
         text: qsTr("Это необходимо для работы приложения")
-        color: themes.GetInactive()
+        color: themes.inactive
         pointSize: 12
 
         anchors.horizontalCenter: parent.horizontalCenter

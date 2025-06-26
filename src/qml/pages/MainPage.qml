@@ -61,7 +61,7 @@ Item {
 
     Rectangle {
       anchors.fill: parent
-      color: themes.GetBackground()
+      color: themes.background
     }
 
     Components.TopBar {

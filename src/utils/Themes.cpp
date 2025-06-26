@@ -1,69 +1,166 @@
 #include "Themes.h"
 
 #include <QColor>
+#include <QDir>
 
 #include "JsonLoader.h"
 
 Themes::Themes(QObject *parent)
   : QObject(parent)
 {
-  // const QString theme_path = ":/themes/light.json";
-  const QString theme_path = ":/themes/dark.json";
+  QDir themes_dir(":/themes/");
 
-  const auto theme_opt = JsonLoader::Load<Theme>(theme_path);
+  for (const auto file : themes_dir.entryInfoList()) {
+    const auto theme_opt = JsonLoader::Load<Theme>(file.absoluteFilePath());
 
-  if (!theme_opt.has_value()) {
-    qWarning() << "Failed to load theme: " << theme_path;
+    if (!theme_opt.has_value()) {
+      qWarning() << "Failed to load theme: " << file.absoluteFilePath();
+      return;
+    }
+
+    const auto& theme = theme_opt.value();
+    themes_.insert(file.baseName(), theme);
+  }
+
+  SetTheme("light");
+}
+
+void Themes::SetTheme(const QString& theme)
+{
+  if (!themes_.contains(theme)) {
+    qWarning() << "Theme not found:" << theme;
     return;
   }
 
-  const auto& theme = theme_opt.value();
+  current_theme_ = theme;
+  active_theme_ = themes_[theme];
 
-  themes_.insert("light", theme);
-  current_theme_ = "light";
+  emit mainTextChanged();
+  emit backgroundChanged();
+  emit headerBackgroundChanged();
+  emit accentChanged();
+  emit accent2Changed();
+  emit controlTextChanged();
+  emit inactiveChanged();
+  emit switchInactiveChanged();
+  emit switchActiveChanged();
+  emit trackColorChanged();
 }
 
 QString Themes::GetMainText() const {
-  return themes_[current_theme_].main_text;
+  return active_theme_.main_text;
 }
 
 QString Themes::GetBackground() const {
-  return themes_[current_theme_].background;
+  return active_theme_.background;
 }
 
 QString Themes::GetHeaderBackground() const {
-  return themes_[current_theme_].header_background;
+  return active_theme_.header_background;
 }
 
 QString Themes::GetAccent() const {
-  return themes_[current_theme_].accent;
+  return active_theme_.accent;
 }
 
 QString Themes::GetAccent2() const {
-  return themes_[current_theme_].accent2;
+  return active_theme_.accent2;
 }
 
 QString Themes::GetControlText() const {
-  return themes_[current_theme_].control_text;
+  return active_theme_.control_text;
 }
 
 QString Themes::GetInactive() const {
-  return themes_[current_theme_].inactive;
+  return active_theme_.inactive;
 }
 
 QString Themes::GetSwitchInactive() const {
-  return themes_[current_theme_].switch_inactive;
+  return active_theme_.switch_inactive;
 }
 
 QString Themes::GetSwitchActive() const {
-  return themes_[current_theme_].switch_active;
+  return active_theme_.switch_active;
 }
 
 QColor Themes::GetTrackColor() const {
-  const auto track_color = themes_[current_theme_].track_color;
-
-  QColor color(track_color.hex);
-  color.setAlphaF(track_color.alpha);
-
-  return color;
+  QColor base(active_theme_.track_color.hex);
+  base.setAlphaF(active_theme_.track_color.alpha);
+  return base;
 }
+
+// Setters (if needed for QML write access)
+void Themes::SetMainText(const QString& text) {
+  if (active_theme_.main_text != text) {
+    active_theme_.main_text = text;
+    emit mainTextChanged();
+  }
+}
+
+void Themes::SetBackground(const QString& background) {
+  if (active_theme_.background != background) {
+    active_theme_.background = background;
+    emit backgroundChanged();
+  }
+}
+
+void Themes::SetHeaderBackground(const QString& background) {
+  if (active_theme_.header_background != background) {
+    active_theme_.header_background = background;
+    emit headerBackgroundChanged();
+  }
+}
+
+void Themes::SetAccent(const QString& accent) {
+  if (active_theme_.accent != accent) {
+    active_theme_.accent = accent;
+    emit accentChanged();
+  }
+}
+
+void Themes::SetAccent2(const QString& accent2) {
+  if (active_theme_.accent2 != accent2) {
+    active_theme_.accent2 = accent2;
+    emit accent2Changed();
+  }
+}
+
+void Themes::SetControlText(const QString& text) {
+  if (active_theme_.control_text != text) {
+    active_theme_.control_text = text;
+    emit controlTextChanged();
+  }
+}
+
+void Themes::SetInactive(const QString& text) {
+  if (active_theme_.inactive != text) {
+    active_theme_.inactive = text;
+    emit inactiveChanged();
+  }
+}
+
+void Themes::SetSwitchInactive(const QString& text) {
+  if (active_theme_.switch_inactive != text) {
+    active_theme_.switch_inactive = text;
+    emit switchInactiveChanged();
+  }
+}
+
+void Themes::SetSwitchActive(const QString& text) {
+  if (active_theme_.switch_active != text) {
+    active_theme_.switch_active = text;
+    emit switchActiveChanged();
+  }
+}
+
+void Themes::SetTrackColor(QColor color) {
+  const QString hex = color.name(QColor::HexRgb);
+  float alpha = color.alphaF();
+
+  if (active_theme_.track_color.hex != hex || active_theme_.track_color.alpha != alpha) {
+    active_theme_.track_color.hex = hex;
+    active_theme_.track_color.alpha = alpha;
+    emit trackColorChanged();
+  }
+}
+

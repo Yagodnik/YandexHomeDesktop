@@ -1,6 +1,6 @@
 import QtQuick
 
 Text {
-  color: themes.GetMainText();
+  color: themes.mainText;
   font.pointSize: 16
 }

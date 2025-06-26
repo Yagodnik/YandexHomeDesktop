@@ -139,7 +139,7 @@ Item {
 
         UI.DefaultText {
           text: qsTr("Что-то пошло не так!")
-          color: themes.GetInactive()
+          color: themes.inactive
 
           anchors.horizontalCenter: errorMessage.horizontalCenter
         }

@@ -10,8 +10,8 @@ Item {
   property var active: false
 
   property var tabHeight: 48
-  property var inactiveColor: themes.GetInactive()
-  property var activeColor: themes.GetAccent()
+  property var inactiveColor: themes.inactive
+  property var activeColor: themes.accent
   property var currentColor: active ? activeColor : inactiveColor
 
   signal clicked

@@ -10,7 +10,7 @@ Column {
   Text {
     id: roomTitle
     text: name
-    color: themes.GetInactive()
+    color: themes.inactive
 
     font.pointSize: 14
     font.bold: true

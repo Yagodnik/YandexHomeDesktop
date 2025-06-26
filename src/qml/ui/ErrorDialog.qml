@@ -36,7 +36,7 @@ Dialog {
   background: Item {
     Rectangle {
       id: backgroundRect
-      color: themes.GetHeaderBackground()
+      color: themes.headerBackground
       anchors.fill: parent
       radius: 16
     }
@@ -59,13 +59,13 @@ Dialog {
       text: errorDialog.dialogTitle
       font.pixelSize: 18
       font.bold: true
-      color: themes.GetAccent()
+      color: themes.accent
     }
 
     UI.DefaultText {
       text: errorDialog.dialogMessage
       wrapMode: Text.WordWrap
-      color: themes.GetControlText()
+      color: themes.controlText
       Layout.fillWidth: true
     }
 

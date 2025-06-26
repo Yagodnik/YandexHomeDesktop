@@ -14,7 +14,6 @@ Item {
     yandexAccount.LoadData();
   }
 
-
   Connections {
     target: yandexAccount
 
@@ -30,7 +29,7 @@ Item {
   Rectangle {
     id: background
     anchors.fill: parent
-    color: themes.GetHeaderBackground()
+    color: themes.headerBackground
     radius: 16
   }
 

@@ -4,7 +4,7 @@ import YandexHomeDesktop.Ui as UI
 Item {
   Rectangle {
     anchors.fill: parent
-    color: themes.GetBackground()
+    color: themes.background
   }
 
   UI.MyProgressIndicator {
@@ -19,7 +19,7 @@ Item {
     anchors.top: progress.bottom
     anchors.topMargin: 15
     anchors.horizontalCenter: parent.horizontalCenter
-    color: "#6839CF"
+    color: themes.accent
 
     text: "Загрузка..."
   }

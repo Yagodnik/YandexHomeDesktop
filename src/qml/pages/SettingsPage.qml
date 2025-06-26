@@ -59,7 +59,7 @@ Item {
           Rectangle {
             id: background2
             anchors.fill: parent
-            color: themes.GetHeaderBackground()
+            color: themes.headerBackground
             radius: 16
           }
 
@@ -120,6 +120,10 @@ Item {
                 model: ["Светлая", "Тёмная"]
                 onActivated: {
                   console.log("Selected index:", currentIndex, "value:", currentText)
+
+                  const themesList = [ "light", "dark" ];
+
+                  themes.SetTheme(themesList[currentIndex]);
                 }
               }
             }

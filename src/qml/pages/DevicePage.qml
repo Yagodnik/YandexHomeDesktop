@@ -5,7 +5,7 @@ import YandexHomeDesktop.Components as Components
 Item {
   Rectangle {
     anchors.fill: parent
-    color: themes.GetBackground()
+    color: themes.background
   }
 
   UI.ErrorDialog {
@@ -47,7 +47,7 @@ Item {
 
     Rectangle {
       anchors.fill: parent
-      color: themes.GetHeaderBackground()
+      color: themes.headerBackground
     }
 
     Image {
@@ -81,7 +81,7 @@ Item {
       text: "НУ ВОТ ПРЯМ ДЛИННОЕ НАЗВАНИЕ"
       anchors.verticalCenter: parent.verticalCenter
       anchors.horizontalCenter: parent.horizontalCenter
-      color: themes.GetControlText()
+      color: themes.controlText
     }
   }
 

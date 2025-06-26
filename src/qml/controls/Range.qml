@@ -15,7 +15,7 @@ Item {
 
   Rectangle {
     anchors.fill: parent
-    color: themes.GetHeaderBackground()
+    color: themes.headerBackground
     radius: 16
   }
 

@@ -6,8 +6,8 @@
   "accent2": "#542da8",
   "control_text": "#000",
   "inactive": "#919cb5",
-  "switch_inactive": "#c7ccd9",
-  "switch_active": "#58c46a",
+  "switch_inactive": "#32343a",
+  "switch_active": "#5bd174",
   "track_color": {
     "hex": "#000000",
     "alpha": 0.1

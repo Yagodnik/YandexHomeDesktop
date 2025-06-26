@@ -9,6 +9,7 @@
   "switch_inactive": "#32343a",
   "switch_active": "#5bd174",
   "switch_thumb": "#ffffff",
+  "control_text2": "#FFF",
   "track_color": {
     "hex": "#9099ab",
     "alpha": 0.08

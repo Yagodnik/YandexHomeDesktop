@@ -32,7 +32,7 @@ Item {
         font.pointSize: 24
         font.bold: true
         anchors.top: parent.top
-        anchors.topMargin: 20
+        anchors.topMargin: 16
 
         MouseArea {
           anchors.fill: parent

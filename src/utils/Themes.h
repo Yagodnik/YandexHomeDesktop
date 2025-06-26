@@ -18,6 +18,7 @@ class Themes : public QObject {
   Q_PROPERTY(QString switchInactive READ GetSwitchInactive WRITE SetSwitchInactive NOTIFY switchInactiveChanged)
   Q_PROPERTY(QString switchActive READ GetSwitchActive WRITE SetSwitchActive NOTIFY switchActiveChanged)
   Q_PROPERTY(QString switchThumb READ GetSwitchThumb WRITE SetSwitchThumb NOTIFY switchThumbChanged)
+  Q_PROPERTY(QString controlText2 READ GetControlText2 WRITE SetControlText2 NOTIFY controlText2Changed)
   Q_PROPERTY(QColor trackColor READ GetTrackColor WRITE SetTrackColor NOTIFY trackColorChanged)
 
 public:
@@ -34,6 +35,7 @@ public:
   [[nodiscard]] QString GetSwitchInactive() const;
   [[nodiscard]] QString GetSwitchActive() const;
   [[nodiscard]] QString GetSwitchThumb() const;
+  [[nodiscard]] QString GetControlText2() const;
   [[nodiscard]] QColor GetTrackColor() const;
 
   Q_INVOKABLE void SetTheme(const QString& theme);
@@ -49,6 +51,7 @@ signals:
   void switchInactiveChanged();
   void switchActiveChanged();
   void switchThumbChanged();
+  void controlText2Changed();
   void trackColorChanged();
 
 public slots:
@@ -62,6 +65,7 @@ public slots:
   void SetSwitchInactive(const QString& text);
   void SetSwitchActive(const QString& text);
   void SetSwitchThumb(const QString& text);
+  void SetControlText2(const QString& text);
   void SetTrackColor(QColor color);
 
 private:
@@ -81,6 +85,7 @@ private:
     (QString, switch_inactive),
     (QString, switch_active),
     (QString, switch_thumb),
+    (QString, control_text2),
     (Color, track_color)
   );
 

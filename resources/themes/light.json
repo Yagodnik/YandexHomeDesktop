@@ -6,9 +6,10 @@
   "accent2": "#542da8",
   "control_text": "#000",
   "inactive": "#919cb5",
-  "switch_inactive": "#32343a",
+  "switch_inactive": "#c2ccd9",
   "switch_active": "#5bd174",
   "switch_thumb": "#ffffff",
+  "control_text2": "#FFF",
   "track_color": {
     "hex": "#000000",
     "alpha": 0.1

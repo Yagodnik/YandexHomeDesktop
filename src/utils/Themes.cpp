@@ -87,6 +87,10 @@ QString Themes::GetSwitchThumb() const {
   return active_theme_.switch_thumb;
 }
 
+QString Themes::GetControlText2() const {
+  return active_theme_.control_text2;
+}
+
 QColor Themes::GetTrackColor() const {
   QColor base(active_theme_.track_color.hex);
   base.setAlphaF(active_theme_.track_color.alpha);
@@ -161,6 +165,13 @@ void Themes::SetSwitchThumb(const QString &text) {
   if (active_theme_.switch_thumb != text) {
     active_theme_.switch_thumb = text;
     emit switchThumbChanged();
+  }
+}
+
+void Themes::SetControlText2(const QString &text) {
+  if (active_theme_.control_text2 != text) {
+    active_theme_.control_text2 = text;
+    emit controlText2Changed();
   }
 }
 

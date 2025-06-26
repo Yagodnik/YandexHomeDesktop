@@ -51,7 +51,7 @@ Item {
             text: modelData.label
             font.pointSize: 14
             wrapMode: Text.WordWrap
-            color: themes.controlText
+            color: themes.controlText2
             horizontalAlignment: Text.AlignHCenter
           }
 

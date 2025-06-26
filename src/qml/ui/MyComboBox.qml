@@ -19,7 +19,7 @@ ComboBox {
 
   contentItem: Text {
     text: root.displayText
-    color: root.textColor
+    color: themes.controlText2
     verticalAlignment: Text.AlignVCenter
     anchors.centerIn: root
     leftPadding: 12
@@ -49,7 +49,7 @@ ComboBox {
 
     contentItem: Text {
       text: modelData
-      color: root.textColor
+      color: highlighted ? themes.controlText2 : root.textColor
       verticalAlignment: Text.AlignVCenter
     }
 
@@ -106,7 +106,7 @@ ComboBox {
         Text {
           text: modelData
           anchors.verticalCenter: parent.verticalCenter
-          color: themes.GetControlText()
+          color: themes.controlText
         }
 
         MouseArea {

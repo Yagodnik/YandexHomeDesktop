@@ -39,6 +39,14 @@
     <file>images/modes/sunrise.svg</file>
     <file>images/modes/sunset.svg</file>
     <file>images/modes/unknown.svg</file>
+
+    <file>fonts/Manrope-Bold.ttf</file>
+    <file>fonts/Manrope-ExtraBold.ttf</file>
+    <file>fonts/Manrope-ExtraLight.ttf</file>
+    <file>fonts/Manrope-Light.ttf</file>
+    <file>fonts/Manrope-Medium.ttf</file>
+    <file>fonts/Manrope-Regular.ttf</file>
+    <file>fonts/Manrope-SemiBold.ttf</file>
   </qresource>
 
   <qresource prefix="/pages">

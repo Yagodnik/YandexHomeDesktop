@@ -8,6 +8,7 @@
   "inactive": "#9099ab",
   "switch_inactive": "#32343a",
   "switch_active": "#5bd174",
+  "switch_thumb": "#ffffff",
   "track_color": {
     "hex": "#9099ab",
     "alpha": 0.08

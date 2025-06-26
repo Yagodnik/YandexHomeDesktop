@@ -74,7 +74,6 @@ private:
     { CapabilityType::OnOff,        "qrc:/controls/OnOff.qml" },
     { CapabilityType::VideoStream,  kUnsupportedDelegate },
     { CapabilityType::ColorSetting, "qrc:/controls/ColorSetting.qml" },
-    // { CapabilityType::ColorSetting, kUnsupportedDelegate },
     { CapabilityType::Mode,         "qrc:/controls/Mode.qml" },
     { CapabilityType::Range,        "qrc:/controls/Range.qml" },
     { CapabilityType::Toggle,       "qrc:/controls/Toggle.qml" },

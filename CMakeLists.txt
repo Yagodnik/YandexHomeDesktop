@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Quick Network NetworkAuth QuickControls2)
+find_package(Qt6 REQUIRED COMPONENTS Quick Network NetworkAuth Gui QuickControls2)
 
 qt_standard_project_setup(REQUIRES 6.8)
 qt_add_resources(RESOURCES resources/resources.qrc)
@@ -66,6 +66,7 @@ target_link_libraries(appYandexHomeDesktop PRIVATE
         Qt6::Quick
         Qt6::Core
         Qt6::NetworkAuth
+        Qt6::Gui
         Qt6::QuickControls2
 
         YandexHomeDesktopUi

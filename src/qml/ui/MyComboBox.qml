@@ -51,7 +51,6 @@ ComboBox {
       text: modelData
       color: root.textColor
       verticalAlignment: Text.AlignVCenter
-      font.pointSize: 14
     }
 
     onClicked: {
@@ -108,7 +107,6 @@ ComboBox {
           text: modelData
           anchors.verticalCenter: parent.verticalCenter
           color: themes.GetControlText()
-          font.pointSize: 14
         }
 
         MouseArea {

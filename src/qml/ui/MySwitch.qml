@@ -31,7 +31,7 @@ Item {
     width: 18
     height: 18
     radius: 12
-    color: themes.controlText
+    color: themes.switchThumb
     anchors.verticalCenter: parent.verticalCenter
     x: internalChecked ? root.width - width : 0
     Behavior on x { NumberAnimation { duration: 200; easing.type: Easing.InOutQuad } }

@@ -35,9 +35,6 @@ Item {
     text: root.text
     font.bold: true
 
-    // Size text to its natural width/height
-    // Remove anchors.fill to avoid stretching
-    // Instead center the text in the parent
     anchors.horizontalCenter: parent.horizontalCenter
     anchors.verticalCenter: parent.verticalCenter
 

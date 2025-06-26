@@ -2,6 +2,8 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QQuickStyle>
+#include <QFontDatabase>
+#include <QFont>
 #include "api/YandexHomeApi.h"
 #include "api/YandexAccount.h"
 #include "auth/AuthorizationService.h"
@@ -30,6 +32,14 @@ int main(int argc, char *argv[]) {
 
   QGuiApplication app(argc, argv);
   // app.setQuitOnLastWindowClosed(false);
+
+  const int id = QFontDatabase::addApplicationFont(":/fonts/Manrope-Regular.ttf");
+  QFontDatabase::addApplicationFont(":/fonts/Manrope-Bold.ttf");
+
+  const QString family = QFontDatabase::applicationFontFamilies(id).at(0);
+  const QFont font(family);
+
+  app.setFont(font);
 
   QQmlApplicationEngine engine;
 

@@ -8,32 +8,19 @@
 Themes::Themes(QObject *parent)
   : QObject(parent)
 {
-  QDir themes_dir(":/themes/");
-
-  for (const auto file : themes_dir.entryInfoList()) {
-    const auto theme_opt = JsonLoader::Load<Theme>(file.absoluteFilePath());
-
-    if (!theme_opt.has_value()) {
-      qWarning() << "Failed to load theme: " << file.absoluteFilePath();
-      return;
-    }
-
-    const auto& theme = theme_opt.value();
-    themes_.insert(file.baseName(), theme);
-  }
-
-  SetTheme("light");
+  LoadTheme(":/themes/light.json");
+  LoadTheme(":/themes/dark.json");
 }
 
-void Themes::SetTheme(const QString& theme)
+void Themes::SetTheme(const int theme)
 {
-  if (!themes_.contains(theme)) {
+  if (theme < 0 || theme >= themes_names_.size()) {
     qWarning() << "Theme not found:" << theme;
     return;
   }
 
-  current_theme_ = theme;
-  active_theme_ = themes_[theme];
+  current_theme_ = themes_names_[theme];
+  active_theme_ = themes_[current_theme_];
 
   emit mainTextChanged();
   emit backgroundChanged();
@@ -184,5 +171,19 @@ void Themes::SetTrackColor(QColor color) {
     active_theme_.track_color.alpha = alpha;
     emit trackColorChanged();
   }
+}
+
+void Themes::LoadTheme(const QString &theme_path) {
+  const QFileInfo fi(theme_path);
+  const auto theme_opt = JsonLoader::Load<Theme>(theme_path);
+
+  if (!theme_opt.has_value()) {
+    qWarning() << "Failed to load theme: " << fi.absoluteFilePath();
+    return;
+  }
+
+  const auto& theme = theme_opt.value();
+  themes_.insert(fi.baseName(), theme);
+  themes_names_.push_back(fi.baseName());
 }
 

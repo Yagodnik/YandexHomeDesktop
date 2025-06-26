@@ -38,7 +38,7 @@ public:
   [[nodiscard]] QString GetControlText2() const;
   [[nodiscard]] QColor GetTrackColor() const;
 
-  Q_INVOKABLE void SetTheme(const QString& theme);
+  Q_INVOKABLE void SetTheme(int theme);
 
 signals:
   void mainTextChanged();
@@ -69,6 +69,8 @@ public slots:
   void SetTrackColor(QColor color);
 
 private:
+  void LoadTheme(const QString& theme);
+
   JSON_STRUCT(Color,
     (QString, hex),
     (float, alpha)
@@ -91,6 +93,7 @@ private:
 
   QString current_theme_;
   QHash<QString, Theme> themes_;
+  QStringList themes_names_;
 
   Theme active_theme_;
 };

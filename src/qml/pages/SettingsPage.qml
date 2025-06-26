@@ -90,8 +90,10 @@ Item {
                 anchors.right: parent.right
                 anchors.rightMargin: 10
                 anchors.verticalCenter: parent.verticalCenter
+                checked: settings.trayModeEnabled
 
                 onToggled: function (checked) {
+                  settings.trayModeEnabled = checked
                   if (checked) {
                     platformService.ShowOnlyInTray();
                   } else {
@@ -117,13 +119,15 @@ Item {
                 anchors.rightMargin: 10
                 anchors.verticalCenter: parent.verticalCenter
 
+                currentIndex: settings.currentTheme
+
                 model: ["Светлая", "Тёмная"]
+
                 onActivated: {
                   console.log("Selected index:", currentIndex, "value:", currentText)
 
-                  const themesList = [ "light", "dark" ];
-
-                  themes.SetTheme(themesList[currentIndex]);
+                  settings.currentTheme = currentIndex;
+                  themes.SetTheme(currentIndex);
                 }
               }
             }

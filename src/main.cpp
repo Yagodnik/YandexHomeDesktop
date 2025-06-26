@@ -22,6 +22,7 @@
 #include "utils/Router.h"
 #include "utils/Themes.h"
 #include "utils/ErrorCodes.h"
+#include "utils/Settings.h"
 #include "capabilities/OnOffCapability.h"
 #include "capabilities/RangeCapability.h"
 #include "capabilities/ToggleCapability.h"
@@ -60,6 +61,7 @@ int main(int argc, char *argv[]) {
   const auto error_codes = new ErrorCodes(&app);
   const auto color_model = new ColorsModel(&app);
   const auto modes_model = new ModesModel(&app);
+  const auto settings = new Settings(&app);
 
   root_context->setContextProperty("platformService", platform_service);
   root_context->setContextProperty("authorizationService", authorization_service);
@@ -74,6 +76,15 @@ int main(int argc, char *argv[]) {
   root_context->setContextProperty("errorCodes", error_codes);
   root_context->setContextProperty("colorModel", color_model);
   root_context->setContextProperty("modesModel", modes_model);
+  root_context->setContextProperty("settings", settings);
+
+  if (settings->GetTrayModeEnabled()) {
+    platform_service->ShowOnlyInTray();
+  } else {
+    platform_service->ShowAsApp();
+  }
+
+  themes->SetTheme(settings->GetCurrentTheme());
 
   qmlRegisterType<DevicesFilterModel>("YandexHomeDesktop.Models", 1, 0, "DevicesFilterModel");
   qmlRegisterType<RoomsFilterModel>("YandexHomeDesktop.Models", 1, 0, "RoomsFilterModel");

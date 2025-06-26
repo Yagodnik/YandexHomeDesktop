@@ -47,7 +47,13 @@ int main(int argc, char *argv[]) {
   const auto root_context = engine.rootContext();
   const auto authorization_service = new AuthorizationService(&app);
   const auto token_provider = [authorization_service] {
-    return authorization_service->GetToken();
+    const auto token = authorization_service->GetToken();
+    if (!token.has_value()) {
+      qWarning() << "AuthorizationService::GetToken: no token provided";
+      QGuiApplication::quit();
+    }
+
+    return token.value();
   };
   const auto platform_service = new PlatformService(&app);
   const auto yandex_api = new YandexHomeApi(token_provider, &app);

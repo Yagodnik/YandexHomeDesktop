@@ -55,10 +55,10 @@ void AuthorizationService::Logout() {
   emit logout();
 }
 
-const QString& AuthorizationService::GetToken() const {
+std::optional<QString> AuthorizationService::GetToken() const {
   if (!token_.has_value()) {
     qDebug() << "AuthorizationService::GetToken: no token provided";
-    return QString();
+    return std::nullopt;
   }
 
   return token_.value();

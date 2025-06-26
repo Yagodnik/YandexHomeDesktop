@@ -7,6 +7,7 @@ project(YandexHomeDesktop VERSION 0.1 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Quick Network NetworkAuth Gui QuickControls2)
 
@@ -24,6 +25,7 @@ add_subdirectory(src/platform)
 qt_add_executable(appYandexHomeDesktop
         src/main.cpp
         src/utils/Router.cpp
+        src/utils/Router.h
 
         ${RESOURCES}
         src/utils/Themes.cpp
@@ -50,6 +52,13 @@ endif()
 
 add_subdirectory(src/qml)
 add_subdirectory(src/qml/shaders)
+
+qt_add_qml_module(appYandexHomeDesktop
+        URI YandexHomeDesktop
+        VERSION 1.0
+        QML_FILES
+        src/qml/Main.qml
+)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
@@ -87,6 +96,11 @@ install(TARGETS appYandexHomeDesktop
         BUNDLE DESTINATION .
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+set_target_properties(appYandexHomeDesktop PROPERTIES
+        OUTPUT_NAME "YandexHomeDesktop"
+        MACOSX_BUNDLE TRUE
 )
 
 add_subdirectory(tests)

@@ -59,10 +59,3 @@ qt_add_qml_module(YandexHomeDesktopIotControls
         controls/Mode.qml
         controls/Unsupported.qml
 )
-
-qt_add_qml_module(appYandexHomeDesktop
-        URI YandexHomeDesktop
-        VERSION 1.0
-        QML_FILES
-        Main.qml
-)

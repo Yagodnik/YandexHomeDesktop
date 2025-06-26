@@ -8,8 +8,6 @@ add_library(YandexHomeApi SHARED
         YandexAccount.cpp
         YandexAccount.h
         RequestFactory.cpp
-        CapabilityFactory.cpp
-        CapabilityFactory.h
 )
 
 target_link_libraries(YandexHomeApi PRIVATE Qt6::Core Qt6::Network Qt6::Gui)

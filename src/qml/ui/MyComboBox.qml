@@ -1,17 +1,17 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
+import Qt5Compat.GraphicalEffects
 
 ComboBox {
   id: root
   width: 80
   height: 32
 
-  property color normalColor: Qt.rgba(104 / 255, 57 / 255, 207 / 255, 1)
-  property color pressedColor: Qt.rgba(84 / 255, 45 / 255, 168 / 255, 1)
-  property color textColor: "white"
-  property color popupBackground: "#f8f8f8"
-  property color popupHighlight: Qt.rgba(220 / 255, 220 / 255, 255 / 255, 1)
+  property color normalColor: themes.GetAccent()
+  property color pressedColor: themes.GetAccent2()
+  property color textColor: themes.GetControlText()
+  property color popupBackground: themes.GetHeaderBackground()
 
   font.pointSize: 14
 
@@ -34,9 +34,30 @@ ComboBox {
     }
   }
 
-  indicator: Item {
-    width: 0
-    height: 0
+  indicator: Item {}
+
+  delegate: ItemDelegate {
+    width: root.width
+    height: 32
+    highlighted: root.highlightedIndex === index
+
+    background: Rectangle {
+      anchors.fill: parent
+      radius: 8
+      color: highlighted ? themes.GetAccent() : "transparent"
+    }
+
+    contentItem: Text {
+      text: modelData
+      color: root.textColor
+      verticalAlignment: Text.AlignVCenter
+      font.pointSize: 14
+    }
+
+    onClicked: {
+      root.currentIndex = index
+      root.popup.close()
+    }
   }
 
   popup: Popup {
@@ -45,33 +66,48 @@ ComboBox {
     implicitHeight: contentItem.implicitHeight
     padding: 0
 
-    background: Rectangle {
-      radius: 8
-      color: root.popupBackground
+    background: Item {
+      id: shadowContainer
+      width: root.width
+      height: listView.implicitHeight
+
+      Rectangle {
+        id: popupBackground
+        anchors.fill: parent
+        radius: 8
+        color: root.popupBackground
+      }
+
+      DropShadow {
+        anchors.fill: popupBackground
+        source: popupBackground
+        radius: 12
+        samples: 16
+        horizontalOffset: 0
+        verticalOffset: 2
+        color: "#66000000"
+      }
     }
 
     contentItem: ListView {
+      id: listView
       model: root.delegateModel
       currentIndex: root.highlightedIndex
       clip: true
       interactive: true
       implicitHeight: contentHeight
 
+      highlightRangeMode: ListView.ApplyRange
+      highlightMoveDuration: 0
+
       delegate: Item {
-        id: delegateRect
         width: root.width
         height: 32
-
-        Rectangle {
-          anchors.fill: parent
-          color: ListView.isCurrentItem ? root.popupHighlight : "transparent"
-          radius: 16
-        }
 
         Text {
           text: modelData
           anchors.verticalCenter: parent.verticalCenter
-          color: "#000"
+          color: themes.GetControlText()
           font.pointSize: 14
         }
 
@@ -87,4 +123,5 @@ ComboBox {
       }
     }
   }
+
 }

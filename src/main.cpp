@@ -4,7 +4,6 @@
 #include <QQuickStyle>
 #include "api/YandexHomeApi.h"
 #include "api/YandexAccount.h"
-#include "api/CapabilityFactory.h"
 #include "auth/AuthorizationService.h"
 #include "capabilities/ColorSettingCapability.h"
 #include "models/ScenariosModel/ScenariosModel.h"
@@ -48,7 +47,6 @@ int main(int argc, char *argv[]) {
   const auto devices_model = new DevicesModel(yandex_api, &app);
   const auto rooms_model = new RoomsModel(yandex_api, &app);
   const auto device_model = new DeviceModel(yandex_api, &app);
-  const auto capability_factory = new CapabilityFactory(&app);
   const auto error_codes = new ErrorCodes(&app);
   const auto color_model = new ColorsModel(&app);
   const auto modes_model = new ModesModel(&app);
@@ -63,7 +61,6 @@ int main(int argc, char *argv[]) {
   root_context->setContextProperty("yandexAccount", yandex_account);
   root_context->setContextProperty("themes", themes);
   root_context->setContextProperty("deviceModel", device_model);
-  root_context->setContextProperty("capabilityFactory", capability_factory);
   root_context->setContextProperty("errorCodes", error_codes);
   root_context->setContextProperty("colorModel", color_model);
   root_context->setContextProperty("modesModel", modes_model);

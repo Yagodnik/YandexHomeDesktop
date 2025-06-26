@@ -42,8 +42,8 @@ QVariantMap ColorSettingCapability::Create(const QColor &value) {
     uint32_t rgb_data = (value.red() << 16) | (value.green() << 8) | value.blue();
 
     return {
-          { "instance", "rgb" },
-          { "value", rgb_data }
+      { "instance", "rgb" },
+      { "value", rgb_data }
     };
   }
 

@@ -152,7 +152,7 @@ Item {
 
         model: RoomsFilterModel {
           sourceModel: roomsModel
-          householdId: "393c92a2-000d-4ae4-b2dc-f3cd0dc00188"
+          householdId: householdsModel.currentHousehold
         }
 
         delegate: Components.RoomDevicesList {

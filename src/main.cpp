@@ -18,6 +18,7 @@
 #include "models/ModesModel/ModesModel.h"
 #include "models/ColorsModel/ColorsFilterModel.h"
 #include "models/ModesModel/ModesFilterModel.h"
+#include "models/HouseholdsModel/HouseholdsModel.h"
 #include "platform/PlatformService.h"
 #include "utils/Router.h"
 #include "utils/Themes.h"
@@ -28,12 +29,13 @@
 #include "capabilities/ToggleCapability.h"
 #include "capabilities/ColorSettingCapability.h"
 
-int main(int argc, char *argv[]) {
-  QQuickStyle::setStyle("Basic");
+/*
+ * TODO: Possible Bug
+ * User Creates new rooms -> select dialog have room -> no data in devices model -> looking for unknown device
+ * Same with removing
+ */
 
-  QGuiApplication app(argc, argv);
-  // app.setQuitOnLastWindowClosed(false);
-
+void RegisterFonts(QGuiApplication& app) {
   const int id = QFontDatabase::addApplicationFont(":/fonts/Manrope-Regular.ttf");
   QFontDatabase::addApplicationFont(":/fonts/Manrope-Bold.ttf");
 
@@ -41,6 +43,29 @@ int main(int argc, char *argv[]) {
   const QFont font(family);
 
   app.setFont(font);
+}
+
+void RegisterModels() {
+  qmlRegisterType<DevicesFilterModel>("YandexHomeDesktop.Models", 1, 0, "DevicesFilterModel");
+  qmlRegisterType<RoomsFilterModel>("YandexHomeDesktop.Models", 1, 0, "RoomsFilterModel");
+  qmlRegisterType<ColorsFilterModel>("YandexHomeDesktop.Models", 1, 0, "ColorsFilterModel");
+  qmlRegisterType<ModesFilterModel>("YandexHomeDesktop.Models", 1, 0, "ModesFilterModel");
+}
+
+void RegisterCapabilities() {
+  qmlRegisterType<OnOffCapability>("YandexHomeDesktop.Capabilities", 1, 0, "OnOff");
+  qmlRegisterType<RangeCapability>("YandexHomeDesktop.Capabilities", 1, 0, "Range");
+  qmlRegisterType<ToggleCapability>("YandexHomeDesktop.Capabilities", 1, 0, "Toggle");
+  qmlRegisterType<ColorSettingCapability>("YandexHomeDesktop.Capabilities", 1, 0, "ColorSetting");
+}
+
+int main(int argc, char *argv[]) {
+  QQuickStyle::setStyle("Basic");
+
+  QGuiApplication app(argc, argv);
+  // app.setQuitOnLastWindowClosed(false);
+
+  RegisterFonts(app);
 
   QQmlApplicationEngine engine;
 
@@ -64,6 +89,7 @@ int main(int argc, char *argv[]) {
   const auto devices_model = new DevicesModel(yandex_api, &app);
   const auto rooms_model = new RoomsModel(yandex_api, &app);
   const auto device_model = new DeviceModel(yandex_api, &app);
+  const auto households_model = new HouseholdsModel(yandex_api, &app);
   const auto error_codes = new ErrorCodes(&app);
   const auto color_model = new ColorsModel(&app);
   const auto modes_model = new ModesModel(&app);
@@ -82,7 +108,11 @@ int main(int argc, char *argv[]) {
   root_context->setContextProperty("errorCodes", error_codes);
   root_context->setContextProperty("colorModel", color_model);
   root_context->setContextProperty("modesModel", modes_model);
+  root_context->setContextProperty("householdsModel", households_model);
   root_context->setContextProperty("settings", settings);
+
+  RegisterModels();
+  RegisterCapabilities();
 
   if (settings->GetTrayModeEnabled()) {
     platform_service->ShowOnlyInTray();
@@ -91,16 +121,6 @@ int main(int argc, char *argv[]) {
   }
 
   themes->SetTheme(settings->GetCurrentTheme());
-
-  qmlRegisterType<DevicesFilterModel>("YandexHomeDesktop.Models", 1, 0, "DevicesFilterModel");
-  qmlRegisterType<RoomsFilterModel>("YandexHomeDesktop.Models", 1, 0, "RoomsFilterModel");
-  qmlRegisterType<ColorsFilterModel>("YandexHomeDesktop.Models", 1, 0, "ColorsFilterModel");
-  qmlRegisterType<ModesFilterModel>("YandexHomeDesktop.Models", 1, 0, "ModesFilterModel");
-
-  qmlRegisterType<OnOffCapability>("YandexHomeDesktop.Capabilities", 1, 0, "OnOff");
-  qmlRegisterType<RangeCapability>("YandexHomeDesktop.Capabilities", 1, 0, "Range");
-  qmlRegisterType<ToggleCapability>("YandexHomeDesktop.Capabilities", 1, 0, "Toggle");
-  qmlRegisterType<ColorSettingCapability>("YandexHomeDesktop.Capabilities", 1, 0, "ColorSetting");
 
   QObject::connect(
     &engine,

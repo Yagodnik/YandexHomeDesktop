@@ -22,6 +22,8 @@ add_library(Models SHARED
         ColorsModel/ColorsFilterModel.h
         ModesModel/ModesFilterModel.cpp
         ModesModel/ModesFilterModel.h
+        HouseholdsModel/HouseholdsModel.cpp
+        HouseholdsModel/HouseholdsModel.h
 )
 
 target_link_libraries(Models PRIVATE Qt6::Core Qt6::Network Qt6::Gui YandexHomeApi)

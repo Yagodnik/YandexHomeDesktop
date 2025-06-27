@@ -38,7 +38,7 @@ Item {
           anchors.fill: parent
 
           onClicked: {
-            householdSelectDialog.myVisible = true
+            householdSelectDialog.open();
           }
         }
       }

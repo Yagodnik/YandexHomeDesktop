@@ -1,4 +1,4 @@
-find_package(Qt6 COMPONENTS Core REQUIRED)
+find_package(Qt6 COMPONENTS Core Quick REQUIRED)
 
 set(MAC_SOURCES "")
 set(MAC_FRAMEWORKS "")
@@ -14,4 +14,4 @@ add_library(PlatformService
         ${MAC_SOURCES}
 )
 
-target_link_libraries(PlatformService PRIVATE Qt6::Core ${MAC_FRAMEWORKS})
+target_link_libraries(PlatformService PRIVATE Qt6::Core Qt6::Quick ${MAC_FRAMEWORKS})

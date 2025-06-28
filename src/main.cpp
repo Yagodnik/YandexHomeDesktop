@@ -114,20 +114,27 @@ int main(int argc, char *argv[]) {
   RegisterModels();
   RegisterCapabilities();
 
-  if (settings->GetTrayModeEnabled()) {
-    platform_service->ShowOnlyInTray();
-  } else {
-    platform_service->ShowAsApp();
-  }
+  QObject::connect(
+    &engine, &QQmlApplicationEngine::objectCreated,
+    &app, [themes, settings, platform_service]() {
+      if (settings->GetTrayModeEnabled()) {
+        platform_service->ShowOnlyInTray();
+      } else {
+        platform_service->ShowAsApp();
+      }
 
-  themes->SetTheme(settings->GetCurrentTheme());
+      themes->SetTheme(settings->GetCurrentTheme());
+    }, Qt::QueuedConnection
+  );
+
 
   QObject::connect(
-    &engine,
-    &QQmlApplicationEngine::objectCreationFailed,
-    &app,
-    []() { QCoreApplication::exit(-1); },
-    Qt::QueuedConnection);
+    &engine, &QQmlApplicationEngine::objectCreationFailed,
+    &app,[]() {
+      qCritical() << "QQmlApplicationEngine::objectCreationFailed";
+      QCoreApplication::exit(-1);
+    }, Qt::QueuedConnection
+  );
 
   engine.loadFromModule("YandexHomeDesktop", "Main");
 

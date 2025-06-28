@@ -8,6 +8,8 @@ class PlatformService : public QObject {
 public:
   explicit PlatformService(QObject *parent = nullptr);
 
+  Q_INVOKABLE void SetWindow(QQuickWindow *window) const;
+  Q_INVOKABLE void ShowWindow(const QRect& icon) const;
   Q_INVOKABLE void ShowAsApp() const;
   Q_INVOKABLE void ShowOnlyInTray() const;
 

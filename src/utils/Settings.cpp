@@ -29,6 +29,8 @@ void Settings::SetTrayModeEnabled(bool enabled) {
     return;
   }
 
+  qDebug() << "Settings::SetTrayModeEnabled" << enabled;
+
   settings_.setValue("trayModeEnabled", enabled);
   emit trayModeEnabledChanged();
 }

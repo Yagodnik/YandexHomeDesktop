@@ -12,17 +12,17 @@ void YandexAccount::LoadData() {
 
   auto reply = network_manager_.get(request);
 
-  connect(reply, &QNetworkReply::finished, [=]() {
+  connect(reply, &QNetworkReply::finished, [this, reply]() {
     if (reply->error() != QNetworkReply::NoError) {
       emit dataLoadingFailed();
       reply->deleteLater();
       return;
     }
 
-    QByteArray response = reply->readAll();
+    const QByteArray response = reply->readAll();
 
-    QJsonDocument document = QJsonDocument::fromJson(response);
-    QJsonObject root = document.object();
+    const QJsonDocument document = QJsonDocument::fromJson(response);
+    const QJsonObject root = document.object();
 
     const auto data = Serialization::From<AccountInfo>(root);
 

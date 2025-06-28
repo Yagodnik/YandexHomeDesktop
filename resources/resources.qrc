@@ -8,6 +8,7 @@
     <file>images/light.svg</file>
     <file>images/back.svg</file>
     <file>images/household.svg</file>
+    <file>images/arrow.svg</file>
 
     <file>auth/secrets.json</file>
     <file>callback/index.html</file>

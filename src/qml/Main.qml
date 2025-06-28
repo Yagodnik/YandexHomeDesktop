@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import Qt.labs.platform
+import Qt5Compat.GraphicalEffects
 import YandexHomeDesktop.Pages
 import YandexHomeDesktop.Ui
 
@@ -8,29 +9,30 @@ Window {
   id: window
   width: 350
   height: 460
-  visible: true
+  minimumWidth: 350
+  minimumHeight: 460
+  visible: !settings.trayModeEnabled
   title: qsTr("Yandex Home Desktop")
-  // flags: Qt.FramelessWindowHint
+  color: "transparent"
 
-  Rectangle {
-    anchors.fill: parent
-    color: themes.background
+  Component.onCompleted: {
+    platformService.SetWindow(window);
+  }
+
+  onActiveFocusItemChanged: {
+    if (!activeFocusItem && settings.trayModeEnabled) {
+      window.hide();
+    }
   }
 
   SystemTrayIcon {
-    visible: true
+    visible: settings.trayModeEnabled
     icon.name: "Yandex Home Desktop"
     icon.source: "qrc:/images/icon.png"
 
     onActivated: function(reason) {
       console.log("Position:", geometry.x, geometry.y);
-
-      window.x = geometry.x - window.width / 2 + geometry.width / 2
-      window.y = geometry.y + 10;
-
-      window.show()
-      window.raise()
-      window.requestActivate()
+      platformService.ShowWindow(geometry);
     }
   }
 
@@ -77,9 +79,22 @@ Window {
     }
   }
 
+  Rectangle {
+    id: background
+    anchors.fill: parent
+    color: themes.background
+    radius: settings.trayModeEnabled ? 12 : 0
+  }
+
   StackView {
     id: pages
     anchors.fill: parent
+
+    layer.enabled: settings.trayModeEnabled
+    layer.smooth: true
+    layer.effect: OpacityMask {
+      maskSource: background
+    }
 
     pushEnter: Transition {
       NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 200 }

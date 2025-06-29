@@ -46,19 +46,19 @@ qt_add_executable(appYandexHomeDesktop
         src/utils/Settings.h
 )
 
-if(APPLE)
-    set_target_properties(appYandexHomeDesktop PROPERTIES
-            MACOSX_BUNDLE TRUE
-            MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/macos/Info.plist"
-            MACOSX_BUNDLE_ICON_FILE "YandexHomeDesktop.icns"
-    )
+if (APPLE)
+  set_target_properties(appYandexHomeDesktop PROPERTIES
+          MACOSX_BUNDLE TRUE
+          MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/macos/Info.plist"
+          MACOSX_BUNDLE_ICON_FILE "YandexHomeDesktop.icns"
+  )
 
-    set_source_files_properties(resources/YandexHomeDesktop.icns PROPERTIES
-            MACOSX_PACKAGE_LOCATION "Resources"
-    )
+  set_source_files_properties(resources/YandexHomeDesktop.icns PROPERTIES
+          MACOSX_PACKAGE_LOCATION "Resources"
+  )
 
-    target_sources(appYandexHomeDesktop PRIVATE resources/YandexHomeDesktop.icns)
-endif()
+  target_sources(appYandexHomeDesktop PRIVATE resources/YandexHomeDesktop.icns)
+endif ()
 
 add_subdirectory(src/qml)
 add_subdirectory(src/qml/shaders)

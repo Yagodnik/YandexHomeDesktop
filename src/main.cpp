@@ -35,7 +35,7 @@
  * Same with removing
  */
 
-void RegisterFonts(QGuiApplication& app) {
+void RegisterFonts(QGuiApplication &app) {
   const int id = QFontDatabase::addApplicationFont(":/fonts/Manrope-Regular.ttf");
   QFontDatabase::addApplicationFont(":/fonts/Manrope-Bold.ttf");
 
@@ -127,10 +127,9 @@ int main(int argc, char *argv[]) {
     }, Qt::QueuedConnection
   );
 
-
   QObject::connect(
     &engine, &QQmlApplicationEngine::objectCreationFailed,
-    &app,[]() {
+    &app, []() {
       qCritical() << "QQmlApplicationEngine::objectCreationFailed";
       QCoreApplication::exit(-1);
     }, Qt::QueuedConnection

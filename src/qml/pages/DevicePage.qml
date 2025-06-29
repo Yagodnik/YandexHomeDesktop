@@ -100,23 +100,6 @@ Item {
 
     spacing: 10
 
-    // model: ListModel {
-    //   ListElement {
-    //     name: "Вкл/выкл"
-    //     delegateSource: "qrc:/controls/OnOff.qml"
-    //   }
-    //
-    //   ListElement {
-    //     name: "Яркость"
-    //     delegateSource: "qrc:/controls/Range.qml"
-    //   }
-    //
-    //   // ListElement {
-    //   //   name: "Цвета"
-    //   //   delegateSource: "qrc:/controls/ColorSetting.qml"
-    //   // }
-    // }
-
     model: deviceModel
 
     delegate: Loader {

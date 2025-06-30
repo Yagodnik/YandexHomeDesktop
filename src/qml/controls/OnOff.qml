@@ -9,8 +9,8 @@ Item {
   Capabilities.OnOff {
     id: onOffCapability
 
-    state: model.deviceState
-    parameters: model.deviceParameters
+    state: model.attributeState
+    parameters: model.attributeParameters
   }
 
   Rectangle {

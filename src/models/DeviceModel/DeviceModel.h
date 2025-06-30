@@ -2,39 +2,7 @@
 
 #include <QAbstractListModel>
 #include "api/YandexHomeApi.h"
-
-struct CapabilityData {
-  CapabilityObject data;
-
-  CapabilityData() = default;
-  explicit CapabilityData(const CapabilityObject& cap) : data(cap) {}
-
-  bool is_pending = false;
-  double action_start_time {};
-  double action_finish_time {};
-
-  void SetPending(bool value) {
-    is_pending = value;
-  }
-
-  void SetStartTime() {
-    action_start_time = static_cast<double>(QDateTime::currentMSecsSinceEpoch()) / 1000;
-  }
-
-  void SetFinishTime() {
-    action_finish_time = static_cast<double>(QDateTime::currentMSecsSinceEpoch()) / 1000;
-  }
-
-  [[nodiscard]] bool IsInside(double time, double delta) const {
-    return time >= (action_start_time - delta)
-        && time < (action_finish_time + delta);
-  }
-
-  [[nodiscard]] bool IsInside(double time, double l_delta, double r_delta) const {
-    return time >= (action_start_time - l_delta)
-        && time < (action_finish_time + r_delta);
-  }
-};
+#include "DeviceAttribute.h"
 
 class DeviceModel : public QAbstractListModel {
   Q_OBJECT
@@ -44,8 +12,8 @@ public:
   enum Roles {
     IdRole = Qt::UserRole + 1,
     NameRole,
-    LastUpdateTimeRole,
     DelegateSourceRole,
+    AttributeTypeRole,
     BusyRole,
     StateRole,
     ParametersRole
@@ -56,17 +24,18 @@ public:
   [[nodiscard]] QHash<int, QByteArray> roleNames() const override;
 
   Q_INVOKABLE void RequestData(const QString& device_id);
+  void RequestUpdate();
 
-  Q_INVOKABLE [[nodiscard]] CapabilityObject GetCapabilityInfo(int index) const;
   Q_INVOKABLE [[nodiscard]] QVariantMap GetState(int index) const;
   Q_INVOKABLE [[nodiscard]] QVariantMap GetParameters(int index) const;
+
   Q_INVOKABLE void UseCapability(int index, const QVariantMap& state);
 
 signals:
   void dataLoaded();
   void dataLoadingFailed();
   void dataUpdated(int index);
-  void errorOccured(const QString& error_message);
+  void errorOccurred(const QString& error_message);
 
 private:
   const QString kUnsupportedDelegate = "qrc:/controls/Unsupported.qml";
@@ -79,10 +48,20 @@ private:
     { CapabilityType::Toggle,       "qrc:/controls/Toggle.qml" },
   };
 
+  const QMap<QString, QString> kDelegates2 = {
+    { "devices.capabilities.on_off",        "qrc:/controls/OnOff.qml" },
+    { "devices.capabilities.video_stream",  kUnsupportedDelegate },
+    { "devices.capabilities.color_setting", "qrc:/controls/ColorSetting.qml" },
+    { "devices.capabilities.mode",         "qrc:/controls/Mode.qml" },
+    { "devices.capabilities.range",        "qrc:/controls/Range.qml" },
+    { "devices.capabilities.toggle",       "qrc:/controls/Toggle.qml" },
+  };
+
   QString device_id_;
   YandexHomeApi *api_;
 
-  QList<CapabilityData> capabilities_data_;
+  QList<DeviceAttribute> attributes_;
+  bool is_initialized_;
 
   double last_update_start_time_;
 

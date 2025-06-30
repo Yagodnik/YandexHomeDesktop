@@ -3,6 +3,7 @@
 #include "serialization/Serialization.h"
 #include "Status.h"
 #include "Capabilites.h"
+#include "Properties.h"
 
 JSON_ENUMERATION(DeviceType,
   ("devices.types.{type}", Lamp),
@@ -33,14 +34,16 @@ JSON_STRUCT(DeviceObject,
   (QStringList, aliases),
   (QString, room),
   (QString, household_id),
-  (QList<CapabilityObject>, capabilities)
+  (QList<CapabilityObject>, capabilities),
+  (QList<PropertyObject>, properties)
 );
 
 JSON_STRUCT(DeviceInfo,
   (Status, status),
   (QString, message),
   (QString, request_id),
-  (QList<CapabilityObject>, capabilities)
+  (QList<CapabilityObject>, capabilities),
+  (QList<PropertyObject>, properties)
 );
 
 JSON_STRUCT(ScenarioObject,

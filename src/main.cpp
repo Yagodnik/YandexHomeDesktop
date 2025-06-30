@@ -19,6 +19,7 @@
 #include "models/ColorsModel/ColorsFilterModel.h"
 #include "models/ModesModel/ModesFilterModel.h"
 #include "models/HouseholdsModel/HouseholdsModel.h"
+#include "models/DeviceModel/DeviceFilterModel.h"
 #include "platform/PlatformService.h"
 #include "utils/Router.h"
 #include "utils/Themes.h"
@@ -46,6 +47,7 @@ void RegisterFonts(QGuiApplication &app) {
 }
 
 void RegisterModels() {
+  qmlRegisterType<DeviceFilterModel>("YandexHomeDesktop.Models", 1, 0, "DeviceFilterModel");
   qmlRegisterType<DevicesFilterModel>("YandexHomeDesktop.Models", 1, 0, "DevicesFilterModel");
   qmlRegisterType<RoomsFilterModel>("YandexHomeDesktop.Models", 1, 0, "RoomsFilterModel");
   qmlRegisterType<ColorsFilterModel>("YandexHomeDesktop.Models", 1, 0, "ColorsFilterModel");

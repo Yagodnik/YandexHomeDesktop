@@ -24,6 +24,10 @@ add_library(Models SHARED
         ModesModel/ModesFilterModel.h
         HouseholdsModel/HouseholdsModel.cpp
         HouseholdsModel/HouseholdsModel.h
+        DeviceModel/DeviceAttribute.h
+        DeviceModel/DeviceAttribute.cpp
+        DeviceModel/DeviceFilterModel.cpp
+        DeviceModel/DeviceFilterModel.h
 )
 
 target_link_libraries(Models PRIVATE Qt6::Core Qt6::Network Qt6::Gui YandexHomeApi)

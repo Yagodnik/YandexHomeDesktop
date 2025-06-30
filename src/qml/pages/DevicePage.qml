@@ -26,7 +26,7 @@ Item {
       console.log("Device data loading - FAILED");
     }
 
-    function onErrorOccured(errorCode) {
+    function onErrorOccurred(errorCode) {
       const error = errorCodes.GetDeviceError(errorCode);
 
       if (error == null) {
@@ -85,11 +85,24 @@ Item {
     }
   }
 
-  ListView {
+  UI.HeadingText {
+    id: capabilitiesText
+    text: "Умения"
+
     anchors.top: topHeader.bottom
-    anchors.topMargin: 16
-    anchors.bottom: parent.bottom
-    anchors.bottomMargin: 10
+    anchors.topMargin: 4
+    anchors.left: parent.left
+    anchors.leftMargin: 16
+  }
+
+  ListView {
+    id: capabilitiesList
+    anchors.top: capabilitiesText.bottom
+    anchors.topMargin: 4
+    // anchors.bottom: parent.bottom
+    // anchors.bottomMargin: 10
+
+    height: 100
 
     anchors.left: parent.left
     anchors.leftMargin: 16
@@ -105,6 +118,114 @@ Item {
     delegate: Loader {
       source: delegateSource
       width: parent.width
+    }
+  }
+
+  UI.HeadingText {
+    id: propertiesText
+    text: "Свойства"
+
+    anchors.top: capabilitiesList.bottom
+    anchors.topMargin: 4
+    anchors.left: parent.left
+    anchors.leftMargin: 16
+  }
+
+  ListView {
+    id: propertiesList
+    anchors.top: propertiesText.bottom
+    anchors.topMargin: 4
+    anchors.bottom: parent.bottom
+    anchors.bottomMargin: 10
+
+    anchors.left: parent.left
+    anchors.leftMargin: 16
+    anchors.right: parent.right
+    anchors.rightMargin: 16
+
+    clip: true
+
+    spacing: 10
+
+    model: ListModel {
+      ListElement {
+        name: "Влажность"
+        value: 15
+        unit: "%"
+      }
+
+      ListElement {
+        name: "Уровень заряда"
+        value: 55
+        unit: "%"
+      }
+
+      ListElement {
+        name: "Уровень воды"
+        value: 80
+        unit: "%"
+      }
+    }
+
+    delegate: Item {
+      width: parent.width
+      height: 58
+
+      Rectangle {
+        anchors.fill: parent
+        color: themes.headerBackground
+        radius: 16
+      }
+
+      Item {
+        id: top
+
+        anchors.top: parent.top
+        anchors.topMargin: 8
+
+        anchors.left: parent.left
+        anchors.leftMargin: 12
+        anchors.right: parent.right
+        anchors.rightMargin: 12
+
+        height: 20
+
+        UI.DefaultText {
+          id: propertyTitle
+
+          anchors.left: parent.left
+          anchors.verticalCenter: parent.verticalCenter
+
+          text: name
+        }
+
+        UI.DefaultText {
+          id: valueText
+
+          anchors.right: parent.right
+          anchors.verticalCenter: parent.verticalCenter
+
+          text: value + unit
+        }
+      }
+
+      UI.MySlider {
+        id: valueSlider
+        anchors.top: top.bottom
+        anchors.topMargin: 10
+        anchors.left: parent.left
+        anchors.leftMargin: 12
+        anchors.right: parent.right
+        anchors.rightMargin: 12
+
+        height: 12
+
+        from: 0
+        to: 100
+        enabled: false
+
+        value: model.value
+      }
     }
   }
 }

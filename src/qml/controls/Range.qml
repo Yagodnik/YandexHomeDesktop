@@ -9,8 +9,8 @@ Item {
   Capabilities.Range {
     id: rangeCapability
 
-    state: model.deviceState
-    parameters: model.deviceParameters
+    state: model.attributeState
+    parameters: model.attributeParameters
   }
 
   Rectangle {

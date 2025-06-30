@@ -1,0 +1,108 @@
+#include "PropertiesModel.h"
+
+#include <QRandomGenerator>
+
+#include "CapabilitiesModel.h"
+
+PropertiesModel::PropertiesModel(YandexHomeApi* api, QObject* parent)
+  : QAbstractListModel(parent), api_(api)
+{
+  connect(api_,
+    &YandexHomeApi::deviceInfoReceived,
+    this,
+    &PropertiesModel::OnDeviceInfoReceived);
+
+  connect(api_,
+    &YandexHomeApi::deviceInfoReceivingFailed,
+    this,
+    &PropertiesModel::OnDeviceInfoReceivingFailed);
+}
+
+int PropertiesModel::rowCount(const QModelIndex &parent) const {
+  return properties_.size();
+}
+
+QVariant PropertiesModel::data(const QModelIndex &index, int role) const {
+  if (!index.isValid() || index.row() >= properties_.size()) {
+    return {};
+  }
+
+  const auto& property = properties_.at(index.row());
+
+  switch (role) {
+    case IdRole:
+      return {};
+    case NameRole:
+      return "Test";
+      return PropertyType::operator[](property.type);
+    case StateRole:
+      return property.state;
+    case ParametersRole:
+      return property.parameters;
+    default:
+      return {};
+  }
+}
+
+QHash<int, QByteArray> PropertiesModel::roleNames() const {
+  return {
+    { IdRole, "deviceId" },
+    { NameRole, "name"},
+    { StateRole, "propertyState" },
+    { ParametersRole, "propertyParameters" }
+  };
+}
+
+void PropertiesModel::OnDeviceInfoReceived(const DeviceObject &info2) {
+  qDebug() << "Updated by timer from another model!";
+
+  /* -- Fake data for testing -- */
+  DeviceObject info = info2;
+
+  QString pseudo_property_data_str = R"(
+    {
+        "type": "devices.properties.float",
+        "retrievable": true,
+        "parameters": {
+            "instance": "humidity",
+            "unit": "unit.percent"
+        },
+        "state": {
+            "instance": "humidity",
+            "value": %1
+        }
+    }
+  )";
+
+  pseudo_property_data_str = pseudo_property_data_str.arg(QRandomGenerator::global()->bounded(101));
+  const QJsonObject test_object = QJsonDocument::fromJson(pseudo_property_data_str.toUtf8()).object();
+  info.properties.push_back(Serialization::From<PropertyObject>(test_object));
+
+  if (!is_initialized_) {
+    beginResetModel();
+    properties_.resize(info.properties.size());
+  }
+
+  for (auto [property, incoming_property] : std::ranges::views::zip(properties_, info.properties)) {
+    qDebug() << "Update!";
+    property = incoming_property;
+  }
+
+  if (!is_initialized_) {
+    endResetModel();
+  }
+
+  is_initialized_ = true;
+
+  const auto top_left = createIndex(0, 0);
+  const auto bottom_right = createIndex(properties_.size() - 1, 0);
+
+  emit dataChanged(top_left, bottom_right);
+  emit dataLoaded();
+}
+
+void PropertiesModel::OnDeviceInfoReceivingFailed(const QString &message) {
+  qDebug() << "Devices Model: Error receiving devices:" << message;
+
+  emit dataLoadingFailed();
+}

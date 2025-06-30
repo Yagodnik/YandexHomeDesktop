@@ -1,27 +1,27 @@
-#include "DeviceModel.h"
+#include "CapabilitiesModel.h"
 
-DeviceModel::DeviceModel(YandexHomeApi *api, QObject *parent)
+CapabilitiesModel::CapabilitiesModel(YandexHomeApi *api, QObject *parent)
   : QAbstractListModel(parent), api_(api)
 {
   connect(api_,
     &YandexHomeApi::deviceInfoReceived,
     this,
-    &DeviceModel::OnDeviceInfoReceived);
+    &CapabilitiesModel::OnDeviceInfoReceived);
 
   connect(api_,
     &YandexHomeApi::deviceInfoReceivingFailed,
     this,
-    &DeviceModel::OnDeviceInfoReceivingFailed);
+    &CapabilitiesModel::OnDeviceInfoReceivingFailed);
 
   connect(api_,
     &YandexHomeApi::actionExecutingFinishedSuccessfully,
     this,
-    &DeviceModel::OnActionExecutionFinishedSuccessfully);
+    &CapabilitiesModel::OnActionExecutionFinishedSuccessfully);
 
   connect(api_,
     &YandexHomeApi::actionExecutingFailed,
     this,
-    &DeviceModel::OnActionExecutionFailed);
+    &CapabilitiesModel::OnActionExecutionFailed);
 
   timer_.setInterval(3000);
   timer_.setSingleShot(false);
@@ -31,16 +31,16 @@ DeviceModel::DeviceModel(YandexHomeApi *api, QObject *parent)
   });
 }
 
-int DeviceModel::rowCount(const QModelIndex &parent) const {
-  return attributes_.size();
+int CapabilitiesModel::rowCount(const QModelIndex &parent) const {
+  return capabilities_.size();
 }
 
-QVariant DeviceModel::data(const QModelIndex &index, int role) const {
-  if (!index.isValid() || index.row() >= attributes_.size()) {
+QVariant CapabilitiesModel::data(const QModelIndex &index, int role) const {
+  if (!index.isValid() || index.row() >= capabilities_.size()) {
     return {};
   }
 
-  const auto& capability = attributes_.at(index.row());
+  const auto& capability = capabilities_.at(index.row());
 
   switch (role) {
     case IdRole:
@@ -57,8 +57,10 @@ QVariant DeviceModel::data(const QModelIndex &index, int role) const {
     case AttributeTypeRole:
       switch (capability.type) {
         case DeviceAttribute::Capability:
+          qDebug() << "capability";
           return "capability";
         case DeviceAttribute::Property:
+          qDebug() << "property";
           return "property";
         default:
           return {};
@@ -74,7 +76,7 @@ QVariant DeviceModel::data(const QModelIndex &index, int role) const {
   }
 }
 
-QHash<int, QByteArray> DeviceModel::roleNames() const {
+QHash<int, QByteArray> CapabilitiesModel::roleNames() const {
   return {
     { IdRole, "deviceId" },
     { NameRole, "name"},
@@ -86,41 +88,41 @@ QHash<int, QByteArray> DeviceModel::roleNames() const {
   };
 }
 
-void DeviceModel::RequestData(const QString& device_id) {
+void CapabilitiesModel::RequestData(const QString& device_id) {
   device_id_ = device_id;
 
-  attributes_.clear();
+  capabilities_.clear();
   is_initialized_ = false;
 
   RequestUpdate();
 }
 
-void DeviceModel::RequestUpdate() {
+void CapabilitiesModel::RequestUpdate() {
   last_update_start_time_ = static_cast<double>(QDateTime::currentMSecsSinceEpoch()) / 1000;
   api_->GetDeviceInfo(device_id_);
 }
 
-QVariantMap DeviceModel::GetState(const int index) const {
-  const auto& capability = attributes_.at(index);
+QVariantMap CapabilitiesModel::GetState(const int index) const {
+  const auto& capability = capabilities_.at(index);
 
   return capability.state;
 }
 
-QVariantMap DeviceModel::GetParameters(const int index) const {
-  const auto& capability = attributes_.at(index);
+QVariantMap CapabilitiesModel::GetParameters(const int index) const {
+  const auto& capability = capabilities_.at(index);
 
   return capability.parameters;
 }
 
-void DeviceModel::UseCapability(const int index, const QVariantMap &state) {
-  auto& capability = attributes_[index];
+void CapabilitiesModel::UseCapability(const int index, const QVariantMap &state) {
+  auto& capability = capabilities_[index];
 
   if (capability.type != DeviceAttribute::Capability) {
     qDebug() << "DeviceModel::UseCapability: Invalid type";
     return;
   }
 
-  attributes_[index].PausePolling();
+  capabilities_[index].PausePolling();
 
   capability.state = state;
 
@@ -142,34 +144,12 @@ void DeviceModel::UseCapability(const int index, const QVariantMap &state) {
   }, index);
 }
 
-void DeviceModel::OnDeviceInfoReceived(const DeviceObject &info2) {
+void CapabilitiesModel::OnDeviceInfoReceived(const DeviceObject &info) {
   const double receive_time = static_cast<double>(QDateTime::currentMSecsSinceEpoch()) / 1000;
-
-  DeviceObject info = info2;
-
-  // TODO: Add property manually
-
-  QString pseudo_property_data_str = R"(
-    {
-        "type": "devices.properties.float",
-        "retrievable": true,
-        "parameters": {
-            "instance": "humidity",
-            "unit": "unit.percent"
-        }
-        "state": {
-            "instance": "humidity",
-            "value": 55
-        }
-    }
-  )";
-
-  const QJsonObject test_object = QJsonDocument::fromJson(pseudo_property_data_str.toUtf8()).object();
-  info.properties.push_back(Serialization::From<PropertyObject>(test_object));
 
   if (!is_initialized_) {
     beginResetModel();
-    attributes_.resize(info.capabilities.size() + info.properties.size());
+    capabilities_.resize(info.capabilities.size());
   }
 
   constexpr double ignore_delta = 0.8;
@@ -180,7 +160,7 @@ void DeviceModel::OnDeviceInfoReceived(const DeviceObject &info2) {
            attr.IsInsideInterval(last_update_start_time_, ignore_delta);
   };
 
-  for (auto [attr, incoming] : std::ranges::views::zip(attributes_, info.capabilities)) {
+  for (auto [attr, incoming] : std::ranges::views::zip(capabilities_, info.capabilities)) {
     if (blocking_condition(attr)) {
       continue;
     }
@@ -195,7 +175,7 @@ void DeviceModel::OnDeviceInfoReceived(const DeviceObject &info2) {
   is_initialized_ = true;
 
   const auto top_left = createIndex(0, 0);
-  const auto bottom_right = createIndex(attributes_.size() - 1, 0);
+  const auto bottom_right = createIndex(capabilities_.size() - 1, 0);
 
   emit dataChanged(top_left, bottom_right);
   emit dataLoaded();
@@ -203,30 +183,30 @@ void DeviceModel::OnDeviceInfoReceived(const DeviceObject &info2) {
   timer_.start();
 }
 
-void DeviceModel::OnDeviceInfoReceivingFailed(const QString &message) {
+void CapabilitiesModel::OnDeviceInfoReceivingFailed(const QString &message) {
   qDebug() << "Devices Model: Error receiving devices:" << message;
 
   emit dataLoadingFailed();
 }
 
-void DeviceModel::OnActionExecutionFinishedSuccessfully(const QVariant &user_data) {
+void CapabilitiesModel::OnActionExecutionFinishedSuccessfully(const QVariant &user_data) {
   const int index = user_data.toInt();
 
-  attributes_[index].ResumePolling();
+  capabilities_[index].ResumePolling();
 
   qDebug() << "Device Model: Action finished at" << QString::number(
-    attributes_[index].polling_finish_time, 'f', 3);
+    capabilities_[index].polling_finish_time, 'f', 3);
 
   const auto model_index = createIndex(index, 0);
   emit dataChanged(model_index, model_index);
 }
 
-void DeviceModel::OnActionExecutionFailed(const QString &message, const QVariant &user_data) {
+void CapabilitiesModel::OnActionExecutionFailed(const QString &message, const QVariant &user_data) {
   qDebug() << "Device Model: Error executing action:" << message;
 
   const int index = user_data.toInt();
 
-  attributes_[index].ResumePolling();
+  capabilities_[index].ResumePolling();
 
   const auto model_index = createIndex(index, 0);
   emit dataChanged(model_index, model_index);

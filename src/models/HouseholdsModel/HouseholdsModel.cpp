@@ -1,7 +1,7 @@
 #include "HouseholdsModel.h"
 
 HouseholdsModel::HouseholdsModel(YandexHomeApi *api, QObject *parent)
-  : QAbstractListModel(parent), api_(api), current_(std::nullopt)
+  : QAbstractListModel(parent), current_(std::nullopt), api_(api)
 {
   connect(api_,
     &YandexHomeApi::userInfoReceived,

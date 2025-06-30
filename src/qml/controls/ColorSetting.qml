@@ -143,7 +143,7 @@ Item {
                 capability_action = colorSettingCapability.Create(model.color);
               }
 
-              deviceModel.UseCapability(deviceModelData.index, capability_action);
+              capabilitiesModel.UseCapability(deviceModelData.index, capability_action);
             }
           }
         }
@@ -223,7 +223,7 @@ Item {
               console.log("Selected mode:", modeId);
 
               const capability_action = colorSettingCapability.Create(modeId);
-              deviceModel.UseCapability(deviceModelData.index, capability_action);
+              capabilitiesModel.UseCapability(deviceModelData.index, capability_action);
             }
           }
         }

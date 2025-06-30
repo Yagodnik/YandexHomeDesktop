@@ -13,13 +13,13 @@
 #include "models/DevicesModel/DevicesFilterModel.h"
 #include "models/RoomsModel/RoomsModel.h"
 #include "models/RoomsModel/RoomsFilterModel.h"
-#include "models/DeviceModel/DeviceModel.h"
+#include "models/DeviceModel/CapabilitiesModel.h"
+#include "models/DeviceModel/PropertiesModel.h"
 #include "models/ColorsModel/ColorsModel.h"
 #include "models/ModesModel/ModesModel.h"
 #include "models/ColorsModel/ColorsFilterModel.h"
 #include "models/ModesModel/ModesFilterModel.h"
 #include "models/HouseholdsModel/HouseholdsModel.h"
-#include "models/DeviceModel/DeviceFilterModel.h"
 #include "platform/PlatformService.h"
 #include "utils/Router.h"
 #include "utils/Themes.h"
@@ -47,7 +47,6 @@ void RegisterFonts(QGuiApplication &app) {
 }
 
 void RegisterModels() {
-  qmlRegisterType<DeviceFilterModel>("YandexHomeDesktop.Models", 1, 0, "DeviceFilterModel");
   qmlRegisterType<DevicesFilterModel>("YandexHomeDesktop.Models", 1, 0, "DevicesFilterModel");
   qmlRegisterType<RoomsFilterModel>("YandexHomeDesktop.Models", 1, 0, "RoomsFilterModel");
   qmlRegisterType<ColorsFilterModel>("YandexHomeDesktop.Models", 1, 0, "ColorsFilterModel");
@@ -90,7 +89,8 @@ int main(int argc, char *argv[]) {
   const auto scenarios_model = new ScenariosModel(yandex_api, &app);
   const auto devices_model = new DevicesModel(yandex_api, &app);
   const auto rooms_model = new RoomsModel(yandex_api, &app);
-  const auto device_model = new DeviceModel(yandex_api, &app);
+  const auto capabilities_model = new CapabilitiesModel(yandex_api, &app);
+  const auto properties_model = new PropertiesModel(yandex_api, &app);
   const auto households_model = new HouseholdsModel(yandex_api, &app);
   const auto error_codes = new ErrorCodes(&app);
   const auto color_model = new ColorsModel(&app);
@@ -102,11 +102,12 @@ int main(int argc, char *argv[]) {
   root_context->setContextProperty("router", router);
   root_context->setContextProperty("scenariosModel", scenarios_model);
   root_context->setContextProperty("devicesModel", devices_model);
+  root_context->setContextProperty("propertiesModel", properties_model);
   root_context->setContextProperty("roomsModel", rooms_model);
   root_context->setContextProperty("yandexApi", yandex_api);
   root_context->setContextProperty("yandexAccount", yandex_account);
   root_context->setContextProperty("themes", themes);
-  root_context->setContextProperty("deviceModel", device_model);
+  root_context->setContextProperty("capabilitiesModel", capabilities_model);
   root_context->setContextProperty("errorCodes", error_codes);
   root_context->setContextProperty("colorModel", color_model);
   root_context->setContextProperty("modesModel", modes_model);

@@ -41,7 +41,7 @@ Item {
 
       onToggled: function(checked) {
         const capability_action = toggleCapability.Create(checked);
-        deviceModel.UseCapability(model.index, capability_action);
+        capabilitiesModel.UseCapability(model.index, capability_action);
       }
     }
   }

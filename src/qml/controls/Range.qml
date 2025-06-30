@@ -73,7 +73,7 @@ Item {
     onPressedChanged: {
       if (!pressed) {
         const capability_action = rangeCapability.Create(value);
-        deviceModel.UseCapability(model.index, capability_action);
+        capabilitiesModel.UseCapability(model.index, capability_action);
       }
     }
   }

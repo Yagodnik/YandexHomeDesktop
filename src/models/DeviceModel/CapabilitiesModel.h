@@ -4,10 +4,10 @@
 #include "api/YandexHomeApi.h"
 #include "DeviceAttribute.h"
 
-class DeviceModel : public QAbstractListModel {
+class CapabilitiesModel : public QAbstractListModel {
   Q_OBJECT
 public:
-  explicit DeviceModel(YandexHomeApi *api, QObject *parent = nullptr);
+  explicit CapabilitiesModel(YandexHomeApi *api, QObject *parent = nullptr);
 
   enum Roles {
     IdRole = Qt::UserRole + 1,
@@ -60,7 +60,7 @@ private:
   QString device_id_;
   YandexHomeApi *api_;
 
-  QList<DeviceAttribute> attributes_;
+  QList<DeviceAttribute> capabilities_;
   bool is_initialized_;
 
   double last_update_start_time_;

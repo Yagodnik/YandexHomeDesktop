@@ -1,6 +1,7 @@
 import QtQuick
 import YandexHomeDesktop.Ui as UI
 import YandexHomeDesktop.Components as Components
+import YandexHomeDesktop.Models as Models
 
 Item {
   Rectangle {
@@ -16,7 +17,7 @@ Item {
   }
 
   Connections {
-    target: deviceModel
+    target: capabilitiesModel
 
     function onDataLoaded() {
       console.log("Device data loading - OK");
@@ -113,7 +114,7 @@ Item {
 
     spacing: 10
 
-    model: deviceModel
+    model: capabilitiesModel
 
     delegate: Loader {
       source: delegateSource
@@ -147,25 +148,27 @@ Item {
 
     spacing: 10
 
-    model: ListModel {
-      ListElement {
-        name: "Влажность"
-        value: 15
-        unit: "%"
-      }
+    // model: ListModel {
+    //   ListElement {
+    //     name: "Влажность"
+    //     value: 15
+    //     unit: "%"
+    //   }
+    //
+    //   ListElement {
+    //     name: "Уровень заряда"
+    //     value: 55
+    //     unit: "%"
+    //   }
+    //
+    //   ListElement {
+    //     name: "Уровень воды"
+    //     value: 80
+    //     unit: "%"
+    //   }
+    // }
 
-      ListElement {
-        name: "Уровень заряда"
-        value: 55
-        unit: "%"
-      }
-
-      ListElement {
-        name: "Уровень воды"
-        value: 80
-        unit: "%"
-      }
-    }
+    model: propertiesModel
 
     delegate: Item {
       width: parent.width
@@ -205,7 +208,7 @@ Item {
           anchors.right: parent.right
           anchors.verticalCenter: parent.verticalCenter
 
-          text: value + unit
+          text: propertyState["value"]
         }
       }
 
@@ -224,7 +227,7 @@ Item {
         to: 100
         enabled: false
 
-        value: model.value
+        value: propertyState["value"]
       }
     }
   }

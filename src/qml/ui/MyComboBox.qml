@@ -48,7 +48,7 @@ ComboBox {
     }
 
     contentItem: Text {
-      text: modelData
+      text: model.displayText
       color: highlighted ? themes.controlText2 : root.textColor
       verticalAlignment: Text.AlignVCenter
     }
@@ -94,7 +94,7 @@ ComboBox {
       currentIndex: root.highlightedIndex
       clip: true
       interactive: true
-      implicitHeight: contentHeight
+      implicitHeight: contentHeight > 200 ? 200 : contentHeight
 
       highlightRangeMode: ListView.ApplyRange
       highlightMoveDuration: 0

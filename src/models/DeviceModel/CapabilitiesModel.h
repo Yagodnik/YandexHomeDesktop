@@ -19,6 +19,8 @@ public:
     ParametersRole
   };
 
+  void ResetModel(const QString& device_id);
+
   [[nodiscard]] int rowCount(const QModelIndex &parent) const override;
   [[nodiscard]] QVariant data(const QModelIndex &index, int role) const override;
   [[nodiscard]] QHash<int, QByteArray> roleNames() const override;
@@ -37,7 +39,8 @@ signals:
   void dataUpdated(int index);
   void errorOccurred(const QString& error_message);
 
-private:
+// private:
+public:
   const QString kUnsupportedDelegate = "qrc:/controls/Unsupported.qml";
   const QMap<CapabilityType, QString> kDelegates = {
     { CapabilityType::OnOff,        "qrc:/controls/OnOff.qml" },
@@ -49,12 +52,13 @@ private:
   };
 
   const QMap<QString, QString> kDelegates2 = {
-    { "devices.capabilities.on_off",        "qrc:/controls/OnOff.qml" },
+    // { "devices.capabilities.on_off",        "qrc:/controls/OnOff.qml" },
+    { "devices.capabilities.on_off",        "qrc:/controls/Mode.qml" },
     { "devices.capabilities.video_stream",  kUnsupportedDelegate },
     { "devices.capabilities.color_setting", "qrc:/controls/ColorSetting.qml" },
-    { "devices.capabilities.mode",         "qrc:/controls/Mode.qml" },
-    { "devices.capabilities.range",        "qrc:/controls/Range.qml" },
-    { "devices.capabilities.toggle",       "qrc:/controls/Toggle.qml" },
+    { "devices.capabilities.mode",          "qrc:/controls/Mode.qml" },
+    { "devices.capabilities.range",         "qrc:/controls/Range.qml" },
+    { "devices.capabilities.toggle",        "qrc:/controls/Toggle.qml" },
   };
 
   QString device_id_;

@@ -53,6 +53,7 @@ Item {
       console.log("Device Id: ", deviceId, " Room Id: ", deviceRoomId, " Household Id: ", deviceHouseholdId)
 
       capabilitiesModel.RequestData(deviceId);
+      // deviceDataController.RequestData(deviceId);
 
       router.navigateTo("device");
     }

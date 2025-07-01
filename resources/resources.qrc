@@ -21,6 +21,7 @@
     <file>data/errorCodes.json</file>
     <file>data/colors.json</file>
     <file>data/colorModes.json</file>
+    <file>data/modes.json</file>
 
     <file>images/modes/alarm.svg</file>
     <file>images/modes/alice.svg</file>

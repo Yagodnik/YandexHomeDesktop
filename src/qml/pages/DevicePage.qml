@@ -1,4 +1,5 @@
 import QtQuick
+import Qt5Compat.GraphicalEffects
 import YandexHomeDesktop.Ui as UI
 import YandexHomeDesktop.Components as Components
 import YandexHomeDesktop.Models as Models
@@ -45,10 +46,22 @@ Item {
 
     width: parent.width
     height: 48
+    z: 200
 
     Rectangle {
+      id: headerBackground
       anchors.fill: parent
       color: themes.headerBackground
+    }
+
+    DropShadow {
+      anchors.fill: headerBackground
+      source: headerBackground
+      radius: 12
+      samples: 16
+      horizontalOffset: 0
+      verticalOffset: 2
+      color: "#66000000"
     }
 
     Image {
@@ -86,148 +99,142 @@ Item {
     }
   }
 
-  UI.HeadingText {
-    id: capabilitiesText
-    text: "Умения"
-
+  Flickable {
+    width: parent.width
     anchors.top: topHeader.bottom
-    anchors.topMargin: 4
-    anchors.left: parent.left
-    anchors.leftMargin: 16
-  }
-
-  ListView {
-    id: capabilitiesList
-    anchors.top: capabilitiesText.bottom
-    anchors.topMargin: 4
-    // anchors.bottom: parent.bottom
-    // anchors.bottomMargin: 10
-
-    height: 100
-
-    anchors.left: parent.left
-    anchors.leftMargin: 16
-    anchors.right: parent.right
-    anchors.rightMargin: 16
-
-    clip: true
-
-    spacing: 10
-
-    model: capabilitiesModel
-
-    delegate: Loader {
-      source: delegateSource
-      width: parent.width
-    }
-  }
-
-  UI.HeadingText {
-    id: propertiesText
-    text: "Свойства"
-
-    anchors.top: capabilitiesList.bottom
-    anchors.topMargin: 4
-    anchors.left: parent.left
-    anchors.leftMargin: 16
-  }
-
-  ListView {
-    id: propertiesList
-    anchors.top: propertiesText.bottom
-    anchors.topMargin: 4
     anchors.bottom: parent.bottom
-    anchors.bottomMargin: 10
-
-    anchors.left: parent.left
-    anchors.leftMargin: 16
-    anchors.right: parent.right
-    anchors.rightMargin: 16
-
+    contentHeight: contentItem.childrenRect.height
     clip: true
+    interactive: true
 
-    spacing: 10
+    UI.HeadingText {
+      id: capabilitiesText
+      text: "Умения"
 
-    // model: ListModel {
-    //   ListElement {
-    //     name: "Влажность"
-    //     value: 15
-    //     unit: "%"
-    //   }
-    //
-    //   ListElement {
-    //     name: "Уровень заряда"
-    //     value: 55
-    //     unit: "%"
-    //   }
-    //
-    //   ListElement {
-    //     name: "Уровень воды"
-    //     value: 80
-    //     unit: "%"
-    //   }
-    // }
+      anchors.top: parent.top
+      anchors.topMargin: 4
+      anchors.left: parent.left
+      anchors.leftMargin: 16
+    }
 
-    model: propertiesModel
+    ListView {
+      id: capabilitiesList
+      anchors.top: capabilitiesText.bottom
+      anchors.topMargin: 4
+      height: contentHeight
 
-    delegate: Item {
-      width: parent.width
-      height: 58
+      // anchors.bottom: parent.bottom
+      // anchors.bottomMargin: 10
 
-      Rectangle {
-        anchors.fill: parent
-        color: themes.headerBackground
-        radius: 16
+      // height: 100
+
+      anchors.left: parent.left
+      anchors.leftMargin: 16
+      anchors.right: parent.right
+      anchors.rightMargin: 16
+
+      clip: true
+      interactive: false
+
+      spacing: 10
+
+      model: capabilitiesModel
+
+      delegate: Loader {
+        source: delegateSource
+        width: parent.width
       }
+    }
 
-      Item {
-        id: top
+    UI.HeadingText {
+      id: propertiesText
+      text: "Свойства"
 
-        anchors.top: parent.top
-        anchors.topMargin: 8
+      anchors.top: capabilitiesList.bottom
+      anchors.topMargin: 4
+      anchors.left: parent.left
+      anchors.leftMargin: 16
+    }
 
-        anchors.left: parent.left
-        anchors.leftMargin: 12
-        anchors.right: parent.right
-        anchors.rightMargin: 12
+    ListView {
+      id: propertiesList
+      anchors.top: propertiesText.bottom
+      anchors.topMargin: 4
+      // anchors.bottom: parent.bottom
+      // anchors.bottomMargin: 10
+      height: contentHeight + 12
 
-        height: 20
+      anchors.left: parent.left
+      anchors.leftMargin: 16
+      anchors.right: parent.right
+      anchors.rightMargin: 16
 
-        UI.DefaultText {
-          id: propertyTitle
+      clip: true
+      interactive: false
+
+      spacing: 10
+
+      model: propertiesModel
+
+      delegate: Item {
+        width: parent.width
+        height: 58
+
+        Rectangle {
+          anchors.fill: parent
+          color: themes.headerBackground
+          radius: 16
+        }
+
+        Item {
+          id: top
+
+          anchors.top: parent.top
+          anchors.topMargin: 8
 
           anchors.left: parent.left
-          anchors.verticalCenter: parent.verticalCenter
-
-          text: name
-        }
-
-        UI.DefaultText {
-          id: valueText
-
+          anchors.leftMargin: 12
           anchors.right: parent.right
-          anchors.verticalCenter: parent.verticalCenter
+          anchors.rightMargin: 12
 
-          text: propertyState["value"]
+          height: 20
+
+          UI.DefaultText {
+            id: propertyTitle
+
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+
+            text: name
+          }
+
+          UI.DefaultText {
+            id: valueText
+
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+
+            text: propertyState["value"]
+          }
         }
-      }
 
-      UI.MySlider {
-        id: valueSlider
-        anchors.top: top.bottom
-        anchors.topMargin: 10
-        anchors.left: parent.left
-        anchors.leftMargin: 12
-        anchors.right: parent.right
-        anchors.rightMargin: 12
+        UI.MySlider {
+          id: valueSlider
+          anchors.top: top.bottom
+          anchors.topMargin: 10
+          anchors.left: parent.left
+          anchors.leftMargin: 12
+          anchors.right: parent.right
+          anchors.rightMargin: 12
 
-        height: 12
+          height: 12
 
-        from: 0
-        to: 100
-        enabled: false
+          from: 0
+          to: 100
+          enabled: false
 
-        value: propertyState["value"]
+          value: propertyState["value"]
+        }
       }
     }
   }

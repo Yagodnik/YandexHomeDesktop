@@ -31,6 +31,16 @@ CapabilitiesModel::CapabilitiesModel(YandexHomeApi *api, QObject *parent)
   });
 }
 
+void CapabilitiesModel::ResetModel(const QString& device_id) {
+  beginResetModel();
+
+  device_id_ = device_id;
+  capabilities_.clear();
+  is_initialized_ = false;
+
+  endResetModel();
+}
+
 int CapabilitiesModel::rowCount(const QModelIndex &parent) const {
   return capabilities_.size();
 }
@@ -123,11 +133,14 @@ void CapabilitiesModel::UseCapability(const int index, const QVariantMap &state)
   }
 
   capabilities_[index].PausePolling();
+  // controller_->PausePolling(index);
 
   capability.state = state;
 
   const auto model_index = createIndex(index, 0);
   emit dataChanged(model_index, model_index);
+
+  // controller->UseCapability(index, capability, state);
 
   const CapabilityObject action = {
     .type = CapabilityType::operator[](capability.name),

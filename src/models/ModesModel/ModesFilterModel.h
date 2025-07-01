@@ -1,24 +1,24 @@
 #pragma once
 
 #include <QSortFilterProxyModel>
-#include <QVariantList>
 
 class ModesFilterModel : public QSortFilterProxyModel {
   Q_OBJECT
-  Q_PROPERTY(QVariantList allowedScenes READ GetAllowedScenes WRITE SetAllowedScenes NOTIFY allowedScenesChanged)
+  Q_PROPERTY(QVariantList allowedModes READ GetAllowedModes WRITE SetAllowedModes NOTIFY allowedModesChanged)
 public:
   explicit ModesFilterModel(QObject *parent = nullptr);
 
-  [[nodiscard]] QVariantList GetAllowedScenes() const;
+  [[nodiscard]] QVariantList GetAllowedModes() const;
 
 public slots:
-  void SetAllowedScenes(const QVariantList &allowed_scenes);
+  void SetAllowedModes(const QVariantList &allowed_modes);
 
 signals:
-  void allowedScenesChanged();
+  void allowedModesChanged();
 
 protected:
   [[nodiscard]] bool filterAcceptsRow(int row, const QModelIndex &parent) const override;
 
-  QVariantList allowed_scenes_;
+private:
+  QVariantList allowed_modes_;
 };

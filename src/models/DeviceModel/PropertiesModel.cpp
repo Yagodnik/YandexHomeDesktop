@@ -18,6 +18,15 @@ PropertiesModel::PropertiesModel(YandexHomeApi* api, QObject* parent)
     &PropertiesModel::OnDeviceInfoReceivingFailed);
 }
 
+void PropertiesModel::ResetModel() {
+  beginResetModel();
+
+  properties_.clear();
+  is_initialized_ = false;
+
+  endResetModel();
+}
+
 int PropertiesModel::rowCount(const QModelIndex &parent) const {
   return properties_.size();
 }

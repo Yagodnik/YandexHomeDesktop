@@ -121,7 +121,15 @@ Item {
 
                 currentIndex: settings.currentTheme
 
-                model: ["Светлая", "Тёмная"]
+                model: ListModel {
+                  ListElement {
+                    displayText: "Светлая"
+                  }
+
+                  ListElement {
+                    displayText: "Тёмная"
+                  }
+                }
 
                 onActivated: {
                   console.log("Selected index:", currentIndex, "value:", currentText)

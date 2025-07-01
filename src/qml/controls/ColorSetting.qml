@@ -163,10 +163,10 @@ Item {
         // model: 12
         // model: modesModel
 
-        model: Models.ModesFilterModel {
+        model: Models.ColorModesFilterModel {
           // allowedScenes: colorSettingCapability.GetAvailableScenes()
           allowedScenes: colorSettingCapability.availableScenes
-          sourceModel: modesModel
+          sourceModel: colorModesModel
         }
 
         delegate: Rectangle {

@@ -2,30 +2,31 @@
 
 #include "ModesModel.h"
 
-ModesFilterModel::ModesFilterModel(QObject *parent) : QSortFilterProxyModel(parent ) {}
+ModesFilterModel::ModesFilterModel(QObject *parent) : QSortFilterProxyModel(parent) {}
 
-QVariantList ModesFilterModel::GetAllowedScenes() const {
-  return allowed_scenes_;
+QVariantList ModesFilterModel::GetAllowedModes() const {
+  return allowed_modes_;
 }
 
-void ModesFilterModel::SetAllowedScenes(const QVariantList &allowed_scenes) {
-  allowed_scenes_ = allowed_scenes;
-  emit allowedScenesChanged();
+void ModesFilterModel::SetAllowedModes(const QVariantList &allowed_modes) {
+  allowed_modes_.clear();
+
+  for (const auto &mode : allowed_modes) {
+    const auto item = mode.toMap();
+    allowed_modes_.append(item.value("value").toString());
+  }
+
+  emit allowedModesChanged();
 }
 
-bool ModesFilterModel::filterAcceptsRow(int row, const QModelIndex &parent) const {
+bool ModesFilterModel::filterAcceptsRow(const int row, const QModelIndex &parent) const {
   const auto index = sourceModel()->index(row, 0, parent);
 
   if (!index.isValid()) {
     return false;
   }
 
-  const auto mode_id = sourceModel()->data(
-    index, ModesModel::IdRole
-  ).toString();
+  const auto mode_value = sourceModel()->data(index, ModesModel::IdRole).toString();
 
-  return std::ranges::any_of(allowed_scenes_, [&mode_id](const auto &scene) {
-    const auto& data = scene.toMap();
-    return data["id"].toString() == mode_id;
-  });
+  return allowed_modes_.contains(mode_value);
 }

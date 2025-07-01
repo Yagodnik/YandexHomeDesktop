@@ -1,36 +1,32 @@
 #include "ModesModel.h"
-
 #include "utils/JsonLoader.h"
 
 ModesModel::ModesModel(QObject *parent) : QAbstractListModel(parent) {
-  const auto& modes_file = JsonLoader::Load<ColorModesFile>(kModesFile);
-
-  if (!modes_file.has_value()) {
-    qWarning() << "Failed to load colors file";
+  const auto modes_list_opt = JsonLoader::Load<ModesList>(kModesListFile);
+  if (!modes_list_opt.has_value()) {
+    qDebug() << "Failed to load modes list";
     return;
   }
 
-  color_modes_ = modes_file.value().color_modes;
+  modes_ = modes_list_opt.value().modes;
 }
 
 int ModesModel::rowCount(const QModelIndex &parent) const {
-  return color_modes_.size();
+  return modes_.size();
 }
 
 QVariant ModesModel::data(const QModelIndex &index, int role) const {
-  if (!index.isValid() || index.row() >= color_modes_.size()) {
+  if (index.row() < 0 || index.row() >= modes_.size()) {
     return {};
   }
 
-  const auto& mode = color_modes_.at(index.row());
+  const Mode &mode = modes_[index.row()];
 
   switch (role) {
     case IdRole:
       return mode.id;
     case NameRole:
       return mode.name;
-    case ImageRole:
-      return kImagePrefix + mode.id + ".svg";
     default:
       return {};
   }
@@ -39,7 +35,14 @@ QVariant ModesModel::data(const QModelIndex &index, int role) const {
 QHash<int, QByteArray> ModesModel::roleNames() const {
   return {
     { IdRole, "modeId" },
-    { NameRole, "name" },
-    { ImageRole, "image" }
+    { NameRole, "displayText" }
   };
+}
+
+QVariant ModesModel::getItem(int index) const {
+  if (index < 0 || index >= rowCount()) {
+    return {};
+  }
+
+  return QVariant::fromValue(modes_.at(index));
 }

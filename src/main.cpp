@@ -15,11 +15,14 @@
 #include "models/RoomsModel/RoomsFilterModel.h"
 #include "models/DeviceModel/CapabilitiesModel.h"
 #include "models/DeviceModel/PropertiesModel.h"
+// #include "models/DeviceModel/DeviceDataController.h"
 #include "models/ColorsModel/ColorsModel.h"
-#include "models/ModesModel/ModesModel.h"
+#include "models/ColorsModel/ColorModesModel.h"
 #include "models/ColorsModel/ColorsFilterModel.h"
-#include "models/ModesModel/ModesFilterModel.h"
+#include "models/ColorsModel/ColorModesFilterModel.h"
 #include "models/HouseholdsModel/HouseholdsModel.h"
+#include "models/ModesModel/ModesModel.h"
+#include "models/ModesModel/ModesFilterModel.h"
 #include "platform/PlatformService.h"
 #include "utils/Router.h"
 #include "utils/Themes.h"
@@ -50,6 +53,7 @@ void RegisterModels() {
   qmlRegisterType<DevicesFilterModel>("YandexHomeDesktop.Models", 1, 0, "DevicesFilterModel");
   qmlRegisterType<RoomsFilterModel>("YandexHomeDesktop.Models", 1, 0, "RoomsFilterModel");
   qmlRegisterType<ColorsFilterModel>("YandexHomeDesktop.Models", 1, 0, "ColorsFilterModel");
+  qmlRegisterType<ColorModesFilterModel>("YandexHomeDesktop.Models", 1, 0, "ColorModesFilterModel");
   qmlRegisterType<ModesFilterModel>("YandexHomeDesktop.Models", 1, 0, "ModesFilterModel");
 }
 
@@ -91,9 +95,14 @@ int main(int argc, char *argv[]) {
   const auto rooms_model = new RoomsModel(yandex_api, &app);
   const auto capabilities_model = new CapabilitiesModel(yandex_api, &app);
   const auto properties_model = new PropertiesModel(yandex_api, &app);
+  // const auto device_data_controller = new DeviceDataController(yandex_api, &app);
+  // device_data_controller->capabilities_model_ = capabilities_model;
+  // device_data_controller->properties_model_ = properties_model;
+
   const auto households_model = new HouseholdsModel(yandex_api, &app);
   const auto error_codes = new ErrorCodes(&app);
   const auto color_model = new ColorsModel(&app);
+  const auto color_modes_model = new ColorModesModel(&app);
   const auto modes_model = new ModesModel(&app);
   const auto settings = new Settings(&app);
 
@@ -103,6 +112,7 @@ int main(int argc, char *argv[]) {
   root_context->setContextProperty("scenariosModel", scenarios_model);
   root_context->setContextProperty("devicesModel", devices_model);
   root_context->setContextProperty("propertiesModel", properties_model);
+  // root_context->setContextProperty("deviceDataController", device_data_controller);
   root_context->setContextProperty("roomsModel", rooms_model);
   root_context->setContextProperty("yandexApi", yandex_api);
   root_context->setContextProperty("yandexAccount", yandex_account);
@@ -110,6 +120,7 @@ int main(int argc, char *argv[]) {
   root_context->setContextProperty("capabilitiesModel", capabilities_model);
   root_context->setContextProperty("errorCodes", error_codes);
   root_context->setContextProperty("colorModel", color_model);
+  root_context->setContextProperty("colorModesModel", color_modes_model);
   root_context->setContextProperty("modesModel", modes_model);
   root_context->setContextProperty("householdsModel", households_model);
   root_context->setContextProperty("settings", settings);

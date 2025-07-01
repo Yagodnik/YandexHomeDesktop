@@ -9,6 +9,7 @@ Item {
   height: layout.implicitHeight
 
   Rectangle {
+    id: background
     anchors.fill: parent
     color: themes.headerBackground
   }

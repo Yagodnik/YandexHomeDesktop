@@ -1,0 +1,126 @@
+{
+  "vibration": [
+    {
+      "id": "tilt",
+      "name": "переворачивание"
+    },
+    {
+      "id": "fall",
+      "name": "падение"
+    },
+    {
+      "id": "vibration",
+      "name": "вибрация"
+    }
+  ],
+  "open": [
+    {
+      "id": "opened",
+      "name": "открыто"
+    },
+    {
+      "id": "closed",
+      "name": "закрыто"
+    }
+  ],
+  "button": [
+    {
+      "id": "click",
+      "name": "одиночное нажатие"
+    },
+    {
+      "id": "double_click",
+      "name": "двойное нажатие"
+    },
+    {
+      "id": "long_click",
+      "name": "долгое нажатие"
+    }
+  ],
+  "motion": [
+    {
+      "id": "detected",
+      "name": "обнаружено"
+    },
+    {
+      "id": "not_detected",
+      "name": "не обнаружено"
+    }
+  ],
+  "smoke": [
+    {
+      "id": "detected",
+      "name": "обнаружено"
+    },
+    {
+      "id": "not_detected",
+      "name": "не обнаружено"
+    },
+    {
+      "id": "high",
+      "name": "высокий уровень"
+    }
+  ],
+  "gas": [
+    {
+      "id": "detected",
+      "name": "обнаружено"
+    },
+    {
+      "id": "not_detected",
+      "name": "не обнаружено"
+    },
+    {
+      "id": "high",
+      "name": "высокий уровень"
+    }
+  ],
+  "battery_level": [
+    {
+      "id": "low",
+      "name": "низкий"
+    },
+    {
+      "id": "normal",
+      "name": "нормальный"
+    }
+  ],
+  "food_level": [
+    {
+      "id": "empty",
+      "name": "пустой"
+    },
+    {
+      "id": "low",
+      "name": "низкий"
+    },
+    {
+      "id": "normal",
+      "name": "нормальный"
+    }
+  ],
+  "water_level": [
+    {
+      "id": "empty",
+      "name": "пустой"
+    },
+    {
+      "id": "low",
+      "name": "низкий"
+    },
+    {
+      "id": "normal",
+      "name": "нормальный"
+    }
+  ],
+  "water_leak": [
+    {
+      "id": "dry",
+      "name": "нет протечки"
+    },
+    {
+      "id": "leak",
+      "name": "протечка"
+    }
+  ]
+}

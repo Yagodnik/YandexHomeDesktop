@@ -3,7 +3,9 @@ find_package(Qt6 COMPONENTS Core Quick REQUIRED)
 set(MAC_SOURCES "")
 set(MAC_FRAMEWORKS "")
 if(APPLE)
-  set(MAC_SOURCES macos/MacOSIntegration.mm)
+  set(MAC_SOURCES macos/MacOSIntegration.mm
+          PlatformServiceWin.cpp
+          PlatformServiceWin.h)
   set_source_files_properties(macos/MacOSIntegration.mm PROPERTIES COMPILE_FLAGS "-x objective-c++")
   set(MAC_FRAMEWORKS "-framework Cocoa")
 endif()

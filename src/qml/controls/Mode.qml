@@ -6,6 +6,15 @@ import YandexHomeDesktop.Capabilities as Capabilities
 Item {
   height: 48
 
+  property var deviceModelData: model
+
+  Capabilities.Modes {
+    id: modesCapability
+
+    state: model.attributeState
+    parameters: model.attributeParameters
+  }
+
   Rectangle {
     anchors.fill: parent
     color: themes.headerBackground
@@ -22,37 +31,60 @@ Item {
 
   UI.MyComboBox {
     id: comboBox
+    width: 120
 
-    // model: modesModel
+    textRole: "displayText"
+
     model: Models.ModesFilterModel {
       sourceModel: modesModel
-      allowedModes: [
-        {
-          "value": "fan_only"
-        },
-        {
-          "value": "heat"
-        },
-        {
-          "value": "cool"
-        },
-        {
-          "value": "dry"
-        },
-        {
-          "value": "auto"
-        }
-      ]
+
+      // allowedModes: [
+      //   { "value": "fan_only" },
+      //   { "value": "heat"     },
+      //   { "value": "cool"     },
+      //   { "value": "dry"      },
+      //   { "value": "auto"     }
+      // ]
+
+      allowedModes: modesCapability.parameters["modes"]
     }
 
     anchors.right: parent.right
     anchors.rightMargin: 12
     anchors.verticalCenter: parent.verticalCenter
 
-    onCurrentIndexChanged: {
-      const item = comboBox.model.getItem(comboBox.currentIndex);
+    property alias selectedModeId: modesCapability.value
 
-      console.log(item);
+    Component.onCompleted: {
+      updateCurrentIndexFromValue()
+    }
+
+    onSelectedModeIdChanged: updateCurrentIndexFromValue()
+
+    onCurrentIndexChanged: {
+      console.log(deviceModelData.index);
+
+      const idx = currentIndex;
+      const id = model.get(idx).id;
+      if (selectedModeId !== id) {
+        selectedModeId = id;
+        console.log("New id:", id);
+      }
+
+      const capability_action = modesCapability.Create(selectedModeId);
+      capabilitiesModel.UseCapability(model.index, capability_action);
+    }
+
+    function updateCurrentIndexFromValue() {
+      for (let i = 0; i < model.count; ++i) {
+        if (model.get(i).id === selectedModeId) {
+          if (currentIndex !== i) {
+            currentIndex = i;
+          }
+
+          break;
+        }
+      }
     }
   }
 }

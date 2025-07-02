@@ -9,6 +9,7 @@ public:
   explicit ModesFilterModel(QObject *parent = nullptr);
 
   [[nodiscard]] QVariantList GetAllowedModes() const;
+  Q_INVOKABLE QVariantMap get(int index) const;
 
 public slots:
   void SetAllowedModes(const QVariantList &allowed_modes);

@@ -8,6 +8,22 @@ QVariantList ModesFilterModel::GetAllowedModes() const {
   return allowed_modes_;
 }
 
+QVariantMap ModesFilterModel::get(int index) const {
+  if (index < 0 || index >= rowCount()) {
+    return {};
+  }
+
+  QModelIndex proxyIndex = this->index(index, 0);
+  QModelIndex sourceIndex = mapToSource(proxyIndex);
+  const auto& source = sourceModel();
+
+  QVariantMap map;
+  map["id"] = source->data(sourceIndex, ModesModel::IdRole);
+  map["name"] = source->data(sourceIndex, ModesModel::NameRole);
+
+  return map;
+}
+
 void ModesFilterModel::SetAllowedModes(const QVariantList &allowed_modes) {
   allowed_modes_.clear();
 

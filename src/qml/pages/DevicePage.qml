@@ -218,23 +218,23 @@ Item {
           }
         }
 
-        UI.MySlider {
-          id: valueSlider
-          anchors.top: top.bottom
-          anchors.topMargin: 10
-          anchors.left: parent.left
-          anchors.leftMargin: 12
-          anchors.right: parent.right
-          anchors.rightMargin: 12
-
-          height: 12
-
-          from: 0
-          to: 100
-          enabled: false
-
-          value: propertyState["value"]
-        }
+        // UI.MySlider {
+        //   id: valueSlider
+        //   anchors.top: top.bottom
+        //   anchors.topMargin: 10
+        //   anchors.left: parent.left
+        //   anchors.leftMargin: 12
+        //   anchors.right: parent.right
+        //   anchors.rightMargin: 12
+        //
+        //   height: 12
+        //
+        //   from: 0
+        //   to: 100
+        //   enabled: false
+        //
+        //   value: propertyState["value"]
+        // }
       }
     }
   }

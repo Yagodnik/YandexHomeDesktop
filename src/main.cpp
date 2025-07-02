@@ -32,12 +32,25 @@
 #include "capabilities/RangeCapability.h"
 #include "capabilities/ToggleCapability.h"
 #include "capabilities/ColorSettingCapability.h"
+#include "capabilities/ModesCapability.h"
 
 /*
  * TODO: Possible Bug
  * User Creates new rooms -> select dialog have room -> no data in devices model -> looking for unknown device
  * Same with removing
  */
+
+/*
+* TODO List
+*  1) Finish modes capability
+*  2) Implement properties views
+*  3) Implement properties classes (IProperty, FloatProperty, EventProperty)
+*  4) Refactor polling system (CapabilitiesModel)
+*  5) Range random access
+*  6) Loading animation for capabilities/properties
+*  7) Block polling when app is not in focus
+*  8) Logging
+* */
 
 void RegisterFonts(QGuiApplication &app) {
   const int id = QFontDatabase::addApplicationFont(":/fonts/Manrope-Regular.ttf");
@@ -62,6 +75,7 @@ void RegisterCapabilities() {
   qmlRegisterType<RangeCapability>("YandexHomeDesktop.Capabilities", 1, 0, "Range");
   qmlRegisterType<ToggleCapability>("YandexHomeDesktop.Capabilities", 1, 0, "Toggle");
   qmlRegisterType<ColorSettingCapability>("YandexHomeDesktop.Capabilities", 1, 0, "ColorSetting");
+  qmlRegisterType<ModesCapability>("YandexHomeDesktop.Capabilities", 1, 0, "Modes");
 }
 
 int main(int argc, char *argv[]) {

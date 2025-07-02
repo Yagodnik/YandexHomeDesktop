@@ -23,6 +23,7 @@ ComboBox {
     verticalAlignment: Text.AlignVCenter
     anchors.centerIn: root
     leftPadding: 12
+    wrapMode: Text.WordWrap
   }
 
   background: Rectangle {
@@ -51,6 +52,7 @@ ComboBox {
       text: model.displayText
       color: highlighted ? themes.controlText2 : root.textColor
       verticalAlignment: Text.AlignVCenter
+      wrapMode: Text.WordWrap
     }
 
     onClicked: {
@@ -104,7 +106,7 @@ ComboBox {
         height: 32
 
         Text {
-          text: modelData
+          text: model.displayText
           anchors.verticalCenter: parent.verticalCenter
           color: themes.controlText
         }

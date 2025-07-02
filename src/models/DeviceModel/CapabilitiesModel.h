@@ -52,8 +52,8 @@ public:
   };
 
   const QMap<QString, QString> kDelegates2 = {
-    // { "devices.capabilities.on_off",        "qrc:/controls/OnOff.qml" },
-    { "devices.capabilities.on_off",        "qrc:/controls/Mode.qml" },
+    { "devices.capabilities.on_off",        "qrc:/controls/OnOff.qml" },
+    // { "devices.capabilities.on_off",        "qrc:/controls/Mode.qml" },
     { "devices.capabilities.video_stream",  kUnsupportedDelegate },
     { "devices.capabilities.color_setting", "qrc:/controls/ColorSetting.qml" },
     { "devices.capabilities.mode",          "qrc:/controls/Mode.qml" },

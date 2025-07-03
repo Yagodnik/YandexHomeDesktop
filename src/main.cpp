@@ -42,14 +42,19 @@
 
 /*
 * TODO List
-*  1) Finish modes capability
+*  1) Fix modes capability
 *  2) Implement properties views
 *  3) Implement properties classes (IProperty, FloatProperty, EventProperty)
 *  4) Refactor polling system (CapabilitiesModel)
-*  5) Range random access
+*  5) Range random access false support
 *  6) Loading animation for capabilities/properties
 *  7) Block polling when app is not in focus
 *  8) Logging
+*  + 9) Color Settings - not all devices support concrete colors
+*  10) Device offline mark
+*  11) Performance optimizations
+*  + 12) Titles
+*  13) Range doesnt supports any units
 * */
 
 void RegisterFonts(QGuiApplication &app) {
@@ -119,6 +124,7 @@ int main(int argc, char *argv[]) {
   const auto color_modes_model = new ColorModesModel(&app);
   const auto modes_model = new ModesModel(&app);
   const auto settings = new Settings(&app);
+  const auto titles_list = new TitlesList(&app);
 
   root_context->setContextProperty("platformService", platform_service);
   root_context->setContextProperty("authorizationService", authorization_service);
@@ -138,6 +144,7 @@ int main(int argc, char *argv[]) {
   root_context->setContextProperty("modesModel", modes_model);
   root_context->setContextProperty("householdsModel", households_model);
   root_context->setContextProperty("settings", settings);
+  root_context->setContextProperty("capabilitiesTitles", titles_list);
 
   RegisterModels();
   RegisterCapabilities();

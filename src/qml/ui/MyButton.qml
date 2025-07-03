@@ -33,7 +33,7 @@ Item {
     id: label
     anchors.centerIn: parent
     color: themes.controlText
-    font.pointSize: 16
+    font.pixelSize: 16
   }
 
   MouseArea {

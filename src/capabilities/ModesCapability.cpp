@@ -1,7 +1,7 @@
 #include "ModesCapability.h"
 
 ModesCapability::ModesCapability(QObject *parent)
-  : ICapability(parent) {}
+  : ICapability("modes", parent) {}
 
 void ModesCapability::SetValue(const QVariant &value) {
   if (GetValue().toString() == value.toString()) {

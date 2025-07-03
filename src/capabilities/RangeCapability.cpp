@@ -1,6 +1,6 @@
 #include "RangeCapability.h"
 
-RangeCapability::RangeCapability(QObject *parent) : ICapability(parent) {}
+RangeCapability::RangeCapability(QObject *parent) : ICapability("range", parent) {}
 
 void RangeCapability::SetValue(const QVariant& value) {
   if (GetValue().toDouble() == value.toDouble()) {

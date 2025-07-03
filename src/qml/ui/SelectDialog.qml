@@ -136,7 +136,7 @@ Item {
     id: selectTitle
     text: title
 
-    font.pointSize: 24
+    font.pixelSize: 24
     font.bold: true
 
     anchors.left: parent.left

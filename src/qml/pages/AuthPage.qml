@@ -34,7 +34,7 @@ Item {
         UI.AnimatedText {
           text: "Yandex Home Desktop"
           color: themes.accent
-          pointSize: 24
+          pixelSize: 24
 
           anchors.horizontalCenter: col.horizontalCenter
         }
@@ -42,7 +42,7 @@ Item {
         UI.AnimatedText {
           text: qsTr("Необходимо войти в аккаунт, чтобы\nприложение могло получить доступ\nк вашим устройствам")
           color: themes.inactive
-          pointSize: 16
+          pixelSize: 16
 
           anchors.horizontalCenter: col.horizontalCenter
         }

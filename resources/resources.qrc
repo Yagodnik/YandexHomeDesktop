@@ -22,6 +22,9 @@
     <file>data/colors.json</file>
     <file>data/colorModes.json</file>
     <file>data/modes.json</file>
+    <file>data/instances.json</file>
+    <file>data/propertiesEvents.json</file>
+    <file>data/propertiesFloat.json</file>
 
     <file>images/modes/alarm.svg</file>
     <file>images/modes/alice.svg</file>

@@ -1,7 +1,7 @@
 #include "ColorSettingCapability.h"
 #include <QColor>
 
-ColorSettingCapability::ColorSettingCapability(QObject *parent) : ICapability(parent) {}
+ColorSettingCapability::ColorSettingCapability(QObject *parent) : ICapability("base", parent) {}
 
 void ColorSettingCapability::SetValue(const QVariant &value) {
   if (GetValue() == value) {
@@ -80,12 +80,22 @@ QVariantList ColorSettingCapability::GetAvailableScenes() const {
   return color_scene["scenes"].toList();
 }
 
+bool ColorSettingCapability::GetSupportsColors() const {
+  return parameters_.contains("color_model");
+}
+
+bool ColorSettingCapability::GetSupportsTemperature() const {
+  return parameters_.contains("temperature_k");
+}
+
 void ColorSettingCapability::SetParameters(const QVariantMap &parameters) {
   ICapability::SetParameters(parameters);
 
   emit temperatureMinChanged();
   emit temperatureMaxChanged();
   emit availableScenesChanged();
+  emit supportsColorsChanged();
+  emit supportsTemperatureChanged();
 }
 
 void ColorSettingCapability::SetTemperatureMin(int value) {

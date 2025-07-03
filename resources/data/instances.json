@@ -1,108 +1,39 @@
 {
-  "range": [
-    {
-      "id": "brightness",
-      "name": "Яркость"
-    },
-    {
-      "id": "channel",
-      "name": "Канал"
-    },
-    {
-      "id": "humidity",
-      "name": "Влажность"
-    },
-    {
-      "id": "open",
-      "name": "Открытие"
-    },
-    {
-      "id": "temperature",
-      "name": "Температура"
-    },
-    {
-      "id": "volume",
-      "name": "Громкость"
-    }
-  ],
-  "toggle": [
-    {
-      "id": "backlight",
-      "name": "Подсветка"
-    },
-    {
-      "id": "controls_locked",
-      "name": "Детский режим"
-    },
-    {
-      "id": "ionization",
-      "name": "Ионизация"
-    },
-    {
-      "id": "keep_warm",
-      "name": "Поддержание тепла"
-    },
-    {
-      "id": "mute",
-      "name": "Выключение звука"
-    },
-    {
-      "id": "oscillation",
-      "name": "Вращение"
-    },
-    {
-      "id": "pause",
-      "name": "Пауза"
-    }
-  ],
-  "mode": [
-    {
-      "id": "cleanup_mode",
-      "name": "Режим уборки"
-    },
-    {
-      "id": "coffee_mode",
-      "name": "Режим работы кофеварки"
-    },
-    {
-      "id": "dishwashing",
-      "name": "Режим мытья посуды"
-    },
-    {
-      "id": "fan_speed",
-      "name": "Режима работы скорости вентиляции"
-    },
-    {
-      "id": "heat",
-      "name": "Режим нагрева"
-    },
-    {
-      "id": "input_source",
-      "name": "Источник сигнала"
-    },
-    {
-      "id": "program",
-      "name": "Программа работы"
-    },
-    {
-      "id": "swing",
-      "name": "Направление воздуха"
-    },
-    {
-      "id": "tea_mode",
-      "name": "Режима приготовления чая"
-    },
-    {
-      "id": "thermostat",
-      "name": "Температурный режим"
-    },
-    {
-      "id": "ventilation_mode",
-      "name": "Режима вентиляции"
-    },
-    {
-      "id": "work_speed",
-      "name": "Скорость работы"
-    }
-  ]
+  "on_off": {
+    "on": "Вкл/Выкл"
+  },
+
+  "range": {
+    "brightness": "Яркость",
+    "channel": "Канал",
+    "humidity": "Влажность",
+    "open": "Открытие",
+    "temperature": "Температура",
+    "volume": "Громкость"
+  },
+
+  "toggle": {
+    "backlight": "Подсветка",
+    "controls_locked": "Детский режим",
+    "ionization": "Ионизация",
+    "keep_warm": "Поддержание тепла",
+    "mute": "Выключение звука",
+    "oscillation": "Вращение",
+    "pause": "Пауза"
+  },
+
+  "mode": {
+    "cleanup_mode": "Режим уборки",
+    "coffee_mode": "Режим работы кофеварки",
+    "dishwashing": "Режим мытья посуды",
+    "fan_speed": "Режима работы скорости вентиляции",
+    "heat": "Режим нагрева",
+    "input_source": "Источник сигнала",
+    "program": "Программа работы",
+    "swing": "Направление воздуха",
+    "tea_mode": "Режима приготовления чая",
+    "thermostat": "Температурный режим",
+    "ventilation_mode": "Режима вентиляции",
+    "work_speed": "Скорость работы"
+  }
 }

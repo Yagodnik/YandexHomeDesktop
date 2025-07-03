@@ -13,6 +13,7 @@ Item {
 
     state: model.attributeState
     parameters: model.attributeParameters
+    titlesList: capabilitiesTitles
   }
 
   Rectangle {
@@ -26,7 +27,7 @@ Item {
     anchors.leftMargin: 12
     anchors.verticalCenter: parent.verticalCenter
 
-    text: name
+    text: modesCapability.title
   }
 
   UI.MyComboBox {

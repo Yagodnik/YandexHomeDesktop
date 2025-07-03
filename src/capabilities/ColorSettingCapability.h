@@ -22,6 +22,8 @@ class ColorSettingCapability : public ICapability {
     WRITE SetAvailableScenes
     NOTIFY availableScenesChanged
   )
+  Q_PROPERTY(bool supportsColors READ GetSupportsColors NOTIFY supportsColorsChanged)
+  Q_PROPERTY(bool supportsTemperatures READ GetSupportsTemperature NOTIFY supportsTemperatureChanged)
 public:
   explicit ColorSettingCapability(QObject *parent = nullptr);
 
@@ -35,6 +37,8 @@ public:
   [[nodiscard]] int GetTemperatureMin() const;
   [[nodiscard]] int GetTemperatureMax() const;
   [[nodiscard]] QVariantList GetAvailableScenes() const;
+  [[nodiscard]] bool GetSupportsColors() const;
+  [[nodiscard]] bool GetSupportsTemperature() const;
 
   void SetParameters(const QVariantMap& parameters) override;
 
@@ -42,6 +46,9 @@ signals:
   void temperatureMinChanged();
   void temperatureMaxChanged();
   void availableScenesChanged();
+
+  void supportsColorsChanged();
+  void supportsTemperatureChanged();
 
 public slots:
   void SetTemperatureMin(int value);

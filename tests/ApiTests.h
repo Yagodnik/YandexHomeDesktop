@@ -9,4 +9,6 @@ private slots:
   static void TestCapabilities();
   static void CapabilitiesNullTest();
   static void CapabilitiesObjectTest();
+
+  static void PropertiesTest();
 };

@@ -81,3 +81,55 @@ void ApiTests::CapabilitiesObjectTest() {
 
   QCOMPARE(parameters["split"].toBool(), true);
 }
+
+void ApiTests::PropertiesTest() {
+  const QByteArray test_content = R"({
+		"status": "ok",
+		"request_id": "",
+		"id": "",
+		"name": "",
+		"aliases": [""],
+		"type": "devices.types.iron",
+		"state": "",
+		"groups": [""],
+		"room": "",
+		"external_id": "",
+		"skill_id": "",
+		"capabilities": [{
+				"retrievable": false,
+				"type": "devices.capabilities.on_off",
+				"parameters": {},
+				"state": {},
+				"last_updated": 0.0
+			},
+			{
+				"retrievable": false,
+				"type": "devices.capabilities.range",
+				"parameters": {},
+				"state": {},
+				"last_updated": 1.23
+			}
+		],
+		"properties": [{
+				"retrievable": false,
+				"type": "devices.properties.float",
+				"parameters": {},
+				"state": {},
+				"last_updated": 0
+	        },
+	        {
+				"retrievable": false,
+				"type": "devices.properties.event",
+				"parameters": {},
+				"state": {},
+				"last_updated": 94
+	        }
+	    ]
+	})";
+  QJsonDocument test_json = QJsonDocument::fromJson(test_content);
+
+
+	auto object = Serialization::From<DeviceObject>(test_json.object());
+
+	QCOMPARE(object.properties.size(), 2);
+}

@@ -42,7 +42,6 @@ QVariant PropertiesModel::data(const QModelIndex &index, int role) const {
     case IdRole:
       return {};
     case NameRole:
-      return "Test";
       return PropertyType::operator[](property.type);
     case StateRole:
       return property.state;
@@ -65,8 +64,12 @@ QHash<int, QByteArray> PropertiesModel::roleNames() const {
 void PropertiesModel::OnDeviceInfoReceived(const DeviceObject &info2) {
   qDebug() << "Updated by timer from another model!";
 
+  qDebug() << "Properties received:" << info2.properties.size() << "without fake data";
+
   /* -- Fake data for testing -- */
   DeviceObject info = info2;
+
+  qDebug() << "Properties received (copy):" << info.properties.size() << "without fake data";
 
   QString pseudo_property_data_str = R"(
     {
@@ -80,11 +83,11 @@ void PropertiesModel::OnDeviceInfoReceived(const DeviceObject &info2) {
             "instance": "humidity",
             "value": %1
         }
-    }
-  )";
+    })";
 
   pseudo_property_data_str = pseudo_property_data_str.arg(QRandomGenerator::global()->bounded(101));
   const QJsonObject test_object = QJsonDocument::fromJson(pseudo_property_data_str.toUtf8()).object();
+
   info.properties.push_back(Serialization::From<PropertyObject>(test_object));
 
   if (!is_initialized_) {
@@ -92,8 +95,12 @@ void PropertiesModel::OnDeviceInfoReceived(const DeviceObject &info2) {
     properties_.resize(info.properties.size());
   }
 
+  qDebug() << "Updating" << info.properties.size() << "properties";
+
   for (auto [property, incoming_property] : std::ranges::views::zip(properties_, info.properties)) {
-    qDebug() << "Update!";
+    qDebug() << "Property update:"  << incoming_property.state;
+    qDebug() << "\t"  << incoming_property.parameters;
+
     property = incoming_property;
   }
 

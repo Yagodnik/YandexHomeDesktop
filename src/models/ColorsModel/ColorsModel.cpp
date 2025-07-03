@@ -56,7 +56,12 @@ QVariant ColorsModel::data(const QModelIndex &index, int role) const {
     case IsTemperatureRole:
       return color.temperature.has_value();
     case TemperatureRole:
-      return color.temperature.value();
+      if (color.temperature.has_value()) {
+        return color.temperature.value();
+      }
+
+      qDebug() << "ColorsModel: Accessing temperature, while color is not temperature!";
+      return {};
     default:
       return {};
   }

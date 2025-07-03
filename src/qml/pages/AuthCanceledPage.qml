@@ -19,7 +19,7 @@ Item {
       UI.AnimatedText {
         text: qsTr("Не удалось получить доступ к хранилищу!")
         color: themes.inactive
-        pointSize: 16
+        pixelSize: 16
 
         anchors.horizontalCenter: parent.horizontalCenter
       }
@@ -27,7 +27,7 @@ Item {
       UI.AnimatedText {
         text: qsTr("Это необходимо для работы приложения")
         color: themes.inactive
-        pointSize: 12
+        pixelSize: 12
 
         anchors.horizontalCenter: parent.horizontalCenter
       }

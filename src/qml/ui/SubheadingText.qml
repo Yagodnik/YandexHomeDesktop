@@ -1,6 +1,6 @@
 import QtQuick
 
 Text {
-  font.pointSize: 13
+  font.pixelSize: 13
   color: themes.inactive
 }

@@ -1,0 +1,52 @@
+{
+  "units": [
+    {
+      "id": "unit.percent",
+      "name": "%"
+    },
+    {
+      "id": "unit.temperature.celsius",
+      "name": "°"
+    },
+    {
+      "id": "unit.temperature.celsius",
+      "name": "K"
+    },
+    {
+      "id": "unit.ampere",
+      "name": " Ам"
+    },
+    {
+      "id": "unit.ppm",
+      "name": " ппм"
+    },
+    {
+      "id": "unit.kilowatt_hour",
+      "name": " кВт⋅ч"
+    },
+    {
+      "id": "unit.cubic_meter",
+      "name": " м³"
+    },
+    {
+      "id": "unit.gigacalorie",
+      "name": " Гкал"
+    },
+    {
+      "id": "unit.illumination.lux",
+      "name": " Люкс"
+    },
+    {
+      "id": "unit.density.mcg_m3",
+      "name": " мкг/м3"
+    },
+    {
+      "id": "unit.watt",
+      "name": "Ватт"
+    },
+    {
+      "id": "unit.watt",
+      "name": "Ватт"
+    }
+  ]
+}

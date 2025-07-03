@@ -5,7 +5,7 @@ Item {
   id: root
   property alias text: label.text
   property color color: themes.mainText;
-  property var pointSize: 20
+  property var pixelSize: 20
 
   width: label.implicitWidth
   height: label.implicitHeight
@@ -16,7 +16,7 @@ Item {
     y: root.height
     opacity: 0
     color: root.color
-    font.pointSize: root.pointSize
+    font.pixelSize: root.pixelSize
     horizontalAlignment: Text.AlignHCenter
   }
 

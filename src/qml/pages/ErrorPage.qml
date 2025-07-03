@@ -15,7 +15,7 @@ Item {
     UI.AnimatedText {
       text: qsTr("Что-то пошло не так!")
       color: themes.inactive
-      pointSize: 24
+      pixelSize: 24
 
       anchors.horizontalCenter: col.horizontalCenter
     }

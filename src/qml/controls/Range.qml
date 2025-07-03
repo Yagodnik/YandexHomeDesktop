@@ -11,6 +11,7 @@ Item {
 
     state: model.attributeState
     parameters: model.attributeParameters
+    titlesList: capabilitiesTitles
   }
 
   Rectangle {
@@ -38,7 +39,7 @@ Item {
       anchors.left: parent.left
       anchors.verticalCenter: parent.verticalCenter
 
-      text: name
+      text: rangeCapability.title
     }
 
     UI.DefaultText {

@@ -49,7 +49,7 @@ Item {
             anchors.centerIn: parent
             width: parent.width
             text: modelData.label
-            font.pointSize: 14
+            font.pixelSize: 14
             wrapMode: Text.WordWrap
             color: themes.controlText2
             horizontalAlignment: Text.AlignHCenter
@@ -80,15 +80,13 @@ Item {
       height: childrenRect.height
 
       Repeater {
-        // model: 20
-        // model: colorModel
-
         model: Models.ColorsFilterModel {
-          // min: colorSettingCapability.GetTemperatureMin()
-          // max: colorSettingCapability.GetTemperatureMax()
-
           min: colorSettingCapability.temperatureMin
           max: colorSettingCapability.temperatureMax
+          // supportsColors: false
+          // supportsTemperatures: true
+          supportsColors: colorSettingCapability.supportsColors
+          supportsTemperatures: colorSettingCapability.supportsTemperatures
 
           sourceModel: colorModel
 
@@ -120,7 +118,7 @@ Item {
             UI.DefaultText {
               width: parent.width
               text: model.name
-              font.pointSize: 10
+              font.pixelSize: 10
               color: themes.controlText
               wrapMode: Text.WordWrap
               anchors.horizontalCenter: parent.horizontalCenter
@@ -207,7 +205,7 @@ Item {
 
             UI.DefaultText {
               text: name
-              font.pointSize: 10
+              font.pixelSize: 10
               color: themes.controlText
 
               anchors.horizontalCenter: parent.horizontalCenter

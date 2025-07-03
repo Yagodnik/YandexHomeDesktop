@@ -1,6 +1,6 @@
 #include "TitlesList.h"
 
-TitlesList::TitlesList(QObject *parent) {
+TitlesList::TitlesList(QObject *parent) : QObject(parent) {
   const auto temp = JsonLoader::Load<TitlesListData>(":/data/instances.json");
 
   if (!temp.has_value()) {

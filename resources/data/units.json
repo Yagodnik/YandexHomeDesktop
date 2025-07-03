@@ -1,52 +1,20 @@
 {
-  "units": [
-    {
-      "id": "unit.percent",
-      "name": "%"
-    },
-    {
-      "id": "unit.temperature.celsius",
-      "name": "°"
-    },
-    {
-      "id": "unit.temperature.celsius",
-      "name": "K"
-    },
-    {
-      "id": "unit.ampere",
-      "name": " Ам"
-    },
-    {
-      "id": "unit.ppm",
-      "name": " ппм"
-    },
-    {
-      "id": "unit.kilowatt_hour",
-      "name": " кВт⋅ч"
-    },
-    {
-      "id": "unit.cubic_meter",
-      "name": " м³"
-    },
-    {
-      "id": "unit.gigacalorie",
-      "name": " Гкал"
-    },
-    {
-      "id": "unit.illumination.lux",
-      "name": " Люкс"
-    },
-    {
-      "id": "unit.density.mcg_m3",
-      "name": " мкг/м3"
-    },
-    {
-      "id": "unit.watt",
-      "name": "Ватт"
-    },
-    {
-      "id": "unit.watt",
-      "name": "Ватт"
-    }
-  ]
+  "units": {
+    "unit.percent": "%",
+    "unit.temperature.celsius": "°",
+    "unit.temperature.kelvin": "K",
+    "unit.ampere": " Ам",
+    "unit.ppm": " ппм",
+    "unit.kilowatt_hour": " кВт⋅ч",
+    "unit.cubic_meter": " м³",
+    "unit.gigacalorie": " Гкал",
+    "unit.illumination.lux": " Люкс",
+    "unit.density.mcg_m3": " мкг/м3",
+    "unit.watt": "Ватт",
+    "unit.pressure.atm": " атм",
+    "unit.pressure.pascal": " па",
+    "unit.pressure.bar": " бар",
+    "unit.pressure.mmhg": " мм рт. ст",
+    "unit.volt": " V"
+  }
 }

@@ -33,6 +33,7 @@
 #include "capabilities/ToggleCapability.h"
 #include "capabilities/ColorSettingCapability.h"
 #include "capabilities/ModesCapability.h"
+#include "utils/UnitsList.h"
 
 /*
  * TODO: Possible Bug
@@ -54,7 +55,7 @@
 *  10) Device offline mark
 *  11) Performance optimizations
 *  + 12) Titles
-*  13) Range doesnt supports any units
+*  + 13) Range doesnt supports any units
 * */
 
 void RegisterFonts(QGuiApplication &app) {
@@ -125,6 +126,7 @@ int main(int argc, char *argv[]) {
   const auto modes_model = new ModesModel(&app);
   const auto settings = new Settings(&app);
   const auto titles_list = new TitlesList(&app);
+  const auto units_list = new UnitsList(&app);
 
   root_context->setContextProperty("platformService", platform_service);
   root_context->setContextProperty("authorizationService", authorization_service);
@@ -145,6 +147,7 @@ int main(int argc, char *argv[]) {
   root_context->setContextProperty("householdsModel", households_model);
   root_context->setContextProperty("settings", settings);
   root_context->setContextProperty("capabilitiesTitles", titles_list);
+  root_context->setContextProperty("unitsList", units_list);
 
   RegisterModels();
   RegisterCapabilities();

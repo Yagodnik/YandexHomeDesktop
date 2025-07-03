@@ -36,8 +36,21 @@ double RangeCapability::GetPrecision() const {
   return range["precision"].toDouble();
 }
 
+QString RangeCapability::GetUnit() const {
+  const auto instance = parameters_.value("unit", "").toString();
+  if (units_list_ == nullptr) {
+    return "?";
+  }
+
+  return units_list_->GetUnit(instance);
+}
+
+UnitsList * RangeCapability::GetUnitList() const {
+  return units_list_;
+}
+
 QVariantMap RangeCapability::Create(double value) {
-  const auto instance = state_["instance"].toString();
+  const auto instance = state_.value("instance", "").toString();
 
   return {
     { "instance", instance },
@@ -78,4 +91,15 @@ void RangeCapability::SetParameters(const QVariantMap &parameters) {
   emit minChanged();
   emit maxChanged();
   emit precisionChanged();
+  emit unitChanged();
+}
+
+void RangeCapability::SetUnitList(UnitsList *units_list) {
+  if (units_list_ == units_list) {
+    return;
+  }
+
+  units_list_ = units_list;
+  emit unitsListChanged();
+  emit unitChanged();
 }

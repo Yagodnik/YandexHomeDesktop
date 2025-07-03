@@ -48,6 +48,8 @@ qt_add_executable(appYandexHomeDesktop
         src/capabilities/ModesCapability.h
         src/utils/TitlesList.cpp
         src/utils/TitlesList.h
+        src/utils/UnitsList.cpp
+        src/utils/UnitsList.h
 )
 
 if (APPLE)

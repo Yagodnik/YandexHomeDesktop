@@ -12,6 +12,7 @@ Item {
     state: model.attributeState
     parameters: model.attributeParameters
     titlesList: capabilitiesTitles
+    units: unitsList
   }
 
   Rectangle {
@@ -48,7 +49,7 @@ Item {
       anchors.right: parent.right
       anchors.verticalCenter: parent.verticalCenter
 
-      text: rangeSlider.value + "%"
+      text: rangeSlider.value + rangeCapability.unit
     }
   }
 

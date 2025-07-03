@@ -25,6 +25,7 @@
     <file>data/instances.json</file>
     <file>data/propertiesEvents.json</file>
     <file>data/propertiesFloat.json</file>
+    <file>data/units.json</file>
 
     <file>images/modes/alarm.svg</file>
     <file>images/modes/alice.svg</file>

@@ -38,6 +38,7 @@ signals:
   void dataLoadingFailed();
   void dataUpdated(int index);
   void errorOccurred(const QString& error_message);
+  void initialized();
 
 // private:
 public:
@@ -72,7 +73,7 @@ public:
   QTimer timer_;
 
 private slots:
-  void OnDeviceInfoReceived(const DeviceObject& info);
+  void OnDeviceInfoReceived(const DeviceInfo& info);
   void OnDeviceInfoReceivingFailed(const QString& message);
 
   void OnActionExecutionFinishedSuccessfully(const QVariant& user_data);

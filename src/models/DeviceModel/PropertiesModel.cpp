@@ -61,13 +61,13 @@ QHash<int, QByteArray> PropertiesModel::roleNames() const {
   };
 }
 
-void PropertiesModel::OnDeviceInfoReceived(const DeviceObject &info2) {
+void PropertiesModel::OnDeviceInfoReceived(const DeviceInfo &info2) {
   qDebug() << "Updated by timer from another model!";
 
   qDebug() << "Properties received:" << info2.properties.size() << "without fake data";
 
   /* -- Fake data for testing -- */
-  DeviceObject info = info2;
+  DeviceInfo info = info2;
 
   qDebug() << "Properties received (copy):" << info.properties.size() << "without fake data";
 
@@ -105,6 +105,7 @@ void PropertiesModel::OnDeviceInfoReceived(const DeviceObject &info2) {
   }
 
   if (!is_initialized_) {
+    emit initialized();
     endResetModel();
   }
 

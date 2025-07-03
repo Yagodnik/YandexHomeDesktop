@@ -157,7 +157,7 @@ void CapabilitiesModel::UseCapability(const int index, const QVariantMap &state)
   }, index);
 }
 
-void CapabilitiesModel::OnDeviceInfoReceived(const DeviceObject &info) {
+void CapabilitiesModel::OnDeviceInfoReceived(const DeviceInfo &info) {
   const double receive_time = static_cast<double>(QDateTime::currentMSecsSinceEpoch()) / 1000;
 
   if (!is_initialized_) {
@@ -183,6 +183,7 @@ void CapabilitiesModel::OnDeviceInfoReceived(const DeviceObject &info) {
 
   if (!is_initialized_) {
     endResetModel();
+    emit initialized();
   }
 
   is_initialized_ = true;

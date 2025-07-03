@@ -33,6 +33,8 @@ add_library(Models SHARED
         ModesModel/ModesModel.h
         ModesModel/ModesFilterModel.cpp
         ModesModel/ModesFilterModel.h
+        DeviceModel/DeviceDataModel.cpp
+        DeviceModel/DeviceDataModel.h
         #        DeviceModel/DeviceDataController.cpp
 #        DeviceModel/DeviceDataController.h
 )

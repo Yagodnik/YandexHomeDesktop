@@ -69,9 +69,7 @@ void YandexHomeApi::GetDeviceInfo(const QString &id) {
     if (info.status == Status::Ok) {
       qDebug() << "YandexHomeApi: Received device info";
 
-      emit deviceInfoReceived({
-        .capabilities = info.capabilities
-      });
+      emit deviceInfoReceived(info);
     } else {
       qDebug() << "YandexHomeApi: Error getting during getting scenarios";
 

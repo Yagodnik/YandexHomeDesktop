@@ -1,10 +1,13 @@
 import QtQuick
+import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 import YandexHomeDesktop.Ui as UI
 import YandexHomeDesktop.Components as Components
 import YandexHomeDesktop.Models as Models
 
 Item {
+  id: root
+
   Rectangle {
     anchors.fill: parent
     color: themes.background
@@ -92,149 +95,213 @@ Item {
     }
 
     UI.DefaultText {
-      text: "НУ ВОТ ПРЯМ ДЛИННОЕ НАЗВАНИЕ"
+      text: deviceDataModel.name
       anchors.verticalCenter: parent.verticalCenter
       anchors.horizontalCenter: parent.horizontalCenter
       color: themes.controlText
     }
   }
 
-  Flickable {
+  property var okCount: 0
+  property var failCount: 0
+
+  Connections {
+    target: capabilitiesModel
+
+    function onInitialized() {
+      console.log("capabilities loaded");
+      okCount++;
+    }
+
+    function dataLoadingFailed() {
+      console.log("capabilities not loaded");
+      failCount++;
+    }
+  }
+
+  Connections {
+    target: propertiesModel
+
+    function onInitialized() {
+      console.log("propeties loaded");
+      okCount++;
+    }
+
+    function dataLoadingFailed() {
+      console.log("propeties not loaded");
+      failCount++;
+    }
+  }
+
+  StackLayout {
     width: parent.width
     anchors.top: topHeader.bottom
     anchors.bottom: parent.bottom
-    contentHeight: contentItem.childrenRect.height
-    clip: true
-    interactive: true
 
-    UI.HeadingText {
-      id: capabilitiesText
-      text: "Умения"
+    currentIndex: (okCount !== 2 && failCount === 0) ? 0 :
+      ((failCount !== 0 || !deviceDataModel.isOnline) ? 1 : (okCount === 2 && failCount === 0) ? 2 : 1)
 
-      anchors.top: parent.top
-      anchors.topMargin: 4
-      anchors.left: parent.left
-      anchors.leftMargin: 16
-    }
+    Item {
+      UI.MyProgressIndicator {
+        width: 32
+        height: 32
 
-    ListView {
-      id: capabilitiesList
-      anchors.top: capabilitiesText.bottom
-      anchors.topMargin: 4
-      height: contentHeight
-
-      // anchors.bottom: parent.bottom
-      // anchors.bottomMargin: 10
-
-      // height: 100
-
-      anchors.left: parent.left
-      anchors.leftMargin: 16
-      anchors.right: parent.right
-      anchors.rightMargin: 16
-
-      clip: true
-      interactive: false
-
-      spacing: 10
-
-      model: capabilitiesModel
-
-      delegate: Loader {
-        source: delegateSource
-        width: parent.width
+        anchors.centerIn: parent
       }
     }
 
-    UI.HeadingText {
-      id: propertiesText
-      text: "Свойства"
+    Item {
+      Column {
+        spacing: 4
+        anchors.centerIn: parent
 
-      anchors.top: capabilitiesList.bottom
-      anchors.topMargin: 4
-      anchors.left: parent.left
-      anchors.leftMargin: 16
+        Image {
+          width: 32
+          height: 32
+          source: "qrc:/images/warning.svg"
+          anchors.horizontalCenter: parent.horizontalCenter
+        }
+
+        UI.DefaultText {
+          text: "Нет связи с устройством"
+          anchors.horizontalCenter: parent.horizontalCenter
+        }
+
+        UI.MyButton {
+          text: "Попробовать снова"
+          anchors.horizontalCenter: parent.horizontalCenter
+        }
+      }
     }
 
-    ListView {
-      id: propertiesList
-      anchors.top: propertiesText.bottom
-      anchors.topMargin: 4
-      // anchors.bottom: parent.bottom
-      // anchors.bottomMargin: 10
-      height: contentHeight + 12
-
-      anchors.left: parent.left
-      anchors.leftMargin: 16
-      anchors.right: parent.right
-      anchors.rightMargin: 16
-
+    Flickable {
+      contentHeight: contentItem.childrenRect.height
       clip: true
-      interactive: false
+      interactive: true
 
-      spacing: 10
+      UI.HeadingText {
+        id: capabilitiesText
+        text: "Умения"
 
-      model: propertiesModel
+        anchors.top: parent.top
+        anchors.topMargin: 4
+        anchors.left: parent.left
+        anchors.leftMargin: 16
+      }
 
-      delegate: Item {
-        width: parent.width
-        height: 58
+      ListView {
+        id: capabilitiesList
+        anchors.top: capabilitiesText.bottom
+        anchors.topMargin: 4
+        height: contentHeight
 
-        Rectangle {
-          anchors.fill: parent
-          color: themes.headerBackground
-          radius: 16
+        anchors.left: parent.left
+        anchors.leftMargin: 16
+        anchors.right: parent.right
+        anchors.rightMargin: 16
+
+        clip: true
+        interactive: false
+
+        spacing: 10
+
+        model: capabilitiesModel
+
+        delegate: Loader {
+          source: delegateSource
+          width: parent.width
         }
+      }
 
-        Item {
-          id: top
+      UI.HeadingText {
+        id: propertiesText
+        text: "Свойства"
 
-          anchors.top: parent.top
-          anchors.topMargin: 8
+        anchors.top: capabilitiesList.bottom
+        anchors.topMargin: 4
+        anchors.left: parent.left
+        anchors.leftMargin: 16
+      }
 
-          anchors.left: parent.left
-          anchors.leftMargin: 12
-          anchors.right: parent.right
-          anchors.rightMargin: 12
+      ListView {
+        id: propertiesList
+        anchors.top: propertiesText.bottom
+        anchors.topMargin: 4
 
-          height: 20
+        height: contentHeight + 12
 
-          UI.DefaultText {
-            id: propertyTitle
+        anchors.left: parent.left
+        anchors.leftMargin: 16
+        anchors.right: parent.right
+        anchors.rightMargin: 16
+
+        clip: true
+        interactive: false
+
+        spacing: 10
+
+        model: propertiesModel
+
+        delegate: Item {
+          width: parent.width
+          height: 58
+
+          Rectangle {
+            anchors.fill: parent
+            color: themes.headerBackground
+            radius: 16
+          }
+
+          Item {
+            id: top
+
+            anchors.top: parent.top
+            anchors.topMargin: 8
 
             anchors.left: parent.left
-            anchors.verticalCenter: parent.verticalCenter
-
-            text: name
-          }
-
-          UI.DefaultText {
-            id: valueText
-
+            anchors.leftMargin: 12
             anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
+            anchors.rightMargin: 12
 
-            text: propertyState["value"]
+            height: 20
+
+            UI.DefaultText {
+              id: propertyTitle
+
+              anchors.left: parent.left
+              anchors.verticalCenter: parent.verticalCenter
+
+              text: name
+            }
+
+            UI.DefaultText {
+              id: valueText
+
+              anchors.right: parent.right
+              anchors.verticalCenter: parent.verticalCenter
+
+              text: propertyState["value"]
+            }
           }
-        }
 
-        // UI.MySlider {
-        //   id: valueSlider
-        //   anchors.top: top.bottom
-        //   anchors.topMargin: 10
-        //   anchors.left: parent.left
-        //   anchors.leftMargin: 12
-        //   anchors.right: parent.right
-        //   anchors.rightMargin: 12
-        //
-        //   height: 12
-        //
-        //   from: 0
-        //   to: 100
-        //   enabled: false
-        //
-        //   value: propertyState["value"]
-        // }
+          // UI.MySlider {
+          //   id: valueSlider
+          //   anchors.top: top.bottom
+          //   anchors.topMargin: 10
+          //   anchors.left: parent.left
+          //   anchors.leftMargin: 12
+          //   anchors.right: parent.right
+          //   anchors.rightMargin: 12
+          //
+          //   height: 12
+          //
+          //   from: 0
+          //   to: 100
+          //   enabled: false
+          //
+          //   value: propertyState["value"]
+          // }
+        }
       }
     }
   }

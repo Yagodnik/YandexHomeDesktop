@@ -31,7 +31,7 @@ signals:
   void scenariosReceivedSuccessfully(const QList<ScenarioObject>& scenarios);
   void scenariosReceivingFailed(const QString& message);
 
-  void deviceInfoReceived(const DeviceObject& info);
+  void deviceInfoReceived(const DeviceInfo &info);
   void deviceInfoReceivingFailed(const QString& message);
 
   void errorReceived(const QString& error);

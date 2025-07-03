@@ -10,6 +10,10 @@ JSON_ENUMERATION(DeviceType,
   ("devices.types.{type2}", Lamp2)
 );
 
+JSON_ENUMERATION(DeviceState,
+  ("online", Online),
+  ("offline", Offline)
+);
 
 JSON_STRUCT(RoomObject,
   (QString, id),
@@ -40,6 +44,8 @@ JSON_STRUCT(DeviceObject,
 
 JSON_STRUCT(DeviceInfo,
   (Status, status),
+  (QString, name),
+  (DeviceState, state),
   (QString, message),
   (QString, request_id),
   (QList<CapabilityObject>, capabilities),

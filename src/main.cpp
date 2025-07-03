@@ -33,6 +33,7 @@
 #include "capabilities/ToggleCapability.h"
 #include "capabilities/ColorSettingCapability.h"
 #include "capabilities/ModesCapability.h"
+#include "models/DeviceModel/DeviceDataModel.h"
 #include "utils/UnitsList.h"
 
 /*
@@ -52,10 +53,13 @@
 *  7) Block polling when app is not in focus
 *  8) Logging
 *  + 9) Color Settings - not all devices support concrete colors
-*  10) Device offline mark
+*  + 10) Device offline mark
 *  11) Performance optimizations
 *  + 12) Titles
 *  + 13) Range doesnt supports any units
+*  14) Select dialog doesnt print current household name
+*  15) Fix CMake for Windows
+*  16) Add true email to settings
 * */
 
 void RegisterFonts(QGuiApplication &app) {
@@ -127,6 +131,7 @@ int main(int argc, char *argv[]) {
   const auto settings = new Settings(&app);
   const auto titles_list = new TitlesList(&app);
   const auto units_list = new UnitsList(&app);
+  const auto device_data_model = new DeviceDataModel(yandex_api, &app);
 
   root_context->setContextProperty("platformService", platform_service);
   root_context->setContextProperty("authorizationService", authorization_service);
@@ -148,6 +153,7 @@ int main(int argc, char *argv[]) {
   root_context->setContextProperty("settings", settings);
   root_context->setContextProperty("capabilitiesTitles", titles_list);
   root_context->setContextProperty("unitsList", units_list);
+  root_context->setContextProperty("deviceDataModel", device_data_model);
 
   RegisterModels();
   RegisterCapabilities();

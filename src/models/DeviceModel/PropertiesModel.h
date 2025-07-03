@@ -26,6 +26,7 @@ public:
 signals:
   void dataLoaded();
   void dataLoadingFailed();
+  void initialized();
 
 private:
   YandexHomeApi *api_;
@@ -33,7 +34,7 @@ private:
   bool is_initialized_ = false;
 
 private slots:
-  void OnDeviceInfoReceived(const DeviceObject& info);
+  void OnDeviceInfoReceived(const DeviceInfo& info);
   void OnDeviceInfoReceivingFailed(const QString& message);
 };
 

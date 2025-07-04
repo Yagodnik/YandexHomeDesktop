@@ -50,6 +50,8 @@ qt_add_executable(appYandexHomeDesktop
         src/utils/TitlesList.h
         src/utils/UnitsList.cpp
         src/utils/UnitsList.h
+        src/utils/DevicesIcons.cpp
+        src/utils/DevicesIcons.h
 )
 
 if (APPLE)

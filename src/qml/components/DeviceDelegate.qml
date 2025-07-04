@@ -26,7 +26,7 @@ Item {
   Image {
     id: icon
 
-    source: "qrc:/images/light.svg"
+    source: deviceIcons.GetIcon(deviceType)
     width: 40
     height: 40
 

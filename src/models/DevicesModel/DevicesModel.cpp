@@ -38,6 +38,8 @@ QVariant DevicesModel::data(const QModelIndex &index, int role) const {
       return device.room;
     case HouseholdIdRole:
       return device.household_id;
+    case TypeRole:
+      return device.type;
     default:
       return {};
   }
@@ -45,10 +47,11 @@ QVariant DevicesModel::data(const QModelIndex &index, int role) const {
 
 QHash<int, QByteArray> DevicesModel::roleNames() const {
   return {
-  { NameRole, "name" },
-  { IdRole, "deviceId" },
-  { RoomIdRole, "deviceRoomId" },
-  { HouseholdIdRole, "deviceHouseholdId" }
+    { NameRole, "name" },
+    { IdRole, "deviceId" },
+    { RoomIdRole, "deviceRoomId" },
+    { HouseholdIdRole, "deviceHouseholdId" },
+    { TypeRole, "deviceType" }
   };
 }
 

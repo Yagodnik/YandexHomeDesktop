@@ -27,6 +27,7 @@
     <file>data/propertiesEvents.json</file>
     <file>data/propertiesFloat.json</file>
     <file>data/units.json</file>
+    <file>data/deviceIcons.json</file>
 
     <file>images/modes/alarm.svg</file>
     <file>images/modes/alice.svg</file>
@@ -47,6 +48,37 @@
     <file>images/modes/sunrise.svg</file>
     <file>images/modes/sunset.svg</file>
     <file>images/modes/unknown.svg</file>
+
+    <file>images/devices/camera.svg</file>
+    <file>images/devices/cooking.svg</file>
+    <file>images/devices/cooking_coffee_maker.svg</file>
+    <file>images/devices/cooking_kettle.svg</file>
+    <file>images/devices/cooking_multicooker.svg</file>
+    <file>images/devices/dishwasher.svg</file>
+    <file>images/devices/fan.svg</file>
+    <file>images/devices/hub.svg</file>
+    <file>images/devices/humidifier.svg</file>
+    <file>images/devices/iron.svg</file>
+    <file>images/devices/light.svg</file>
+    <file>images/devices/media_device.svg</file>
+    <file>images/devices/media_device_receiver.svg</file>
+    <file>images/devices/media_device_tv.svg</file>
+    <file>images/devices/media_device_tv_box.svg</file>
+    <file>images/devices/openable.svg</file>
+    <file>images/devices/openable_curtain.svg</file>
+    <file>images/devices/other.svg</file>
+    <file>images/devices/pet_feeder.svg</file>
+    <file>images/devices/purifier.svg</file>
+    <file>images/devices/refrigerator.svg</file>
+    <file>images/devices/sensor.svg</file>
+    <file>images/devices/smart_speaker.svg</file>
+    <file>images/devices/socket.svg</file>
+    <file>images/devices/switch.svg</file>
+    <file>images/devices/thermostat.svg</file>
+    <file>images/devices/thermostat_ac.svg</file>
+    <file>images/devices/unknown.svg</file>
+    <file>images/devices/vacuum_cleaner.svg</file>
+    <file>images/devices/washing_machine.svg</file>
 
     <file>fonts/Manrope-Bold.ttf</file>
     <file>fonts/Manrope-ExtraBold.ttf</file>

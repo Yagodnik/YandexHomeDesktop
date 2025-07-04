@@ -12,7 +12,8 @@ public:
     IdRole = Qt::UserRole + 1,
     NameRole,
     RoomIdRole,
-    HouseholdIdRole
+    HouseholdIdRole,
+    TypeRole
   };
 
   [[nodiscard]] int rowCount(const QModelIndex &parent) const override;

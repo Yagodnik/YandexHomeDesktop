@@ -61,6 +61,7 @@
 *  14) Select dialog doesnt print current household name
 *  15) Fix CMake for Windows
 *  16) Add true email to settings
+*  + 17) Devices icons
 * */
 
 void RegisterFonts(QGuiApplication &app) {

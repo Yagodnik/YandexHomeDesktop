@@ -47,6 +47,13 @@ QVariant PropertiesModel::data(const QModelIndex &index, int role) const {
       return property.state;
     case ParametersRole:
       return property.parameters;
+    case DelegateSourceRole:
+      switch (property.type) {
+      case PropertyType::Float:
+          return "qrc:/controls/PropertyFloat.qml";
+      case PropertyType::Event:
+          return "qrc:/controls/PropertyEvent.qml";
+      }
     default:
       return {};
   }
@@ -57,7 +64,8 @@ QHash<int, QByteArray> PropertiesModel::roleNames() const {
     { IdRole, "deviceId" },
     { NameRole, "name"},
     { StateRole, "propertyState" },
-    { ParametersRole, "propertyParameters" }
+    { ParametersRole, "propertyParameters" },
+    { DelegateSourceRole, "delegateSource" }
   };
 }
 
@@ -71,7 +79,8 @@ void PropertiesModel::OnDeviceInfoReceived(const DeviceInfo &info2) {
 
   qDebug() << "Properties received (copy):" << info.properties.size() << "without fake data";
 
-  QString pseudo_property_data_str = R"(
+  {
+    QString pseudo_property_data_str = R"(
     {
         "type": "devices.properties.float",
         "retrievable": true,
@@ -85,10 +94,37 @@ void PropertiesModel::OnDeviceInfoReceived(const DeviceInfo &info2) {
         }
     })";
 
-  pseudo_property_data_str = pseudo_property_data_str.arg(QRandomGenerator::global()->bounded(101));
-  const QJsonObject test_object = QJsonDocument::fromJson(pseudo_property_data_str.toUtf8()).object();
+    pseudo_property_data_str = pseudo_property_data_str.arg(QRandomGenerator::global()->bounded(101));
+    const QJsonObject test_object = QJsonDocument::fromJson(pseudo_property_data_str.toUtf8()).object();
 
-  info.properties.push_back(Serialization::From<PropertyObject>(test_object));
+    info.properties.push_back(Serialization::From<PropertyObject>(test_object));
+  }
+
+  {
+    QString pseudo_property_data_str = R"({
+      "type": "devices.properties.event",
+      "retrievable": true,
+      "reportable": true,
+      "parameters": {
+        "instance": "open",
+        "events": [
+          { "value": "opened" },
+          { "value": "closed" }
+        ]
+      },
+      "state": {
+          "instance": "open",
+          "value": "%1"
+      }
+    })";
+
+    pseudo_property_data_str = pseudo_property_data_str.arg(
+      QRandomGenerator::global()->bounded(101) > 70 ? "opened" : "closed"
+    );
+    const QJsonObject test_object = QJsonDocument::fromJson(pseudo_property_data_str.toUtf8()).object();
+
+    info.properties.push_back(Serialization::From<PropertyObject>(test_object));
+  }
 
   if (!is_initialized_) {
     beginResetModel();

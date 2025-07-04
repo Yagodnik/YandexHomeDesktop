@@ -242,65 +242,9 @@ Item {
 
         model: propertiesModel
 
-        delegate: Item {
+        delegate: Loader {
+          source: delegateSource
           width: parent.width
-          height: 58
-
-          Rectangle {
-            anchors.fill: parent
-            color: themes.headerBackground
-            radius: 16
-          }
-
-          Item {
-            id: top
-
-            anchors.top: parent.top
-            anchors.topMargin: 8
-
-            anchors.left: parent.left
-            anchors.leftMargin: 12
-            anchors.right: parent.right
-            anchors.rightMargin: 12
-
-            height: 20
-
-            UI.DefaultText {
-              id: propertyTitle
-
-              anchors.left: parent.left
-              anchors.verticalCenter: parent.verticalCenter
-
-              text: name
-            }
-
-            UI.DefaultText {
-              id: valueText
-
-              anchors.right: parent.right
-              anchors.verticalCenter: parent.verticalCenter
-
-              text: propertyState["value"]
-            }
-          }
-
-          // UI.MySlider {
-          //   id: valueSlider
-          //   anchors.top: top.bottom
-          //   anchors.topMargin: 10
-          //   anchors.left: parent.left
-          //   anchors.leftMargin: 12
-          //   anchors.right: parent.right
-          //   anchors.rightMargin: 12
-          //
-          //   height: 12
-          //
-          //   from: 0
-          //   to: 100
-          //   enabled: false
-          //
-          //   value: propertyState["value"]
-          // }
         }
       }
     }

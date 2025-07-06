@@ -58,5 +58,18 @@
     "voltage": "Напряжение",
     "water_level": "Уровень воды",
     "water_meter": "Счетчик воды"
+  },
+
+  "event": {
+    "vibration": "Вибрация",
+    "open": "Открытие",
+    "button": "Нажатие",
+    "motion": "Движение",
+    "smoke": "Дым",
+    "gas": "Газ",
+    "battery_level": "Уровень заряда",
+    "food_level": "Уровень корма",
+    "water_level": "Уровень воды",
+    "water_leak": "Протечка воды"
   }
 }

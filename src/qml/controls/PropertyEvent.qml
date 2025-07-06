@@ -1,9 +1,18 @@
 import QtQuick
 import Qt5Compat.GraphicalEffects
 import YandexHomeDesktop.Ui as UI
+import YandexHomeDesktop.Properties as Properties
 
 Item {
   height: 64
+
+  Properties.Event {
+    id: eventProperty
+
+    state: model.propertyState
+    parameters: model.propertyParameters
+    titlesList: iotTitles
+  }
 
   Rectangle {
     anchors.fill: parent
@@ -32,7 +41,7 @@ Item {
       id: iconImage
       anchors.fill: parent
       anchors.margins: 8
-      source: "qrc:/images/properties/open.svg"
+      source: propertiesIcons.GetIcon(eventProperty.instance)
     }
 
     ColorOverlay {
@@ -52,14 +61,14 @@ Item {
       id: valueText
       font.bold: true
 
-      text: propertyState["value"]
+      text: eventProperty.value
     }
 
     UI.DefaultText {
       id: propertyTitle
       font.pixelSize: 14
 
-      text: "Закрытие" + " • " + "00:11"
+      text: eventProperty.title + " • " + "00:11"
     }
   }
 }

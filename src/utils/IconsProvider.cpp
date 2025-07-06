@@ -14,6 +14,5 @@ IconsProvider::IconsProvider(const QString& path, const QString& prefix, QObject
 }
 
 QString IconsProvider::GetIcon(const QString &name) const {
-  qDebug() << "Icons: Getting icon " << name;
   return base_path_ + data_.icons.value(name, "other.svg").toString();
 }

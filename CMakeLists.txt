@@ -50,8 +50,8 @@ qt_add_executable(appYandexHomeDesktop
         src/utils/TitlesList.h
         src/utils/UnitsList.cpp
         src/utils/UnitsList.h
-        src/utils/DevicesIcons.cpp
-        src/utils/DevicesIcons.h
+        src/utils/IconsProvider.cpp
+        src/utils/IconsProvider.h
         src/iot/properties/FloatProperty.cpp
         src/iot/properties/FloatProperty.h
         src/iot/properties/EventProperty.cpp

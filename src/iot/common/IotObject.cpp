@@ -20,13 +20,17 @@ QString IotObject::GetTitle() const {
   return state_.value("instance", "").toString() + "???";
 }
 
+QString IotObject::GetInstance() const {
+  return state_.value("instance", "").toString();
+}
+
 void IotObject::SetState(const QVariantMap &state) {
   const QVariant old_value = GetValue();
   state_ = state;
   emit stateChanged();
 
-  // TODO: Maybe remove due useless
   emit titleChanged();
+  emit instanceChanged();
 
   if (GetValue() != old_value) {
     emit valueChanged();

@@ -28,6 +28,7 @@
     <file>data/propertiesFloat.json</file>
     <file>data/units.json</file>
     <file>data/deviceIcons.json</file>
+    <file>data/propertiesIcons.json</file>
 
     <file>images/modes/alarm.svg</file>
     <file>images/modes/alice.svg</file>

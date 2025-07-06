@@ -42,7 +42,7 @@ Item {
       id: iconImage
       anchors.fill: parent
       anchors.margins: 8
-      source: "qrc:/images/properties/temperature.svg"
+      source: propertiesIcons.GetIcon(floatProperty.instance)
     }
 
     ColorOverlay {

@@ -36,7 +36,7 @@
 #include "iot/properties/EventProperty.h"
 #include "iot/properties/FloatProperty.h"
 #include "models/DeviceModel/DeviceDataModel.h"
-#include "utils/DevicesIcons.h"
+#include "utils/IconsProvider.h"
 #include "utils/UnitsList.h"
 
 /*
@@ -141,7 +141,8 @@ int main(int argc, char *argv[]) {
   const auto titles_list = new TitlesList(&app);
   const auto units_list = new UnitsList(&app);
   const auto device_data_model = new DeviceDataModel(yandex_api, &app);
-  const auto device_icons = new DevicesIcons(&app);
+  const auto device_icons = new IconsProvider(":/data/deviceIcons.json", "devices", &app);
+  const auto properties_icons = new IconsProvider(":/data/propertiesIcons.json", "properties", &app);
 
   root_context->setContextProperty("platformService", platform_service);
   root_context->setContextProperty("authorizationService", authorization_service);
@@ -165,6 +166,7 @@ int main(int argc, char *argv[]) {
   root_context->setContextProperty("unitsList", units_list);
   root_context->setContextProperty("deviceDataModel", device_data_model);
   root_context->setContextProperty("deviceIcons", device_icons);
+  root_context->setContextProperty("propertiesIcons", properties_icons);
 
   RegisterModels();
   RegisterCapabilities();

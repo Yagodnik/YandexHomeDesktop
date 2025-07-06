@@ -1,9 +1,9 @@
 #pragma once
 
 #include <QMap>
-#include "ICapability.h"
+#include "../common/IotObject.h"
 
-class OnOffCapability : public ICapability {
+class OnOffCapability : public IotObject {
   Q_OBJECT
 public:
   explicit OnOffCapability(QObject *parent = nullptr);

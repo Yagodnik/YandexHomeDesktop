@@ -27,6 +27,14 @@ QString TitlesList::GetModeTitle(const QString &instance) const {
   return data_.mode.value(instance, "").toString();
 }
 
+QString TitlesList::GetFloatTitle(const QString &instance) const {
+  return data_.float_.value(instance, "").toString();
+}
+
+QString TitlesList::GetEventTitle(const QString &instance) const {
+  return data_.event.value(instance, "").toString();
+}
+
 QString TitlesList::GetTitle(const QString &name, const QString &instance) const {
   if (name == "on_off") {
     return GetOnOffTitle(instance);
@@ -36,6 +44,10 @@ QString TitlesList::GetTitle(const QString &name, const QString &instance) const
     return GetToggleTitle(instance);
   } else if (name == "mode") {
     return GetModeTitle(instance);
+  } else if (name == "float") {
+    return GetFloatTitle(instance);
+  } else if (name == "event") {
+    return GetEventTitle(instance);
   }
 
   return "???";

@@ -1,7 +1,7 @@
 #include "ColorSettingCapability.h"
 #include <QColor>
 
-ColorSettingCapability::ColorSettingCapability(QObject *parent) : ICapability("base", parent) {}
+ColorSettingCapability::ColorSettingCapability(QObject *parent) : IotObject("base", parent) {}
 
 void ColorSettingCapability::SetValue(const QVariant &value) {
   if (GetValue() == value) {
@@ -89,7 +89,7 @@ bool ColorSettingCapability::GetSupportsTemperature() const {
 }
 
 void ColorSettingCapability::SetParameters(const QVariantMap &parameters) {
-  ICapability::SetParameters(parameters);
+  IotObject::SetParameters(parameters);
 
   emit temperatureMinChanged();
   emit temperatureMaxChanged();

@@ -1,7 +1,7 @@
 #include "ModesCapability.h"
 
 ModesCapability::ModesCapability(QObject *parent)
-  : ICapability("modes", parent) {}
+  : IotObject("modes", parent) {}
 
 void ModesCapability::SetValue(const QVariant &value) {
   if (GetValue().toString() == value.toString()) {

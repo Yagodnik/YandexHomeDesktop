@@ -1,6 +1,6 @@
 #include "RangeCapability.h"
 
-RangeCapability::RangeCapability(QObject *parent) : ICapability("range", parent) {}
+RangeCapability::RangeCapability(QObject *parent) : IotObject("range", parent) {}
 
 void RangeCapability::SetValue(const QVariant& value) {
   if (GetValue().toDouble() == value.toDouble()) {
@@ -86,7 +86,7 @@ void RangeCapability::SetPrecision(double value) {
 }
 
 void RangeCapability::SetParameters(const QVariantMap &parameters) {
-  ICapability::SetParameters(parameters);
+  IotObject::SetParameters(parameters);
 
   emit minChanged();
   emit maxChanged();

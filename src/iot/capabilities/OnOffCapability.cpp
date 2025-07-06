@@ -2,7 +2,7 @@
 
 #include <QVariant>
 
-OnOffCapability::OnOffCapability(QObject *parent) : ICapability("on_off", parent) {}
+OnOffCapability::OnOffCapability(QObject *parent) : IotObject("on_off", parent) {}
 
 void OnOffCapability::SetValue(const QVariant &value) {
   if (GetValue() == value) {

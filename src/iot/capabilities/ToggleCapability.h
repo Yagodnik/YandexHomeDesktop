@@ -1,9 +1,9 @@
 #pragma once
 
 #include <QMap>
-#include "ICapability.h"
+#include "../common/IotObject.h"
 
-class ToggleCapability : public ICapability {
+class ToggleCapability : public IotObject {
   Q_OBJECT
 public:
   explicit ToggleCapability(QObject *parent = nullptr);

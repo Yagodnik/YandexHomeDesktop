@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ICapability.h"
+#include "../common/IotObject.h"
 
-class ModesCapability : public ICapability {
+class ModesCapability : public IotObject {
   Q_OBJECT
 public:
   explicit ModesCapability(QObject *parent = nullptr);

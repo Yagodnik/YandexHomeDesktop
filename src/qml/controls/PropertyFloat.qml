@@ -1,9 +1,19 @@
 import QtQuick
 import Qt5Compat.GraphicalEffects
 import YandexHomeDesktop.Ui as UI
+import YandexHomeDesktop.Properties as Properties
 
 Item {
   height: 64
+
+  Properties.Float {
+    id: floatProperty
+
+    state: model.propertyState
+    parameters: model.propertyParameters
+    titlesList: iotTitles
+    units: unitsList
+  }
 
   Rectangle {
     anchors.fill: parent
@@ -52,14 +62,14 @@ Item {
       id: valueText
       font.bold: true
 
-      text: propertyState["value"] + "%"
+      text: floatProperty.value + floatProperty.unit
     }
 
     UI.DefaultText {
       id: propertyTitle
       font.pixelSize: 14
 
-      text: "Уровень водыыы" + " • " + "00:11"
+      text: floatProperty.title + " • " + "00:11"
     }
   }
 }

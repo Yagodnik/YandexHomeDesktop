@@ -32,26 +32,32 @@ qt_add_executable(appYandexHomeDesktop
         src/utils/Themes.h
         src/utils/ErrorCodes.cpp
         src/utils/ErrorCodes.h
-        src/capabilities/OnOffCapability.cpp
-        src/capabilities/OnOffCapability.h
-        src/capabilities/RangeCapability.cpp
-        src/capabilities/RangeCapability.h
-        src/capabilities/ICapability.cpp
-        src/capabilities/ICapability.h
-        src/capabilities/ToggleCapability.cpp
-        src/capabilities/ToggleCapability.h
-        src/capabilities/ColorSettingCapability.cpp
-        src/capabilities/ColorSettingCapability.h
+        src/iot/capabilities/OnOffCapability.cpp
+        src/iot/capabilities/OnOffCapability.h
+        src/iot/capabilities/RangeCapability.cpp
+        src/iot/capabilities/RangeCapability.h
+        src/iot/common/IotObject.cpp
+        src/iot/common/IotObject.h
+        src/iot/capabilities/ToggleCapability.cpp
+        src/iot/capabilities/ToggleCapability.h
+        src/iot/capabilities/ColorSettingCapability.cpp
+        src/iot/capabilities/ColorSettingCapability.h
         src/utils/Settings.cpp
         src/utils/Settings.h
-        src/capabilities/ModesCapability.cpp
-        src/capabilities/ModesCapability.h
+        src/iot/capabilities/ModesCapability.cpp
+        src/iot/capabilities/ModesCapability.h
         src/utils/TitlesList.cpp
         src/utils/TitlesList.h
         src/utils/UnitsList.cpp
         src/utils/UnitsList.h
         src/utils/DevicesIcons.cpp
         src/utils/DevicesIcons.h
+        src/iot/properties/FloatProperty.cpp
+        src/iot/properties/FloatProperty.h
+        src/iot/properties/EventProperty.cpp
+        src/iot/properties/EventProperty.h
+#        src/iot/common/UnitObject.cpp
+#        src/iot/common/UnitObject.h
 )
 
 if (APPLE)

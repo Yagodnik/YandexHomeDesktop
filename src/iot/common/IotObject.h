@@ -2,23 +2,24 @@
 
 #include <QVariant>
 #include "utils/TitlesList.h"
+#include "utils/UnitsList.h"
 
-class ICapability : public QObject {
+class IotObject : public QObject {
   Q_OBJECT
   Q_PROPERTY(QVariantMap state READ GetState WRITE SetState NOTIFY stateChanged)
   Q_PROPERTY(QVariantMap parameters READ GetParameters WRITE SetParameters NOTIFY parametersChanged)
   Q_PROPERTY(QVariant value READ GetValue WRITE SetValue NOTIFY valueChanged)
-  Q_PROPERTY(QString title READ GetCapabilityTitle NOTIFY capabilityTitleChanged)
+  Q_PROPERTY(QString title READ GetTitle NOTIFY titleChanged)
   Q_PROPERTY(TitlesList* titlesList MEMBER titles_list_)
 public:
-  explicit ICapability(const QString& capability_name, QObject *parent = nullptr);
+  explicit IotObject(const QString& name, QObject *parent = nullptr);
 
   virtual QVariantMap GetState() const;
   virtual QVariantMap GetParameters() const;
 
   virtual void SetValue(const QVariant& value) = 0;
 
-  [[nodiscard]] QString GetCapabilityTitle() const;
+  [[nodiscard]] QString GetTitle() const;
 
 public slots:
   virtual void SetState(const QVariantMap& state);
@@ -29,10 +30,10 @@ signals:
   void stateChanged();
   void parametersChanged();
   void valueChanged();
-  void capabilityTitleChanged();
+  void titleChanged();
 
 protected:
-  QString capability_name_;
+  QString name_;
   QVariantMap parameters_;
   QVariantMap state_;
 

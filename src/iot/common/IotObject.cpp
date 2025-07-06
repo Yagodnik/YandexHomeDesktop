@@ -1,0 +1,40 @@
+#include "IotObject.h"
+
+IotObject::IotObject(const QString& name, QObject *parent)
+  : QObject(parent), name_(name) {}
+
+QVariantMap IotObject::GetState() const {
+  return state_;
+}
+
+QVariantMap IotObject::GetParameters() const {
+  return parameters_;
+}
+
+QString IotObject::GetTitle() const {
+  if (titles_list_ != nullptr) {
+    const auto instance = state_.value("instance", "").toString();
+    return titles_list_->GetTitle(name_, instance);
+  }
+
+  return state_.value("instance", "").toString() + "???";
+}
+
+void IotObject::SetState(const QVariantMap &state) {
+  const QVariant old_value = GetValue();
+  state_ = state;
+  emit stateChanged();
+
+  // TODO: Maybe remove due useless
+  emit titleChanged();
+
+  if (GetValue() != old_value) {
+    emit valueChanged();
+  }
+}
+
+void IotObject::SetParameters(const QVariantMap &parameters) {
+  parameters_ = parameters;
+
+  emit parametersChanged();
+}

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "ICapability.h"
+#include "../common/IotObject.h"
 #include "utils/UnitsList.h"
 
-class RangeCapability : public ICapability {
+class RangeCapability : public IotObject {
   Q_OBJECT
   Q_PROPERTY(double min READ GetMin WRITE SetMin NOTIFY minChanged)
   Q_PROPERTY(double max READ GetMax WRITE SetMax NOTIFY maxChanged)

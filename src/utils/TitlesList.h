@@ -11,6 +11,8 @@ public:
   [[nodiscard]] QString GetRangeTitle(const QString& instance) const;
   [[nodiscard]] QString GetToggleTitle(const QString& instance) const;
   [[nodiscard]] QString GetModeTitle(const QString& instance) const;
+  [[nodiscard]] QString GetFloatTitle(const QString& instance) const;
+  [[nodiscard]] QString GetEventTitle(const QString& instance) const;
   [[nodiscard]] QString GetTitle(const QString& name, const QString& instance) const;
 
 private:
@@ -18,7 +20,9 @@ private:
     (QVariantMap, on_off),
     (QVariantMap, range),
     (QVariantMap, toggle),
-    (QVariantMap, mode)
+    (QVariantMap, mode),
+    (QVariantMap, float_),
+    (QVariantMap, event)
   );
 
   TitlesListData data_;

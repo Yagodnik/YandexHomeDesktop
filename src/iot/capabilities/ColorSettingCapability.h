@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ICapability.h"
+#include "../common/IotObject.h"
 
-class ColorSettingCapability : public ICapability {
+class ColorSettingCapability : public IotObject {
   Q_OBJECT
   Q_PROPERTY(
     int temperatureMin

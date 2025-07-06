@@ -11,7 +11,7 @@ Item {
 
     state: model.attributeState
     parameters: model.attributeParameters
-    titlesList: capabilitiesTitles
+    titlesList: iotTitles
     units: unitsList
   }
 

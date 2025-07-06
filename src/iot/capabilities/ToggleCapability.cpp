@@ -2,7 +2,7 @@
 
 #include <QVariant>
 
-ToggleCapability::ToggleCapability(QObject *parent) : ICapability("toggle", parent) {}
+ToggleCapability::ToggleCapability(QObject *parent) : IotObject("toggle", parent) {}
 
 void ToggleCapability::SetValue(const QVariant &value) {
   if (GetValue() == value) {

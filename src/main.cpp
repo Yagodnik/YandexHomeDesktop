@@ -7,7 +7,7 @@
 #include "api/YandexHomeApi.h"
 #include "api/YandexAccount.h"
 #include "auth/AuthorizationService.h"
-#include "capabilities/ColorSettingCapability.h"
+#include "iot/capabilities/ColorSettingCapability.h"
 #include "models/ScenariosModel/ScenariosModel.h"
 #include "models/DevicesModel//DevicesModel.h"
 #include "models/DevicesModel/DevicesFilterModel.h"
@@ -28,11 +28,13 @@
 #include "utils/Themes.h"
 #include "utils/ErrorCodes.h"
 #include "utils/Settings.h"
-#include "capabilities/OnOffCapability.h"
-#include "capabilities/RangeCapability.h"
-#include "capabilities/ToggleCapability.h"
-#include "capabilities/ColorSettingCapability.h"
-#include "capabilities/ModesCapability.h"
+#include "iot/capabilities/OnOffCapability.h"
+#include "iot/capabilities/RangeCapability.h"
+#include "iot/capabilities/ToggleCapability.h"
+#include "iot/capabilities/ColorSettingCapability.h"
+#include "iot/capabilities/ModesCapability.h"
+#include "iot/properties/EventProperty.h"
+#include "iot/properties/FloatProperty.h"
 #include "models/DeviceModel/DeviceDataModel.h"
 #include "utils/DevicesIcons.h"
 #include "utils/UnitsList.h"
@@ -46,11 +48,11 @@
 /*
 * TODO List
 *  1) Fix modes capability
-*  2) Implement properties views
+*  + 2) Implement properties views
 *  3) Implement properties classes (IProperty, FloatProperty, EventProperty)
 *  4) Refactor polling system (CapabilitiesModel)
 *  5) Range random access false support
-*  6) Loading animation for capabilities/properties
+*  + 6) Loading animation for capabilities/properties
 *  7) Block polling when app is not in focus
 *  8) Logging
 *  + 9) Color Settings - not all devices support concrete colors
@@ -88,6 +90,11 @@ void RegisterCapabilities() {
   qmlRegisterType<ToggleCapability>("YandexHomeDesktop.Capabilities", 1, 0, "Toggle");
   qmlRegisterType<ColorSettingCapability>("YandexHomeDesktop.Capabilities", 1, 0, "ColorSetting");
   qmlRegisterType<ModesCapability>("YandexHomeDesktop.Capabilities", 1, 0, "Modes");
+}
+
+void RegisterProperties() {
+  qmlRegisterType<FloatProperty>("YandexHomeDesktop.Properties", 1, 0, "Float");
+  qmlRegisterType<EventProperty>("YandexHomeDesktop.Properties", 1, 0, "Event");
 }
 
 int main(int argc, char *argv[]) {
@@ -154,13 +161,14 @@ int main(int argc, char *argv[]) {
   root_context->setContextProperty("modesModel", modes_model);
   root_context->setContextProperty("householdsModel", households_model);
   root_context->setContextProperty("settings", settings);
-  root_context->setContextProperty("capabilitiesTitles", titles_list);
+  root_context->setContextProperty("iotTitles", titles_list);
   root_context->setContextProperty("unitsList", units_list);
   root_context->setContextProperty("deviceDataModel", device_data_model);
   root_context->setContextProperty("deviceIcons", device_icons);
 
   RegisterModels();
   RegisterCapabilities();
+  RegisterProperties();
 
   QObject::connect(
     &engine, &QQmlApplicationEngine::objectCreated,

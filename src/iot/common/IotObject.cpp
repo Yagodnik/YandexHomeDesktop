@@ -12,9 +12,9 @@ QVariantMap IotObject::GetParameters() const {
 }
 
 QString IotObject::GetTitle() const {
-  if (titles_list_ != nullptr) {
+  if (titles_provider_ != nullptr) {
     const auto instance = state_.value("instance", "").toString();
-    return titles_list_->GetTitle(name_, instance);
+    return titles_provider_->GetTitle(name_, instance);
   }
 
   return state_.value("instance", "").toString() + "???";
@@ -34,6 +34,7 @@ void IotObject::SetState(const QVariantMap &state) {
 
   if (GetValue() != old_value) {
     emit valueChanged();
+    emit formattedValueChanged();
   }
 }
 
@@ -41,4 +42,8 @@ void IotObject::SetParameters(const QVariantMap &parameters) {
   parameters_ = parameters;
 
   emit parametersChanged();
+}
+
+QString IotObject::GetFormattedValue() const {
+  return GetValue().toString();
 }

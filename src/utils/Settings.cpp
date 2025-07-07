@@ -2,6 +2,7 @@
 
 Settings::Settings(QObject *parent)
   : QObject(parent), settings_("ArtemYagodnik", "YandexHomeDesktop") {
+
   qDebug() << "CurrentTheme" << GetCurrentTheme();
   qDebug() << "Settings initialized:" << settings_.fileName();
 }

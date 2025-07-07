@@ -4,18 +4,17 @@
 #include "serialization/Serialization.h"
 
 namespace JsonLoader {
+  [[nodiscard]] std::optional<QJsonObject> LoadRaw(const QString& path);
+
   template<Serialization::Serializable T>
   [[nodiscard]] std::optional<T> Load(const QString& path) {
-    QFile file(path);
+    const auto temp = LoadRaw(path);
 
-    if (!file.open(QIODevice::ReadOnly)) {
-      qWarning() << "Failed to open file: " << path;
+    if (!temp.has_value()) {
+      qDebug() << "TitlesProvider: Failed to load JSON data";
       return std::nullopt;
     }
 
-    const QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-    const QJsonObject obj = doc.object();
-
-    return Serialization::From<T>(obj);
+    return Serialization::From<T>(temp.value());
   }
 };

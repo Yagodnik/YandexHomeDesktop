@@ -11,6 +11,7 @@ void RangeCapability::SetValue(const QVariant& value) {
 
   emit valueChanged();
   emit stateChanged();
+  emit formattedValueChanged();
 }
 
 QVariant RangeCapability::GetValue() const {
@@ -47,6 +48,10 @@ QString RangeCapability::GetUnit() const {
 
 UnitsList * RangeCapability::GetUnitList() const {
   return units_list_;
+}
+
+QString RangeCapability::GetFormattedValue() const {
+  return GetValue().toString() + GetUnit();
 }
 
 QVariantMap RangeCapability::Create(double value) {

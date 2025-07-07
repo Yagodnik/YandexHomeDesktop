@@ -39,4 +39,4 @@ add_library(Models SHARED
 #        DeviceModel/DeviceDataController.h
 )
 
-target_link_libraries(Models PRIVATE Qt6::Core Qt6::Network Qt6::Gui YandexHomeApi)
+target_link_libraries(Models PRIVATE Qt6::Core Qt6::Network Qt6::Gui YandexHomeApi Utils)

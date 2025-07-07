@@ -49,7 +49,8 @@ Item {
       anchors.right: parent.right
       anchors.verticalCenter: parent.verticalCenter
 
-      text: rangeSlider.value + rangeCapability.unit
+      // text: rangeSlider.value + rangeCapability.unit
+      text: rangeCapability.formattedValue
     }
   }
 

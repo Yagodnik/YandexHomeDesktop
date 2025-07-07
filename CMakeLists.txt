@@ -21,6 +21,7 @@ add_subdirectory(src/api)
 add_subdirectory(src/auth)
 add_subdirectory(src/models)
 add_subdirectory(src/platform)
+add_subdirectory(src/utils)
 
 qt_add_executable(appYandexHomeDesktop
         src/main.cpp
@@ -28,10 +29,6 @@ qt_add_executable(appYandexHomeDesktop
         src/utils/Router.h
 
         ${RESOURCES}
-        src/utils/Themes.cpp
-        src/utils/Themes.h
-        src/utils/ErrorCodes.cpp
-        src/utils/ErrorCodes.h
         src/iot/capabilities/OnOffCapability.cpp
         src/iot/capabilities/OnOffCapability.h
         src/iot/capabilities/RangeCapability.cpp
@@ -42,21 +39,16 @@ qt_add_executable(appYandexHomeDesktop
         src/iot/capabilities/ToggleCapability.h
         src/iot/capabilities/ColorSettingCapability.cpp
         src/iot/capabilities/ColorSettingCapability.h
-        src/utils/Settings.cpp
-        src/utils/Settings.h
+
         src/iot/capabilities/ModesCapability.cpp
         src/iot/capabilities/ModesCapability.h
-        src/utils/TitlesList.cpp
-        src/utils/TitlesList.h
-        src/utils/UnitsList.cpp
-        src/utils/UnitsList.h
-        src/utils/IconsProvider.cpp
-        src/utils/IconsProvider.h
+
         src/iot/properties/FloatProperty.cpp
         src/iot/properties/FloatProperty.h
         src/iot/properties/EventProperty.cpp
         src/iot/properties/EventProperty.h
-#        src/iot/common/UnitObject.cpp
+
+        #        src/iot/common/UnitObject.cpp
 #        src/iot/common/UnitObject.h
 )
 
@@ -111,6 +103,7 @@ target_link_libraries(appYandexHomeDesktop PRIVATE
         YandexAuth
         Models
         PlatformService
+        Utils
 )
 
 add_dependencies(appYandexHomeDesktop compile_shaders)

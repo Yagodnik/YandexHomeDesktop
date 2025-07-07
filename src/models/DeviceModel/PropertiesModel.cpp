@@ -135,7 +135,7 @@ void PropertiesModel::OnDeviceInfoReceived(const DeviceInfo &info2) {
 
   for (auto [property, incoming_property] : std::ranges::views::zip(properties_, info.properties)) {
     qDebug() << "Property update:"  << incoming_property.state;
-    qDebug() << "\t"  << incoming_property.parameters;
+    qDebug() << "\t Params:"  << incoming_property.parameters;
 
     property = incoming_property;
   }

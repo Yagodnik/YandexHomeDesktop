@@ -49,7 +49,7 @@
 * TODO List
 *  1) Fix modes capability
 *  + 2) Implement properties views
-*  3) Implement properties classes (IProperty, FloatProperty, EventProperty)
+*  + 3) Implement properties classes (IProperty, FloatProperty, EventProperty)
 *  4) Refactor polling system (CapabilitiesModel)
 *  5) Range random access false support
 *  + 6) Loading animation for capabilities/properties
@@ -64,6 +64,8 @@
 *  15) Fix CMake for Windows
 *  16) Add true email to settings
 *  + 17) Devices icons
+*  18) Fix switching between devices bug
+*  19) Fix loading animation and offline device
 * */
 
 void RegisterFonts(QGuiApplication &app) {
@@ -138,7 +140,8 @@ int main(int argc, char *argv[]) {
   const auto color_modes_model = new ColorModesModel(&app);
   const auto modes_model = new ModesModel(&app);
   const auto settings = new Settings(&app);
-  const auto titles_list = new TitlesList(&app);
+  const auto titles_list = new TitlesProvider(":/data/instances.json", &app);
+  const auto events_list = new TitlesProvider(":/data/propertiesEvents.json", &app);
   const auto units_list = new UnitsList(&app);
   const auto device_data_model = new DeviceDataModel(yandex_api, &app);
   const auto device_icons = new IconsProvider(":/data/deviceIcons.json", "devices", &app);
@@ -163,6 +166,7 @@ int main(int argc, char *argv[]) {
   root_context->setContextProperty("householdsModel", households_model);
   root_context->setContextProperty("settings", settings);
   root_context->setContextProperty("iotTitles", titles_list);
+  root_context->setContextProperty("eventTitles", events_list);
   root_context->setContextProperty("unitsList", units_list);
   root_context->setContextProperty("deviceDataModel", device_data_model);
   root_context->setContextProperty("deviceIcons", device_icons);

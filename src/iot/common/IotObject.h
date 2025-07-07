@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QVariant>
-#include "utils/TitlesList.h"
+#include "utils/TitlesProvider.h"
 #include "utils/UnitsList.h"
 
 class IotObject : public QObject {
@@ -11,7 +11,8 @@ class IotObject : public QObject {
   Q_PROPERTY(QVariant value READ GetValue WRITE SetValue NOTIFY valueChanged)
   Q_PROPERTY(QString title READ GetTitle NOTIFY titleChanged)
   Q_PROPERTY(QString instance READ GetInstance NOTIFY instanceChanged)
-  Q_PROPERTY(TitlesList* titlesList MEMBER titles_list_)
+  Q_PROPERTY(TitlesProvider* titlesList MEMBER titles_provider_)
+  Q_PROPERTY(QString formattedValue READ GetFormattedValue NOTIFY formattedValueChanged)
 public:
   explicit IotObject(const QString& name, QObject *parent = nullptr);
 
@@ -27,6 +28,7 @@ public slots:
   virtual void SetState(const QVariantMap& state);
   virtual void SetParameters(const QVariantMap& parameters);
   virtual QVariant GetValue() const = 0;
+  virtual QString GetFormattedValue() const;
 
 signals:
   void stateChanged();
@@ -34,11 +36,12 @@ signals:
   void valueChanged();
   void titleChanged();
   void instanceChanged();
+  void formattedValueChanged();
 
 protected:
   QString name_;
   QVariantMap parameters_;
   QVariantMap state_;
 
-  TitlesList *titles_list_{nullptr};
+  TitlesProvider *titles_provider_{nullptr};
 };

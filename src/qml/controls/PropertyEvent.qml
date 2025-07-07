@@ -12,6 +12,7 @@ Item {
     state: model.propertyState
     parameters: model.propertyParameters
     titlesList: iotTitles
+    valuesTitles: eventTitles
   }
 
   Rectangle {
@@ -61,7 +62,7 @@ Item {
       id: valueText
       font.bold: true
 
-      text: eventProperty.value
+      text: eventProperty.formattedValue
     }
 
     UI.DefaultText {

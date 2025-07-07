@@ -22,6 +22,8 @@ public:
   [[nodiscard]] QString GetUnit() const;
   [[nodiscard]] UnitsList* GetUnitList() const;
 
+  QString GetFormattedValue() const override;
+
   Q_INVOKABLE [[nodiscard]] QVariantMap Create(double value);
 
 signals:

@@ -8,10 +8,7 @@ void ColorSettingCapability::SetValue(const QVariant &value) {
     return;
   }
 
-  state_["value"] = value;
-
-  emit valueChanged();
-  emit stateChanged();
+  SetStateValue(value);
 }
 
 QVariant ColorSettingCapability::GetValue() const {

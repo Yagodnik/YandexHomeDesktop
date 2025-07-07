@@ -62,7 +62,7 @@ Item {
       id: valueText
       font.bold: true
 
-      text: floatProperty.value + floatProperty.unit
+      text: floatProperty.formattedValue
     }
 
     UI.DefaultText {

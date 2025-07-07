@@ -3,10 +3,7 @@
 EventProperty::EventProperty(QObject *parent) : IotObject("event", parent) {}
 
 void EventProperty::SetValue(const QVariant &value) {
-  state_["value"] = value.toString();
-
-  emit valueChanged();
-  emit stateChanged();
+  SetStateValue(value);
   emit formattedValueChanged();
 }
 

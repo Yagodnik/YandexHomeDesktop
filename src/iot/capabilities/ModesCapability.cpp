@@ -8,10 +8,7 @@ void ModesCapability::SetValue(const QVariant &value) {
     return;
   }
 
-  state_["value"] = value.toString();
-
-  emit valueChanged();
-  emit stateChanged();
+  SetStateValue(value);
 }
 
 QVariant ModesCapability::GetValue() const {

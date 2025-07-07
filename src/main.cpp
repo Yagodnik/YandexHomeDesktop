@@ -47,13 +47,14 @@
 
 /*
 * TODO List
-*  1) Fix modes capability
+*  1) Fix modes capability?
+*  7) Block polling when app is not in focus
+*  4) Refactor polling system (CapabilitiesModel)
+*  18) Fix switching between devices bug
 *  + 2) Implement properties views
 *  + 3) Implement properties classes (IProperty, FloatProperty, EventProperty)
-*  4) Refactor polling system (CapabilitiesModel)
 *  5) Range random access false support
 *  + 6) Loading animation for capabilities/properties
-*  7) Block polling when app is not in focus
 *  8) Logging
 *  + 9) Color Settings - not all devices support concrete colors
 *  + 10) Device offline mark
@@ -64,8 +65,8 @@
 *  15) Fix CMake for Windows
 *  16) Add true email to settings
 *  + 17) Devices icons
-*  18) Fix switching between devices bug
 *  19) Fix loading animation and offline device
+*  20) Try to refactor capabilities and properties
 * */
 
 void RegisterFonts(QGuiApplication &app) {

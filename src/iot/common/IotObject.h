@@ -44,4 +44,6 @@ protected:
   QVariantMap state_;
 
   TitlesProvider *titles_provider_{nullptr};
+
+  void SetStateValue(const QVariant& value);
 };

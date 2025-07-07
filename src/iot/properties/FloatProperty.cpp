@@ -3,9 +3,12 @@
 FloatProperty::FloatProperty(QObject *parent) : IotObject("float", parent) {}
 
 void FloatProperty::SetValue(const QVariant &value) {
-  state_["value"] = value.toDouble();
+  if (value.toString() == GetValue()) {
+    return;
+  }
 
-  emit stateChanged();
+  SetStateValue(value);
+  emit formattedValueChanged();
 }
 
 QVariant FloatProperty::GetValue() const {
@@ -39,4 +42,9 @@ void FloatProperty::SetUnitList(UnitsList *units_list) {
   units_list_ = units_list;
   emit unitsListChanged();
   emit unitChanged();
+  emit formattedValueChanged();
+}
+
+QString FloatProperty::GetFormattedValue() const {
+  return GetValue().toString() + GetUnit();
 }

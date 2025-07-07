@@ -9,10 +9,7 @@ void ToggleCapability::SetValue(const QVariant &value) {
     return;
   }
 
-  state_["value"] = value;
-
-  emit valueChanged();
-  emit stateChanged();
+  SetStateValue(value);
 }
 
 QVariant ToggleCapability::GetValue() const {

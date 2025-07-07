@@ -7,10 +7,7 @@ void RangeCapability::SetValue(const QVariant& value) {
     return;
   }
 
-  state_["value"] = value.toDouble();
-
-  emit valueChanged();
-  emit stateChanged();
+  SetStateValue(value);
   emit formattedValueChanged();
 }
 

@@ -42,8 +42,16 @@ void IotObject::SetParameters(const QVariantMap &parameters) {
   parameters_ = parameters;
 
   emit parametersChanged();
+  emit formattedValueChanged();
 }
 
 QString IotObject::GetFormattedValue() const {
   return GetValue().toString();
+}
+
+void IotObject::SetStateValue(const QVariant &value) {
+  state_["value"] = value;
+
+  emit valueChanged();
+  emit stateChanged();
 }

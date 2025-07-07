@@ -24,6 +24,8 @@ public slots:
   void SetParameters(const QVariantMap& parameters) override;
   void SetUnitList(UnitsList* units_list);
 
+  QString GetFormattedValue() const override;
+
 protected:
   UnitsList* units_list_{nullptr};
 };

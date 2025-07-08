@@ -98,11 +98,15 @@ QHash<int, QByteArray> CapabilitiesModel::roleNames() const {
   };
 }
 
+void CapabilitiesModel::ResetModel() {
+  capabilities_.clear();
+  is_initialized_ = false;
+}
+
 void CapabilitiesModel::RequestData(const QString& device_id) {
   device_id_ = device_id;
 
-  capabilities_.clear();
-  is_initialized_ = false;
+  ResetModel();
 
   RequestUpdate();
 }

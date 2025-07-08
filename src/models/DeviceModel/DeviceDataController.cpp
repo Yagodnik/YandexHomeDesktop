@@ -19,8 +19,13 @@ DeviceDataController::DeviceDataController(YandexHomeApi *api, QObject *parent)
     &DeviceDataController::OnTimerTimeout);
 }
 
-void DeviceDataController::RequestData(const QString &device_id) {
+void DeviceDataController::LoadDevice(const QString &device_id) {
+  device_id_ = device_id;
 
+  last_update_start_time_ = CurrentTime();
+  api_->GetDeviceInfo(device_id_);
+
+  emit loadRequestMade();
 }
 
 void DeviceDataController::EnablePolling() {
@@ -53,7 +58,7 @@ void DeviceDataController::UseCapability(
 
 void DeviceDataController::OnTimerTimeout() {
   qDebug() << "Making polling request";
-  capabilities_model_->last_update_start_time_ = CurrentTime();
+
   api_->GetDeviceInfo(device_id_);
 }
 

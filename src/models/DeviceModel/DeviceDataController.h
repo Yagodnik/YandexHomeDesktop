@@ -13,13 +13,14 @@ public:
 
   using CapabilitiesList = QList<std::optional<CapabilityObject>>;
 
-  Q_INVOKABLE void RequestData(const QString& device_id);
+  Q_INVOKABLE void LoadDevice(const QString& device_id);
   Q_INVOKABLE void EnablePolling();
   Q_INVOKABLE void DisablePolling();
 
   void UseCapability(int index, const CapabilityObject& capability, const QVariantMap& state) const;
 
 signals:
+  void loadRequestMade();
   void capabilitiesUpdateReady(const QVariantList& capabilities);
   void propertiesUpdateReady(const QVariantList& properties);
   void capabilityUsed(int index, const QVariantMap& state);
@@ -32,8 +33,6 @@ private:
   QTimer timer_;
 
   QString device_id_;
-  CapabilitiesModel *capabilities_model_;
-  PropertiesModel *properties_model_;
 
   YandexHomeApi* api_;
 

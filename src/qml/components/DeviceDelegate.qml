@@ -52,7 +52,7 @@ Item {
     onClicked: {
       console.log("Device Id: ", deviceId, " Room Id: ", deviceRoomId, " Household Id: ", deviceHouseholdId)
 
-      capabilitiesModel.RequestData(deviceId);
+      capabilitiesModel.LoadDevice(deviceId);
       // deviceDataController.RequestData(deviceId);
 
       router.navigateTo("device");

@@ -47,10 +47,10 @@
 
 /*
 * TODO List
-*  1) Fix modes capability?
 *  7) Block polling when app is not in focus
 *  4) Refactor polling system (CapabilitiesModel)
 *  18) Fix switching between devices bug
+*  1) Fix modes capability?
 *  + 2) Implement properties views
 *  + 3) Implement properties classes (IProperty, FloatProperty, EventProperty)
 *  5) Range random access false support
@@ -67,6 +67,7 @@
 *  + 17) Devices icons
 *  19) Fix loading animation and offline device
 *  20) Try to refactor capabilities and properties
+*  21) Make smart-checkers to blind changes
 * */
 
 void RegisterFonts(QGuiApplication &app) {

@@ -25,6 +25,8 @@ public:
   [[nodiscard]] QVariant data(const QModelIndex &index, int role) const override;
   [[nodiscard]] QHash<int, QByteArray> roleNames() const override;
 
+  void ResetModel();
+
   Q_INVOKABLE void RequestData(const QString& device_id);
   void RequestUpdate();
 

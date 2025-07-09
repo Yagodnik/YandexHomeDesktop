@@ -8,16 +8,22 @@
 class DeviceController : public QObject {
   Q_OBJECT
 public:
+  using CapabilitiesList = QList<std::optional<CapabilityObject>>;
+  using PropertiesList = QList<std::optional<PropertyObject>>;
+
   explicit DeviceController(YandexHomeApi *api, QObject* parent = nullptr);
 
   Q_INVOKABLE void LoadDevice(const QString& device_id);
+  Q_INVOKABLE void ContinuePollingIfNeeded();
+  Q_INVOKABLE void StopPolling();
+  Q_INVOKABLE void ForgetDevice();
 
   void UseCapability(int index, const CapabilityObject& capability, const QVariantMap& state);
 
 signals:
   void loadRequestMade();
-  void capabilitiesUpdateReady(const QVariantList& capabilities);
-  void propertiesUpdateReady(const QVariantList& properties);
+  void capabilitiesUpdateReady(const CapabilitiesList& capabilities);
+  void propertiesUpdateReady(const PropertiesList& properties);
   void capabilityUsed(int index, const QVariantMap& state);
   void errorOccurred(const QString& error_message);
 
@@ -25,6 +31,7 @@ private:
   static constexpr int kPollingInterval = 3000;
 
   QString device_id_;
+  bool is_in_use_ = false;
   QList<DeviceAttribute> capabilities_updates_;
   double last_update_start_time_;
 

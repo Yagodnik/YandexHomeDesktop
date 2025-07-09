@@ -47,6 +47,14 @@ Window {
     }
   }
 
+  onActiveChanged: {
+    if (active) {
+      deviceController.ContinuePollingIfNeeded();
+    } else {
+      deviceController.StopPolling();
+    }
+  }
+
   SystemTrayIcon {
     visible: settings.trayModeEnabled
     icon.name: "Yandex Home Desktop"

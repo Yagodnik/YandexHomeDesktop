@@ -12,6 +12,11 @@ class HouseholdsModel : public QAbstractListModel {
     WRITE SetCurrentHousehold
     NOTIFY currentHouseholdChanged
   )
+  Q_PROPERTY(
+    QString currentHouseholdName
+    READ GetCurrentHouseholdName
+    NOTIFY currentHouseholdChanged
+  )
 public:
   explicit HouseholdsModel(YandexHomeApi *api, QObject *parent = nullptr);
 
@@ -26,6 +31,7 @@ public:
 
   [[nodiscard]] int GetCount() const;
   [[nodiscard]] QString GetCurrentHousehold() const;
+  [[nodiscard]] QString GetCurrentHouseholdName() const;
 
   Q_INVOKABLE void RequestData();
 

@@ -38,7 +38,7 @@ Item {
 
         UI.HeadingText {
           id: heading
-          text: "Мой дом"
+          text: householdsModel.currentHouseholdName
           font.pointSize: 24
           font.bold: true
           anchors.left: parent.left

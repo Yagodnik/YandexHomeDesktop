@@ -53,6 +53,23 @@ QString HouseholdsModel::GetCurrentHousehold() const {
   return current_.value();
 }
 
+QString HouseholdsModel::GetCurrentHouseholdName() const {
+  if (!current_.has_value()) {
+    qDebug() << "HouseholdsModel: Cant find household with empty id!";
+    return {};
+  }
+
+  for (const auto& household : households_) {
+    if (household.id == current_.value()) {
+      return household.name;
+    }
+  }
+
+  qDebug() << "HouseholdsModel: Cant find household with id:" << current_.value();
+
+  return {};
+}
+
 void HouseholdsModel::RequestData() {
   beginResetModel();
 

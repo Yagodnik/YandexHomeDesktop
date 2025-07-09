@@ -39,10 +39,33 @@ void DeviceController::LoadDevice(const QString &device_id) {
 
   last_update_start_time_ = CurrentTime();
   capabilities_updates_.clear();
+  is_in_use_ = true;
 
   api_->GetDeviceInfo(device_id_);
 
   emit loadRequestMade();
+}
+
+void DeviceController::ContinuePollingIfNeeded() {
+  if (is_in_use_) {
+    qDebug() << "Device Controller: Continued polling for device" << device_id_;
+    polling_timer_.start();
+  }
+}
+
+void DeviceController::StopPolling() {
+  if (polling_timer_.isActive()) {
+    qDebug() << "Device Controller: Stopped polling for device" << device_id_;
+    polling_timer_.stop();
+  }
+}
+
+void DeviceController::ForgetDevice() {
+  StopPolling();
+  qDebug() << "Device Controller: Forgetting device" << device_id_;
+
+  device_id_ = "";
+  is_in_use_ = false;
 }
 
 void DeviceController::UseCapability(
@@ -100,8 +123,8 @@ void DeviceController::OnDeviceInfoReceived(const DeviceInfo& info) {
     capabilities_updates_.resize(info.capabilities.size());
   }
 
-  QVariantList capabilities;
-  QVariantList properties;
+  CapabilitiesList capabilities;
+  PropertiesList properties;
 
   const auto blocking_condition = [this, receive_time](const auto& attr) -> bool {
     return attr.is_pending ||
@@ -111,18 +134,18 @@ void DeviceController::OnDeviceInfoReceived(const DeviceInfo& info) {
 
   for (auto [attr, incoming] : std::ranges::views::zip(capabilities_updates_, info.capabilities)) {
     if (blocking_condition(attr)) {
-      capabilities.push_back({});
+      capabilities.push_back(std::nullopt);
     } else {
-      capabilities.push_back(QVariant::fromValue(incoming));
+      capabilities.push_back(incoming);
     }
   }
 
   for (const auto& property : info.properties) {
-    properties.push_back(QVariant::fromValue(property));
+    properties.push_back(property);
   }
 
-  emit capabilitiesUpdateReady(std::move(capabilities));
-  emit propertiesUpdateReady(std::move(properties));
+  emit capabilitiesUpdateReady(capabilities);
+  emit propertiesUpdateReady(properties);
 
   polling_timer_.start();
 }

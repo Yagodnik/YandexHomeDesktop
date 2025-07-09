@@ -89,6 +89,7 @@ Item {
         cursorShape: Qt.PointingHandCursor
 
         onClicked: {
+          deviceController.ForgetDevice();
           router.goBack();
         }
       }
@@ -175,6 +176,8 @@ Item {
         id: capabilitiesText
         text: "Умения"
 
+        visible: capabilitiesModel.count !== 0
+
         anchors.top: parent.top
         anchors.topMargin: 4
         anchors.left: parent.left
@@ -208,6 +211,8 @@ Item {
       UI.HeadingText {
         id: propertiesText
         text: "Свойства"
+
+        visible: propertiesModel.count !== 0
 
         anchors.top: capabilitiesList.bottom
         anchors.topMargin: 4

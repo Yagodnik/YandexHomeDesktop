@@ -73,10 +73,10 @@ QHash<int, QByteArray> PropertiesModel::roleNames() const {
   };
 }
 
-void PropertiesModel::OnPropertiesUpdateReady(const QVariantList &properties2) {
+void PropertiesModel::OnPropertiesUpdateReady(const DeviceController::PropertiesList &properties2) {
   qDebug() << "PropertiesModel: Properties received:" << properties2.size() << "without fake data";
 
-  QVariantList properties = properties2;
+  DeviceController::PropertiesList properties = properties2;
 
   if (!is_initialized_) {
     /* -- Adding fake data */
@@ -120,15 +120,19 @@ void PropertiesModel::OnPropertiesUpdateReady(const QVariantList &properties2) {
 
   qDebug() << "PropertiesModel: Updating" << properties.size() << "properties";
 
-  for (auto [property, incoming_property_var] : std::ranges::views::zip(properties_, properties)) {
-    const auto incoming_property = qvariant_cast<PropertyObject>(incoming_property_var);
+  for (auto [property, incoming_property_opt] : std::ranges::views::zip(properties_, properties)) {
+    if (!incoming_property_opt.has_value()) {
+      qDebug() << "PropertiesModel: Updating property failed as it is nullopt!";
+      continue;
+    }
+
+    const auto incoming_property = incoming_property_opt.value();
 
     qDebug() << "PropertiesModel: Property update:"  << incoming_property.state;
     qDebug() << "PropertiesModel: Property Params:"  << incoming_property.parameters;
 
     property = incoming_property;
   }
-
 
   if (!is_initialized_) {
     emit initialized();

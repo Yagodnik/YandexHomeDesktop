@@ -7,8 +7,8 @@
 
 class CapabilitiesModel : public QAbstractListModel {
   Q_OBJECT
+  Q_PROPERTY(int count READ rowCount NOTIFY dataLoaded)
 public:
-  // explicit CapabilitiesModel(YandexHomeApi *api, QObject *parent = nullptr);
   explicit CapabilitiesModel(DeviceController *controller, QObject *parent = nullptr);
 
   enum Roles {
@@ -21,7 +21,7 @@ public:
     ParametersRole
   };
 
-  [[nodiscard]] int rowCount(const QModelIndex &parent) const override;
+  [[nodiscard]] int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   [[nodiscard]] QVariant data(const QModelIndex &index, int role) const override;
   [[nodiscard]] QHash<int, QByteArray> roleNames() const override;
 
@@ -48,16 +48,6 @@ private:
     { CapabilityType::Toggle,       "qrc:/controls/Toggle.qml" },
   };
 
-  const QMap<QString, QString> kDelegates2 = {
-    { "devices.capabilities.on_off",        "qrc:/controls/OnOff.qml" },
-    // { "devices.capabilities.on_off",        "qrc:/controls/Mode.qml" },
-    { "devices.capabilities.video_stream",  kUnsupportedDelegate },
-    { "devices.capabilities.color_setting", "qrc:/controls/ColorSetting.qml" },
-    { "devices.capabilities.mode",          "qrc:/controls/Mode.qml" },
-    { "devices.capabilities.range",         "qrc:/controls/Range.qml" },
-    { "devices.capabilities.toggle",        "qrc:/controls/Toggle.qml" },
-  };
-
   QString device_id_;
 
   QList<CapabilityObject> capabilities_;
@@ -66,5 +56,5 @@ private:
   DeviceController *controller_;
 
 private slots:
-  void OnCapabilitiesUpdated(const QVariantList& capabilities);
+  void OnCapabilitiesUpdated(const DeviceController::CapabilitiesList& capabilities);
 };

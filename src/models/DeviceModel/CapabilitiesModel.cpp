@@ -33,10 +33,8 @@ QVariant CapabilitiesModel::data(const QModelIndex &index, int role) const {
     case NameRole:
       return CapabilityType::operator[](capability.type);
     case DelegateSourceRole: {
-      const auto name = CapabilityType::operator[](capability.type);
-
-      if (kDelegates2.contains(name)) {
-        return kDelegates2[name];
+      if (kDelegates.contains(capability.type)) {
+        return kDelegates[capability.type];
       }
 
       return kUnsupportedDelegate;
@@ -97,7 +95,7 @@ void CapabilitiesModel::UseCapability(const int index, const QVariantMap &state)
   controller_->UseCapability(index, capability, state);
 }
 
-void CapabilitiesModel::OnCapabilitiesUpdated(const QVariantList &capabilities) {
+void CapabilitiesModel::OnCapabilitiesUpdated(const DeviceController::CapabilitiesList& capabilities) {
   qDebug() << "Capabilities Model: Updates received from controller";
   qDebug() << "Capabilities count:" << capabilities.size();
 
@@ -109,12 +107,12 @@ void CapabilitiesModel::OnCapabilitiesUpdated(const QVariantList &capabilities) 
   int empty_count = 0;
 
   for (auto [capability_var, capability_instance] : std::views::zip(capabilities, capabilities_) ) {
-    if (capability_var.isNull()) {
+    if (!capability_var.has_value()) {
       empty_count++;
       continue;
     }
 
-    capability_instance = qvariant_cast<CapabilityObject>(capability_var);
+    capability_instance = capability_var.value();
   }
 
   qDebug() << "Capabilities Model: Update applied to" << capabilities_.size() << "capabilities";

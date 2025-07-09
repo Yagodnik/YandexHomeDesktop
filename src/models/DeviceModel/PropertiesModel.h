@@ -15,6 +15,7 @@
 
 class PropertiesModel : public QAbstractListModel {
   Q_OBJECT
+  Q_PROPERTY(int count READ rowCount NOTIFY dataLoaded)
 public:
   explicit PropertiesModel(DeviceController* controller, QObject* parent = nullptr);
 
@@ -28,13 +29,12 @@ public:
 
   void ResetModel();
 
-  [[nodiscard]] int rowCount(const QModelIndex &parent) const override;
+  [[nodiscard]] int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   [[nodiscard]] QVariant data(const QModelIndex &index, int role) const override;
   [[nodiscard]] QHash<int, QByteArray> roleNames() const override;
 
 signals:
   void dataLoaded();
-  void dataLoadingFailed();
   void initialized();
 
 private:
@@ -43,6 +43,6 @@ private:
   bool is_initialized_ = false;
 
 private slots:
-  void OnPropertiesUpdateReady(const QVariantList& properties);
+  void OnPropertiesUpdateReady(const DeviceController::PropertiesList& properties);
 };
 

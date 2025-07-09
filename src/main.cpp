@@ -47,14 +47,16 @@
 
 /*
 * TODO List
+*  1) Fix modes capability?
+*  5) Range random access false support
+*  + 24) Remove capabilities title if they are empty (same for props)
+*  23) Add properties time correctly displaying
 *  22) Fix that newly opened device can receive updates from previous device
-*  7) Block polling when app is not in focus
+*  + 7) Block polling when app is not in focus
 *  + 4) Refactor polling system (CapabilitiesModel)
 *  + 18) Fix switching between devices bug
-*  1) Fix modes capability?
 *  + 2) Implement properties views
 *  + 3) Implement properties classes (IProperty, FloatProperty, EventProperty)
-*  5) Range random access false support
 *  + 6) Loading animation for capabilities/properties
 *  8) Logging
 *  + 9) Color Settings - not all devices support concrete colors
@@ -62,7 +64,7 @@
 *  11) Performance optimizations
 *  + 12) Titles
 *  + 13) Range doesnt supports any units
-*  14) Select dialog doesnt print current household name
+*  + 14) Select dialog doesnt print current household name
 *  15) Fix CMake for Windows
 *  16) Add true email to settings
 *  + 17) Devices icons

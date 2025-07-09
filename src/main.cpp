@@ -15,7 +15,6 @@
 #include "models/RoomsModel/RoomsFilterModel.h"
 #include "models/DeviceModel/CapabilitiesModel.h"
 #include "models/DeviceModel/PropertiesModel.h"
-// #include "models/DeviceModel/DeviceDataController.h"
 #include "models/ColorsModel/ColorsModel.h"
 #include "models/ColorsModel/ColorModesModel.h"
 #include "models/ColorsModel/ColorsFilterModel.h"
@@ -35,6 +34,7 @@
 #include "iot/capabilities/ModesCapability.h"
 #include "iot/properties/EventProperty.h"
 #include "iot/properties/FloatProperty.h"
+#include "models/DeviceModel/DeviceController.h"
 #include "models/DeviceModel/DeviceDataModel.h"
 #include "utils/IconsProvider.h"
 #include "utils/UnitsList.h"
@@ -47,9 +47,10 @@
 
 /*
 * TODO List
+*  22) Fix that newly opened device can receive updates from previous device
 *  7) Block polling when app is not in focus
-*  4) Refactor polling system (CapabilitiesModel)
-*  18) Fix switching between devices bug
+*  + 4) Refactor polling system (CapabilitiesModel)
+*  + 18) Fix switching between devices bug
 *  1) Fix modes capability?
 *  + 2) Implement properties views
 *  + 3) Implement properties classes (IProperty, FloatProperty, EventProperty)
@@ -130,12 +131,7 @@ int main(int argc, char *argv[]) {
   const auto scenarios_model = new ScenariosModel(yandex_api, &app);
   const auto devices_model = new DevicesModel(yandex_api, &app);
   const auto rooms_model = new RoomsModel(yandex_api, &app);
-  const auto capabilities_model = new CapabilitiesModel(yandex_api, &app);
-  const auto properties_model = new PropertiesModel(yandex_api, &app);
-  // const auto device_data_controller = new DeviceDataController(yandex_api, &app);
-  // device_data_controller->capabilities_model_ = capabilities_model;
-  // device_data_controller->properties_model_ = properties_model;
-
+  const auto device_controller = new DeviceController(yandex_api, &app);
   const auto households_model = new HouseholdsModel(yandex_api, &app);
   const auto error_codes = new ErrorCodes(&app);
   const auto color_model = new ColorsModel(&app);
@@ -148,6 +144,9 @@ int main(int argc, char *argv[]) {
   const auto device_data_model = new DeviceDataModel(yandex_api, &app);
   const auto device_icons = new IconsProvider(":/data/deviceIcons.json", "devices", &app);
   const auto properties_icons = new IconsProvider(":/data/propertiesIcons.json", "properties", &app);
+  // const auto capabilities_model = new CapabilitiesModel(yandex_api, &app);
+  const auto capabilities_model = new CapabilitiesModel(device_controller, &app);
+  const auto properties_model = new PropertiesModel(device_controller, &app);
 
   root_context->setContextProperty("platformService", platform_service);
   root_context->setContextProperty("authorizationService", authorization_service);
@@ -155,7 +154,7 @@ int main(int argc, char *argv[]) {
   root_context->setContextProperty("scenariosModel", scenarios_model);
   root_context->setContextProperty("devicesModel", devices_model);
   root_context->setContextProperty("propertiesModel", properties_model);
-  // root_context->setContextProperty("deviceDataController", device_data_controller);
+  root_context->setContextProperty("deviceController", device_controller);
   root_context->setContextProperty("roomsModel", rooms_model);
   root_context->setContextProperty("yandexApi", yandex_api);
   root_context->setContextProperty("yandexAccount", yandex_account);

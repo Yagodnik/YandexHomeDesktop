@@ -26,10 +26,10 @@ Item {
     function onDataLoaded() {
       console.log("Device data loading - OK");
     }
+  }
 
-    function onDataLoadingFailed() {
-      console.log("Device data loading - FAILED");
-    }
+  Connections {
+    target: deviceController
 
     function onErrorOccurred(errorCode) {
       const error = errorCodes.GetDeviceError(errorCode);
@@ -112,11 +112,6 @@ Item {
       console.log("capabilities loaded");
       okCount++;
     }
-
-    function dataLoadingFailed() {
-      console.log("capabilities not loaded");
-      failCount++;
-    }
   }
 
   Connections {
@@ -126,11 +121,6 @@ Item {
       console.log("propeties loaded");
       okCount++;
     }
-
-    function dataLoadingFailed() {
-      console.log("propeties not loaded");
-      failCount++;
-    }
   }
 
   StackLayout {
@@ -138,8 +128,10 @@ Item {
     anchors.top: topHeader.bottom
     anchors.bottom: parent.bottom
 
-    currentIndex: (okCount !== 2 && failCount === 0) ? 0 :
-      ((failCount !== 0 || !deviceDataModel.isOnline) ? 1 : (okCount === 2 && failCount === 0) ? 2 : 1)
+    // currentIndex: (okCount !== 2 && failCount === 0) ? 0 :
+    //   ((failCount !== 0 || !deviceDataModel.isOnline) ? 1 : (okCount === 2 && failCount === 0) ? 2 : 1)
+
+    currentIndex: 2
 
     Item {
       UI.MyProgressIndicator {

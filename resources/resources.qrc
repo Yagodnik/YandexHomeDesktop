@@ -83,30 +83,31 @@
 
     <file>images/properties/amperage.svg</file>
     <file>images/properties/battery_level.svg</file>
+    <file>images/properties/button.svg</file>
     <file>images/properties/co2_level.svg</file>
     <file>images/properties/electricity_meter.svg</file>
     <file>images/properties/food_level.svg</file>
+    <file>images/properties/gas.svg</file>
     <file>images/properties/gas_meter.svg</file>
     <file>images/properties/heat_meter.svg</file>
     <file>images/properties/humidity.svg</file>
     <file>images/properties/illumination.svg</file>
     <file>images/properties/meter.svg</file>
+    <file>images/properties/motion.svg</file>
+    <file>images/properties/open.svg</file>
     <file>images/properties/pm1_density.svg</file>
     <file>images/properties/pm2.5_density.svg</file>
     <file>images/properties/pm10_density.svg</file>
     <file>images/properties/power.svg</file>
     <file>images/properties/pressure.svg</file>
+    <file>images/properties/smoke.svg</file>
     <file>images/properties/temperature.svg</file>
     <file>images/properties/tvoc.svg</file>
+    <file>images/properties/vibration.svg</file>
     <file>images/properties/voltage.svg</file>
+    <file>images/properties/water_leak.svg</file>
     <file>images/properties/water_level.svg</file>
     <file>images/properties/water_meter.svg</file>
-    <file>images/properties/vibration.svg</file>
-    <file>images/properties/open.svg</file>
-    <file>images/properties/button.svg</file>
-    <file>images/properties/motion.svg</file>
-    <file>images/properties/smoke.svg</file>
-    <file>images/properties/water_leak.svg</file>
 
     <file>fonts/Manrope-Bold.ttf</file>
     <file>fonts/Manrope-ExtraBold.ttf</file>

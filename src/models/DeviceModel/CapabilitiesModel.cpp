@@ -1,44 +1,19 @@
 #include "CapabilitiesModel.h"
 
-CapabilitiesModel::CapabilitiesModel(YandexHomeApi *api, QObject *parent)
-  : QAbstractListModel(parent), api_(api)
+CapabilitiesModel::CapabilitiesModel(DeviceController *controller, QObject *parent)
+  : QAbstractListModel(parent), controller_(controller)
 {
-  connect(api_,
-    &YandexHomeApi::deviceInfoReceived,
+  connect(controller_,
+    &DeviceController::loadRequestMade,
     this,
-    &CapabilitiesModel::OnDeviceInfoReceived);
+    &CapabilitiesModel::ResetModel
+  );
 
-  connect(api_,
-    &YandexHomeApi::deviceInfoReceivingFailed,
+  connect(controller_,
+    &DeviceController::capabilitiesUpdateReady,
     this,
-    &CapabilitiesModel::OnDeviceInfoReceivingFailed);
-
-  connect(api_,
-    &YandexHomeApi::actionExecutingFinishedSuccessfully,
-    this,
-    &CapabilitiesModel::OnActionExecutionFinishedSuccessfully);
-
-  connect(api_,
-    &YandexHomeApi::actionExecutingFailed,
-    this,
-    &CapabilitiesModel::OnActionExecutionFailed);
-
-  timer_.setInterval(3000);
-  timer_.setSingleShot(false);
-
-  connect(&timer_, &QTimer::timeout, [this]() {
-    RequestUpdate();
-  });
-}
-
-void CapabilitiesModel::ResetModel(const QString& device_id) {
-  beginResetModel();
-
-  device_id_ = device_id;
-  capabilities_.clear();
-  is_initialized_ = false;
-
-  endResetModel();
+    &CapabilitiesModel::OnCapabilitiesUpdated
+  );
 }
 
 int CapabilitiesModel::rowCount(const QModelIndex &parent) const {
@@ -56,27 +31,19 @@ QVariant CapabilitiesModel::data(const QModelIndex &index, int role) const {
     case IdRole:
       return device_id_;
     case NameRole:
-      return capability.name;
+      return CapabilityType::operator[](capability.type);
     case DelegateSourceRole: {
-      if (kDelegates2.contains(capability.name)) {
-        return kDelegates2[capability.name];
+      const auto name = CapabilityType::operator[](capability.type);
+
+      if (kDelegates2.contains(name)) {
+        return kDelegates2[name];
       }
 
       return kUnsupportedDelegate;
     }
     case AttributeTypeRole:
-      switch (capability.type) {
-        case DeviceAttribute::Capability:
-          qDebug() << "capability";
-          return "capability";
-        case DeviceAttribute::Property:
-          qDebug() << "property";
-          return "property";
-        default:
-          return {};
-      }
-    case BusyRole:
-      return capability.is_pending;
+      qDebug() << "capability";
+      return "capability";
     case StateRole:
       return capability.state;
     case ParametersRole:
@@ -99,21 +66,10 @@ QHash<int, QByteArray> CapabilitiesModel::roleNames() const {
 }
 
 void CapabilitiesModel::ResetModel() {
+  qDebug() << "Capabilities Model: Reset due to controller request";
+
   capabilities_.clear();
   is_initialized_ = false;
-}
-
-void CapabilitiesModel::RequestData(const QString& device_id) {
-  device_id_ = device_id;
-
-  ResetModel();
-
-  RequestUpdate();
-}
-
-void CapabilitiesModel::RequestUpdate() {
-  last_update_start_time_ = static_cast<double>(QDateTime::currentMSecsSinceEpoch()) / 1000;
-  api_->GetDeviceInfo(device_id_);
 }
 
 QVariantMap CapabilitiesModel::GetState(const int index) const {
@@ -131,59 +87,38 @@ QVariantMap CapabilitiesModel::GetParameters(const int index) const {
 void CapabilitiesModel::UseCapability(const int index, const QVariantMap &state) {
   auto& capability = capabilities_[index];
 
-  if (capability.type != DeviceAttribute::Capability) {
-    qDebug() << "DeviceModel::UseCapability: Invalid type";
-    return;
-  }
-
-  capabilities_[index].PausePolling();
-  // controller_->PausePolling(index);
+  qDebug() << "Capabilities Model: UseCapability" << index << "New state:" << state;
 
   capability.state = state;
 
   const auto model_index = createIndex(index, 0);
   emit dataChanged(model_index, model_index);
 
-  // controller->UseCapability(index, capability, state);
-
-  const CapabilityObject action = {
-    .type = CapabilityType::operator[](capability.name),
-    .state = state
-  };
-
-  const DeviceActionsObject action_object = {
-    .id = device_id_,
-    .actions = { action }
-  };
-
-  api_->PerformActions({
-    action_object
-  }, index);
+  controller_->UseCapability(index, capability, state);
 }
 
-void CapabilitiesModel::OnDeviceInfoReceived(const DeviceInfo &info) {
-  const double receive_time = static_cast<double>(QDateTime::currentMSecsSinceEpoch()) / 1000;
+void CapabilitiesModel::OnCapabilitiesUpdated(const QVariantList &capabilities) {
+  qDebug() << "Capabilities Model: Updates received from controller";
+  qDebug() << "Capabilities count:" << capabilities.size();
 
   if (!is_initialized_) {
     beginResetModel();
-    capabilities_.resize(info.capabilities.size());
+    capabilities_.resize(capabilities.size());
   }
 
-  constexpr double ignore_delta = 0.8;
+  int empty_count = 0;
 
-  const auto blocking_condition = [this, receive_time](const auto& attr) -> bool {
-    return attr.is_pending ||
-           attr.IsInsideInterval(receive_time, ignore_delta) ||
-           attr.IsInsideInterval(last_update_start_time_, ignore_delta);
-  };
-
-  for (auto [attr, incoming] : std::ranges::views::zip(capabilities_, info.capabilities)) {
-    if (blocking_condition(attr)) {
+  for (auto [capability_var, capability_instance] : std::views::zip(capabilities, capabilities_) ) {
+    if (capability_var.isNull()) {
+      empty_count++;
       continue;
     }
 
-    attr.UpdateFrom(incoming);
+    capability_instance = qvariant_cast<CapabilityObject>(capability_var);
   }
+
+  qDebug() << "Capabilities Model: Update applied to" << capabilities_.size() << "capabilities";
+  qDebug() << "Capabilities Model: Update contained valid:" << (capabilities.size() - empty_count) << "Empty count:" << empty_count;
 
   if (!is_initialized_) {
     endResetModel();
@@ -197,37 +132,4 @@ void CapabilitiesModel::OnDeviceInfoReceived(const DeviceInfo &info) {
 
   emit dataChanged(top_left, bottom_right);
   emit dataLoaded();
-
-  timer_.start();
-}
-
-void CapabilitiesModel::OnDeviceInfoReceivingFailed(const QString &message) {
-  qDebug() << "Devices Model: Error receiving devices:" << message;
-
-  emit dataLoadingFailed();
-}
-
-void CapabilitiesModel::OnActionExecutionFinishedSuccessfully(const QVariant &user_data) {
-  const int index = user_data.toInt();
-
-  capabilities_[index].ResumePolling();
-
-  qDebug() << "Device Model: Action finished at" << QString::number(
-    capabilities_[index].polling_finish_time, 'f', 3);
-
-  const auto model_index = createIndex(index, 0);
-  emit dataChanged(model_index, model_index);
-}
-
-void CapabilitiesModel::OnActionExecutionFailed(const QString &message, const QVariant &user_data) {
-  qDebug() << "Device Model: Error executing action:" << message;
-
-  const int index = user_data.toInt();
-
-  capabilities_[index].ResumePolling();
-
-  const auto model_index = createIndex(index, 0);
-  emit dataChanged(model_index, model_index);
-
-  emit errorOccurred(message);
 }

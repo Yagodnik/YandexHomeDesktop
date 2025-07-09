@@ -2,38 +2,33 @@
 
 #include <QTimer>
 
-#include "CapabilitiesModel.h"
-#include "PropertiesModel.h"
+#include "DeviceAttribute.h"
 #include "api/YandexHomeApi.h"
 
-class DeviceDataController : public QObject {
+class DeviceController : public QObject {
   Q_OBJECT
 public:
-  explicit DeviceDataController(YandexHomeApi *api, QObject* parent = nullptr);
-
-  using CapabilitiesList = QList<std::optional<CapabilityObject>>;
+  explicit DeviceController(YandexHomeApi *api, QObject* parent = nullptr);
 
   Q_INVOKABLE void LoadDevice(const QString& device_id);
-  Q_INVOKABLE void EnablePolling();
-  Q_INVOKABLE void DisablePolling();
 
-  void UseCapability(int index, const CapabilityObject& capability, const QVariantMap& state) const;
+  void UseCapability(int index, const CapabilityObject& capability, const QVariantMap& state);
 
 signals:
   void loadRequestMade();
   void capabilitiesUpdateReady(const QVariantList& capabilities);
   void propertiesUpdateReady(const QVariantList& properties);
   void capabilityUsed(int index, const QVariantMap& state);
+  void errorOccurred(const QString& error_message);
 
 private:
   static constexpr int kPollingInterval = 3000;
 
+  QString device_id_;
+  QList<DeviceAttribute> capabilities_updates_;
   double last_update_start_time_;
 
-  QTimer timer_;
-
-  QString device_id_;
-
+  QTimer polling_timer_;
   YandexHomeApi* api_;
 
   static double CurrentTime() {
@@ -42,8 +37,11 @@ private:
 
 private slots:
   void OnTimerTimeout();
-  void OnDeviceInfoReceived(const DeviceObject& info);
+  void OnDeviceInfoReceived(const DeviceInfo& info);
   void OnDeviceInfoReceivingFailed(const QString& message);
+
+  void OnActionExecutionFinishedSuccessfully(const QVariant& user_data);
+  void OnActionExecutionFailed(const QString& message, const QVariant& user_data);
 };
 
 

@@ -45,6 +45,7 @@ JSON_STRUCT(DeviceObject,
 
 JSON_STRUCT(DeviceInfo,
   (Status, status),
+  (QString, id),
   (QString, name),
   (QString, type),
   (DeviceState, state),

@@ -4,21 +4,23 @@
 
 #include "CapabilitiesModel.h"
 
-PropertiesModel::PropertiesModel(YandexHomeApi* api, QObject* parent)
-  : QAbstractListModel(parent), api_(api)
+PropertiesModel::PropertiesModel(DeviceController* controller, QObject* parent)
+  : QAbstractListModel(parent), controller_(controller)
 {
-  connect(api_,
-    &YandexHomeApi::deviceInfoReceived,
+  connect(controller,
+    &DeviceController::loadRequestMade,
     this,
-    &PropertiesModel::OnDeviceInfoReceived);
+    &PropertiesModel::ResetModel);
 
-  connect(api_,
-    &YandexHomeApi::deviceInfoReceivingFailed,
+  connect(controller,
+    &DeviceController::propertiesUpdateReady,
     this,
-    &PropertiesModel::OnDeviceInfoReceivingFailed);
+    &PropertiesModel::OnPropertiesUpdateReady);
 }
 
 void PropertiesModel::ResetModel() {
+  qDebug() << "Properties Model: Reset due to controller request";
+
   beginResetModel();
 
   properties_.clear();
@@ -50,9 +52,11 @@ QVariant PropertiesModel::data(const QModelIndex &index, int role) const {
     case DelegateSourceRole:
       switch (property.type) {
       case PropertyType::Float:
-          return "qrc:/controls/PropertyFloat.qml";
+        return "qrc:/controls/PropertyFloat.qml";
       case PropertyType::Event:
-          return "qrc:/controls/PropertyEvent.qml";
+        return "qrc:/controls/PropertyEvent.qml";
+      default:
+        return "qrc:/controls/Unsupported.qml";
       }
     default:
       return {};
@@ -69,18 +73,30 @@ QHash<int, QByteArray> PropertiesModel::roleNames() const {
   };
 }
 
-void PropertiesModel::OnDeviceInfoReceived(const DeviceInfo &info2) {
-  qDebug() << "Updated by timer from another model!";
+void PropertiesModel::OnPropertiesUpdateReady(const QVariantList &properties2) {
+  qDebug() << "PropertiesModel: Properties received:" << properties2.size() << "without fake data";
 
-  qDebug() << "Properties received:" << info2.properties.size() << "without fake data";
+  QVariantList properties = properties2;
 
-  /* -- Fake data for testing -- */
-  DeviceInfo info = info2;
+  if (!is_initialized_) {
+    /* -- Adding fake data */
 
-  qDebug() << "Properties received (copy):" << info.properties.size() << "without fake data";
+#ifdef ALLOW_FAKE_PROPETIES
+    const int iterations = QRandomGenerator::global()->bounded(4) + 1;
+#else
+    const int iterations = 0;
+#endif
 
-  {
-    QString pseudo_property_data_str = R"(
+    beginResetModel();
+    properties_.resize(properties.size() + iterations);
+
+    qDebug() << "Properties Model: added" << iterations << "fake properties";
+  }
+
+#ifdef ALLOW_FAKE_PROPETIES
+  for (int i = 0; i < properties_.size(); ++i) {
+    {
+      QString pseudo_property_data_str = R"(
     {
         "type": "devices.properties.float",
         "retrievable": true,
@@ -94,51 +110,25 @@ void PropertiesModel::OnDeviceInfoReceived(const DeviceInfo &info2) {
         }
     })";
 
-    pseudo_property_data_str = pseudo_property_data_str.arg(QRandomGenerator::global()->bounded(101));
-    const QJsonObject test_object = QJsonDocument::fromJson(pseudo_property_data_str.toUtf8()).object();
+      pseudo_property_data_str = pseudo_property_data_str.arg(QRandomGenerator::global()->bounded(101));
+      const QJsonObject test_object = QJsonDocument::fromJson(pseudo_property_data_str.toUtf8()).object();
 
-    info.properties.push_back(Serialization::From<PropertyObject>(test_object));
+      properties.push_back(QVariant::fromValue(Serialization::From<PropertyObject>(test_object)));
+    }
   }
+#endif
 
-  {
-    QString pseudo_property_data_str = R"({
-      "type": "devices.properties.event",
-      "retrievable": true,
-      "reportable": true,
-      "parameters": {
-        "instance": "open",
-        "events": [
-          { "value": "opened" },
-          { "value": "closed" }
-        ]
-      },
-      "state": {
-          "instance": "open",
-          "value": "%1"
-      }
-    })";
+  qDebug() << "PropertiesModel: Updating" << properties.size() << "properties";
 
-    pseudo_property_data_str = pseudo_property_data_str.arg(
-      QRandomGenerator::global()->bounded(101) > 70 ? "opened" : "closed"
-    );
-    const QJsonObject test_object = QJsonDocument::fromJson(pseudo_property_data_str.toUtf8()).object();
+  for (auto [property, incoming_property_var] : std::ranges::views::zip(properties_, properties)) {
+    const auto incoming_property = qvariant_cast<PropertyObject>(incoming_property_var);
 
-    info.properties.push_back(Serialization::From<PropertyObject>(test_object));
-  }
-
-  if (!is_initialized_) {
-    beginResetModel();
-    properties_.resize(info.properties.size());
-  }
-
-  qDebug() << "Updating" << info.properties.size() << "properties";
-
-  for (auto [property, incoming_property] : std::ranges::views::zip(properties_, info.properties)) {
-    qDebug() << "Property update:"  << incoming_property.state;
-    qDebug() << "\t Params:"  << incoming_property.parameters;
+    qDebug() << "PropertiesModel: Property update:"  << incoming_property.state;
+    qDebug() << "PropertiesModel: Property Params:"  << incoming_property.parameters;
 
     property = incoming_property;
   }
+
 
   if (!is_initialized_) {
     emit initialized();
@@ -152,10 +142,4 @@ void PropertiesModel::OnDeviceInfoReceived(const DeviceInfo &info2) {
 
   emit dataChanged(top_left, bottom_right);
   emit dataLoaded();
-}
-
-void PropertiesModel::OnDeviceInfoReceivingFailed(const QString &message) {
-  qDebug() << "Devices Model: Error receiving devices:" << message;
-
-  emit dataLoadingFailed();
 }

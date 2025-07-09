@@ -83,6 +83,11 @@ private:
       }
 
       const auto response_bytes = reply->readAll();
+
+      qDebug() << "";
+      qDebug() << response_bytes.toStdString();
+      qDebug() << "";
+
       const auto response_object = ParseResponseAsObject(response_bytes);
 
       if (!response_object.has_value()) {

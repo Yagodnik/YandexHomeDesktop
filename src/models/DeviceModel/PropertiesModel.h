@@ -2,13 +2,21 @@
 
 #include <QAbstractListModel>
 
+#include "DeviceController.h"
 #include "api/YandexHomeApi.h"
 #include "api/model/UserInfo.h"
+
+// #define ALLOW_FAKE_PROPETIES
+#if defined(QT_NO_DEBUG) && defined(ALLOW_FAKE_PROPETIES)
+#error "Propeties Model: Building with fake data in release mode!"
+#else
+#warning "Propeties Model: Building with fake data in release mode!"
+#endif
 
 class PropertiesModel : public QAbstractListModel {
   Q_OBJECT
 public:
-  explicit PropertiesModel(YandexHomeApi* api, QObject* parent = nullptr);
+  explicit PropertiesModel(DeviceController* controller, QObject* parent = nullptr);
 
   enum Roles {
     IdRole = Qt::UserRole + 1,
@@ -30,12 +38,11 @@ signals:
   void initialized();
 
 private:
-  YandexHomeApi *api_;
+  DeviceController* controller_;
   QList<PropertyObject> properties_;
   bool is_initialized_ = false;
 
 private slots:
-  void OnDeviceInfoReceived(const DeviceInfo& info);
-  void OnDeviceInfoReceivingFailed(const QString& message);
+  void OnPropertiesUpdateReady(const QVariantList& properties);
 };
 

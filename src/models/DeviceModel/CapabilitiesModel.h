@@ -3,11 +3,13 @@
 #include <QAbstractListModel>
 #include "api/YandexHomeApi.h"
 #include "DeviceAttribute.h"
+#include "DeviceController.h"
 
 class CapabilitiesModel : public QAbstractListModel {
   Q_OBJECT
 public:
-  explicit CapabilitiesModel(YandexHomeApi *api, QObject *parent = nullptr);
+  // explicit CapabilitiesModel(YandexHomeApi *api, QObject *parent = nullptr);
+  explicit CapabilitiesModel(DeviceController *controller, QObject *parent = nullptr);
 
   enum Roles {
     IdRole = Qt::UserRole + 1,
@@ -19,16 +21,9 @@ public:
     ParametersRole
   };
 
-  void ResetModel(const QString& device_id);
-
   [[nodiscard]] int rowCount(const QModelIndex &parent) const override;
   [[nodiscard]] QVariant data(const QModelIndex &index, int role) const override;
   [[nodiscard]] QHash<int, QByteArray> roleNames() const override;
-
-  void ResetModel();
-
-  Q_INVOKABLE void RequestData(const QString& device_id);
-  void RequestUpdate();
 
   Q_INVOKABLE [[nodiscard]] QVariantMap GetState(int index) const;
   Q_INVOKABLE [[nodiscard]] QVariantMap GetParameters(int index) const;
@@ -37,13 +32,12 @@ public:
 
 signals:
   void dataLoaded();
-  void dataLoadingFailed();
-  void dataUpdated(int index);
-  void errorOccurred(const QString& error_message);
   void initialized();
 
-// private:
-public:
+public slots:
+  void ResetModel();
+
+private:
   const QString kUnsupportedDelegate = "qrc:/controls/Unsupported.qml";
   const QMap<CapabilityType, QString> kDelegates = {
     { CapabilityType::OnOff,        "qrc:/controls/OnOff.qml" },
@@ -65,19 +59,12 @@ public:
   };
 
   QString device_id_;
-  YandexHomeApi *api_;
 
-  QList<DeviceAttribute> capabilities_;
+  QList<CapabilityObject> capabilities_;
   bool is_initialized_;
 
-  double last_update_start_time_;
-
-  QTimer timer_;
+  DeviceController *controller_;
 
 private slots:
-  void OnDeviceInfoReceived(const DeviceInfo& info);
-  void OnDeviceInfoReceivingFailed(const QString& message);
-
-  void OnActionExecutionFinishedSuccessfully(const QVariant& user_data);
-  void OnActionExecutionFailed(const QString& message, const QVariant& user_data);
+  void OnCapabilitiesUpdated(const QVariantList& capabilities);
 };

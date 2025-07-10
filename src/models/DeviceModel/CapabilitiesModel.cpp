@@ -30,9 +30,16 @@ QVariant CapabilitiesModel::data(const QModelIndex &index, int role) const {
   switch (role) {
     case IdRole:
       return device_id_;
-    case NameRole:
-      return CapabilityType::operator[](capability.type);
-    case DelegateSourceRole: {
+    case NameRole: {
+      QString output = "";
+      try {
+        output = CapabilityType::AsString(capability.type);
+      } catch (...) {
+        output = "Неизвестный тип умения";
+      }
+
+      return output;
+    } case DelegateSourceRole: {
       if (kDelegates.contains(capability.type)) {
         return kDelegates[capability.type];
       }

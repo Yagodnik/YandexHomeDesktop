@@ -6,10 +6,10 @@
 #include "api/YandexHomeApi.h"
 #include "api/model/UserInfo.h"
 
-#define ALLOW_FAKE_PROPERTIES
+// #define ALLOW_FAKE_PROPERTIES
 #if defined(QT_NO_DEBUG) && defined(ALLOW_FAKE_PROPERTIES)
 #error "Propeties Model: Building with fake data in release mode!"
-#else
+#elif !defined(QT_NO_DEBUG) && defined(ALLOW_FAKE_PROPERTIES)
 #warning "Propeties Model: Building with fake data in release mode!"
 #endif
 

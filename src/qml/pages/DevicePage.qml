@@ -172,76 +172,85 @@ Item {
       clip: true
       interactive: true
 
-      UI.HeadingText {
-        id: capabilitiesText
-        text: "Умения"
-
-        visible: capabilitiesModel.count !== 0
-
+      Column {
+        width: parent.width
         anchors.top: parent.top
         anchors.topMargin: 4
-        anchors.left: parent.left
-        anchors.leftMargin: 16
-      }
+        spacing: 4
 
-      ListView {
-        id: capabilitiesList
-        anchors.top: capabilitiesText.bottom
-        anchors.topMargin: 4
-        height: contentHeight
+        UI.HeadingText {
+          id: capabilitiesText
+          text: "Умения"
 
-        anchors.left: parent.left
-        anchors.leftMargin: 16
-        anchors.right: parent.right
-        anchors.rightMargin: 16
+          visible: capabilitiesModel.count !== 0
 
-        clip: true
-        interactive: false
-
-        spacing: 10
-
-        model: capabilitiesModel
-
-        delegate: Loader {
-          source: delegateSource
-          width: parent.width
+          // anchors.top: parent.top
+          // anchors.topMargin: 4
+          anchors.left: parent.left
+          anchors.leftMargin: 16
         }
-      }
 
-      UI.HeadingText {
-        id: propertiesText
-        text: "Свойства"
+        ListView {
+          id: capabilitiesList
+          // anchors.top: capabilitiesText.bottom
+          // anchors.topMargin: 4
+          height: contentHeight
 
-        visible: propertiesModel.count !== 0
+          visible: capabilitiesModel.count !== 0
 
-        anchors.top: capabilitiesList.bottom
-        anchors.topMargin: 4
-        anchors.left: parent.left
-        anchors.leftMargin: 16
-      }
+          anchors.left: parent.left
+          anchors.leftMargin: 16
+          anchors.right: parent.right
+          anchors.rightMargin: 16
 
-      ListView {
-        id: propertiesList
-        anchors.top: propertiesText.bottom
-        anchors.topMargin: 4
+          clip: true
+          interactive: false
 
-        height: contentHeight + 12
+          spacing: 10
 
-        anchors.left: parent.left
-        anchors.leftMargin: 16
-        anchors.right: parent.right
-        anchors.rightMargin: 16
+          model: capabilitiesModel
 
-        clip: true
-        interactive: false
+          delegate: Loader {
+            source: delegateSource
+            width: parent.width
+          }
+        }
 
-        spacing: 10
+        UI.HeadingText {
+          id: propertiesText
+          text: "Свойства"
 
-        model: propertiesModel
+          visible: propertiesModel.count !== 0
 
-        delegate: Loader {
-          source: delegateSource
-          width: parent.width
+          // anchors.top: capabilitiesList.bottom
+          // anchors.topMargin: 4
+          anchors.left: parent.left
+          anchors.leftMargin: 16
+        }
+
+        ListView {
+          id: propertiesList
+          // anchors.top: propertiesText.bottom
+          // anchors.topMargin: 4
+
+          height: contentHeight + 12
+
+          anchors.left: parent.left
+          anchors.leftMargin: 16
+          anchors.right: parent.right
+          anchors.rightMargin: 16
+
+          clip: true
+          interactive: false
+
+          spacing: 10
+
+          model: propertiesModel
+
+          delegate: Loader {
+            source: delegateSource
+            width: parent.width
+          }
         }
       }
     }

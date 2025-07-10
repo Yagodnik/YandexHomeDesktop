@@ -81,13 +81,16 @@
 
 struct IEnumeration {};
 
+const QString kUnknownEnumValue = "";
+
 #define JSON_ENUMERATION(name, ...)                                 \
 struct name : IEnumeration {                                        \
   enum Type {                                                       \
-    JSON_ENUM_VALUES(__VA_ARGS__)                                   \
+    JSON_ENUM_VALUES(__VA_ARGS__),                                  \
+    Unknown                                                         \
   };                                                                \
                                                                     \
-  Type value;                                                       \
+  Type value = Unknown;                                             \
                                                                     \
   name() = default;                                                 \
   constexpr name(Type v) : value(v) {}                              \
@@ -105,8 +108,7 @@ struct name : IEnumeration {                                        \
     auto it = mapping.find(key);                                    \
                                                                     \
     if (it == mapping.end()) {                                      \
-      throw std::out_of_range("Invalid enum string key: " +         \
-      key.toStdString());                                           \
+      return Unknown;                                               \
     }                                                               \
                                                                     \
     return *it;                                                     \
@@ -120,7 +122,7 @@ struct name : IEnumeration {                                        \
     auto it = bi_mapping.find(type);                                \
                                                                     \
     if (it == bi_mapping.end()) {                                   \
-      throw std::out_of_range("Invalid enum type");                 \
+      return kUnknownEnumValue;                                     \
     }                                                               \
                                                                     \
     return *it;                                                     \

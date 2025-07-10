@@ -69,7 +69,7 @@ Item {
       id: propertyTitle
       font.pixelSize: 14
 
-      text: eventProperty.title + " • " + "00:11"
+      text: eventProperty.title + (model.updateTime !== null ? (" • " + model.updateTime) : "")
     }
   }
 }

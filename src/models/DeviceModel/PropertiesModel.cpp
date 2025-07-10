@@ -43,8 +43,16 @@ QVariant PropertiesModel::data(const QModelIndex &index, int role) const {
   switch (role) {
     case IdRole:
       return {};
-    case NameRole:
-      return PropertyType::operator[](property.type);
+    case NameRole: {
+      QString output = "";
+      try {
+        output = PropertyType::AsString(property.type);
+      } catch (...) {
+        output = "Неизвестный тип свойства";
+      }
+
+      return output;
+    }
     case StateRole:
       return property.state;
     case ParametersRole:
@@ -73,7 +81,7 @@ QVariant PropertiesModel::data(const QModelIndex &index, int role) const {
       if (date_time.date() == today) {
         output = date_time.toString("HH:mm");
       } else {
-        output = date_time.toString("yyyy-MM-dd HH:mm");
+        output = date_time.toString("dd-MM-yyyy HH:mm");
       }
 
       return output;

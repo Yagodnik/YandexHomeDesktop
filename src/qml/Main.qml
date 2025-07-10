@@ -15,27 +15,27 @@ Window {
   title: qsTr("Yandex Home Desktop")
   color: "transparent"
 
-  // property int frames: 0
-  // property real fps: 0
-  // Timer {
-  //   interval: 1000
-  //   repeat: true
-  //   running: true
-  //   onTriggered: {
-  //     fps = frames
-  //     frames = 0
-  //   }
-  // }
-  //
-  // onFrameSwapped: frames++
-  // Text {
-  //   x: 10
-  //   y: 10
-  //   z: 3000
-  //   color: "red"
-  //   font.pixelSize: 20
-  //   text: "FPS: " + fps
-  // }
+  property int frames: 0
+  property real fps: 0
+  Timer {
+    interval: 1000
+    repeat: true
+    running: true
+    onTriggered: {
+      fps = frames
+      frames = 0
+    }
+  }
+
+  onFrameSwapped: frames++
+  Text {
+    x: 10
+    y: 10
+    z: 3000
+    color: "red"
+    font.pixelSize: 20
+    text: "FPS: " + fps
+  }
 
   Component.onCompleted: {
     platformService.SetWindow(window);

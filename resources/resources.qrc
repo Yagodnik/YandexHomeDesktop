@@ -133,6 +133,7 @@
     <file alias="OnOff.qml">../src/qml/controls/OnOff.qml</file>
     <file alias="Range.qml">../src/qml/controls/Range.qml</file>
     <file alias="Mode.qml">../src/qml/controls/Mode.qml</file>
+    <file alias="Toggle.qml">../src/qml/controls/Toggle.qml</file>
     <file alias="ColorSetting.qml">../src/qml/controls/ColorSetting.qml</file>
     <file alias="Unsupported.qml">../src/qml/controls/Unsupported.qml</file>
     <file alias="PropertyFloat.qml">../src/qml/controls/PropertyFloat.qml</file>

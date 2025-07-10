@@ -10,6 +10,6 @@ public:
   void SetValue(const QVariant& value) override;
   QVariant GetValue() const override;
 
-  Q_INVOKABLE [[nodiscard]] QVariantMap Create(double value);
+  Q_INVOKABLE [[nodiscard]] QVariantMap Create(const QString& value);
 };
 

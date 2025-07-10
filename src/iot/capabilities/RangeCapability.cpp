@@ -52,7 +52,7 @@ QString RangeCapability::GetFormattedValue() const {
 }
 
 QVariantMap RangeCapability::Create(double value) {
-  const auto instance = state_.value("instance", "").toString();
+  const auto instance = GetInstance();
 
   return {
     { "instance", instance },

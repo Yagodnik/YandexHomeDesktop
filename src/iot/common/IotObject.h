@@ -11,7 +11,7 @@ class IotObject : public QObject {
   Q_PROPERTY(QVariant value READ GetValue WRITE SetValue NOTIFY valueChanged)
   Q_PROPERTY(QString title READ GetTitle NOTIFY titleChanged)
   Q_PROPERTY(QString instance READ GetInstance NOTIFY instanceChanged)
-  Q_PROPERTY(TitlesProvider* titlesList MEMBER titles_provider_)
+  Q_PROPERTY(TitlesProvider* titlesList READ GetTitlesProvider WRITE SetTitlesProvider NOTIFY titlesProviderChanged)
   Q_PROPERTY(QString formattedValue READ GetFormattedValue NOTIFY formattedValueChanged)
 public:
   explicit IotObject(const QString& name, QObject *parent = nullptr);
@@ -23,6 +23,9 @@ public:
 
   [[nodiscard]] QString GetTitle() const;
   [[nodiscard]] QString GetInstance() const;
+
+  TitlesProvider* GetTitlesProvider() const;
+  void SetTitlesProvider(TitlesProvider* provider);
 
 public slots:
   virtual void SetState(const QVariantMap& state);
@@ -37,6 +40,7 @@ signals:
   void titleChanged();
   void instanceChanged();
   void formattedValueChanged();
+  void titlesProviderChanged();
 
 protected:
   QString name_;

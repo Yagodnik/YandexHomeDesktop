@@ -21,7 +21,7 @@ QVariant ToggleCapability::GetValue() const {
 }
 
 QVariantMap ToggleCapability::Create(const bool value) {
-  const auto instance = state_["instance"].toString();
+  const auto instance = GetInstance();
 
   return {
     { "instance", instance },

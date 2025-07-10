@@ -50,7 +50,7 @@ Item {
     cursorShape: Qt.PointingHandCursor
 
     onClicked: {
-      console.log("Device Id: ", deviceId, " Room Id: ", deviceRoomId, " Household Id: ", deviceHouseholdId)
+      console.log("Device Delegate: Device Id: ", deviceId, " Room Id: ", deviceRoomId, " Household Id: ", deviceHouseholdId)
 
       // capabilitiesModel.RequestData(deviceId);
       deviceController.LoadDevice(deviceId);

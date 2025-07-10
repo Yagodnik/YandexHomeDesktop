@@ -41,6 +41,7 @@ private:
   const QString kUnsupportedDelegate = "qrc:/controls/Unsupported.qml";
   const QMap<CapabilityType, QString> kDelegates = {
     { CapabilityType::OnOff,        "qrc:/controls/OnOff.qml" },
+    // { CapabilityType::OnOff,        "qrc:/controls/Mode.qml" },
     { CapabilityType::VideoStream,  kUnsupportedDelegate },
     { CapabilityType::ColorSetting, "qrc:/controls/ColorSetting.qml" },
     { CapabilityType::Mode,         "qrc:/controls/Mode.qml" },

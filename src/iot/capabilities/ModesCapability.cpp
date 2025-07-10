@@ -1,7 +1,7 @@
 #include "ModesCapability.h"
 
 ModesCapability::ModesCapability(QObject *parent)
-  : IotObject("modes", parent) {}
+  : IotObject("mode", parent) {}
 
 void ModesCapability::SetValue(const QVariant &value) {
   if (GetValue().toString() == value.toString()) {
@@ -16,10 +16,10 @@ QVariant ModesCapability::GetValue() const {
     return 0;
   }
 
-  return state_["value"];
+  return state_.value("value", "").toString();
 }
 
-QVariantMap ModesCapability::Create(double value) {
+QVariantMap ModesCapability::Create(const QString& value) {
   const auto instance = state_["instance"].toString();
 
   return {

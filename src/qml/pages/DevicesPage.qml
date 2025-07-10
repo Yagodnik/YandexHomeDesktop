@@ -150,6 +150,9 @@ Item {
 
         spacing: 8
 
+        // flickableDirection: Flickable.VerticalFlick
+        // boundsBehavior: Flickable.StopAtBounds
+
         model: RoomsFilterModel {
           sourceModel: roomsModel
           householdId: householdsModel.currentHousehold

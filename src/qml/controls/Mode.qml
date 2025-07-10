@@ -62,7 +62,7 @@ Item {
 
     onSelectedModeIdChanged: updateCurrentIndexFromValue()
 
-    onCurrentIndexChanged: {
+    onActivated: {
       console.log(deviceModelData.index);
 
       const idx = currentIndex;

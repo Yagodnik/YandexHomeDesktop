@@ -6,7 +6,7 @@ import Qt5Compat.GraphicalEffects
 
 Item {
   id: root
-  height: 64
+  height: 58
 
   Capabilities.OnOff {
     id: onOffCapability
@@ -45,8 +45,8 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
 
         Item {
-          width: 32
-          height: 32
+          width: 24
+          height: 24
           anchors.horizontalCenter: parent.horizontalCenter
 
           Image {
@@ -89,8 +89,8 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
 
         Item {
-          width: 32
-          height: 32
+          width: 24
+          height: 24
           anchors.horizontalCenter: parent.horizontalCenter
 
           Image {

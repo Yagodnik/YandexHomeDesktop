@@ -125,4 +125,12 @@ struct name : IEnumeration {                                        \
                                                                     \
     return *it;                                                     \
   }                                                                 \
+                                                                    \
+  static const QString& AsString(const Type& type) {                \
+    return operator[](type);                                        \
+  }                                                                 \
+                                                                    \
+  static Type AsValue(const QString& key) {                         \
+    return operator[](key);                                         \
+  }                                                                 \
 };                                                                  \

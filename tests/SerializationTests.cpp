@@ -288,3 +288,8 @@ void SerializationTests::TripTest() {
   QCOMPARE(trip1.transport_type, TransportEnum::Plane);
   QCOMPARE(trip2.transport_type, TransportEnum::Car);
 }
+
+void SerializationTests::JsonEnumNoValueTest() {
+  const QString value = "something which you definitely wont see here)";
+  const auto enum_value = TransportEnum::AsValue(value);
+}

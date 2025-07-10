@@ -45,6 +45,15 @@ namespace Serialization {
 
     template<typename T>
     constexpr bool is_qvmap_v = is_qvmap<T>::value;
+
+    template<typename T>
+    struct is_optional : std::false_type {};
+
+    template<typename T>
+    struct is_optional<std::optional<T>> : std::true_type {};
+
+    template<typename T>
+    constexpr bool is_optional_v = is_optional<T>::value;
   }
 
   namespace details {

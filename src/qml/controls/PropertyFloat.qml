@@ -69,7 +69,7 @@ Item {
       id: propertyTitle
       font.pixelSize: 14
 
-      text: floatProperty.title + " • " + "00:11"
+      text: floatProperty.title + (model.updateTime !== null ? (" • " + model.updateTime) : "")
     }
   }
 }

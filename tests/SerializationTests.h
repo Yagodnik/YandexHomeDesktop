@@ -85,5 +85,6 @@ private slots:
   static void JsonArraySerializationTest();
   static void JsonArraySerializationTest2();
   static void TripTest();
+  static void JsonEnumNoValueTest();
 };
 

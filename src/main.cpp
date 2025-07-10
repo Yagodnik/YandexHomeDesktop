@@ -50,7 +50,7 @@
 *  1) Fix modes capability?
 *  5) Range random access false support
 *  + 24) Remove capabilities title if they are empty (same for props)
-*  23) Add properties time correctly displaying
+*  + 23) Add properties time correctly displaying
 *  22) Fix that newly opened device can receive updates from previous device
 *  + 7) Block polling when app is not in focus
 *  + 4) Refactor polling system (CapabilitiesModel)

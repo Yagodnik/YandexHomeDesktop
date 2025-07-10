@@ -52,13 +52,32 @@ QVariant PropertiesModel::data(const QModelIndex &index, int role) const {
     case DelegateSourceRole:
       switch (property.type) {
       case PropertyType::Float:
-        return "qrc:/controls/PropertyFloat.qml";
+          return "qrc:/controls/PropertyFloat.qml";
       case PropertyType::Event:
-        return "qrc:/controls/PropertyEvent.qml";
+          return "qrc:/controls/PropertyEvent.qml";
       default:
-        return "qrc:/controls/Unsupported.qml";
+          return "qrc:/controls/Unsupported.qml";
       }
-    default:
+    case UpdateTimeRole: {
+      // TODO: Add support to optional types to get rid from this mess...
+      // Just checking if it is somehow initialized
+      if (property.last_updated < 1) {
+        return QVariant::fromValue(nullptr);
+      }
+
+      const QDateTime date_time = QDateTime::fromSecsSinceEpoch(property.last_updated).toLocalTime();
+
+      QString output;
+      const QDate today = QDate::currentDate();
+
+      if (date_time.date() == today) {
+        output = date_time.toString("HH:mm");
+      } else {
+        output = date_time.toString("yyyy-MM-dd HH:mm");
+      }
+
+      return output;
+    } default:
       return {};
   }
 }
@@ -69,7 +88,8 @@ QHash<int, QByteArray> PropertiesModel::roleNames() const {
     { NameRole, "name"},
     { StateRole, "propertyState" },
     { ParametersRole, "propertyParameters" },
-    { DelegateSourceRole, "delegateSource" }
+    { DelegateSourceRole, "delegateSource" },
+    { UpdateTimeRole, "updateTime" }
   };
 }
 
@@ -81,7 +101,7 @@ void PropertiesModel::OnPropertiesUpdateReady(const DeviceController::Properties
   if (!is_initialized_) {
     /* -- Adding fake data */
 
-#ifdef ALLOW_FAKE_PROPETIES
+#ifdef ALLOW_FAKE_PROPERTIES
     const int iterations = QRandomGenerator::global()->bounded(4) + 1;
 #else
     const int iterations = 0;
@@ -93,7 +113,7 @@ void PropertiesModel::OnPropertiesUpdateReady(const DeviceController::Properties
     qDebug() << "Properties Model: added" << iterations << "fake properties";
   }
 
-#ifdef ALLOW_FAKE_PROPETIES
+#ifdef ALLOW_FAKE_PROPERTIES
   for (int i = 0; i < properties_.size(); ++i) {
     {
       QString pseudo_property_data_str = R"(
@@ -113,7 +133,7 @@ void PropertiesModel::OnPropertiesUpdateReady(const DeviceController::Properties
       pseudo_property_data_str = pseudo_property_data_str.arg(QRandomGenerator::global()->bounded(101));
       const QJsonObject test_object = QJsonDocument::fromJson(pseudo_property_data_str.toUtf8()).object();
 
-      properties.push_back(QVariant::fromValue(Serialization::From<PropertyObject>(test_object)));
+      properties.push_back(Serialization::From<PropertyObject>(test_object));
     }
   }
 #endif

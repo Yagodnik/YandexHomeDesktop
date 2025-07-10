@@ -6,8 +6,8 @@
 #include "api/YandexHomeApi.h"
 #include "api/model/UserInfo.h"
 
-// #define ALLOW_FAKE_PROPETIES
-#if defined(QT_NO_DEBUG) && defined(ALLOW_FAKE_PROPETIES)
+#define ALLOW_FAKE_PROPERTIES
+#if defined(QT_NO_DEBUG) && defined(ALLOW_FAKE_PROPERTIES)
 #error "Propeties Model: Building with fake data in release mode!"
 #else
 #warning "Propeties Model: Building with fake data in release mode!"
@@ -24,7 +24,8 @@ public:
     DelegateSourceRole,
     NameRole,
     StateRole,
-    ParametersRole
+    ParametersRole,
+    UpdateTimeRole
   };
 
   void ResetModel();

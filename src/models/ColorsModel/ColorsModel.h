@@ -6,21 +6,6 @@
 
 class ColorsModel : public QAbstractListModel {
   Q_OBJECT
-public:
-  explicit ColorsModel(QObject *parent = nullptr);
-
-  enum Roles {
-    IndexRole = Qt::UserRole + 1,
-    NameRole,
-    ColorRole,
-    IsTemperatureRole,
-    TemperatureRole
-  };
-
-  [[nodiscard]] int rowCount(const QModelIndex &parent) const override;
-  [[nodiscard]] QVariant data(const QModelIndex &index, int role) const override;
-  [[nodiscard]] QHash<int, QByteArray> roleNames() const override;
-
 private:
   JSON_STRUCT(Rgb,
     (int, r),
@@ -53,4 +38,24 @@ private:
   const QString kColorsFile = ":/data/colors.json";
 
   QList<ColorData> colors_;
+
+  void ProcessData(const ColorsFile& data);
+
+  friend class ModelsTests;
+
+public:
+  explicit ColorsModel(QObject *parent = nullptr);
+  explicit ColorsModel(const ColorsFile& test_data, QObject *parent = nullptr);
+
+  enum Roles {
+    IndexRole = Qt::UserRole + 1,
+    NameRole,
+    ColorRole,
+    IsTemperatureRole,
+    TemperatureRole
+  };
+
+  [[nodiscard]] int rowCount(const QModelIndex &parent) const override;
+  [[nodiscard]] QVariant data(const QModelIndex &index, int role) const override;
+  [[nodiscard]] QHash<int, QByteArray> roleNames() const override;
 };

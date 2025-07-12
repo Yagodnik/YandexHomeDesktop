@@ -20,7 +20,7 @@ QVariant ModesCapability::GetValue() const {
 }
 
 QVariantMap ModesCapability::Create(const QString& value) {
-  const auto instance = state_["instance"].toString();
+  const auto instance = GetInstance();
 
   return {
     { "instance", instance },

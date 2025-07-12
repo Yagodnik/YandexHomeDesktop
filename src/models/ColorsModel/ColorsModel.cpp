@@ -2,17 +2,7 @@
 #include "utils/JsonLoader.h"
 #include <QColor>
 
-ColorsModel::ColorsModel(QObject *parent) : QAbstractListModel(parent)
-{
-  const auto& colors_file = JsonLoader::Load<ColorsFile>(kColorsFile);
-
-  if (!colors_file.has_value()) {
-    qWarning() << "Failed to load colors/temperatures file";
-    return;
-  }
-
-  const auto& data = colors_file.value();
-
+void ColorsModel::ProcessData(const ColorsFile &data) {
   for (const auto& candidate : data.colors) {
     colors_.push_back({
       candidate.name,
@@ -28,6 +18,26 @@ ColorsModel::ColorsModel(QObject *parent) : QAbstractListModel(parent)
       candidate.temperature
     });
   }
+}
+
+ColorsModel::ColorsModel(QObject *parent) : QAbstractListModel(parent)
+{
+  const auto& colors_file = JsonLoader::Load<ColorsFile>(kColorsFile);
+
+  if (!colors_file.has_value()) {
+    qWarning() << "Failed to load colors/temperatures file";
+    return;
+  }
+
+  const auto& data = colors_file.value();
+
+  ProcessData(data);
+}
+
+ColorsModel::ColorsModel(const ColorsFile &test_data, QObject *parent)
+  : QAbstractListModel(parent)
+{
+  ProcessData(test_data);
 }
 
 int ColorsModel::rowCount(const QModelIndex &parent) const {

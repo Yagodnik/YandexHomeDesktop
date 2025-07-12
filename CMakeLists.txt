@@ -22,6 +22,7 @@ add_subdirectory(src/auth)
 add_subdirectory(src/models)
 add_subdirectory(src/platform)
 add_subdirectory(src/utils)
+add_subdirectory(src/iot)
 
 qt_add_executable(appYandexHomeDesktop
         src/main.cpp
@@ -29,27 +30,6 @@ qt_add_executable(appYandexHomeDesktop
         src/utils/Router.h
 
         ${RESOURCES}
-        src/iot/capabilities/OnOffCapability.cpp
-        src/iot/capabilities/OnOffCapability.h
-        src/iot/capabilities/RangeCapability.cpp
-        src/iot/capabilities/RangeCapability.h
-        src/iot/common/IotObject.cpp
-        src/iot/common/IotObject.h
-        src/iot/capabilities/ToggleCapability.cpp
-        src/iot/capabilities/ToggleCapability.h
-        src/iot/capabilities/ColorSettingCapability.cpp
-        src/iot/capabilities/ColorSettingCapability.h
-
-        src/iot/capabilities/ModesCapability.cpp
-        src/iot/capabilities/ModesCapability.h
-
-        src/iot/properties/FloatProperty.cpp
-        src/iot/properties/FloatProperty.h
-        src/iot/properties/EventProperty.cpp
-        src/iot/properties/EventProperty.h
-
-        #        src/iot/common/UnitObject.cpp
-#        src/iot/common/UnitObject.h
 )
 
 if (APPLE)
@@ -104,6 +84,7 @@ target_link_libraries(appYandexHomeDesktop PRIVATE
         Models
         PlatformService
         Utils
+        Iot
 )
 
 add_dependencies(appYandexHomeDesktop compile_shaders)

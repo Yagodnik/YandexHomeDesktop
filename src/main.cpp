@@ -48,29 +48,30 @@
 /*
 * TODO List
 *  16) Add true email to settings
-*  + 1) Definitely fix modes capability
 *  5) Range random access false support
 *  19) Fix loading animation and offline device
+*  + 25) Color settings bug - single temperature
+*  + 1) Definitely fix modes capability
 *  + 24) Remove capabilities title if they are empty (same for props)
 *  + 23) Add properties time correctly displaying
-*  22) Fix that newly opened device can receive updates from previous device
 *  + 7) Block polling when app is not in focus
 *  + 4) Refactor polling system (CapabilitiesModel)
 *  + 18) Fix switching between devices bug
 *  + 2) Implement properties views
 *  + 3) Implement properties classes (IProperty, FloatProperty, EventProperty)
 *  + 6) Loading animation for capabilities/properties
-*  8) Logging
 *  + 9) Color Settings - not all devices support concrete colors
 *  + 10) Device offline mark
-*  11) Performance optimizations
 *  + 12) Titles
 *  + 13) Range doesnt supports any units
 *  + 14) Select dialog doesnt print current household name
-*  15) Fix CMake for Windows
 *  + 17) Devices icons
+*  15) Fix CMake for Windows
+*  8) Logging
+*  11) Performance optimizations
 *  20) Try to refactor capabilities and properties
 *  21) Make smart-checkers to blind changes
+*  22) Fix that newly opened device can receive updates from previous device
 * */
 
 void RegisterFonts(QGuiApplication &app) {

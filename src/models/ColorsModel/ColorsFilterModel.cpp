@@ -1,5 +1,7 @@
 #include "ColorsFilterModel.h"
 
+#include <valarray>
+
 #include "ColorsModel.h"
 
 ColorsFilterModel::ColorsFilterModel(QObject *parent)
@@ -81,6 +83,25 @@ bool ColorsFilterModel::filterAcceptsRow(int row, const QModelIndex &parent) con
     const auto temperature = sourceModel()->data(
       index, ColorsModel::TemperatureRole
     ).toInt();
+
+    // temperature_k: https://yandex.ru/dev/dialogs/smart-home/doc/ru/concepts/color_setting#discovery
+    if (min_ == max_) {
+      const int target = min_;
+      int current_best = 0;
+
+      for (int i = 0;i < sourceModel()->rowCount(); ++i) {
+        const auto source_index = createIndex(i, 0);
+        const auto temperature_value = sourceModel()->data(source_index, ColorsModel::TemperatureRole).toInt();
+        const auto new_diff = std::abs(temperature_value - target);
+        const auto current_diff = std::abs(current_best - target);
+
+        if (new_diff < current_diff) {
+          current_best = temperature_value;
+        }
+      }
+
+      return (temperature == current_best);
+    }
 
     return (min_ <= temperature) && (temperature <= max_);
   }

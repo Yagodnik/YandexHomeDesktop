@@ -5,6 +5,7 @@
 
 class RangeCapability : public IotObject {
   Q_OBJECT
+  Q_PROPERTY(bool supportsRandomAccess READ GetRandomAccessSupport NOTIFY randomAccessSupportChanged)
   Q_PROPERTY(double min READ GetMin WRITE SetMin NOTIFY minChanged)
   Q_PROPERTY(double max READ GetMax WRITE SetMax NOTIFY maxChanged)
   Q_PROPERTY(double precision READ GetPrecision WRITE SetPrecision NOTIFY precisionChanged)
@@ -16,6 +17,7 @@ public:
   void SetValue(const QVariant& value) override;
   QVariant GetValue() const override;
 
+  [[nodiscard]] bool GetRandomAccessSupport() const;
   [[nodiscard]] double GetMin() const;
   [[nodiscard]] double GetMax() const;
   [[nodiscard]] double GetPrecision() const;
@@ -25,6 +27,7 @@ public:
   QString GetFormattedValue() const override;
 
   Q_INVOKABLE [[nodiscard]] QVariantMap Create(double value);
+  Q_INVOKABLE [[nodiscard]] QVariantMap CreateRelative(double delta);
 
 signals:
   void minChanged();
@@ -32,6 +35,7 @@ signals:
   void precisionChanged();
   void unitsListChanged();
   void unitChanged();
+  void randomAccessSupportChanged();
 
 public slots:
   void SetMin(double value);

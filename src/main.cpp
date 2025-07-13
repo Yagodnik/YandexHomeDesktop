@@ -47,8 +47,8 @@
 
 /*
 * TODO List
+*  + 5) Range random access false support
 *  16) Add true email to settings
-*  5) Range random access false support
 *  19) Fix loading animation and offline device
 *  + 25) Color settings bug - single temperature
 *  + 1) Definitely fix modes capability

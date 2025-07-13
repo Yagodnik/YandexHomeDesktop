@@ -19,6 +19,10 @@ QVariant RangeCapability::GetValue() const {
   return state_["value"].toDouble();
 }
 
+bool RangeCapability::GetRandomAccessSupport() const {
+  return parameters_.value("random_access", false).toBool();
+}
+
 double RangeCapability::GetMin() const {
   const auto range = parameters_["range"].toMap();
   return range["min"].toDouble();
@@ -60,6 +64,16 @@ QVariantMap RangeCapability::Create(double value) {
   };
 }
 
+QVariantMap RangeCapability::CreateRelative(double delta) {
+  const auto instance = GetInstance();
+
+  return {
+    { "instance", instance },
+    { "value", delta },
+    { "relative", true }
+  };
+}
+
 void RangeCapability::SetMin(double value) {
   QVariantMap range = parameters_.value("range").toMap();
   range["min"] = value;
@@ -94,6 +108,7 @@ void RangeCapability::SetParameters(const QVariantMap &parameters) {
   emit maxChanged();
   emit precisionChanged();
   emit unitChanged();
+  emit randomAccessSupportChanged();
 }
 
 void RangeCapability::SetUnitList(UnitsList *units_list) {

@@ -1,3 +1,4 @@
+#include <qcommandlineparser.h>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
@@ -7,6 +8,7 @@
 #include "api/YandexHomeApi.h"
 #include "api/YandexAccount.h"
 #include "auth/AuthorizationService.h"
+#include "cli/CLI.h"
 #include "iot/capabilities/ColorSettingCapability.h"
 #include "models/ScenariosModel/ScenariosModel.h"
 #include "models/DevicesModel//DevicesModel.h"
@@ -39,40 +41,7 @@
 #include "utils/IconsProvider.h"
 #include "utils/UnitsList.h"
 
-/*
- * TODO: Possible Bug
- * User Creates new rooms -> select dialog have room -> no data in devices model -> looking for unknown device
- * Same with removing
- */
-
-/*
-* TODO List
-*  + 5) Range random access false support
-*  16) Add true email to settings
-*  19) Fix loading animation and offline device
-*  + 25) Color settings bug - single temperature
-*  + 1) Definitely fix modes capability
-*  + 24) Remove capabilities title if they are empty (same for props)
-*  + 23) Add properties time correctly displaying
-*  + 7) Block polling when app is not in focus
-*  + 4) Refactor polling system (CapabilitiesModel)
-*  + 18) Fix switching between devices bug
-*  + 2) Implement properties views
-*  + 3) Implement properties classes (IProperty, FloatProperty, EventProperty)
-*  + 6) Loading animation for capabilities/properties
-*  + 9) Color Settings - not all devices support concrete colors
-*  + 10) Device offline mark
-*  + 12) Titles
-*  + 13) Range doesnt supports any units
-*  + 14) Select dialog doesnt print current household name
-*  + 17) Devices icons
-*  15) Fix CMake for Windows
-*  8) Logging
-*  11) Performance optimizations
-*  20) Try to refactor capabilities and properties
-*  21) Make smart-checkers to blind changes
-*  22) Fix that newly opened device can receive updates from previous device
-* */
+// TODO: Add logout button at error screen if some shit happened
 
 void RegisterFonts(QGuiApplication &app) {
   const int id = QFontDatabase::addApplicationFont(":/fonts/Manrope-Regular.ttf");
@@ -106,10 +75,15 @@ void RegisterProperties() {
 }
 
 int main(int argc, char *argv[]) {
-  QQuickStyle::setStyle("Basic");
+  if (argc > 1) {
+    QCoreApplication app(argc, argv);
+    CLI cli(&app);
 
+    return app.exec();
+  }
+
+  QQuickStyle::setStyle("Basic");
   QGuiApplication app(argc, argv);
-  // app.setQuitOnLastWindowClosed(false);
 
   RegisterFonts(app);
 

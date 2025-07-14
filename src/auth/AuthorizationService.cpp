@@ -142,6 +142,7 @@ bool AuthorizationService::PrepareCallbackPage() {
 void AuthorizationService::HandleAuthorizationStatus(const QAbstractOAuth::Status status) {
   switch (status) {
     case QAbstractOAuth::Status::Granted:
+      qDebug() << "AuthorizationService: Access granted!";
       token_ = oauth2_.token();
 
       TryWrite(oauth2_.token());

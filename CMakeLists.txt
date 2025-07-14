@@ -30,6 +30,12 @@ qt_add_executable(appYandexHomeDesktop
         src/utils/Router.h
 
         ${RESOURCES}
+        src/cli/CLI.cpp
+        src/cli/CLI.h
+        src/cli/OnOffExecutor.cpp
+        src/cli/OnOffExecutor.h
+        src/cli/IExecutor.cpp
+        src/cli/IExecutor.h
 )
 
 if (APPLE)

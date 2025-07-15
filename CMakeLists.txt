@@ -36,6 +36,8 @@ qt_add_executable(appYandexHomeDesktop
         src/cli/OnOffExecutor.h
         src/cli/IExecutor.cpp
         src/cli/IExecutor.h
+        src/cli/ListDevicesCommand.cpp
+        src/cli/ListDevicesCommand.h
 )
 
 if (APPLE)

@@ -5,6 +5,8 @@
 #include <QQuickStyle>
 #include <QFontDatabase>
 #include <QFont>
+#include <thread>
+
 #include "api/YandexHomeApi.h"
 #include "api/YandexAccount.h"
 #include "auth/AuthorizationService.h"
@@ -75,15 +77,33 @@ void RegisterProperties() {
 }
 
 int main(int argc, char *argv[]) {
-  if (argc > 1) {
-    QCoreApplication app(argc, argv);
-    CLI cli(&app);
+  qInstallMessageHandler([](QtMsgType, const QMessageLogContext&, const QString&) {});
+
+  QGuiApplication app(argc, argv);
+
+  if (app.arguments().size() > 1) {
+    const auto authorization_service = new AuthorizationService(&app);
+    const auto token_provider = [authorization_service] {
+      const auto token = authorization_service->GetToken();
+      if (!token.has_value()) {
+        qWarning() << "AuthorizationService::GetToken: no token provided";
+        QGuiApplication::quit();
+      }
+
+      return token.value();
+    };
+    const auto yandex_api = new YandexHomeApi(token_provider, &app);
+
+    QObject::connect(authorization_service, &AuthorizationService::authorized, &app, [&app, yandex_api]() {
+      CLI cli(&app, yandex_api);
+    });
+
+    authorization_service->AttemptLocalAuthorization();
 
     return app.exec();
   }
 
   QQuickStyle::setStyle("Basic");
-  QGuiApplication app(argc, argv);
 
   RegisterFonts(app);
 

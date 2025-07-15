@@ -12,6 +12,7 @@ AuthorizationService::AuthorizationService(QObject *parent) :
   const auto auth_secrets_object = GetAuthSecrets();
 
   if (!auth_secrets_object.has_value() || !PrepareCallbackPage()) {
+    qDebug() << "AuthorizationService: Initialization failed";
     emit initializationFailed();
     return;
   }

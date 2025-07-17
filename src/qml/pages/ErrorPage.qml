@@ -20,13 +20,31 @@ Item {
       anchors.horizontalCenter: col.horizontalCenter
     }
 
-    UI.MyButton {
-      text: "Попробовать ещё раз"
-
+    Column {
+      spacing: 8
       anchors.horizontalCenter: col.horizontalCenter
 
-      onClicked: {
-        router.navigateTo("auth")
+      UI.MyButton {
+        width: col.width
+        text: "Попробовать ещё раз"
+
+        anchors.horizontalCenter: col.horizontalCenter
+
+        onClicked: {
+          router.navigateTo("auth");
+        }
+      }
+
+      UI.MyButton {
+        width: col.width
+        text: "Выйти из аккаунта"
+
+        anchors.horizontalCenter: col.horizontalCenter
+
+        onClicked: {
+          authorizationService.Logout();
+          router.navigateTo("auth");
+        }
       }
     }
   }

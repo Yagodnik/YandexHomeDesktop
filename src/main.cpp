@@ -77,7 +77,7 @@ void RegisterProperties() {
 }
 
 int main(int argc, char *argv[]) {
-  qInstallMessageHandler([](QtMsgType, const QMessageLogContext&, const QString&) {});
+  // qInstallMessageHandler([](QtMsgType, const QMessageLogContext&, const QString&) {});
 
   QGuiApplication app(argc, argv);
 

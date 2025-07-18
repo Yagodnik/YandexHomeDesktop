@@ -15,6 +15,7 @@ public:
   Q_INVOKABLE [[nodiscard]] bool IsAuthorized() const;
   Q_INVOKABLE void AttemptAuthorization();
   Q_INVOKABLE void Logout();
+  Q_INVOKABLE QString GetLastErrorCode() const;
   [[nodiscard]] std::optional<QString> GetToken() const;
 
 signals:
@@ -57,7 +58,7 @@ private:
 
   QOAuth2AuthorizationCodeFlow oauth2_;
   QOAuthHttpServerReplyHandler reply_handler_;
-
+  int last_error_code_{0};
   std::optional<QString> token_;
 
 private slots:

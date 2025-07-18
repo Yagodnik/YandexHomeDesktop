@@ -13,7 +13,7 @@ Item {
     spacing: 15
 
     UI.AnimatedText {
-      text: qsTr("Что-то пошло не так!")
+      text: "Что-то пошло не так! " + authorizationService.GetLastErrorCode();
       color: themes.inactive
       pixelSize: 24
 
@@ -31,7 +31,7 @@ Item {
         anchors.horizontalCenter: col.horizontalCenter
 
         onClicked: {
-          router.navigateTo("auth");
+          router.navigateTo("loading");
         }
       }
 

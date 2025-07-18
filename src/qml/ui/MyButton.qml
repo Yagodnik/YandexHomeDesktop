@@ -32,7 +32,7 @@ Item {
   Text {
     id: label
     anchors.centerIn: parent
-    color: themes.controlText
+    color: themes.controlText2
     font.pixelSize: 16
   }
 

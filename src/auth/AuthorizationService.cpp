@@ -56,6 +56,12 @@ void AuthorizationService::Logout() {
   emit logout();
 }
 
+QString AuthorizationService::GetLastErrorCode() const {
+  QString number;
+  number.setNum(last_error_code_, 16);
+  return number;
+}
+
 std::optional<QString> AuthorizationService::GetToken() const {
   if (!token_.has_value()) {
     qDebug() << "AuthorizationService::GetToken: no token provided";
@@ -141,6 +147,8 @@ bool AuthorizationService::PrepareCallbackPage() {
 }
 
 void AuthorizationService::HandleAuthorizationStatus(const QAbstractOAuth::Status status) {
+  last_error_code_ = (1 << 31) | static_cast<int>(status);
+
   switch (status) {
     case QAbstractOAuth::Status::Granted:
       qDebug() << "AuthorizationService: Access granted!";
@@ -171,6 +179,8 @@ void AuthorizationService::AuthorizeWithBrowser(QUrl url) {
 }
 
 void AuthorizationService::ReadTokenHandler(QKeychain::ReadPasswordJob *job) {
+  last_error_code_ = static_cast<int>(job->error());
+
   switch (job->error()) {
     case QKeychain::NoError:
       break;

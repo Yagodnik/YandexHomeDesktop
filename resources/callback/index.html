@@ -2,22 +2,95 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Authorization Success</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>YandexLampApp</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jersey+25&family=Manrope:wght@200..800&display=swap" rel="stylesheet">
+
   <style>
     body {
-      font-family: sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background-color: #f0fff0;
+      font-family: "Manrope", sans-serif;
+      background-color: #f2f3f5;
+      margin: 0;
+      padding: 0;
     }
-    h1 {
-      color: #2e7d32;
+
+    .main {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      color: #000;
+      background-color: #FFF;
+      padding: 18px;
+      border: solid 1px #dae8dc;
+      border-radius: 5px;
+      text-align: center;
+      opacity: 0;
+      animation: fadeInMove 1s ease-out forwards;
+    }
+
+    h1, h4 {
+      opacity: 0;
+      animation: fadeInUp 0.6s ease-out forwards;
+    }
+
+    h4 {
+      animation-delay: 0.3s;
+    }
+
+    .links {
+      text-align: center;
+      margin-top: 12px;
+      opacity: 0;
+      animation: fadeInUp 0.6s ease-out forwards;
+      animation-delay: 0.6s;
+    }
+
+    a {
+      text-decoration: none;
+      color: #693acf;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    a:hover {
+      text-shadow: 0 0 8px rgba(105, 58, 207, 0.5);
+    }
+
+    @keyframes fadeInMove {
+      from {
+        opacity: 0;
+        transform: translate(-50%, -60%);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
   </style>
 </head>
 <body>
-<h1>✅ Access was granted</h1>
+<main class="main">
+  <h1>Авторизация прошла успешно!</h1>
+  <h4>Теперь вы можете свободно закрыть эту страницу и вернуться в приложение</h4>
+
+  <div class="links">
+    <a href="https://github.com/Yagodnik/YandexHomeDesktop">GitHub</a>
+  </div>
+</main>
 </body>
 </html>

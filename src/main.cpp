@@ -1,12 +1,9 @@
-#include <qcommandlineparser.h>
-#include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QQuickStyle>
 #include <QFontDatabase>
 #include <QFont>
 #include <thread>
-
 #include "api/YandexHomeApi.h"
 #include "api/YandexAccount.h"
 #include "auth/AuthorizationService.h"
@@ -42,8 +39,6 @@
 #include "models/DeviceModel/DeviceDataModel.h"
 #include "utils/IconsProvider.h"
 #include "utils/UnitsList.h"
-
-// TODO: Add logout button at error screen if some shit happened
 
 void RegisterFonts(QGuiApplication &app) {
   const int id = QFontDatabase::addApplicationFont(":/fonts/Manrope-Regular.ttf");
@@ -81,19 +76,21 @@ int main(int argc, char *argv[]) {
 
   QGuiApplication app(argc, argv);
 
+  const auto authorization_service = new AuthorizationService(&app);
+  const auto token_provider = [authorization_service] {
+    const auto token = authorization_service->GetToken();
+    if (!token.has_value()) {
+      qWarning() << "AuthorizationService::GetToken: no token provided";
+      QGuiApplication::quit();
+    }
+
+    return token.value();
+  };
+  const auto platform_service = new PlatformService(&app);
+  const auto yandex_api = new YandexHomeApi(token_provider, &app);
+  const auto yandex_account = new YandexAccount(token_provider, &app);
+
   if (app.arguments().size() > 1) {
-    const auto authorization_service = new AuthorizationService(&app);
-    const auto token_provider = [authorization_service] {
-      const auto token = authorization_service->GetToken();
-      if (!token.has_value()) {
-        qWarning() << "AuthorizationService::GetToken: no token provided";
-        QGuiApplication::quit();
-      }
-
-      return token.value();
-    };
-    const auto yandex_api = new YandexHomeApi(token_provider, &app);
-
     QObject::connect(authorization_service, &AuthorizationService::authorized, &app, [&app, yandex_api]() {
       CLI cli(&app, yandex_api);
     });
@@ -110,19 +107,6 @@ int main(int argc, char *argv[]) {
   QQmlApplicationEngine engine;
 
   const auto root_context = engine.rootContext();
-  const auto authorization_service = new AuthorizationService(&app);
-  const auto token_provider = [authorization_service] {
-    const auto token = authorization_service->GetToken();
-    if (!token.has_value()) {
-      qWarning() << "AuthorizationService::GetToken: no token provided";
-      QGuiApplication::quit();
-    }
-
-    return token.value();
-  };
-  const auto platform_service = new PlatformService(&app);
-  const auto yandex_api = new YandexHomeApi(token_provider, &app);
-  const auto yandex_account = new YandexAccount(token_provider, &app);
   const auto themes = new Themes(&app);
   const auto router = new Router(&app);
   const auto scenarios_model = new ScenariosModel(yandex_api, &app);

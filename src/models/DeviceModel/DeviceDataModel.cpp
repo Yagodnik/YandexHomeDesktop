@@ -37,15 +37,15 @@ void DeviceDataModel::SetDeviceStatus(DeviceState state) {
 
 void DeviceDataModel::OnDeviceInfoReceived(const DeviceInfo &info) {
   if (info.status != Status::Ok) {
-    qDebug() << "DeviceDataModel: Failed to receive data due to";
-    qDebug() << info.message;
+    qCritical() << "DeviceDataModel: Failed to receive data due to";
+    qCritical() << info.message;
     return;
   }
 
   SetDeviceName(info.name);
   SetDeviceStatus(info.state);
 
-  qDebug() << "DeviceDataModel: update for" << device_name_
+  qInfo() << "DeviceDataModel: update for" << device_name_
     << " status:" << (device_state_ == DeviceState::Online ? "Online" : "Offline");
 
   if (!is_initialized_) {
@@ -57,6 +57,6 @@ void DeviceDataModel::OnDeviceInfoReceived(const DeviceInfo &info) {
 void DeviceDataModel::OnDeviceInfoReceivingFailed(const QString &message) {
   device_state_ = DeviceState::Offline;
 
-  qDebug() << "DeviceDataModel: Cant receive device info due to:";
-  qDebug() << message;
+  qCritical() << "DeviceDataModel: Cant receive device info due to:";
+  qCritical() << message;
 }

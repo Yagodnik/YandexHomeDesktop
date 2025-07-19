@@ -67,7 +67,8 @@ Item {
       verticalOffset: 2
       radius: 6
       samples: 16
-      color: Qt.rgba(0, 32 / 255, 128 / 255, 0.04)
+      // color: Qt.rgba(0, 32 / 255, 128 / 255, 0.04)
+      color: themes.shadowColor
     }
   }
 

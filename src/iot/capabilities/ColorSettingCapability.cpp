@@ -27,7 +27,7 @@ QVariantMap ColorSettingCapability::Create(const QColor &value) {
       { "v", static_cast<int>(value.value() / 255.0 * 100) }
     };
 
-    qDebug() << "HSV: " << hsv_data;
+    qInfo() << "ColorSettingCapability: Setting HSV: " << hsv_data;
 
     return {
         { "instance", "hsv" },
@@ -38,13 +38,17 @@ QVariantMap ColorSettingCapability::Create(const QColor &value) {
   if (parameters_["color_model"] == "rgb") {
     uint32_t rgb_data = (value.red() << 16) | (value.green() << 8) | value.blue();
 
+    qInfo() << "ColorSettingCapability: Setting RGB: " << rgb_data;
+
+
     return {
       { "instance", "rgb" },
       { "value", rgb_data }
     };
   }
 
-  qDebug() << "CapabilityFactory::CreateColorSetting: Unknown color model";
+  qWarning() << "CapabilityFactory::CreateColorSetting: Unknown color model:" << parameters_["color_model"];
+
   return {};
 }
 

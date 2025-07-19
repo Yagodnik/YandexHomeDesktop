@@ -13,5 +13,9 @@
   "track_color": {
     "hex": "#9099ab",
     "alpha": 0.08
+  },
+  "shadow_color": {
+    "hex": "#26282c",
+    "alpha": 0.2
   }
 }

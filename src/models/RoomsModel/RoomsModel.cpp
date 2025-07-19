@@ -68,7 +68,7 @@ void RoomsModel::OnUserInfoReceived(const UserInfo &info) {
 }
 
 void RoomsModel::OnUserInfoReceivingFailed(const QString &message) {
-  qDebug() << "Rooms Model: Error receiving rooms:" << message;
+  qWarning() << "RoomsModel: Error receiving rooms:" << message;
 
   emit dataLoadingFailed();
 }

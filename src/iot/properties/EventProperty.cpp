@@ -13,7 +13,7 @@ QVariant EventProperty::GetValue() const {
 
 QString EventProperty::GetFormattedValue() const {
   if (values_provider_ == nullptr) {
-    qDebug() << "No values provided!";
+    qWarning() << "EventProperty: No values provided!";
     return "???";
   }
 

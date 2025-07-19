@@ -17,12 +17,12 @@ void Router::addRoute(const QString &name, const QString &path) {
 
 void Router::navigateTo(const QString &name) const {
   if (!view_) {
-    qWarning() << "Router: No view!";
+    qCritical() << "Router: No view!";
     return;
   }
 
   if (!routes_.contains(name)) {
-    qWarning() << "No route for name: " << name;
+    qCritical() << "No route for name: " << name;
     return;
   }
 
@@ -32,13 +32,13 @@ void Router::navigateTo(const QString &name) const {
   );
 
   if (!invoked) {
-    qWarning() << "Failed to invoke push on StackView";
+    qCritical() << "Failed to invoke push on StackView";
   }
 }
 
 void Router::goBack() const {
   if (!view_) {
-    qWarning() << "Router: No view!";
+    qCritical() << "Router: No view!";
     return;
   }
 

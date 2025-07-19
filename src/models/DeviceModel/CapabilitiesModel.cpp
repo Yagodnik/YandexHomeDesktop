@@ -92,7 +92,7 @@ QVariantMap CapabilitiesModel::GetParameters(const int index) const {
 void CapabilitiesModel::UseCapability(const int index, const QVariantMap &state) {
   auto& capability = capabilities_[index];
 
-  qDebug() << "Capabilities Model: UseCapability" << index << "New state:" << state;
+  qInfo() << "CapabilitiesModel: UseCapability" << index << "New state:" << state;
 
   capability.state = state;
 
@@ -103,8 +103,8 @@ void CapabilitiesModel::UseCapability(const int index, const QVariantMap &state)
 }
 
 void CapabilitiesModel::OnCapabilitiesUpdated(const DeviceController::CapabilitiesList& capabilities) {
-  qDebug() << "Capabilities Model: Updates received from controller";
-  qDebug() << "Capabilities count:" << capabilities.size();
+  qInfo() << "Capabilities Model: Updates received from controller";
+  qInfo() << "Capabilities count:" << capabilities.size();
 
   if (!is_initialized_) {
     beginResetModel();
@@ -122,8 +122,8 @@ void CapabilitiesModel::OnCapabilitiesUpdated(const DeviceController::Capabiliti
     capability_instance = capability_var.value();
   }
 
-  qDebug() << "Capabilities Model: Update applied to" << capabilities_.size() << "capabilities";
-  qDebug() << "Capabilities Model: Update contained valid:" << (capabilities.size() - empty_count) << "Empty count:" << empty_count;
+  qInfo() << "Capabilities Model: Update applied to" << capabilities_.size() << "capabilities";
+  qInfo() << "Capabilities Model: Update contained valid:" << (capabilities.size() - empty_count) << "Empty count:" << empty_count;
 
   if (!is_initialized_) {
     endResetModel();

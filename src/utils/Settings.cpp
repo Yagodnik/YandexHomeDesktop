@@ -3,8 +3,8 @@
 Settings::Settings(QObject *parent)
   : QObject(parent), settings_("ArtemYagodnik", "YandexHomeDesktop") {
 
-  qDebug() << "CurrentTheme" << GetCurrentTheme();
-  qDebug() << "Settings initialized:" << settings_.fileName();
+  qInfo() << "Settings: CurrentTheme = " << GetCurrentTheme();
+  qInfo() << "Settings: Stored at" << settings_.fileName();
 }
 
 bool Settings::GetTrayModeEnabled() const {
@@ -30,7 +30,7 @@ void Settings::SetTrayModeEnabled(bool enabled) {
     return;
   }
 
-  qDebug() << "Settings::SetTrayModeEnabled" << enabled;
+  qInfo() << "Settings: SetTrayModeEnabled" << enabled;
 
   settings_.setValue("trayModeEnabled", enabled);
   emit trayModeEnabledChanged();

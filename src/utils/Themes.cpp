@@ -32,6 +32,7 @@ void Themes::SetTheme(const int theme)
   emit switchInactiveChanged();
   emit switchActiveChanged();
   emit trackColorChanged();
+  emit shadowColorChanged();
 }
 
 QString Themes::GetMainText() const {
@@ -81,6 +82,12 @@ QString Themes::GetControlText2() const {
 QColor Themes::GetTrackColor() const {
   QColor base(active_theme_.track_color.hex);
   base.setAlphaF(active_theme_.track_color.alpha);
+  return base;
+}
+
+QColor Themes::GetShadowColor() const {
+  QColor base(active_theme_.shadow_color.hex);
+  base.setAlphaF(active_theme_.shadow_color.alpha);
   return base;
 }
 
@@ -170,6 +177,17 @@ void Themes::SetTrackColor(QColor color) {
     active_theme_.track_color.hex = hex;
     active_theme_.track_color.alpha = alpha;
     emit trackColorChanged();
+  }
+}
+
+void Themes::SetShadowColor(QColor color) {
+  const QString hex = color.name(QColor::HexRgb);
+  float alpha = color.alphaF();
+
+  if (active_theme_.shadow_color.hex != hex || active_theme_.shadow_color.alpha != alpha) {
+    active_theme_.shadow_color.hex = hex;
+    active_theme_.shadow_color.alpha = alpha;
+    emit shadowColorChanged();
   }
 }
 

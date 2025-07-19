@@ -17,9 +17,9 @@ struct PlatformServiceFactory {
 #ifdef Q_OS_MAC
     return std::make_unique<PlatformServiceMac>();
 #elif defined(Q_OS_WIN)
-    return std::make_unique<PlatformServiceWin>(window);
+    return std::make_unique<PlatformServiceWin>();
 #else
-    return std::make_unique<PlatformServiceLinux>(window);
+    return std::make_unique<PlatformServiceLinux>();
 #endif
   }
 };

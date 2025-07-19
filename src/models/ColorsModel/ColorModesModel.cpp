@@ -6,7 +6,7 @@ ColorModesModel::ColorModesModel(QObject *parent) : QAbstractListModel(parent) {
   const auto& modes_file = JsonLoader::Load<ColorModesFile>(kModesFile);
 
   if (!modes_file.has_value()) {
-    qWarning() << "Failed to load colors file";
+    qWarning() << "ColorModesModel: Failed to load colors file";
     return;
   }
 

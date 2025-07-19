@@ -12,7 +12,7 @@ AuthorizationService::AuthorizationService(QObject *parent) :
   const auto auth_secrets_object = GetAuthSecrets();
 
   if (!auth_secrets_object.has_value() || !PrepareCallbackPage()) {
-    qDebug() << "AuthorizationService: Initialization failed";
+    qCritical() << "AuthorizationService: Initialization failed";
     emit initializationFailed();
     return;
   }
@@ -64,7 +64,7 @@ QString AuthorizationService::GetLastErrorCode() const {
 
 std::optional<QString> AuthorizationService::GetToken() const {
   if (!token_.has_value()) {
-    qDebug() << "AuthorizationService::GetToken: no token provided";
+    qCritical() << "AuthorizationService::GetToken: no token provided";
     return std::nullopt;
   }
 
@@ -151,7 +151,7 @@ void AuthorizationService::HandleAuthorizationStatus(const QAbstractOAuth::Statu
 
   switch (status) {
     case QAbstractOAuth::Status::Granted:
-      qDebug() << "AuthorizationService: Access granted!";
+      qInfo() << "AuthorizationService: Access granted!";
       token_ = oauth2_.token();
 
       TryWrite(oauth2_.token());
@@ -159,13 +159,15 @@ void AuthorizationService::HandleAuthorizationStatus(const QAbstractOAuth::Statu
       emit authorized();
     break;
     case QAbstractOAuth::Status::NotAuthenticated:
+      qInfo() << "AuthorizationService: NotAuthenticated";
       emit authorizationFailed();
     break;
     case QAbstractOAuth::Status::RefreshingToken:
-      qDebug() << "Auth: Refreshing token";
+      qInfo() << "AuthorizationService: Refreshing token";
     break;
     default:
-      qDebug() << "Auth: Unknown status";
+      qWarning() << "AuthorizationService: Unknown status!";
+      emit authorizationFailed();
     break;
   }
 }
@@ -185,17 +187,17 @@ void AuthorizationService::ReadTokenHandler(QKeychain::ReadPasswordJob *job) {
     case QKeychain::NoError:
       break;
     case QKeychain::EntryNotFound:
-      qDebug() << "AuthorizationService: Key does NOT exist.";
+      qCritical() << "AuthorizationService: Key does NOT exist.";
 
       emit unauthorized();
       return;
     case QKeychain::AccessDeniedByUser:
-      qDebug() << "AuthorizationService: User canceled operation";
+      qWarning() << "AuthorizationService: User canceled operation";
 
       emit authorizationCanceled();
       return;
     default:
-      qDebug() << "AuthorizationService: Token read error -" << job->errorString();
+      qCritical() << "AuthorizationService: Token read error -" << job->errorString();
 
       emit authorizationFailed();
       return;
@@ -212,7 +214,7 @@ void AuthorizationService::WriteTokenHandler(QKeychain::WritePasswordJob *job) {
   if (job->error()) {
     qWarning() << "AuthorizationService: Token write error -" << job->errorString();
   } else {
-    qDebug() << "AuthorizationService: Token stored successfully!";
+    qInfo() << "AuthorizationService: Token stored successfully!";
   }
 }
 
@@ -220,6 +222,6 @@ void AuthorizationService::DeleteTokenHandler(QKeychain::DeletePasswordJob *job)
   if (job->error()) {
     qWarning() << "AuthorizationService: Token delete error -" << job->errorString();
   } else {
-    qDebug() << "AuthorizationService: Token deleted successfully!";
+    qInfo() << "AuthorizationService: Token deleted successfully!";
   }
 }

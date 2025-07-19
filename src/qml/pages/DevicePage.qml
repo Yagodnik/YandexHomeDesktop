@@ -64,7 +64,9 @@ Item {
       samples: 16
       horizontalOffset: 0
       verticalOffset: 2
-      color: "#66000000"
+      // color: "#66000000" // ?
+      // color: Qt.rgba(0, 32 / 255, 128 / 255, 0.04)
+      color: themes.shadowColor
     }
 
     Image {

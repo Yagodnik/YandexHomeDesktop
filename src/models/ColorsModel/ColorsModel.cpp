@@ -25,7 +25,7 @@ ColorsModel::ColorsModel(QObject *parent) : QAbstractListModel(parent)
   const auto& colors_file = JsonLoader::Load<ColorsFile>(kColorsFile);
 
   if (!colors_file.has_value()) {
-    qWarning() << "Failed to load colors/temperatures file";
+    qCritical() << "ColorsModel: Failed to load colors/temperatures file";
     return;
   }
 
@@ -70,7 +70,7 @@ QVariant ColorsModel::data(const QModelIndex &index, int role) const {
         return color.temperature.value();
       }
 
-      qDebug() << "ColorsModel: Accessing temperature, while color is not temperature!";
+      qInfo() << "ColorsModel: Accessing temperature, while color is not temperature!";
       return {};
     default:
       return {};

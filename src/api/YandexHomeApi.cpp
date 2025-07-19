@@ -24,7 +24,7 @@ void YandexHomeApi::GetUserInfo() {
   };
 
   auto error_callback = [this](const QString& message) {
-    qDebug() << "YandexHomeApi: Interal error: " << message;
+    qCritical() << "YandexHomeApi: Internal error: " << message;
 
     emit userInfoReceivingFailed(message);
   };
@@ -43,14 +43,14 @@ void YandexHomeApi::GetScenarios() {
 
       emit scenariosReceivedSuccessfully(user_info.scenarios);
     } else {
-      qDebug() << "YandexHomeApi: Error getting during getting scenarios";
+      qCritical() << "YandexHomeApi: Error getting during getting scenarios";
 
       emit scenariosReceivingFailed(user_info.message);
     }
   };
 
   auto error_callback = [this](const QString& message) {
-    qDebug() << "YandexHomeApi: Interal error: " << message;
+    qCritical() << "YandexHomeApi: Internal error: " << message;
 
     emit scenariosReceivingFailed(message);
   };
@@ -67,18 +67,18 @@ void YandexHomeApi::GetDeviceInfo(const QString &id) {
 
   auto ok_callback = [this](auto& info) {
     if (info.status == Status::Ok) {
-      qDebug() << "YandexHomeApi: Received device info";
+      qInfo() << "YandexHomeApi: Received device info";
 
       emit deviceInfoReceived(info);
     } else {
-      qDebug() << "YandexHomeApi: Error getting during getting scenarios";
+      qCritical() << "YandexHomeApi: Error getting during getting scenarios";
 
       emit deviceInfoReceivingFailed(info.message);
     }
   };
 
   auto error_callback = [this](const QString& message) {
-    qDebug() << "YandexHomeApi: Interal error: " << message;
+    qCritical() << "YandexHomeApi: Internal error: " << message;
 
     emit deviceInfoReceivingFailed(message);
   };
@@ -95,7 +95,7 @@ void YandexHomeApi::ExecuteScenario(const QString &scenario_id, const QVariant& 
 
   auto ok_callback = [this, scenario_id, user_data](auto& response) {
     if (response.status == Status::Ok) {
-      qDebug() << "Scenario" << scenario_id << "executing finished";
+      qInfo() << "YandexHomeApi: Scenario" << scenario_id << "executing finished";
       emit scenarioExecutionFinishedSuccessfully(scenario_id, user_data);
     } else {
       emit scenarioExecutionFailed(response.message, user_data);
@@ -103,7 +103,7 @@ void YandexHomeApi::ExecuteScenario(const QString &scenario_id, const QVariant& 
   };
 
   auto error_callback = [this, user_data](const QString& message) {
-    qDebug() << "YandexHomeApi: Internal error: " << message;
+    qCritical() << "YandexHomeApi: Internal error: " << message;
     emit scenarioExecutionFailed(message, user_data);
   };
 
@@ -117,13 +117,13 @@ void YandexHomeApi::ExecuteScenario(const QString &scenario_id, const QVariant& 
 void YandexHomeApi::PerformActions(const QList<DeviceActionsObject> &actions, const QVariant& user_data) {
   auto ok_callback = [this, user_data](const DeviceActionResponse& response) {
     if (response.status == Status::Error) {
-      qDebug() << "Action " << response.request_id << "executing failed";
+      qCritical() << "YandexHomeApi: Action " << response.request_id << "executing failed";
 
       emit actionExecutingFailed(response.message, user_data);
       return;
     }
 
-    qDebug() << "Action " << response.request_id << "executing finished";
+    qInfo() << "YandexHomeApi: Action " << response.request_id << "executing finished";
 
     for (const auto& device : response.devices) {
       for (const auto& capability : device.capabilities) {
@@ -133,9 +133,9 @@ void YandexHomeApi::PerformActions(const QList<DeviceActionsObject> &actions, co
         if (action_result.status == "DONE") {
           emit actionExecutingFinishedSuccessfully(user_data);
         } else {
-          qDebug() << "Action " << response.request_id << "executing failed with:";
-          qDebug() << "Code:" << action_result.error_code;
-          qDebug() << "Message:" << action_result.error_message;
+          qCritical() << "YandexHomeApi: Action " << response.request_id << "executing failed with:";
+          qCritical() << "YandexHomeApi: Code:" << action_result.error_code;
+          qCritical() << "YandexHomeApi: Message:" << action_result.error_message;
           emit actionExecutingFailed(action_result.error_code, user_data);
         }
       }
@@ -143,7 +143,7 @@ void YandexHomeApi::PerformActions(const QList<DeviceActionsObject> &actions, co
   };
 
   auto error_callback = [this, user_data](const QString& message) {
-    qDebug() << "YandexHomeApi: Internal error: " << message;
+    qCritical() << "YandexHomeApi: Internal error: " << message;
     emit actionExecutingFailed(message, user_data);
   };
 

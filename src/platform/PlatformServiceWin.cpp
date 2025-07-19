@@ -2,7 +2,7 @@
 
 void PlatformServiceWin::ShowWindow(const QRect &icon) {
   if (window_ == nullptr) {
-    qDebug() << "Nullptr window";
+    qCritical() << "PlatformServiceWin: Nullptr window";
     return;
   }
 

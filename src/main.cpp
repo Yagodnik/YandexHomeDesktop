@@ -38,6 +38,7 @@
 #include "models/DeviceModel/DeviceController.h"
 #include "models/DeviceModel/DeviceDataModel.h"
 #include "utils/IconsProvider.h"
+#include "utils/LogManager.h"
 #include "utils/UnitsList.h"
 
 void RegisterFonts(QGuiApplication &app) {
@@ -71,10 +72,11 @@ void RegisterProperties() {
   qmlRegisterType<EventProperty>("YandexHomeDesktop.Properties", 1, 0, "Event");
 }
 
-int main(int argc, char *argv[]) {
-  // qInstallMessageHandler([](QtMsgType, const QMessageLogContext&, const QString&) {});
+static LogManager log_manager(LoggingMode::Both);
 
+int main(int argc, char *argv[]) {
   QGuiApplication app(argc, argv);
+  qInstallMessageHandler(LOGGING_CALLBACK(log_manager));
 
   const auto authorization_service = new AuthorizationService(&app);
   const auto token_provider = [authorization_service] {

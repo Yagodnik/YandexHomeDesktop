@@ -17,6 +17,8 @@ add_library(Utils SHARED
         IconsProvider.h
         JsonLoader.cpp
         JsonLoader.h
+        LogManager.cpp
+        LogManager.h
 )
 
 target_link_libraries(Utils PRIVATE

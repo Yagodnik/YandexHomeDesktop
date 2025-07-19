@@ -4,7 +4,7 @@ TitlesProvider::TitlesProvider(const QString& path, QObject *parent) : QObject(p
   const auto temp = JsonLoader::LoadRaw(path);
 
   if (!temp.has_value()) {
-    qDebug() << "TitlesProvider: Failed to load JSON data";
+    qCritical() << "TitlesProvider: Failed to load JSON data";
     return;
   }
 

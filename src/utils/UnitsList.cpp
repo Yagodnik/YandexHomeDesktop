@@ -4,7 +4,7 @@ UnitsList::UnitsList(QObject *parent) : QObject(parent) {
   const auto temp = JsonLoader::Load<UnitsListData>(":/data/units.json");
 
   if (!temp.has_value()) {
-    qDebug() << "TitlesList::TitlesList: Failed to load JSON data";
+    qCritical() << "TitlesList: Failed to load JSON data";
     return;
   }
 

@@ -19,7 +19,7 @@ PropertiesModel::PropertiesModel(DeviceController* controller, QObject* parent)
 }
 
 void PropertiesModel::ResetModel() {
-  qDebug() << "Properties Model: Reset due to controller request";
+  qInfo() << "Properties Model: Reset due to controller request";
 
   beginResetModel();
 
@@ -102,7 +102,7 @@ QHash<int, QByteArray> PropertiesModel::roleNames() const {
 }
 
 void PropertiesModel::OnPropertiesUpdateReady(const DeviceController::PropertiesList &properties2) {
-  qDebug() << "PropertiesModel: Properties received:" << properties2.size() << "without fake data";
+  qInfo() << "PropertiesModel: Properties received:" << properties2.size() << "without fake data";
 
   DeviceController::PropertiesList properties = properties2;
 
@@ -118,7 +118,7 @@ void PropertiesModel::OnPropertiesUpdateReady(const DeviceController::Properties
     beginResetModel();
     properties_.resize(properties.size() + iterations);
 
-    qDebug() << "Properties Model: added" << iterations << "fake properties";
+    qInfo() << "Properties Model: added" << iterations << "fake properties";
   }
 
 #ifdef ALLOW_FAKE_PROPERTIES
@@ -146,18 +146,18 @@ void PropertiesModel::OnPropertiesUpdateReady(const DeviceController::Properties
   }
 #endif
 
-  qDebug() << "PropertiesModel: Updating" << properties.size() << "properties";
+  qInfo() << "PropertiesModel: Updating" << properties.size() << "properties";
 
   for (auto [property, incoming_property_opt] : std::ranges::views::zip(properties_, properties)) {
     if (!incoming_property_opt.has_value()) {
-      qDebug() << "PropertiesModel: Updating property failed as it is nullopt!";
+      qWarning() << "PropertiesModel: Updating property failed as it is nullopt!";
       continue;
     }
 
     const auto incoming_property = incoming_property_opt.value();
 
-    qDebug() << "PropertiesModel: Property update:"  << incoming_property.state;
-    qDebug() << "PropertiesModel: Property Params:"  << incoming_property.parameters;
+    qInfo() << "PropertiesModel: Property update:"  << incoming_property.state;
+    qInfo() << "PropertiesModel: Property Params:"  << incoming_property.parameters;
 
     property = incoming_property;
   }

@@ -4,7 +4,7 @@
 ModesModel::ModesModel(QObject *parent) : QAbstractListModel(parent) {
   const auto modes_list_opt = JsonLoader::Load<ModesList>(kModesListFile);
   if (!modes_list_opt.has_value()) {
-    qDebug() << "Failed to load modes list";
+    qWarning() << "ModesModel: Failed to load modes list";
     return;
   }
 

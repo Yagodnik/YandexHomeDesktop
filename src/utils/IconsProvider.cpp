@@ -6,7 +6,7 @@ IconsProvider::IconsProvider(const QString& path, const QString& prefix, QObject
 {
   const auto data_opt = JsonLoader::Load<IconsData>(path);
   if (!data_opt.has_value()) {
-    qDebug() << "Icons: Failed to load deviceIcons.json";
+    qCritical() << "Icons: Failed to load deviceIcons.json";
     return;
   }
 

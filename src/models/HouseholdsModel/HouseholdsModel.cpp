@@ -55,7 +55,7 @@ QString HouseholdsModel::GetCurrentHousehold() const {
 
 QString HouseholdsModel::GetCurrentHouseholdName() const {
   if (!current_.has_value()) {
-    qDebug() << "HouseholdsModel: Cant find household with empty id!";
+    qWarning() << "HouseholdsModel: Cant find household with empty id!";
     return {};
   }
 
@@ -65,7 +65,7 @@ QString HouseholdsModel::GetCurrentHouseholdName() const {
     }
   }
 
-  qDebug() << "HouseholdsModel: Cant find household with id:" << current_.value();
+  qWarning() << "HouseholdsModel: Cant find household with id:" << current_.value();
 
   return {};
 }
@@ -108,7 +108,7 @@ void HouseholdsModel::OnUserInfoReceived(const UserInfo &info) {
 }
 
 void HouseholdsModel::OnUserInfoReceivingFailed(const QString &message) {
-  qDebug() << "Rooms Model: Error receiving rooms:" << message;
+  qWarning() << "Rooms Model: Error receiving rooms:" << message;
 
   emit dataLoadingFailed();
 }

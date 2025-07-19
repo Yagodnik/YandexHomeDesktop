@@ -3,7 +3,7 @@
 
 void PlatformServiceMac::ShowWindow(const QRect& icon) {
   if (window_ == nullptr) {
-    qDebug() << "Nullptr window";
+    qCritical() << "PlatformServiceMac: Nullptr window";
     return;
   }
 

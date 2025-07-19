@@ -11,7 +11,7 @@ namespace JsonLoader {
     const auto temp = LoadRaw(path);
 
     if (!temp.has_value()) {
-      qDebug() << "TitlesProvider: Failed to load JSON data";
+      qCritical() << "TitlesProvider: Failed to load JSON data";
       return std::nullopt;
     }
 

@@ -48,21 +48,21 @@ void DeviceController::LoadDevice(const QString &device_id) {
 
 void DeviceController::ContinuePollingIfNeeded() {
   if (is_in_use_) {
-    qDebug() << "Device Controller: Continued polling for device" << device_id_;
+    qInfo() << "Device Controller: Continued polling for device" << device_id_;
     polling_timer_.start();
   }
 }
 
 void DeviceController::StopPolling() {
   if (polling_timer_.isActive()) {
-    qDebug() << "Device Controller: Stopped polling for device" << device_id_;
+    qInfo() << "Device Controller: Stopped polling for device" << device_id_;
     polling_timer_.stop();
   }
 }
 
 void DeviceController::ForgetDevice() {
   StopPolling();
-  qDebug() << "Device Controller: Forgetting device" << device_id_;
+  qInfo() << "Device Controller: Forgetting device" << device_id_;
 
   device_id_ = "";
   is_in_use_ = false;
@@ -86,7 +86,7 @@ void DeviceController::UseCapability(
   if (index < capabilities_updates_.size()) {
     capabilities_updates_[index].PausePolling();
   } else {
-    qDebug() << "Device Controller: Cant pause polling for" << index << "as it out of range:" << capabilities_updates_.size();
+    qInfo() << "Device Controller: Cant pause polling for" << index << "as it out of range:" << capabilities_updates_.size();
   }
 
   api_->PerformActions({
@@ -95,18 +95,18 @@ void DeviceController::UseCapability(
 }
 
 void DeviceController::OnTimerTimeout() {
-  qDebug() << "Device Controller: Polling tick!";
+  qInfo() << "Device Controller: Polling tick!";
 
   last_update_start_time_ = CurrentTime();
   api_->GetDeviceInfo(device_id_);
 
-  qDebug() << "Device Controller: Update requested";
+  qInfo() << "Device Controller: Update requested";
 }
 
 void DeviceController::OnDeviceInfoReceived(const DeviceInfo& info) {
   if (info.id != device_id_) {
-    qDebug() << "Device Controller: Got update for wrong device, skipping";
-    qDebug() << "Device Controller: Expected:" << device_id_ << "Got:" << info.id;
+    qInfo() << "Device Controller: Got update for wrong device, skipping";
+    qInfo() << "Device Controller: Expected:" << device_id_ << "Got:" << info.id;
 
     return;
   }
@@ -114,12 +114,12 @@ void DeviceController::OnDeviceInfoReceived(const DeviceInfo& info) {
   const double receive_time = CurrentTime();
   constexpr double ignore_delta = 0.8;
 
-  qDebug() << "Device Controller: received device info:" << info.name;
-  qDebug() << "Number of caps:" << info.capabilities.size() <<
+  qInfo() << "Device Controller: received device info:" << info.name;
+  qInfo() << "Number of caps:" << info.capabilities.size() <<
               "| Number of props:" << info.properties.size();
 
   if (capabilities_updates_.empty()) {
-    qDebug() << "Device Contoller: Filling updates array with" << info.capabilities.size() << "items";
+    qInfo() << "Device Contoller: Filling updates array with" << info.capabilities.size() << "items";
     capabilities_updates_.resize(info.capabilities.size());
   }
 
@@ -151,8 +151,8 @@ void DeviceController::OnDeviceInfoReceived(const DeviceInfo& info) {
 }
 
 void DeviceController::OnDeviceInfoReceivingFailed(const QString &message) {
-  qDebug() << "Device Controller: unable to receive device info!";
-  qDebug() << "Device Controller: Message:" << message;
+  qCritical() << "Device Controller: unable to receive device info!";
+  qCritical() << "Device Controller: Message:" << message;
 
   emit errorOccurred(message);
 }
@@ -160,7 +160,7 @@ void DeviceController::OnDeviceInfoReceivingFailed(const QString &message) {
 void DeviceController::OnActionExecutionFinishedSuccessfully(const QVariant &user_data) {
   // TODO: Add blocking accessing data from previous device
 
-  qDebug() << "Device Controller: Action executed successfully";
+  qInfo() << "Device Controller: Action executed successfully";
 
   const int index = user_data.toInt();
 
@@ -172,7 +172,7 @@ void DeviceController::OnActionExecutionFinishedSuccessfully(const QVariant &use
 void DeviceController::OnActionExecutionFailed(const QString &message, const QVariant &user_data) {
   // TODO: Add blocking accessing data from previous device
 
-  qDebug() << "Device Controller: Error executing action:" << message;
+  qCritical() << "Device Controller: Error executing action:" << message;
 
   const int index = user_data.toInt();
 

@@ -78,7 +78,7 @@ void DevicesModel::OnUserInfoReceived(const UserInfo &info) {
 }
 
 void DevicesModel::OnUserInfoReceivingFailed(const QString &message) {
-  qDebug() << "Devices Model: Error receiving devices:" << message;
+  qWarning() << "DevicesModel: Error receiving devices:" << message;
 
   emit dataLoadingFailed();
 }

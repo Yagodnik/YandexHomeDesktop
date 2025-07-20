@@ -3,7 +3,8 @@
 #include "RoomsModel.h"
 
 RoomsFilterModel::RoomsFilterModel(QObject *parent)
-  : QSortFilterProxyModel(parent) {}
+  : QSortFilterProxyModel(parent)
+{}
 
 QString RoomsFilterModel::householdId() const {
   return household_id_;

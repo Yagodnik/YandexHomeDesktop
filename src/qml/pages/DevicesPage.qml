@@ -134,14 +134,6 @@ Item {
     }
 
     Item {
-      // TODO: Add this
-      // UI.DefaultText {
-      //   anchors.centerIn: parent
-      //   text: "Пока что у вас нет устройств"
-      //
-      //   visible: deviceModel.count === 0
-      // }
-
       ListView {
         id: roomsList
         anchors.fill: parent

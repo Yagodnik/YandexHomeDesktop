@@ -3,7 +3,12 @@
 #include "DevicesModel.h"
 
 DevicesFilterModel::DevicesFilterModel(QObject *parent)
-  : QSortFilterProxyModel(parent) {}
+  : QSortFilterProxyModel(parent)
+{
+  connect(this, &QAbstractItemModel::rowsInserted, this, &DevicesFilterModel::countChanged);
+  connect(this, &QAbstractItemModel::rowsRemoved,  this, &DevicesFilterModel::countChanged);
+  connect(this, &QAbstractItemModel::modelReset,   this, &DevicesFilterModel::countChanged);
+}
 
 QString DevicesFilterModel::householdId() const {
   return household_id_;
@@ -11,6 +16,10 @@ QString DevicesFilterModel::householdId() const {
 
 QString DevicesFilterModel::roomId() const {
   return room_id_;
+}
+
+int DevicesFilterModel::GetCount() const {
+  return rowCount();
 }
 
 void DevicesFilterModel::setHouseholdId(const QString &id) {

@@ -16,6 +16,19 @@ Column {
     font.bold: true
   }
 
+  DevicesFilterModel {
+    id: filteredModel
+    sourceModel: devicesModel
+    householdId: model.householdId
+    roomId: model.roomId
+  }
+
+  UI.DefaultText {
+    text: "В этой комнате нет устройств!"
+
+    visible: filteredModel.count === 0
+  }
+
   ListView {
     id: devicesList
     clip: true
@@ -25,11 +38,7 @@ Column {
     width: parent.width
     height: contentHeight
 
-    model: DevicesFilterModel {
-      sourceModel: devicesModel
-      householdId: model.householdId
-      roomId: model.roomId
-    }
+    model: filteredModel
 
     delegate: Components.DeviceDelegate {
       width: devicesList.width

@@ -31,6 +31,8 @@ void Themes::SetTheme(const int theme)
   emit inactiveChanged();
   emit switchInactiveChanged();
   emit switchActiveChanged();
+  emit switchThumbChanged();
+  emit controlText2Changed();
   emit trackColorChanged();
   emit shadowColorChanged();
 }
@@ -91,7 +93,6 @@ QColor Themes::GetShadowColor() const {
   return base;
 }
 
-// Setters (if needed for QML write access)
 void Themes::SetMainText(const QString& text) {
   if (active_theme_.main_text != text) {
     active_theme_.main_text = text;

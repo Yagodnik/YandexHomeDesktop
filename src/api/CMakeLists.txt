@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 find_package(Qt6 COMPONENTS Core Network Gui REQUIRED)
 
-add_library(YandexHomeApi SHARED
+add_library(YandexHomeApi STATIC
         YandexHomeApi.cpp
         YandexHomeApi.h
         YandexAccount.cpp

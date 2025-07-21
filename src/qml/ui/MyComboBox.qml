@@ -13,7 +13,8 @@ ComboBox {
   property color textColor: themes.controlText
   property color popupBackground: themes.headerBackground
 
-  font.pointSize: 14
+  font.pixelSize: 14
+  focusPolicy: Qt.StrongFocus
 
   signal indexSelected(int index)
 
@@ -21,8 +22,8 @@ ComboBox {
     text: root.displayText
     color: themes.controlText2
     verticalAlignment: Text.AlignVCenter
-    anchors.centerIn: root
     leftPadding: 12
+    anchors.fill: parent
     wrapMode: Text.WordWrap
   }
 
@@ -37,35 +38,11 @@ ComboBox {
 
   indicator: Item {}
 
-  delegate: ItemDelegate {
-    width: root.width
-    height: 32
-    highlighted: root.highlightedIndex === index
-
-    background: Rectangle {
-      anchors.fill: parent
-      radius: 8
-      color: highlighted ? themes.accent : "transparent"
-    }
-
-    contentItem: Text {
-      text: model.displayText
-      color: highlighted ? themes.controlText2 : root.textColor
-      verticalAlignment: Text.AlignVCenter
-      wrapMode: Text.WordWrap
-    }
-
-    onClicked: {
-      root.currentIndex = index
-      root.popup.close()
-    }
-  }
-
   popup: Popup {
     y: root.height + 4
     width: root.width
-    implicitHeight: contentItem.implicitHeight
     padding: 0
+    focus: true
 
     background: Item {
       id: shadowContainer
@@ -92,30 +69,42 @@ ComboBox {
 
     contentItem: ListView {
       id: listView
-      model: root.delegateModel
-      currentIndex: root.highlightedIndex
+      model: root.model
       clip: true
       interactive: true
-      implicitHeight: contentHeight > 200 ? 200 : contentHeight
+      currentIndex: root.currentIndex
+      implicitHeight: Math.min(contentHeight, 200)
 
-      highlightRangeMode: ListView.ApplyRange
       highlightMoveDuration: 0
+      highlightRangeMode: ListView.ApplyRange
 
       delegate: Item {
         width: root.width
         height: 32
 
+        Rectangle {
+          anchors.fill: parent
+          radius: 8
+          color: ListView.isCurrentItem ? themes.accent : "transparent"
+        }
+
         Text {
-          text: model.displayText
+          text: model.displayText || modelData
           anchors.verticalCenter: parent.verticalCenter
-          color: themes.controlText
+          anchors.left: parent.left
+          anchors.leftMargin: 12
+          color: ListView.isCurrentItem ? themes.controlText2 : root.textColor
+          wrapMode: Text.WordWrap
         }
 
         MouseArea {
           anchors.fill: parent
           cursorShape: Qt.PointingHandCursor
+          hoverEnabled: true
 
           onClicked: {
+            root.currentIndex = index
+            root.activated(index)
             root.indexSelected(index)
             root.popup.close()
           }
@@ -123,5 +112,4 @@ ComboBox {
       }
     }
   }
-
 }

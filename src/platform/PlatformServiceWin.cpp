@@ -8,7 +8,7 @@ void PlatformServiceWin::ShowWindow(const QRect &icon) {
 
   // TODO: Add taskbar position here
   window_->setPosition(
-    icon.x(),
+    icon.x() - 200,
     icon.y() - window_->height() - 50
   );
 

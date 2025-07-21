@@ -64,7 +64,9 @@ void LogManager::CreateLogFile() {
 
   log_file_.setFileName(path);
   if (!log_file_.open(QIODevice::WriteOnly)) {
+    qDebug() << path;
     qCritical() << "LogManager: Failed to open log file";
+    exit(0);
     return;
   }
 

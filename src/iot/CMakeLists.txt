@@ -22,4 +22,4 @@ add_library(Iot
         properties/EventProperty.h
 )
 
-target_link_libraries(Iot PRIVATE Qt6::Core Qt6::Gui)
+target_link_libraries(Iot PRIVATE Qt6::Core Qt6::Gui Utils)

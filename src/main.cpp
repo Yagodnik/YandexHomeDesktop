@@ -72,7 +72,7 @@ void RegisterProperties() {
   qmlRegisterType<EventProperty>("YandexHomeDesktop.Properties", 1, 0, "Event");
 }
 
-static LogManager log_manager(LoggingMode::Both);
+static LogManager log_manager(LoggingMode::Console);
 
 int main(int argc, char *argv[]) {
   QGuiApplication app(argc, argv);

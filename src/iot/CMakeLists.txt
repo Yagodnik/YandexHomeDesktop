@@ -1,7 +1,7 @@
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui)
 
-add_library(Iot
+add_library(Iot STATIC
         capabilities/OnOffCapability.cpp
         capabilities/OnOffCapability.h
         capabilities/RangeCapability.cpp

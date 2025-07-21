@@ -111,6 +111,7 @@ Item {
 
       Rectangle {
         visible: model.index < householdsModel.count - 1
+
         height: 1
         anchors.left: parent.left
         anchors.right: parent.right

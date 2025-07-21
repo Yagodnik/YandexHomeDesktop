@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 12.0.1, 2025-07-03T03:25:41. -->
+<!-- Written by QtCreator 12.0.1, 2025-07-22T02:53:53. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -73,7 +73,15 @@
     <value type="Qt::CheckState" key="1@E:/YandexHomeDesktop/tests/ApiTests.h:ApiTests">Unchecked</value>
     <value type="Qt::CheckState" key="1@E:/YandexHomeDesktop/tests/ApiTests.h:CapabilitiesNullTest">Unchecked</value>
     <value type="Qt::CheckState" key="1@E:/YandexHomeDesktop/tests/ApiTests.h:CapabilitiesObjectTest">Unchecked</value>
+    <value type="Qt::CheckState" key="1@E:/YandexHomeDesktop/tests/ApiTests.h:PropertiesTest">Unchecked</value>
     <value type="Qt::CheckState" key="1@E:/YandexHomeDesktop/tests/ApiTests.h:TestCapabilities">Unchecked</value>
+    <value type="Qt::CheckState" key="1@E:/YandexHomeDesktop/tests/CapabilitiesTests.h:CapabilitiesTests">Unchecked</value>
+    <value type="Qt::CheckState" key="1@E:/YandexHomeDesktop/tests/CapabilitiesTests.h:TestColorSetting">Unchecked</value>
+    <value type="Qt::CheckState" key="1@E:/YandexHomeDesktop/tests/CapabilitiesTests.h:TestOnOff">Unchecked</value>
+    <value type="Qt::CheckState" key="1@E:/YandexHomeDesktop/tests/CapabilitiesTests.h:TestRange">Unchecked</value>
+    <value type="Qt::CheckState" key="1@E:/YandexHomeDesktop/tests/CapabilitiesTests.h:TestToggle">Unchecked</value>
+    <value type="Qt::CheckState" key="1@E:/YandexHomeDesktop/tests/ModelsTests.h:ModelsTests">Unchecked</value>
+    <value type="Qt::CheckState" key="1@E:/YandexHomeDesktop/tests/ModelsTests.h:TestColors">Unchecked</value>
     <value type="Qt::CheckState" key="1@E:/YandexHomeDesktop/tests/SerializationTests.h:FromJsonSimple">Unchecked</value>
     <value type="Qt::CheckState" key="1@E:/YandexHomeDesktop/tests/SerializationTests.h:FromJsonSubObject">Unchecked</value>
     <value type="Qt::CheckState" key="1@E:/YandexHomeDesktop/tests/SerializationTests.h:JsonArraySerializationTest">Unchecked</value>
@@ -81,6 +89,7 @@
     <value type="Qt::CheckState" key="1@E:/YandexHomeDesktop/tests/SerializationTests.h:JsonArrayTest">Unchecked</value>
     <value type="Qt::CheckState" key="1@E:/YandexHomeDesktop/tests/SerializationTests.h:JsonEnumDeserialization2Test">Unchecked</value>
     <value type="Qt::CheckState" key="1@E:/YandexHomeDesktop/tests/SerializationTests.h:JsonEnumDeserializationTest">Unchecked</value>
+    <value type="Qt::CheckState" key="1@E:/YandexHomeDesktop/tests/SerializationTests.h:JsonEnumNoValueTest">Unchecked</value>
     <value type="Qt::CheckState" key="1@E:/YandexHomeDesktop/tests/SerializationTests.h:JsonEnumSerializationTest">Unchecked</value>
     <value type="Qt::CheckState" key="1@E:/YandexHomeDesktop/tests/SerializationTests.h:JsonEnumTest">Unchecked</value>
     <value type="Qt::CheckState" key="1@E:/YandexHomeDesktop/tests/SerializationTests.h:JsonIntArrayTest">Unchecked</value>

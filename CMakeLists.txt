@@ -54,7 +54,7 @@ if (APPLE)
   target_sources(appYandexHomeDesktop PRIVATE resources/YandexHomeDesktop.icns)
 endif ()
 
-add_subdirectory(src/qml)
+add_subdirectory(src/qml/)
 add_subdirectory(src/qml/shaders)
 
 qt_add_qml_module(appYandexHomeDesktop

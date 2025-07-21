@@ -34,6 +34,7 @@ Item {
     id: tabText
     text: root.text
     font.bold: true
+    font.pixelSize: 14
 
     anchors.horizontalCenter: parent.horizontalCenter
     anchors.verticalCenter: parent.verticalCenter

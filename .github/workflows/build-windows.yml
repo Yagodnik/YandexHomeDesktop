@@ -23,11 +23,12 @@ jobs:
           cache: true
 
       - name: Install Boost.Hana
+        shell: cmd
         run: |
           git clone --depth=1 https://github.com/boostorg/hana.git temp_hana
-          mkdir -p libs/boost
-          xcopy /E /I /Y temp_hana/include/boost libs/boost
-          copy temp_hana/include/boost/hana.hpp libs/boost/hana.hpp
+          mkdir libs\boost
+          xcopy /E /I /Y temp_hana\include\boost libs\boost
+          copy temp_hana\include\boost\hana.hpp libs\boost\hana.hpp
 
       - name: Set up Ninja
         uses: ashutoshvarma/setup-ninja@v1
@@ -53,7 +54,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="%Qt6_DIR%"
           cmake --build . --config Release
 
       - name: Make zip achieve from build folder

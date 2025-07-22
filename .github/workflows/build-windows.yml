@@ -30,8 +30,8 @@ jobs:
           xcopy /E /I /Y temp_hana\include\boost libs\boost
           copy temp_hana\include\boost\hana.hpp libs\boost\hana.hpp
 
-      - name: Set up Ninja
-        uses: ashutoshvarma/setup-ninja@v1
+      # - name: Set up Ninja
+      #  uses: ashutoshvarma/setup-ninja@v1
 
       - name: Clone and build QtKeychain with Qt6
         run: |

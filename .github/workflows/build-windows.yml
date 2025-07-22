@@ -49,6 +49,7 @@ jobs:
           
           xcopy /E /I /Y qtkeychain\include\qtkeychain libs\qtkeychain\include\qtkeychain
           copy qtkeychain\build\*.dll libs\qtkeychain\lib\libqt6keychain.dll
+        shell: cmd
 
       - name: Building application
         run: |

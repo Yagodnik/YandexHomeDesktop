@@ -28,7 +28,7 @@ jobs:
           mkdir -p libs/boost
           xcopy /E /I /Y temp_hana/include/boost libs/boost
           copy temp_hana/include/boost/hana.hpp libs/boost/hana.hpp
-          del /Q /F /S temp_hana
+          Remove-Item -Recurse -Force temp_hana
 
       - name: Set up Ninja
         uses: ashutoshvarma/setup-ninja@v1

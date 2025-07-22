@@ -1,7 +1,6 @@
 name: Windows build
 
 on:
-  repository_dispatch:
   workflow_dispatch:
 
 jobs:

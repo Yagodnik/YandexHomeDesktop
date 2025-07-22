@@ -39,7 +39,7 @@ jobs:
           cd qtkeychain
           mkdir build
           cd build
-          cmake -DBUILD_WITH_QT6=1 ..
+          cmake -G "MinGW Makefiles" -DBUILD_WITH_QT6=1 ..
           cmake --build . 
 
       - name: Copy QtKeychain headers and DLL
@@ -54,7 +54,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="%Qt6_DIR%"
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="%Qt6_DIR%" -G "MinGW Makefiles"
           cmake --build . --config Release
 
       - name: Make zip achieve from build folder

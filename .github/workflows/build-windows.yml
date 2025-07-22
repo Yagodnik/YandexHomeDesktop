@@ -1,0 +1,70 @@
+name: Windows build
+
+on:
+  workflow_dispatch:
+
+# Test
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          aqtversion: '==3.1.*'
+          version: '6.9.1'
+          host: 'windows'
+          target: 'desktop'
+          arch: 'win64_mingw'
+          modules: 'qt5compat qtnetworkauth'
+          cache: true
+
+      - name: Install Boost.Hana
+        run: |
+          git clone --depth=1 https://github.com/boostorg/hana.git temp_hana
+          mkdir -p libs/boost
+          xcopy /E /I /Y temp_hana/include/boost libs/boost
+          copy temp_hana/include/boost/hana.hpp libs/boost/hana.hpp
+          del /Q /F /S temp_hana
+
+      - name: Set up Ninja
+        uses: ashutoshvarma/setup-ninja@v1
+
+      - name: Clone and build QtKeychain with Qt6
+        run: |
+          git clone --depth=1 https://github.com/frankosterfeld/qtkeychain.git qtkeychain
+          cd qtkeychain
+          mkdir build
+          cd build
+          cmake -DBUILD_WITH_QT6=1 ..
+          cmake --build . 
+
+      - name: Copy QtKeychain headers and DLL
+        run: |
+          mkdir libs\qtkeychain\include\qtkeychain
+          mkdir libs\qtkeychain\lib
+          
+          xcopy /E /I /Y qtkeychain\include\qtkeychain libs\qtkeychain\include\qtkeychain
+          copy qtkeychain\build\*.dll libs\qtkeychain\lib\libqt6keychain.dll
+
+      - name: Building application
+        run: |
+          mkdir build
+          cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          cmake --build . --config Release
+
+      - name: Make zip achieve from build folder
+        run: |
+          powershell Compress-Archive -Path build\* -DestinationPath build.zip
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifact
+          path: build.zip

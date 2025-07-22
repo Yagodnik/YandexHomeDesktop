@@ -1,0 +1,312 @@
+{
+  "modes": [
+    {
+      "id": "wet_cleaning",
+      "name": "Влажная уборка"
+    },
+    {
+      "id": "dry_cleaning",
+      "name": "Сухая уборка"
+    },
+    {
+      "id": "mixed_cleaning",
+      "name": "Смешанная уборка"
+    },
+    {
+      "id": "auto",
+      "name": "Автоматический режим"
+    },
+    {
+      "id": "eco",
+      "name": "Экономичный режим"
+    },
+    {
+      "id": "smart",
+      "name": "Умный режим"
+    },
+    {
+      "id": "turbo",
+      "name": "Турбо"
+    },
+    {
+      "id": "cool",
+      "name": "Охлаждение"
+    },
+    {
+      "id": "dry",
+      "name": "Режим осушения"
+    },
+    {
+      "id": "fan_only",
+      "name": "Вентиляция"
+    },
+    {
+      "id": "heat",
+      "name": "Обогрев"
+    },
+    {
+      "id": "preheat",
+      "name": "Подогрев"
+    },
+    {
+      "id": "high",
+      "name": "Высокая скорость"
+    },
+    {
+      "id": "low",
+      "name": "Низкая скорость"
+    },
+    {
+      "id": "medium",
+      "name": "Средняя скорость"
+    },
+    {
+      "id": "max",
+      "name": "Максимальный"
+    },
+    {
+      "id": "min",
+      "name": "Минимальный"
+    },
+    {
+      "id": "fast",
+      "name": "Быстрый"
+    },
+    {
+      "id": "slow",
+      "name": "Медленный"
+    },
+    {
+      "id": "express",
+      "name": "Экспресс"
+    },
+    {
+      "id": "normal",
+      "name": "Нормальный"
+    },
+    {
+      "id": "quiet",
+      "name": "Тихий"
+    },
+    {
+      "id": "horizontal",
+      "name": "Горизонтальный"
+    },
+    {
+      "id": "stationary",
+      "name": "Неподвижный"
+    },
+    {
+      "id": "vertical",
+      "name": "Вертикальный"
+    },
+    {
+      "id": "supply_air",
+      "name": "Приток воздуха"
+    },
+    {
+      "id": "extraction_air",
+      "name": "Отток воздуха"
+    },
+    {
+      "id": "one",
+      "name": "Первый"
+    },
+    {
+      "id": "two",
+      "name": "Второй"
+    },
+    {
+      "id": "three",
+      "name": "Третий"
+    },
+    {
+      "id": "four",
+      "name": "Четвертый"
+    },
+    {
+      "id": "five",
+      "name": "Пятый"
+    },
+    {
+      "id": "six",
+      "name": "Шестой"
+    },
+    {
+      "id": "seven",
+      "name": "Седьмой"
+    },
+    {
+      "id": "eight",
+      "name": "Восьмой"
+    },
+    {
+      "id": "nine",
+      "name": "Девятый"
+    },
+    {
+      "id": "ten",
+      "name": "Десятый"
+    },
+    {
+      "id": "americano",
+      "name": "Американо"
+    },
+    {
+      "id": "cappuccino",
+      "name": "Капучино"
+    },
+    {
+      "id": "double_espresso",
+      "name": "Двойной эспрессо"
+    },
+    {
+      "id": "espresso",
+      "name": "Эспрессо"
+    },
+    {
+      "id": "latte",
+      "name": "Латте"
+    },
+    {
+      "id": "black_tea",
+      "name": "Черный чай"
+    },
+    {
+      "id": "flower_tea",
+      "name": "Цветочный чай"
+    },
+    {
+      "id": "green_tea",
+      "name": "Зеленый чай"
+    },
+    {
+      "id": "herbal_tea",
+      "name": "Травяной чай"
+    },
+    {
+      "id": "oolong_tea",
+      "name": "Чай улун"
+    },
+    {
+      "id": "puerh_tea",
+      "name": "Чай пуэр"
+    },
+    {
+      "id": "red_tea",
+      "name": "Красный чай"
+    },
+    {
+      "id": "white_tea",
+      "name": "Белый чай"
+    },
+    {
+      "id": "glass",
+      "name": "Мойка стекла"
+    },
+    {
+      "id": "intensive",
+      "name": "Интенсивный"
+    },
+    {
+      "id": "pre_rinse",
+      "name": "Ополаскивание"
+    },
+    {
+      "id": "aspic",
+      "name": "Холодец"
+    },
+    {
+      "id": "baby_food",
+      "name": "Детское питание"
+    },
+    {
+      "id": "baking",
+      "name": "Выпечка"
+    },
+    {
+      "id": "bread",
+      "name": "Хлеб"
+    },
+    {
+      "id": "boiling",
+      "name": "Варка"
+    },
+    {
+      "id": "cereals",
+      "name": "Крупы"
+    },
+    {
+      "id": "cheesecake",
+      "name": "Чизкейк"
+    },
+    {
+      "id": "deep_fryer",
+      "name": "Фритюр"
+    },
+    {
+      "id": "dessert",
+      "name": "Десерты"
+    },
+    {
+      "id": "fowl",
+      "name": "Дичь"
+    },
+    {
+      "id": "frying",
+      "name": "Жарка"
+    },
+    {
+      "id": "macaroni",
+      "name": "Макароны"
+    },
+    {
+      "id": "milk_porridge",
+      "name": "Молочная каша"
+    },
+    {
+      "id": "multicooker",
+      "name": "Мультиповар"
+    },
+    {
+      "id": "pasta",
+      "name": "Паста"
+    },
+    {
+      "id": "pilaf",
+      "name": "Плов"
+    },
+    {
+      "id": "pizza",
+      "name": "Пицца"
+    },
+    {
+      "id": "sauce",
+      "name": "Соус"
+    },
+    {
+      "id": "slow_cook",
+      "name": "Томление"
+    },
+    {
+      "id": "soup",
+      "name": "Суп"
+    },
+    {
+      "id": "steam",
+      "name": "Пар"
+    },
+    {
+      "id": "stewing",
+      "name": "Тушение"
+    },
+    {
+      "id": "vacuum",
+      "name": "Вакуум"
+    },
+    {
+      "id": "yogurt",
+      "name": "Йогурт"
+    }
+  ]
+}

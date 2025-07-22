@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- Your app's bundle identifier -->
+  <key>CFBundleIdentifier</key>
+  <string>com.artemyagodnik.YandexHomeDesktop_Test</string>
+
+  <key>CFBundleName</key>
+  <string>YandexHomeDesktop</string>
+
+  <key>CFBundleVersion</key>
+  <string>0.1</string>
+
+  <key>CFBundleShortVersionString</key>
+  <string>0.1</string>
+
+  <!-- Hide dock icon and prevent Cmd+Tab presence -->
+  <!--
+  <key>LSUIElement</key>
+  <string>1</string>
+  -->
+
+  <!-- Optional: icon file (if you have one in your bundle) -->
+  <!--
+  <key>CFBundleIconFile</key>
+  <string>AppIcon.icns</string>
+  -->
+
+  <key>CFBundleIconFile</key>
+  <string>YandexHomeDesktop</string>
+</dict>
+</plist>

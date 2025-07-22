@@ -1,0 +1,31 @@
+{
+  "icons": {
+    "amperage": "amperage.svg",
+    "battery_level": "battery_level.svg",
+    "button": "button.svg",
+    "co2_level": "co2_level.svg",
+    "electricity_meter": "electricity_meter.svg",
+    "food_level": "food_level.svg",
+    "gas": "gas.svg",
+    "gas_meter": "gas_meter.svg",
+    "heat_meter": "heat_meter.svg",
+    "humidity": "humidity.svg",
+    "illumination": "illumination.svg",
+    "meter": "meter.svg",
+    "motion": "motion.svg",
+    "open": "open.svg",
+    "pm1_density": "pm1_density.svg",
+    "pm2": "pm2.5_density.svg",
+    "pm10_density": "pm10_density.svg",
+    "power": "power.svg",
+    "pressure": "pressure.svg",
+    "smoke": "smoke.svg",
+    "temperature": "temperature.svg",
+    "tvoc": "tvoc.svg",
+    "vibration": "vibration.svg",
+    "voltage": "voltage.svg",
+    "water_leak": "water_leak.svg",
+    "water_level": "water_level.svg",
+    "water_meter": "water_meter.svg"
+  }
+}

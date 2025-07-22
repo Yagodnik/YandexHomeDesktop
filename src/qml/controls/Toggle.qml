@@ -1,0 +1,49 @@
+import QtQuick
+import YandexHomeDesktop.Ui as UI
+import YandexHomeDesktop.Capabilities as Capabilities
+
+Item {
+  id: root
+  height: 48
+
+  Capabilities.Toggle {
+    id: toggleCapability
+
+    state: model.attributeState
+    parameters: model.attributeParameters
+    titlesList: iotTitles
+  }
+
+  Rectangle {
+    anchors.fill: parent
+    color: themes.headerBackground
+    radius: 16
+  }
+
+  UI.DefaultText {
+    anchors.left: parent.left
+    anchors.leftMargin: 12
+    anchors.verticalCenter: parent.verticalCenter
+
+    text: toggleCapability.title
+  }
+
+  Item {
+    anchors.right: parent.right
+    anchors.rightMargin: 12
+    anchors.verticalCenter: parent.verticalCenter
+    width: switchControl.width
+    height: switchControl.height
+
+    UI.MySwitch {
+      id: switchControl
+      anchors.fill: parent
+      checked: toggleCapability.value
+
+      onToggled: function(checked) {
+        const capability_action = toggleCapability.Create(checked);
+        capabilitiesModel.UseCapability(model.index, capability_action);
+      }
+    }
+  }
+}

@@ -1,0 +1,142 @@
+<RCC>
+  <qresource prefix="/">
+    <file>images/icon.png</file>
+    <file>images/login_github.svg</file>
+    <file>images/play.svg</file>
+    <file>images/logout.svg</file>
+    <file>images/reload.svg</file>
+    <file>images/light.svg</file>
+    <file>images/back.svg</file>
+    <file>images/household.svg</file>
+    <file>images/arrow.svg</file>
+    <file>images/warning.svg</file>
+    <file>images/on.svg</file>
+
+    <file>auth/secrets.json</file>
+    <file>callback/index.html</file>
+
+    <file>shaders/highlight.frag.qsb</file>
+
+    <file>themes/light.json</file>
+    <file>themes/dark.json</file>
+
+    <file>data/errorCodes.json</file>
+    <file>data/colors.json</file>
+    <file>data/colorModes.json</file>
+    <file>data/modes.json</file>
+    <file>data/instances.json</file>
+    <file>data/propertiesEvents.json</file>
+    <file>data/propertiesFloat.json</file>
+    <file>data/units.json</file>
+    <file>data/deviceIcons.json</file>
+    <file>data/propertiesIcons.json</file>
+
+    <file>images/modes/alarm.svg</file>
+    <file>images/modes/alice.svg</file>
+    <file>images/modes/candle.svg</file>
+    <file>images/modes/dinner.svg</file>
+    <file>images/modes/fantasy.svg</file>
+    <file>images/modes/garland.svg</file>
+    <file>images/modes/jungle.svg</file>
+    <file>images/modes/movie.svg</file>
+    <file>images/modes/neon.svg</file>
+    <file>images/modes/night.svg</file>
+    <file>images/modes/ocean.svg</file>
+    <file>images/modes/party.svg</file>
+    <file>images/modes/reading.svg</file>
+    <file>images/modes/rest.svg</file>
+    <file>images/modes/romance.svg</file>
+    <file>images/modes/siren.svg</file>
+    <file>images/modes/sunrise.svg</file>
+    <file>images/modes/sunset.svg</file>
+    <file>images/modes/unknown.svg</file>
+
+    <file>images/devices/camera.svg</file>
+    <file>images/devices/cooking.svg</file>
+    <file>images/devices/cooking_coffee_maker.svg</file>
+    <file>images/devices/cooking_kettle.svg</file>
+    <file>images/devices/cooking_multicooker.svg</file>
+    <file>images/devices/dishwasher.svg</file>
+    <file>images/devices/fan.svg</file>
+    <file>images/devices/hub.svg</file>
+    <file>images/devices/humidifier.svg</file>
+    <file>images/devices/iron.svg</file>
+    <file>images/devices/light.svg</file>
+    <file>images/devices/media_device.svg</file>
+    <file>images/devices/media_device_receiver.svg</file>
+    <file>images/devices/media_device_tv.svg</file>
+    <file>images/devices/media_device_tv_box.svg</file>
+    <file>images/devices/openable.svg</file>
+    <file>images/devices/openable_curtain.svg</file>
+    <file>images/devices/other.svg</file>
+    <file>images/devices/pet_feeder.svg</file>
+    <file>images/devices/purifier.svg</file>
+    <file>images/devices/refrigerator.svg</file>
+    <file>images/devices/sensor.svg</file>
+    <file>images/devices/smart_speaker.svg</file>
+    <file>images/devices/socket.svg</file>
+    <file>images/devices/switch.svg</file>
+    <file>images/devices/thermostat.svg</file>
+    <file>images/devices/thermostat_ac.svg</file>
+    <file>images/devices/unknown.svg</file>
+    <file>images/devices/vacuum_cleaner.svg</file>
+    <file>images/devices/washing_machine.svg</file>
+
+    <file>images/properties/amperage.svg</file>
+    <file>images/properties/battery_level.svg</file>
+    <file>images/properties/button.svg</file>
+    <file>images/properties/co2_level.svg</file>
+    <file>images/properties/electricity_meter.svg</file>
+    <file>images/properties/food_level.svg</file>
+    <file>images/properties/gas.svg</file>
+    <file>images/properties/gas_meter.svg</file>
+    <file>images/properties/heat_meter.svg</file>
+    <file>images/properties/humidity.svg</file>
+    <file>images/properties/illumination.svg</file>
+    <file>images/properties/meter.svg</file>
+    <file>images/properties/motion.svg</file>
+    <file>images/properties/open.svg</file>
+    <file>images/properties/pm1_density.svg</file>
+    <file>images/properties/pm2.5_density.svg</file>
+    <file>images/properties/pm10_density.svg</file>
+    <file>images/properties/power.svg</file>
+    <file>images/properties/pressure.svg</file>
+    <file>images/properties/smoke.svg</file>
+    <file>images/properties/temperature.svg</file>
+    <file>images/properties/tvoc.svg</file>
+    <file>images/properties/vibration.svg</file>
+    <file>images/properties/voltage.svg</file>
+    <file>images/properties/water_leak.svg</file>
+    <file>images/properties/water_level.svg</file>
+    <file>images/properties/water_meter.svg</file>
+    <file>images/properties/other.svg</file>
+
+    <file>fonts/Manrope-Bold.ttf</file>
+    <file>fonts/Manrope-ExtraBold.ttf</file>
+    <file>fonts/Manrope-ExtraLight.ttf</file>
+    <file>fonts/Manrope-Light.ttf</file>
+    <file>fonts/Manrope-Medium.ttf</file>
+    <file>fonts/Manrope-Regular.ttf</file>
+    <file>fonts/Manrope-SemiBold.ttf</file>
+  </qresource>
+
+  <qresource prefix="/pages">
+    <file alias="AuthPage.qml">../src/qml/pages/AuthPage.qml</file>
+    <file alias="LoadingPage.qml">../src/qml/pages/LoadingPage.qml</file>
+    <file alias="MainPage.qml">../src/qml/pages/MainPage.qml</file>
+    <file alias="ErrorPage.qml">../src/qml/pages/ErrorPage.qml</file>
+    <file alias="AuthCanceledPage.qml">../src/qml/pages/AuthCanceledPage.qml</file>
+    <file alias="DevicePage.qml">../src/qml/pages/DevicePage.qml</file>
+  </qresource>
+
+  <qresource prefix="/controls">
+    <file alias="OnOff.qml">../src/qml/controls/OnOff.qml</file>
+    <file alias="Range.qml">../src/qml/controls/Range.qml</file>
+    <file alias="Mode.qml">../src/qml/controls/Mode.qml</file>
+    <file alias="Toggle.qml">../src/qml/controls/Toggle.qml</file>
+    <file alias="ColorSetting.qml">../src/qml/controls/ColorSetting.qml</file>
+    <file alias="Unsupported.qml">../src/qml/controls/Unsupported.qml</file>
+    <file alias="PropertyFloat.qml">../src/qml/controls/PropertyFloat.qml</file>
+    <file alias="PropertyEvent.qml">../src/qml/controls/PropertyEvent.qml</file>
+  </qresource>
+</RCC>

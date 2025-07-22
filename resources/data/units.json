@@ -1,0 +1,20 @@
+{
+  "units": {
+    "unit.percent": "%",
+    "unit.temperature.celsius": "°",
+    "unit.temperature.kelvin": "K",
+    "unit.ampere": " Ам",
+    "unit.ppm": " ппм",
+    "unit.kilowatt_hour": " кВт⋅ч",
+    "unit.cubic_meter": " м³",
+    "unit.gigacalorie": " Гкал",
+    "unit.illumination.lux": " Люкс",
+    "unit.density.mcg_m3": " мкг/м3",
+    "unit.watt": "Ватт",
+    "unit.pressure.atm": " атм",
+    "unit.pressure.pascal": " па",
+    "unit.pressure.bar": " бар",
+    "unit.pressure.mmhg": " мм рт. ст",
+    "unit.volt": " V"
+  }
+}

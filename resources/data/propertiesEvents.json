@@ -1,0 +1,57 @@
+{
+  "vibration": {
+    "tilt": "переворачивание",
+    "fall": "падение",
+    "vibration": "вибрация"
+  },
+
+  "open": {
+    "opened": "открыто",
+    "closed": "закрыто"
+  },
+
+  "button": {
+    "click": "одиночное нажатие",
+    "double_click": "двойное нажатие",
+    "long_click": "долгое нажатие"
+  },
+
+  "motion": {
+    "detected": "обнаружено",
+    "not_detected": "не обнаружено"
+  },
+
+  "smoke": {
+    "detected": "обнаружено",
+    "not_detected": "не обнаружено",
+    "high": "высокий уровень"
+  },
+
+  "gas": {
+    "detected": "обнаружено",
+    "not_detected": "не обнаружено",
+    "high": "высокий уровень"
+  },
+
+  "battery_level": {
+    "low": "низкий",
+    "normal": "нормальный"
+  },
+
+  "food_level": {
+    "empty": "пустой",
+    "low": "низкий",
+    "normal": "нормальный"
+  },
+
+  "water_level": {
+    "empty": "пустой",
+    "low": "низкий",
+    "normal": "нормальный"
+  },
+
+  "water_leak": {
+    "dry": "нет протечки",
+    "leak": "протечка"
+  }
+}

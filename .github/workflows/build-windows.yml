@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@v4
         with:
           aqtversion: '==3.1.*'
           version: '6.9.1'
@@ -21,6 +21,7 @@ jobs:
           arch: 'win64_mingw'
           modules: 'qt5compat qtnetworkauth qtshadertools'
           tools: 'tools_mingw1310'
+          cache: true
 
       - name: Install Boost.Hana
         shell: cmd
@@ -48,8 +49,8 @@ jobs:
           mkdir libs\qtkeychain\lib
           
           copy qtkeychain\build\bin\libqt6keychain.dll libs\qtkeychain\lib\libqt6keychain.dll
-          copy qtkeychain\build\qtkeychain\qkeychain_export.h libs\qtkeychain\include\qkeychain_export.h
-          copy qtkeychain\qtkeychain\keychain.h libs\qtkeychain\include\keychain.h
+          copy qtkeychain\build\qtkeychain\qkeychain_export.h libs\qtkeychain\include\qtkeychain\qkeychain_export.h
+          copy qtkeychain\qtkeychain\keychain.h libs\qtkeychain\include\qtkeychain\keychain.h
         shell: cmd
 
       - name: Building application

@@ -19,8 +19,8 @@ jobs:
           host: 'windows'
           target: 'desktop'
           arch: 'win64_mingw'
-          modules: 'qt5compat qtnetworkauth'
-          cache: true
+          modules: 'qt5compat qtnetworkauth qtshadertools'
+          tools: 'tools_mingw1310'
 
       - name: Install Boost.Hana
         shell: cmd

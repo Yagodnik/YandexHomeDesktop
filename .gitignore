@@ -1,0 +1,16 @@
+.editorconfig
+/build
+/build-release
+/build-debug
+/build-profile
+/build-debinfo
+/build-qt-debug
+/build-qt-profile
+/deploy
+/libs
+/cmake
+/.idea
+/scratches
+/resources/auth/secrets.json
+.DS_Store
+CMakeLists.txt.user

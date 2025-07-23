@@ -15,6 +15,7 @@ Window {
   title: qsTr("Yandex Home Desktop")
   color: "transparent"
 
+  /* FPS Counter
   property int frames: 0
   property real fps: 0
   Timer {
@@ -35,7 +36,7 @@ Window {
     color: "red"
     font.pixelSize: 20
     text: "FPS: " + fps
-  }
+  } */
 
   Component.onCompleted: {
     platformService.SetWindow(window);

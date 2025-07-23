@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Controls
 import Qt5Compat.GraphicalEffects
 import YandexHomeDesktop.Ui as UI
 import YandexHomeDesktop.Components as Components
@@ -170,9 +171,34 @@ Item {
     }
 
     Flickable {
+      id: deviceControlsList
       contentHeight: contentItem.childrenRect.height
       clip: true
       interactive: true
+
+      ScrollBar.vertical: ScrollBar {
+        width: 10
+        policy: deviceControlsList.contentHeight > deviceControlsList.height ? ScrollBar.AlwaysOn : ScrollBar.AlwaysOff
+
+        opacity: hovered ? 1.0 : 0.2
+        Behavior on opacity {
+          NumberAnimation {
+            duration: 200
+            easing.type: Easing.InOutQuad
+          }
+        }
+
+        anchors.right: parent.right
+        anchors.rightMargin: 3
+
+        contentItem: Rectangle {
+          implicitWidth: 10
+          radius: 16
+          color: themes.headerBackground
+        }
+
+        background: Item {}
+      }
 
       Column {
         width: parent.width

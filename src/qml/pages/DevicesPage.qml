@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Controls
 import YandexHomeDesktop.Ui as UI
 import YandexHomeDesktop.Components as Components
 import YandexHomeDesktop.Models 1.0
@@ -142,6 +143,8 @@ Item {
 
         spacing: 8
 
+        ScrollBar.vertical: scrollBar
+
         // flickableDirection: Flickable.VerticalFlick
         // boundsBehavior: Flickable.StopAtBounds
 
@@ -153,6 +156,24 @@ Item {
         delegate: Components.RoomDevicesList {
           width: roomsList.width
         }
+      }
+
+      ScrollBar {
+        id: scrollBar
+
+        width: 10
+        height: roomsList.height
+        anchors.left: roomsList.right
+        anchors.leftMargin: 4
+        policy: roomsList.contentHeight > roomsList.height ? ScrollBar.AlwaysOn : ScrollBar.AlwaysOff
+
+        contentItem: Rectangle {
+          implicitWidth: 10
+          radius: 4
+          color: themes.headerBackground
+        }
+
+        background: Item {}
       }
     }
   }

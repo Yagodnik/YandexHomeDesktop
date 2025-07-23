@@ -68,7 +68,7 @@ namespace Serialization {
       } else if constexpr (std::is_floating_point_v<T>) {
         return value.toDouble();
       } else if constexpr (traits::is_enumeration<T>) {
-        return T::operator[](value.toString());
+        return T::AsValue(value.toString());
       } else if constexpr (traits::is_qlist_v<T>) {
         using Element = typename T::value_type;
         const auto arr = value.toArray();
@@ -96,7 +96,7 @@ namespace Serialization {
       } else if constexpr (std::is_floating_point_v<T>) {
         return static_cast<double>(value);
       } else if constexpr (traits::is_enumeration<T>) {
-        return T::operator[](value);
+        return T::AsString(value);
       } else if constexpr (traits::is_qlist_v<T>) {
         QJsonArray arr;
 

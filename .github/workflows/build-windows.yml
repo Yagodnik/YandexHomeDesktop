@@ -3,8 +3,6 @@ name: Windows build
 on:
   workflow_dispatch:
 
-# Test
-
 jobs:
   build:
     runs-on: windows-latest
@@ -14,26 +12,27 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@v4
         with:
           aqtversion: '==3.1.*'
           version: '6.9.1'
           host: 'windows'
           target: 'desktop'
           arch: 'win64_mingw'
-          modules: 'qt5compat qtnetworkauth'
+          modules: 'qt5compat qtnetworkauth qtshadertools'
+          tools: 'tools_mingw1310'
           cache: true
 
       - name: Install Boost.Hana
+        shell: cmd
         run: |
           git clone --depth=1 https://github.com/boostorg/hana.git temp_hana
-          mkdir -p libs/boost
-          xcopy /E /I /Y temp_hana/include/boost libs/boost
-          copy temp_hana/include/boost/hana.hpp libs/boost/hana.hpp
-          del /Q /F /S temp_hana
+          mkdir libs\boost
+          xcopy /E /I /Y temp_hana\include\boost libs\boost
+          copy temp_hana\include\boost\hana.hpp libs\boost\hana.hpp
 
-      - name: Set up Ninja
-        uses: ashutoshvarma/setup-ninja@v1
+      # - name: Set up Ninja
+      #  uses: ashutoshvarma/setup-ninja@v1
 
       - name: Clone and build QtKeychain with Qt6
         run: |
@@ -41,7 +40,7 @@ jobs:
           cd qtkeychain
           mkdir build
           cd build
-          cmake -DBUILD_WITH_QT6=1 ..
+          cmake -G "MinGW Makefiles" -DBUILD_WITH_QT6=1 ..
           cmake --build . 
 
       - name: Copy QtKeychain headers and DLL
@@ -49,22 +48,49 @@ jobs:
           mkdir libs\qtkeychain\include\qtkeychain
           mkdir libs\qtkeychain\lib
           
-          xcopy /E /I /Y qtkeychain\include\qtkeychain libs\qtkeychain\include\qtkeychain
-          copy qtkeychain\build\*.dll libs\qtkeychain\lib\libqt6keychain.dll
+          copy qtkeychain\build\bin\libqt6keychain.dll libs\qtkeychain\lib\libqt6keychain.dll
+          copy qtkeychain\build\qtkeychain\qkeychain_export.h libs\qtkeychain\include\qtkeychain\qkeychain_export.h
+          copy qtkeychain\qtkeychain\keychain.h libs\qtkeychain\include\qtkeychain\keychain.h
+        shell: cmd
+
+      - name: Generate secrets.json
+        run: python3 scripts/generate-secrets.py
+        env:
+          YANDEX_CLIENT_ID: ${{ secrets.YANDEX_CLIENT_ID }}
 
       - name: Building application
         run: |
           mkdir build
           cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release
-          cmake --build . --config Release
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="%Qt6_DIR%" -G "MinGW Makefiles"
+          cmake --build . --config Release --parallel
 
-      - name: Make zip achieve from build folder
-        run: |
-          powershell Compress-Archive -Path build\* -DestinationPath build.zip
-
-      - name: Upload build artifact
+      - name: Upload build folder as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: build-artifact
-          path: build.zip
+          name: build-folder
+          path: build/
+
+#      - name: Copy .exe and libqtkeychain.dll to deploy folder
+#        run: |
+#          mkdir deploy
+#          copy build\YandexHomeDesktop.exe deploy\
+#          copy libs\qtkeychain\lib\libqt6keychain.dll deploy\
+#          # Copy YandexHomeDesktop folder from build/
+#          # Copy dlls
+#        shell: cmd
+#
+#      - name: Windeployqt
+#        run: |
+#          cd deploy
+#          # Run windeploy qt
+#
+#      - name: Make zip achieve from build folder
+#        run: |
+#          powershell Compress-Archive -Path build\**\* -DestinationPath build.zip
+#
+#      - name: Upload build artifact
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: build-artifact
+#          path: build.zip

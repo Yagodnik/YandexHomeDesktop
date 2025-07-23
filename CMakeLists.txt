@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-include(cmake/qt6-config.cmake)
+include(cmake/qt6-config.cmake OPTIONAL)
 
 project(YandexHomeDesktop VERSION 0.1 LANGUAGES CXX)
 

@@ -88,9 +88,9 @@ void SerializationTests::JsonEnumTest() {
   QVERIFY(my_enum["MyEnum::A"] != MyEnumeration::B);
   QVERIFY(my_enum["MagicString!"] == MyEnumeration::Magic);
 
-  QVERIFY(my_enum[MyEnumeration::A] == "MyEnum::A");
-  QVERIFY(my_enum[MyEnumeration::B] != "MyEnum::A");
-  QVERIFY(my_enum[MyEnumeration::Magic] == "MagicString!");
+  QVERIFY(my_enum.AsString(MyEnumeration::A) == "MyEnum::A");
+  QVERIFY(my_enum.AsString(MyEnumeration::B) != "MyEnum::A");
+  QVERIFY(my_enum.AsString(MyEnumeration::Magic) == "MagicString!");
 }
 
 void SerializationTests::JsonEnumSerializationTest() {

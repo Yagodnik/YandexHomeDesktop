@@ -19,14 +19,14 @@ void DeviceAttribute::ResumePolling() {
 }
 
 void DeviceAttribute::UpdateFrom(const CapabilityObject &source) {
-  name = CapabilityType::operator[](source.type);
+  name = CapabilityType::AsString(source.type);
   state = source.state;
   parameters = source.parameters;
   type = Capability;
 }
 
 void DeviceAttribute::UpdateFrom(const PropertyObject &source) {
-  name = PropertyType::operator[](source.type);
+  name = PropertyType::AsString(source.type);
   state = source.state;
   parameters = source.parameters;
   type = Property;

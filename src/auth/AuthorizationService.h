@@ -38,7 +38,6 @@ private:
     (QString, auth_url),
     (QString, access_token_url),
     (QString, client_id),
-    (QString, client_secret),
     (QString, redirect_base),
     (int, redirect_port),
     (QStringList, scopes)

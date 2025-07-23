@@ -44,11 +44,12 @@ jobs:
 
       - name: Copy QtKeychain headers and DLL
         run: |
-          mkdir libs\qtkeychain\include\qtkeychain
+          mkdir libs\qtkeychain\include
           mkdir libs\qtkeychain\lib
           
-          xcopy /E /I /Y qtkeychain\include\qtkeychain libs\qtkeychain\include\qtkeychain
-          copy qtkeychain\build\*.dll libs\qtkeychain\lib\libqt6keychain.dll
+          copy qtkeychain\build\bin\libqt6keychain.dll libs\qtkeychain\lib\libqt6keychain.dll
+          copy qtkeychain\build\qtkeychain\qkeychain_export.h libs\qtkeychain\include\qkeychain_export.h
+          copy qtkeychain\qtkeychain\keychain.h libs\qtkeychain\include\keychain.h
         shell: cmd
 
       - name: Building application

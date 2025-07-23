@@ -63,14 +63,34 @@ jobs:
           mkdir build
           cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="%Qt6_DIR%" -G "MinGW Makefiles"
-          cmake --build . --config Release
+          cmake --build . --config Release --parallel
 
-      - name: Make zip achieve from build folder
-        run: |
-          powershell Compress-Archive -Path build\**\* -DestinationPath build.zip
-
-      - name: Upload build artifact
+      - name: Upload build folder as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: build-artifact
-          path: build.zip
+          name: build-folder
+          path: build/
+
+#      - name: Copy .exe and libqtkeychain.dll to deploy folder
+#        run: |
+#          mkdir deploy
+#          copy build\YandexHomeDesktop.exe deploy\
+#          copy libs\qtkeychain\lib\libqt6keychain.dll deploy\
+#          # Copy YandexHomeDesktop folder from build/
+#          # Copy dlls
+#        shell: cmd
+#
+#      - name: Windeployqt
+#        run: |
+#          cd deploy
+#          # Run windeploy qt
+#
+#      - name: Make zip achieve from build folder
+#        run: |
+#          powershell Compress-Archive -Path build\**\* -DestinationPath build.zip
+#
+#      - name: Upload build artifact
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: build-artifact
+#          path: build.zip

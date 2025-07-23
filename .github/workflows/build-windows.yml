@@ -53,6 +53,11 @@ jobs:
           copy qtkeychain\qtkeychain\keychain.h libs\qtkeychain\include\qtkeychain\keychain.h
         shell: cmd
 
+      - name: Generate secrets.json
+        run: python3 scripts/generate-secrets.py
+        env:
+          YANDEX_CLIENT_ID: ${{ secrets.YANDEX_CLIENT_ID }}
+
       - name: Building application
         run: |
           mkdir build
@@ -62,7 +67,7 @@ jobs:
 
       - name: Make zip achieve from build folder
         run: |
-          powershell Compress-Archive -Path build\* -DestinationPath build.zip
+          powershell Compress-Archive -Path build\**\* -DestinationPath build.zip
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4

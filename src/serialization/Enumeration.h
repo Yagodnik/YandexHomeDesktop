@@ -104,21 +104,7 @@ struct name : IEnumeration {                                        \
     JSON_ENUM_BI_PAIRS(__VA_ARGS__)                                 \
   };                                                                \
                                                                     \
-  static Type operator[](const QString& key) {                      \
-    auto it = mapping.find(key);                                    \
-                                                                    \
-    if (it == mapping.end()) {                                      \
-      return Unknown;                                               \
-    }                                                               \
-                                                                    \
-    return *it;                                                     \
-  }                                                                 \
-                                                                    \
-  static Type operator[](const char* key) {                         \
-    return operator[](QString::fromUtf8(key));                      \
-  }                                                                 \
-                                                                    \
-  static const QString& operator[](const Type& type) {              \
+  static const QString& AsString(const Type& type) {                \
     auto it = bi_mapping.find(type);                                \
                                                                     \
     if (it == bi_mapping.end()) {                                   \
@@ -128,11 +114,13 @@ struct name : IEnumeration {                                        \
     return *it;                                                     \
   }                                                                 \
                                                                     \
-  static const QString& AsString(const Type& type) {                \
-    return operator[](type);                                        \
-  }                                                                 \
-                                                                    \
   static Type AsValue(const QString& key) {                         \
-    return operator[](key);                                         \
+    auto it = mapping.find(key);                                    \
+                                                                    \
+    if (it == mapping.end()) {                                      \
+      return Unknown;                                               \
+    }                                                               \
+                                                                    \
+    return *it;                                                     \
   }                                                                 \
 };                                                                  \

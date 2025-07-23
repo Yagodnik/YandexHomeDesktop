@@ -45,7 +45,7 @@ jobs:
 
       - name: Copy QtKeychain headers and DLL
         run: |
-          mkdir libs\qtkeychain\include
+          mkdir libs\qtkeychain\include\qtkeychain
           mkdir libs\qtkeychain\lib
           
           copy qtkeychain\build\bin\libqt6keychain.dll libs\qtkeychain\lib\libqt6keychain.dll

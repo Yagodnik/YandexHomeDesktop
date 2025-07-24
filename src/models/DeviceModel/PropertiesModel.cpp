@@ -16,6 +16,11 @@ PropertiesModel::PropertiesModel(DeviceController* controller, QObject* parent)
     &DeviceController::propertiesUpdateReady,
     this,
     &PropertiesModel::OnPropertiesUpdateReady);
+
+  connect(controller,
+    &DeviceController::errorOccurred,
+    this,
+    &PropertiesModel::OnPropertiesUpdateFailed);
 }
 
 void PropertiesModel::ResetModel() {
@@ -174,4 +179,12 @@ void PropertiesModel::OnPropertiesUpdateReady(const DeviceController::Properties
 
   emit dataChanged(top_left, bottom_right);
   emit dataLoaded();
+}
+
+void PropertiesModel::OnPropertiesUpdateFailed(const QString &error_message) {
+  qWarning() << "PropertiesModel: Failed to update properties. Error:" << error_message;
+
+  if (!is_initialized_) {
+    emit initializeFailed();
+  }
 }

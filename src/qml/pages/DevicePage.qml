@@ -22,14 +22,6 @@ Item {
   }
 
   Connections {
-    target: capabilitiesModel
-
-    function onDataLoaded() {
-      console.log("Device data loading - OK");
-    }
-  }
-
-  Connections {
     target: deviceController
 
     function onErrorOccurred(errorCode) {
@@ -99,22 +91,66 @@ Item {
     }
 
     UI.DefaultText {
+      id: deviceTitleText
       text: deviceDataModel.name
       anchors.verticalCenter: parent.verticalCenter
       anchors.horizontalCenter: parent.horizontalCenter
       color: themes.controlText
     }
+
+    MouseArea {
+      id: hoverArea
+      anchors.fill: deviceOffile
+      hoverEnabled: !root.deviceOnline
+    }
+
+    Image {
+      id: deviceOffile
+
+      anchors.left: deviceTitleText.right
+      anchors.leftMargin: 4
+      anchors.verticalCenter: deviceTitleText.verticalCenter
+      source: "qrc:/images/warning.svg"
+      visible: !root.deviceOnline
+
+      ToolTip.visible: hoverArea.containsMouse
+      ToolTip.delay: 300
+      ToolTip.text: "Устройство оффлайн!"
+    }
   }
 
+  property var deviceOnline: deviceDataModel.isOnline ?? false
   property var okCount: 0
   property var failCount: 0
+
+  function initializationOk() {
+    okCount++;
+
+    if (okCount >= 3) {
+      deviceStates.currentIndex = 2;
+    }
+  }
+
+  function initializationFailed() {
+    // Switching to error screen
+    deviceStates.currentIndex = 1;
+  }
 
   Connections {
     target: capabilitiesModel
 
+    function onDataLoaded() {
+      console.log("Capabilities Model: Device data loading - OK");
+    }
+
     function onInitialized() {
-      console.log("capabilities loaded");
-      okCount++;
+      console.log("Capabilities Model: Capabilities loaded");
+      initializationOk();
+    }
+
+    function onInitializeFailed() {
+      console.log("Capabilities Model: Capabilities failed");
+      initializationFailed();
     }
   }
 
@@ -122,20 +158,37 @@ Item {
     target: propertiesModel
 
     function onInitialized() {
-      console.log("propeties loaded");
-      okCount++;
+      console.log("PropertiesModel: Properties loaded");
+      initializationOk();
+    }
+
+    function onInitializeFailed() {
+      console.log("PropertiesModel: Properties failed");
+      initializationFailed();
+    }
+  }
+
+  Connections {
+    target: deviceDataModel
+
+    function onInitialized() {
+      console.log("DeviceDataModel: Data loaded");
+      initializationOk();
+    }
+
+    function onInitializeFailed() {
+      console.log("DeviceDataModel: Data loading failed");
+      initializationFailed();
     }
   }
 
   StackLayout {
+    id: deviceStates
     width: parent.width
     anchors.top: topHeader.bottom
     anchors.bottom: parent.bottom
 
-    // currentIndex: (okCount !== 2 && failCount === 0) ? 0 :
-    //   ((failCount !== 0 || !deviceDataModel.isOnline) ? 1 : (okCount === 2 && failCount === 0) ? 2 : 1)
-
-    currentIndex: 2
+    currentIndex: 0
 
     Item {
       UI.MyProgressIndicator {
@@ -159,13 +212,19 @@ Item {
         }
 
         UI.DefaultText {
-          text: "Нет связи с устройством"
+          text: "Что-то пошло не так"
           anchors.horizontalCenter: parent.horizontalCenter
         }
 
         UI.MyButton {
           text: "Попробовать снова"
           anchors.horizontalCenter: parent.horizontalCenter
+
+          onClicked: {
+            root.okCount = 0;
+            deviceStates.currentIndex = 0;
+            deviceController.TryReloadDevice();
+          }
         }
       }
     }

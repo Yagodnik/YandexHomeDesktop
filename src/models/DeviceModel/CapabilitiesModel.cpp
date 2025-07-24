@@ -138,3 +138,11 @@ void CapabilitiesModel::OnCapabilitiesUpdated(const DeviceController::Capabiliti
   emit dataChanged(top_left, bottom_right);
   emit dataLoaded();
 }
+
+void CapabilitiesModel::OnCapabilitiesUpdateFailed(const QString &error_message) {
+  qWarning() << "CapabilitiesModel: Failed to update capabilities. Error:" << error_message;
+
+  if (!is_initialized_) {
+    emit initializeFailed();
+  }
+}

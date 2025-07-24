@@ -33,6 +33,7 @@ public:
 signals:
   void dataLoaded();
   void initialized();
+  void initializeFailed();
 
 public slots:
   void ResetModel();
@@ -58,4 +59,5 @@ private:
 
 private slots:
   void OnCapabilitiesUpdated(const DeviceController::CapabilitiesList& capabilities);
+  void OnCapabilitiesUpdateFailed(const QString &error_message);
 };

@@ -124,7 +124,7 @@ int main(int argc, char *argv[]) {
   const auto titles_list = new TitlesProvider(":/data/instances.json", &app);
   const auto events_list = new TitlesProvider(":/data/propertiesEvents.json", &app);
   const auto units_list = new UnitsList(&app);
-  const auto device_data_model = new DeviceDataModel(yandex_api, &app);
+  const auto device_data_model = new DeviceDataModel(device_controller, &app);
   const auto device_icons = new IconsProvider(":/data/deviceIcons.json", "devices", &app);
   const auto properties_icons = new IconsProvider(":/data/propertiesIcons.json", "properties", &app);
   // const auto capabilities_model = new CapabilitiesModel(yandex_api, &app);

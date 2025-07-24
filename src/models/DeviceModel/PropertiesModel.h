@@ -37,6 +37,7 @@ public:
 signals:
   void dataLoaded();
   void initialized();
+  void initializeFailed();
 
 private:
   DeviceController* controller_;
@@ -45,5 +46,6 @@ private:
 
 private slots:
   void OnPropertiesUpdateReady(const DeviceController::PropertiesList& properties);
+  void OnPropertiesUpdateFailed(const QString& error_message);
 };
 

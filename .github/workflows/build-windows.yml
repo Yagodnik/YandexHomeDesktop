@@ -85,7 +85,7 @@ jobs:
       - name: Run windeployqt
         run: |
           cd deploy
-          "%Qt6_DIR%\bin\windeployqt.exe" . --no-translations --qmldir "%GITHUB_WORKSPACE%\src"
+          & "$env:Qt6_DIR\bin\windeployqt.exe" . --no-translations --qmldir "$env:GITHUB_WORKSPACE\src"
 
       - name: Upload deploy folder as artifact
         uses: actions/upload-artifact@v4

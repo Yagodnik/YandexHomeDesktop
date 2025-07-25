@@ -85,9 +85,7 @@ jobs:
       - name: Run windeployqt
         run: |
           cd deploy
-          "%Qt6_DIR%\bin\windeployqt.exe" YandexHomeDesktop.exe ^
-            --no-translations ^
-            --qmldir "%GITHUB_WORKSPACE%\src"
+          "%Qt6_DIR%\bin\windeployqt.exe" . --no-translations --qmldir "%GITHUB_WORKSPACE%\src"
 
       - name: Upload deploy folder as artifact
         uses: actions/upload-artifact@v4

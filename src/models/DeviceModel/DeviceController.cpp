@@ -46,6 +46,10 @@ void DeviceController::LoadDevice(const QString &device_id) {
   emit loadRequestMade();
 }
 
+void DeviceController::TryReloadDevice() {
+  LoadDevice(device_id_);
+}
+
 void DeviceController::ContinuePollingIfNeeded() {
   if (is_in_use_) {
     qInfo() << "Device Controller: Continued polling for device" << device_id_;
@@ -110,6 +114,8 @@ void DeviceController::OnDeviceInfoReceived(const DeviceInfo& info) {
 
     return;
   }
+
+  emit deviceDataReady(info);
 
   const double receive_time = CurrentTime();
   constexpr double ignore_delta = 0.8;

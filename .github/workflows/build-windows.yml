@@ -31,9 +31,6 @@ jobs:
           xcopy /E /I /Y temp_hana\include\boost libs\boost
           copy temp_hana\include\boost\hana.hpp libs\boost\hana.hpp
 
-      # - name: Set up Ninja
-      #  uses: ashutoshvarma/setup-ninja@v1
-
       - name: Clone and build QtKeychain with Qt6
         run: |
           git clone --depth=1 https://github.com/frankosterfeld/qtkeychain.git qtkeychain
@@ -71,26 +68,26 @@ jobs:
           name: build-folder
           path: build/
 
-#      - name: Copy .exe and libqtkeychain.dll to deploy folder
-#        run: |
-#          mkdir deploy
-#          copy build\YandexHomeDesktop.exe deploy\
-#          copy libs\qtkeychain\lib\libqt6keychain.dll deploy\
-#          # Copy YandexHomeDesktop folder from build/
-#          # Copy dlls
-#        shell: cmd
-#
-#      - name: Windeployqt
-#        run: |
-#          cd deploy
-#          # Run windeploy qt
-#
-#      - name: Make zip achieve from build folder
-#        run: |
-#          powershell Compress-Archive -Path build\**\* -DestinationPath build.zip
-#
-#      - name: Upload build artifact
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: build-artifact
-#          path: build.zip
+      - name: Setup deploy folder
+        run: |
+          mkdir deploy
+          copy libs\qtkeychain\lib\libqt6keychain.dll deploy\
+          copy build\YandexHomeDesktop.exe deploy\
+          xcopy build\YandexHomeDesktop deploy\YandexHomeDesktop /E /I /Y
+          copy build\YandexHomeDesktopComponents.dll deploy\
+          copy build\YandexHomeDesktopIotControls.dll deploy\
+          copy build\YandexHomeDesktopPages.dll deploy\
+          copy build\YandexHomeDesktopUi.dll deploy\
+
+      - name: Run windeployqt
+        shell: cmd
+        run: |
+          set PATH=%Qt6_DIR%\bin;%PATH%
+          cd deploy
+          windeployqt . --no-translations --qmldir "%GITHUB_WORKSPACE%\src"
+
+      - name: Upload deploy folder as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy-folder
+          path: deploy/

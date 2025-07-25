@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts 2.15
 import QtQuick.Dialogs
+import QtQuick.Controls
 import YandexHomeDesktop.Ui as UI
 import YandexHomeDesktop.Components as Components
 
@@ -169,6 +170,24 @@ Item {
         Components.ScenariosList {
           id: scenariosList
         }
+      }
+
+      ScrollBar {
+        id: scrollBar
+
+        width: 10
+        height: flickable.height
+        anchors.left: flickable.right
+        anchors.leftMargin: 4
+        policy: flickable.contentHeight > flickable.height ? ScrollBar.AlwaysOn : ScrollBar.AlwaysOff
+
+        contentItem: Rectangle {
+          implicitWidth: 10
+          radius: 4
+          color: themes.headerBackground
+        }
+
+        background: Item {}
       }
     }
   }

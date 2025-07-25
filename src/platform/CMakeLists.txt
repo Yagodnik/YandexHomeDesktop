@@ -4,7 +4,9 @@ set(PLATFORM_SPECIFIC_SRC "")
 set(PLATFORM_SPECIFIC_FRAMEWORKS "")
 
 if(APPLE)
-  set(PLATFORM_SPECIFIC_SRC macos/MacOSIntegration.mm)
+  set(PLATFORM_SPECIFIC_SRC macos/MacOSIntegration.mm
+          PlatformServiceLinux.cpp
+          PlatformServiceLinux.h)
   set_source_files_properties(macos/MacOSIntegration.mm PROPERTIES COMPILE_FLAGS "-x objective-c++")
   set(PLATFORM_SPECIFIC_FRAMEWORKS "-framework Cocoa")
 
@@ -13,14 +15,16 @@ if(APPLE)
           PlatformServiceMac.cpp
           ${PLATFORM_SPECIFIC_SRC}
   )
-endif()
-
-if(WIN32)
+elseif(UNIX)
+  add_library(PlatformService
+          PlatformService.cpp
+          PlatformServiceLinux.cpp
+  )
+elseif(WIN32)
   add_library(PlatformService
           PlatformService.cpp
           PlatformServiceWin.cpp
   )
 endif()
-
 
 target_link_libraries(PlatformService PRIVATE Qt6::Core Qt6::Quick ${PLATFORM_SPECIFIC_FRAMEWORKS})

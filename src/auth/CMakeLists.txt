@@ -17,11 +17,13 @@ target_link_libraries(YandexAuth PRIVATE
 )
 
 if (APPLE)
-target_link_libraries(YandexAuth PUBLIC
-        ${CMAKE_SOURCE_DIR}/libs/qtkeychain/lib/libqt6keychain.dylib)
+  target_link_libraries(YandexAuth PUBLIC
+          ${CMAKE_SOURCE_DIR}/libs/qtkeychain/lib/libqt6keychain.dylib)
+elseif (UNIX)
+  target_link_libraries(YandexAuth PUBLIC
+          ${CMAKE_SOURCE_DIR}/libs/qtkeychain/lib/libqt6keychain.so)
+elseif (WIN32)
+  target_link_libraries(YandexAuth PUBLIC
+          ${CMAKE_SOURCE_DIR}/libs/qtkeychain/lib/libqt6keychain.dll)
 endif()
 
-if (WIN32)
-target_link_libraries(YandexAuth PUBLIC
-        ${CMAKE_SOURCE_DIR}/libs/qtkeychain/lib/libqt6keychain.dll)
-endif()

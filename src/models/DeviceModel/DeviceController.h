@@ -14,6 +14,7 @@ public:
   explicit DeviceController(YandexHomeApi *api, QObject* parent = nullptr);
 
   Q_INVOKABLE void LoadDevice(const QString& device_id);
+  Q_INVOKABLE void TryReloadDevice();
   Q_INVOKABLE void ContinuePollingIfNeeded();
   Q_INVOKABLE void StopPolling();
   Q_INVOKABLE void ForgetDevice();
@@ -24,6 +25,7 @@ signals:
   void loadRequestMade();
   void capabilitiesUpdateReady(const CapabilitiesList& capabilities);
   void propertiesUpdateReady(const PropertiesList& properties);
+  void deviceDataReady(const DeviceInfo& info);
   void capabilityUsed(int index, const QVariantMap& state);
   void errorOccurred(const QString& error_message);
 

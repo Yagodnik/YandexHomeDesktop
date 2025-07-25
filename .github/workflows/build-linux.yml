@@ -1,4 +1,4 @@
-name: build-linux.yml
+name: Linux build
 on:
   workflow_dispatch:
 

@@ -1,0 +1,66 @@
+name: build-linux.yml
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          aqtversion: '==3.1.*'
+          version: '6.9.1'
+          host: 'linux'
+          target: 'desktop'
+          arch: 'gcc_64'
+          modules: 'qt5compat qtnetworkauth qtshadertools'
+          cache: true
+
+      - name: Install Boost.Hana
+        run: |
+          git clone --depth=1 https://github.com/boostorg/hana.git temp_hana
+          mkdir -p libs/boost
+          cp -r temp_hana/include/boost libs/boost/
+          cp temp_hana/include/boost/hana.hpp libs/boost/hana.hpp
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y libsecret-1-dev
+
+      - name: Clone and build QtKeychain with Qt6
+        run: |
+          git clone --depth=1 https://github.com/frankosterfeld/qtkeychain.git qtkeychain
+          mkdir qtkeychain/build
+          cd qtkeychain/build
+          cmake .. -DBUILD_WITH_QT6=ON -DCMAKE_BUILD_TYPE=Release
+          cmake --build . 
+
+      - name: Copy QtKeychain headers and .so
+        run: |
+          mkdir -p libs/qtkeychain/include/qtkeychain
+          mkdir -p libs/qtkeychain/lib
+          cp qtkeychain/build/libqt6keychain.so libs/qtkeychain/lib/
+          cp qtkeychain/qtkeychain/qkeychain_export.h libs/qtkeychain/include/qtkeychain/
+          cp qtkeychain/qtkeychain/keychain.h libs/qtkeychain/include/qtkeychain/
+
+      - name: Generate secrets.json
+        run: python3 scripts/generate-secrets.py
+        env:
+          YANDEX_CLIENT_ID: ${{ secrets.YANDEX_CLIENT_ID }}
+
+      - name: Building application
+        run: |
+          mkdir build
+          cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=$Qt6_DIR
+          cmake --build . --config Release --parallel
+
+      - name: Upload build folder as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-folder
+          path: build/

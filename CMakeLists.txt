@@ -104,9 +104,12 @@ install(TARGETS appYandexHomeDesktop
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
-set_target_properties(appYandexHomeDesktop PROPERTIES
-        OUTPUT_NAME "YandexHomeDesktop"
-        MACOSX_BUNDLE TRUE
-)
+if(UNIX AND NOT APPLE)
+else()
+  set_target_properties(appYandexHomeDesktop PROPERTIES
+          OUTPUT_NAME "YandexHomeDesktop"
+          MACOSX_BUNDLE TRUE
+  )
+endif()
 
 add_subdirectory(tests)

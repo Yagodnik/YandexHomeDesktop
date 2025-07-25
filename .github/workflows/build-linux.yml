@@ -43,7 +43,7 @@ jobs:
         run: |
           mkdir -p libs/qtkeychain/include/qtkeychain
           mkdir -p libs/qtkeychain/lib
-          cp qtkeychain/build/libqt6keychain.so libs/qtkeychain/lib/
+          cp qtkeychain/build/bin/libqt6keychain.so libs/qtkeychain/lib/
           cp qtkeychain/qtkeychain/qkeychain_export.h libs/qtkeychain/include/qtkeychain/
           cp qtkeychain/qtkeychain/keychain.h libs/qtkeychain/include/qtkeychain/
 

@@ -61,7 +61,7 @@ def main():
     if is_mac:
         print("\n=== Step 3: Deploying App with macdeployqt ===")
         app_path = build_dir / "YandexHomeDesktop.app"
-        qml_path = build_dir / "src/qml/YandexHomeDesktop"
+        qml_path = "../build-release/YandexHomeDesktop"
         run_command([
             "macdeployqt",
             str(app_path),

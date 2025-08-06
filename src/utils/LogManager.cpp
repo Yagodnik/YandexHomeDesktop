@@ -11,6 +11,16 @@ LogManager::LogManager(LoggingMode mode, QObject *parent)
   }
 }
 
+void LogManager::DisableConsole() {
+  if (mode_ == LoggingMode::Console) {
+    mode_ = LoggingMode::NoLogging;
+  }
+
+  if (mode_ == LoggingMode::Both) {
+    mode_ = LoggingMode::File;
+  }
+}
+
 void LogManager::Log(QtMsgType type, const QMessageLogContext &context, const QString &message) {
   if (UsesFile(mode_) && log_file_.size() > kLogFileSizeLimit) {
     qInfo() << "LogManager: Exceeded limit for log file! Creating new one";
@@ -27,6 +37,8 @@ void LogManager::Log(QtMsgType type, const QMessageLogContext &context, const QS
     case LoggingMode::Both:
       LogToStream(file_, type, context, message);
       LogToStream(console_, type, context, message);
+      break;
+    case LoggingMode::NoLogging:
       break;
     default:
       qWarning() << "LogManager: Unknown LoggingMode";

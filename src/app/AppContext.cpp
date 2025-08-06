@@ -4,11 +4,12 @@ AppContext::AppContext(QGuiApplication *app): app_(app) {
   authorization_service = new AuthorizationService(app_);
   platform_service = new PlatformService(app_);
 
-  token_provider = [this] {
+  token_provider = [this] -> QString {
     const auto token = authorization_service->GetToken();
     if (!token.has_value()) {
       qWarning() << "AuthorizationService::GetToken: no token provided";
-      QGuiApplication::quit();
+      QGuiApplication::exit(0);
+      return "";
     }
 
     return token.value();

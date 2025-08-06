@@ -1,6 +1,7 @@
 #include "CLI.h"
 
 #include <QGuiApplication>
+#include <unistd.h>
 
 #include "AccountInfoCommand.h"
 #include "ListDevicesCommand.h"
@@ -15,8 +16,9 @@ CLI::CLI(AppContext& app_ctx,  QObject *parent) :
     return;
   }
 
-  commands_list_["reset"] = std::make_unique<ResetCommand>();
-  commands_list_["account-info"] = std::make_unique<AccountInfoCommand>();
+  commands_list_["reset"] = new ResetCommand(parent);
+  commands_list_["account-info"] = new AccountInfoCommand(parent);
+  commands_list_["list-devices"] =new ListDevicesCommand(parent);
 
   parser_.addHelpOption();
   parser_.addOption({"list-devices", "list all devices available"});
@@ -37,7 +39,10 @@ CLI::CLI(AppContext& app_ctx,  QObject *parent) :
     .pro_mode = parser_.isSet("i-know-what-i-am-doing")
   };
 
-  for (const auto &[key, command]: commands_list_) {
+  for (auto it = commands_list_.begin(); it != commands_list_.end(); ++it) {
+    const auto& key = it.key();
+    const auto& command = it.value();
+
     if (parser_.isSet(key)) {
       command->Execute(app_ctx_, command_ctx);
       return;

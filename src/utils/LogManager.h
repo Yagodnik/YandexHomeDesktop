@@ -18,6 +18,8 @@ class LogManager : public QObject {
 public:
   explicit LogManager(LoggingMode mode, QObject *parent = nullptr);
 
+  void DisableConsole();
+
   void Log(QtMsgType type, const QMessageLogContext& context,  const QString& message);
 
 private:

@@ -9,10 +9,11 @@ struct CommandContext {
   bool pro_mode;
 };
 
-class ICommand {
+class ICommand : public QObject {
+  Q_OBJECT
 public:
-  explicit ICommand(const QString& command_name)
-    : command_name_(command_name) {}
+  explicit ICommand(const QString& command_name, QObject *parent)
+    : command_name_(command_name), QObject(parent) {}
 
   virtual ~ICommand() = default;
 

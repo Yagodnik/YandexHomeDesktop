@@ -1,37 +1,36 @@
 #include "AccountInfoCommand.h"
 
-AccountInfoCommand::AccountInfoCommand() : ICommand("account-info") {}
+#include <iostream>
+
+AccountInfoCommand::AccountInfoCommand(QObject *parent) : ICommand("account-info", parent) {}
 
 void AccountInfoCommand::Execute(AppContext &app_ctx, const CommandContext &command_ctx) {
   if (!app_ctx.authorization_service->IsAuthorized()) {
-    QTextStream out(stdout);
-    out << "Not authorized!" << Qt::endl;
-    app_ctx.app_->quit();
-    return;
+    std::cout << "Not authorized!" << std::endl;
+
+    QGuiApplication::exit(0);
   }
 
   app_ctx.yandex_account->LoadData();
 
-  QObject::connect(
+  connect(
     app_ctx.yandex_account,
     &YandexAccount::dataLoaded,
     [app_ctx]() {
-      QTextStream out(stdout);
-      out << "Account info: " << Qt::endl;
-      out << "Name: " << app_ctx.yandex_account->GetName() << Qt::endl;
+      std::cout << "Account info: " << std::endl;
+      std::cout << "Name: " << app_ctx.yandex_account->GetName().toStdString() << std::endl;
 
-      app_ctx.app_->quit();
+      QGuiApplication::exit(0);
     }
   );
 
-  QObject::connect(
+  connect(
     app_ctx.yandex_account,
     &YandexAccount::dataLoadingFailed,
     [app_ctx]() {
-      QTextStream out(stdout);
-      out << "Account info loading failed!" << Qt::endl;
+      std::cout << "Account info loading failed!" << std::endl;
 
-      app_ctx.app_->quit();
+      QGuiApplication::exit(0);
     }
   );
 }

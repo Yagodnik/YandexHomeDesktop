@@ -11,6 +11,12 @@ int main(int argc, char *argv[]) {
   QGuiApplication app(argc, argv);
   qInstallMessageHandler(LOGGING_CALLBACK(log_manager));
 
+  if (QGuiApplication::arguments().size() > 1) {
+    // Disable garbage in console during CLI run
+    // Duplicate of condition to disable logging before initializing context
+    log_manager.DisableConsole();
+  }
+
   AppContext app_context(&app);
 
   if (QGuiApplication::arguments().size() > 1) {

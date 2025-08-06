@@ -16,9 +16,7 @@ public:
 private:
   AppContext& app_ctx_;
 
-  // It is strange that Qt still doesn't allow to create QMap of non-copyable elements
-  // seems that C++ and Qt are living in different worlds
-  std::map<QString, std::unique_ptr<ICommand>> commands_list_;
+  QMap<QString, ICommand*> commands_list_;
 
   const QMap<QString, ExecutorFactoryFunction> kCapabilityExecutors = {
     { "on_off", EXECUTOR_FACTORY(OnOffExecutor) }

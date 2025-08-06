@@ -22,6 +22,8 @@ signals:
   void authorized();
   void unauthorized();
   void logout();
+  void logoutFinished();
+  void logoutFailed(const QString &error);
   void authorizationFailed();
   void initializationFailed();
   void authorizationCanceled();

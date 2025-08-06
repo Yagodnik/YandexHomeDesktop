@@ -4,22 +4,27 @@
 #include <QGuiApplication>
 #include <QMap>
 
+#include "ICommand.h"
 #include "OnOffExecutor.h"
+#include "ResetCommand.h"
 
 class CLI : public QObject {
   Q_OBJECT
 public:
-  explicit CLI(QGuiApplication* app, YandexHomeApi* api, QObject *parent = nullptr);
+  explicit CLI(AppContext& app_ctx, QObject *parent = nullptr);
 
 private:
+  AppContext& app_ctx_;
+
+  // It is strange that Qt still doesn't allow to create QMap of non-copyable elements
+  // seems that C++ and Qt are living in different worlds
+  std::map<QString, std::unique_ptr<ICommand>> commands_list_;
+
   const QMap<QString, ExecutorFactoryFunction> kCapabilityExecutors = {
     { "on_off", EXECUTOR_FACTORY(OnOffExecutor) }
   };
 
-  void HandleReset();
   [[nodiscard]] bool HandleCapabilities();
 
-  QGuiApplication* app_;
-  YandexHomeApi* api_;
   QCommandLineParser parser_;
 };

@@ -221,7 +221,9 @@ void AuthorizationService::WriteTokenHandler(QKeychain::WritePasswordJob *job) {
 void AuthorizationService::DeleteTokenHandler(QKeychain::DeletePasswordJob *job) {
   if (job->error()) {
     qWarning() << "AuthorizationService: Token delete error -" << job->errorString();
+    emit logoutFailed(job->errorString());
   } else {
     qInfo() << "AuthorizationService: Token deleted successfully!";
+    emit logoutFinished();
   }
 }

@@ -2,11 +2,11 @@
 
 #include <QObject>
 
-#include "auth/AuthorizationService.h"
-#include "platform/PlatformService.h"
-#include "utils/Settings.h"
-#include "api/YandexAccount.h"
-#include "api/YandexHomeApi.h"
+#include "../auth/AuthorizationService.h"
+#include "../platform/PlatformService.h"
+#include "../utils/Settings.h"
+#include "../api/YandexAccount.h"
+#include "../api/YandexHomeApi.h"
 
 struct AppContext {
   explicit AppContext(QGuiApplication *app);

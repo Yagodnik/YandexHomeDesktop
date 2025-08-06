@@ -3,7 +3,7 @@
 #include <QGuiApplication>
 #include <QString>
 
-#include "AppContext.h"
+#include "app/AppContext.h"
 
 struct CommandContext {
   bool pro_mode;

@@ -16,6 +16,7 @@ qt_add_resources(RESOURCES resources/resources.qrc)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/app)
 
 add_subdirectory(src/api)
 add_subdirectory(src/auth)
@@ -41,10 +42,14 @@ qt_add_executable(appYandexHomeDesktop
         src/cli/ResetCommand.cpp
         src/cli/ResetCommand.h
         src/cli/ICommand.h
-        src/AppContext.h
-        src/AppContext.cpp
+        src/app/AppContext.h
+        src/app/AppContext.cpp
         src/cli/AccountInfoCommand.cpp
         src/cli/AccountInfoCommand.h
+        src/app/CliApp.cpp
+        src/app/CliApp.h
+        src/app/GuiApp.cpp
+        src/app/GuiApp.h
 )
 
 if (APPLE)

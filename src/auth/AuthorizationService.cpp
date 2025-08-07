@@ -157,18 +157,21 @@ void AuthorizationService::HandleAuthorizationStatus(const QAbstractOAuth::Statu
       TryWrite(oauth2_.token());
 
       emit authorized();
-    break;
+      break;
     case QAbstractOAuth::Status::NotAuthenticated:
       qInfo() << "AuthorizationService: NotAuthenticated";
       emit authorizationFailed();
-    break;
+      break;
     case QAbstractOAuth::Status::RefreshingToken:
       qInfo() << "AuthorizationService: Refreshing token";
-    break;
+      break;
+    case QAbstractOAuth::Status::TemporaryCredentialsReceived:
+      qInfo() << "AuthorizationService: TemporaryCredentialsReceived";
+      break;
     default:
       qWarning() << "AuthorizationService: Unknown status!";
       emit authorizationFailed();
-    break;
+      break;
   }
 }
 

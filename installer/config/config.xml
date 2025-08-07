@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Installer>
+  <Name>Yandex Home Desktop</Name>
+  <Version>1.0.0</Version>
+  <Title>Yandex Home Desktop</Title>
+  <Publisher>Artem Yagodnik</Publisher>
+  <StartMenuDir>Yandex Home Desktop</StartMenuDir>
+  <TargetDir>@HomeDir@/YandexHomeDesktop</TargetDir>
+  <WizardStyle>Classic</WizardStyle>
+  <WizardShowPageList>false</WizardShowPageList>
+  <WizardDefaultWidth>600</WizardDefaultWidth>
+  <WizardDefaultHeight>600</WizardDefaultHeight>
+</Installer>

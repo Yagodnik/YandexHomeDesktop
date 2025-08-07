@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package>
+  <DisplayName>Yandex Home Desktop</DisplayName>
+  <Version>0.1.0-1</Version>
+  <ReleaseDate>2025-07-26</ReleaseDate>
+  <Licenses>
+    <License name="GNU GPL V3" file="license.txt" />
+  </Licenses>
+  <Default>True</Default>
+  <Script>installscript.js</Script>
+</Package>

@@ -11,6 +11,7 @@ public:
 
   [[nodiscard]] bool GetTrayModeEnabled() const;
   [[nodiscard]] int GetCurrentTheme() const;
+  void Reset();
 
 signals:
   void trayModeEnabledChanged();

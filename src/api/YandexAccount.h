@@ -15,18 +15,18 @@ public:
   Q_INVOKABLE void LoadData();
   Q_INVOKABLE [[nodiscard]] QString GetName() const;
   Q_INVOKABLE [[nodiscard]] QString GetAvatarUrl() const;
+  Q_INVOKABLE [[nodiscard]] QString GetEmail() const;
 
 signals:
   void dataLoaded();
   void dataLoadingFailed();
 
 private:
-  void LoadImage(const QString &url);
-
   JSON_STRUCT(AccountInfo,
     (QString, login),
     (QString, display_name),
-    (QString, default_avatar_id)
+    (QString, default_avatar_id),
+    (QString, default_email)
   );
 
   const QString kAccountInfoEndpoint = "https://login.yandex.ru/info";
@@ -36,6 +36,7 @@ private:
 
   QString name_;
   QString avatar_id_;
+  QString email_;
 
   TokenProvider token_provider_;
 };

@@ -4,22 +4,22 @@
 #include <QGuiApplication>
 #include <QMap>
 
+#include "ICommand.h"
 #include "OnOffExecutor.h"
+#include "ResetCommand.h"
 
 class CLI : public QObject {
   Q_OBJECT
 public:
-  explicit CLI(QGuiApplication* app, YandexHomeApi* api, QObject *parent = nullptr);
+  explicit CLI(AppContext& app_ctx, QObject *parent = nullptr);
 
 private:
-  const QMap<QString, ExecutorFactoryFunction> kCapabilityExecutors = {
-    { "on_off", EXECUTOR_FACTORY(OnOffExecutor) }
-  };
+  AppContext& app_ctx_;
 
-  void HandleReset();
+  QMap<QString, ICommand*> commands_list_;
+  QMap<QString, IExecutor*> capability_executors_;
+
   [[nodiscard]] bool HandleCapabilities();
 
-  QGuiApplication* app_;
-  YandexHomeApi* api_;
   QCommandLineParser parser_;
 };

@@ -157,18 +157,21 @@ void AuthorizationService::HandleAuthorizationStatus(const QAbstractOAuth::Statu
       TryWrite(oauth2_.token());
 
       emit authorized();
-    break;
+      break;
     case QAbstractOAuth::Status::NotAuthenticated:
       qInfo() << "AuthorizationService: NotAuthenticated";
       emit authorizationFailed();
-    break;
+      break;
     case QAbstractOAuth::Status::RefreshingToken:
       qInfo() << "AuthorizationService: Refreshing token";
-    break;
+      break;
+    case QAbstractOAuth::Status::TemporaryCredentialsReceived:
+      qInfo() << "AuthorizationService: TemporaryCredentialsReceived";
+      break;
     default:
       qWarning() << "AuthorizationService: Unknown status!";
       emit authorizationFailed();
-    break;
+      break;
   }
 }
 
@@ -221,7 +224,9 @@ void AuthorizationService::WriteTokenHandler(QKeychain::WritePasswordJob *job) {
 void AuthorizationService::DeleteTokenHandler(QKeychain::DeletePasswordJob *job) {
   if (job->error()) {
     qWarning() << "AuthorizationService: Token delete error -" << job->errorString();
+    emit logoutFailed(job->errorString());
   } else {
     qInfo() << "AuthorizationService: Token deleted successfully!";
+    emit logoutFinished();
   }
 }

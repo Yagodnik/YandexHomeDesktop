@@ -15,6 +15,11 @@ int Settings::GetCurrentTheme() const {
   return settings_.value("currentTheme", 0).toInt();
 }
 
+void Settings::Reset() {
+  settings_.remove("trayModeEnabled");
+  settings_.remove("currentTheme");
+}
+
 void Settings::SetCurrentTheme(const int theme) {
   if (GetCurrentTheme() == theme) {
     return;

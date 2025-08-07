@@ -1,24 +1,31 @@
 #include "ListDevicesCommand.h"
 
 #include <iostream>
-#include <QGuiApplication>
+#include <unistd.h>
 
-ListDevicesCommand::ListDevicesCommand(YandexHomeApi *api, QObject *parent)
-  : QObject(parent), api_(api)
-{
-  connect(api_, &YandexHomeApi::userInfoReceived, this, &ListDevicesCommand::OnUserInfoReceived);
-  connect(api_, &YandexHomeApi::userInfoReceivingFailed, this, &ListDevicesCommand::OnUserInfoReceivingFailed);
+ListDevicesCommand::ListDevicesCommand(QObject *parent) : ICommand("list-devices", parent) {}
 
-  api_->GetUserInfo();
+void ListDevicesCommand::Execute(AppContext &app_ctx, const CommandContext &command_ctx) {
+  connect(
+    app_ctx.yandex_api,
+    &YandexHomeApi::userInfoReceived,
+    &ListDevicesCommand::OnUserInfoReceived);
+
+  connect(
+    app_ctx.yandex_api,
+    &YandexHomeApi::userInfoReceivingFailed,
+    &ListDevicesCommand::OnUserInfoReceivingFailed);
+
+  app_ctx.yandex_api->GetUserInfo();
 }
 
 void ListDevicesCommand::OnUserInfoReceived(const UserInfo &info) {
-  QTextStream out(stdout);
-  out << "List of devices:" << Qt::endl;
+  std::cout << "List of devices:" << std::endl;
 
   int index = 1;
   for (const auto& device : info.devices) {
-    out << index << ") " << device.name << " " << device.type << Qt::endl;
+    std::cout << index << ") " << device.name.toStdString() << " "
+              << device.type.toStdString() << std::endl;
     index++;
   }
 
@@ -26,9 +33,8 @@ void ListDevicesCommand::OnUserInfoReceived(const UserInfo &info) {
 }
 
 void ListDevicesCommand::OnUserInfoReceivingFailed(const QString &error) {
-  QTextStream out(stdout);
-  out << "Something went wrong..." << Qt::endl;
-  out << error << Qt::endl;
+  std::cout << "Something went wrong..." << std::endl;
+  std::cout << error.toStdString() << std::endl;
 
   QGuiApplication::quit();
 }

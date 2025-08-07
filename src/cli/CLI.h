@@ -17,10 +17,7 @@ private:
   AppContext& app_ctx_;
 
   QMap<QString, ICommand*> commands_list_;
-
-  const QMap<QString, ExecutorFactoryFunction> kCapabilityExecutors = {
-    { "on_off", EXECUTOR_FACTORY(OnOffExecutor) }
-  };
+  QMap<QString, IExecutor*> capability_executors_;
 
   [[nodiscard]] bool HandleCapabilities();
 

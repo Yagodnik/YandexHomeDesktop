@@ -1,7 +1,7 @@
 #include "CLI.h"
 
 #include <QGuiApplication>
-#include <unistd.h>
+#include <iostream>
 
 #include "AccountInfoCommand.h"
 #include "ListDevicesCommand.h"
@@ -18,7 +18,9 @@ CLI::CLI(AppContext& app_ctx,  QObject *parent) :
 
   commands_list_["reset"] = new ResetCommand(parent);
   commands_list_["account-info"] = new AccountInfoCommand(parent);
-  commands_list_["list-devices"] =new ListDevicesCommand(parent);
+  commands_list_["list-devices"] = new ListDevicesCommand(parent);
+
+  capability_executors_["on_off"] = new OnOffExecutor(app_ctx_.yandex_api, parent);
 
   parser_.addHelpOption();
   parser_.addOption({"list-devices", "list all devices available"});
@@ -59,14 +61,16 @@ CLI::CLI(AppContext& app_ctx,  QObject *parent) :
 
 bool CLI::HandleCapabilities() {
   for (const auto& option : parser_.optionNames()) {
-    if (kCapabilityExecutors.contains(option)) {
-      const auto executor = kCapabilityExecutors[option](app_ctx_.yandex_api);
+    if (capability_executors_.contains(option)) {
+      const auto executor = capability_executors_[option];
 
       if (parser_.isSet("info")) {
         executor->PrintInfo();
       } else {
+        const QString device_name = parser_.value(option);
         const QString capability_value = parser_.value("value");
-        executor->Execute(capability_value);
+
+        executor->Execute(device_name, capability_value);
       }
 
       return true;

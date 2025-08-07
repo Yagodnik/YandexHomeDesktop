@@ -8,7 +8,7 @@
 class IExecutor : public QObject {
   Q_OBJECT
 public:
-  explicit IExecutor(YandexHomeApi* api) : api_(api) {};
+  explicit IExecutor(YandexHomeApi* api, QObject *parent) : QObject(parent), api_(api) {};
 
   template <typename ExecutorType, typename... Args>
   static std::unique_ptr<IExecutor> Create(Args&&... args) {
@@ -17,7 +17,7 @@ public:
 
   virtual ~IExecutor() = default;
 
-  virtual void Execute(const QString& value) = 0;
+  virtual void Execute(const QString& name, const QString& value) = 0;
   virtual void PrintInfo() = 0;
 
 protected:

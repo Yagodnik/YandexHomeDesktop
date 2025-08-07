@@ -19,6 +19,7 @@ void AccountInfoCommand::Execute(AppContext &app_ctx, const CommandContext &comm
     [app_ctx]() {
       std::cout << "Account info: " << std::endl;
       std::cout << "Name: " << app_ctx.yandex_account->GetName().toStdString() << std::endl;
+      std::cout << "Email: " << app_ctx.yandex_account->GetEmail().toStdString() << std::endl;
 
       QGuiApplication::exit(0);
     }

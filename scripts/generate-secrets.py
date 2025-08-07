@@ -12,7 +12,8 @@ output = {
         "iot:view",
         "iot:control",
         "login:info",
-        "login:avatar"
+        "login:avatar",
+        "login:email"
     ]
 }
 

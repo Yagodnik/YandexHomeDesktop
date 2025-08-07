@@ -23,6 +23,7 @@ Item {
 
       userName.text = yandexAccount.GetName();
       avatarImage.source = yandexAccount.GetAvatarUrl();
+      userEmail.text = yandexAccount.GetEmail();
     }
   }
 
@@ -135,13 +136,13 @@ Item {
     UI.DefaultText {
       id: userName
       visible: !userDetails.loading
-      text: "Artem Yagodnik22222"
+      text: "Loading..."
     }
 
     UI.SubheadingText {
       id: userEmail
       visible: !userDetails.loading
-      text: "YagodnikArtem2@yandex.ru"
+      text: "Loading..."
     }
   }
 

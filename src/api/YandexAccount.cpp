@@ -28,6 +28,7 @@ void YandexAccount::LoadData() {
 
     name_ = data.display_name;
     avatar_id_ = data.default_avatar_id;
+    email_ = data.default_email;
 
     emit dataLoaded();
 
@@ -41,4 +42,8 @@ QString YandexAccount::GetName() const {
 
 QString YandexAccount::GetAvatarUrl() const {
   return kAvatarUrl.arg(avatar_id_);
+}
+
+QString YandexAccount::GetEmail() const {
+  return email_;
 }

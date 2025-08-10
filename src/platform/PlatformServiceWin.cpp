@@ -67,6 +67,7 @@ RECT PlatformServiceWin::GetTaskbarRectUnderCursor() {
   MONITORINFO mi{};
   mi.cbSize = sizeof(mi);
   if (!GetMonitorInfo(monitor, &mi)) {
+    qCritical() << "PlatformServiceWin: GetMonitorInfo failed";
     return {0, 0, 0, 0};
   }
 

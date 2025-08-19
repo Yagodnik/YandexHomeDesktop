@@ -120,6 +120,11 @@ install(TARGETS appYandexHomeDesktop
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
+if(WIN32)
+  set(APP_ICON_RESOURCE "${CMAKE_CURRENT_SOURCE_DIR}/resources/app.rc")
+  target_sources(appYandexHomeDesktop PRIVATE ${APP_ICON_RESOURCE})
+endif()
+
 if(UNIX AND NOT APPLE)
 else()
   set_target_properties(appYandexHomeDesktop PROPERTIES

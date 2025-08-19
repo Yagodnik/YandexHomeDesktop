@@ -92,6 +92,11 @@ jobs:
           name: deploy-folder
           path: deploy/
 
+      - name: Copy deploy folder into installer package
+        run: |
+          mkdir -p installer/packages/com.artemyagodnik.yandexhomedesktop/data
+          xcopy /E /I deploy installer\packages\com.artemyagodnik.yandexhomedesktop\data
+
       - name: Create installer
         run: |
           binarycreator.exe \

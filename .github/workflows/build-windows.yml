@@ -100,9 +100,9 @@ jobs:
       - name: Create installer
         run: |
           binarycreator.exe \
-            -c installer\config\config.xml \
-            -p installer\packages \
-            yhd-installer
+            -c "installer\config\config.xml" \
+            -p "installer\packages" \
+            "yhd-installer.exe"
 
       - name: Upload installer
         uses: actions/upload-artifact@v4

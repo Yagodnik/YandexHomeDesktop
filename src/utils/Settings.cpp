@@ -5,6 +5,12 @@ Settings::Settings(QObject *parent)
 
   qInfo() << "Settings: CurrentTheme = " << GetCurrentTheme();
   qInfo() << "Settings: Stored at" << settings_.fileName();
+
+  // Add to autostart
+#ifdef Q_OS_WIN32
+  settings_.setValue("YandexHomeDesktop", QDir::toNativeSeparators(QCoreApplication::applicationFilePath()));
+  settings_.sync();
+#endif
 }
 
 bool Settings::GetTrayModeEnabled() const {

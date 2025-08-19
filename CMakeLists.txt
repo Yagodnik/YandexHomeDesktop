@@ -4,6 +4,10 @@ include(cmake/qt6-config.cmake OPTIONAL)
 
 project(YandexHomeDesktop VERSION 0.1 LANGUAGES CXX)
 
+if(APPLE)
+  set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64")
+endif()
+
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)

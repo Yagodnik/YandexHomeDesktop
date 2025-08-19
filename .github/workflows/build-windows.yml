@@ -20,7 +20,7 @@ jobs:
           target: 'desktop'
           arch: 'win64_mingw'
           modules: 'qt5compat qtnetworkauth qtshadertools'
-          tools: 'tools_mingw1310'
+          tools: 'tools_ifw tools_mingw1310'
           cache: true
 
       - name: Install Boost.Hana
@@ -91,3 +91,16 @@ jobs:
         with:
           name: deploy-folder
           path: deploy/
+
+      - name: Create installer
+        run: |
+          binarycreator.exe \
+            -c installer\config\config.xml \
+            -p installer\packages \
+            yhd-installer
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: Installer
+          path: yhd-installer.exe

@@ -125,6 +125,9 @@
     <file alias="ErrorPage.qml">../src/qml/pages/ErrorPage.qml</file>
     <file alias="AuthCanceledPage.qml">../src/qml/pages/AuthCanceledPage.qml</file>
     <file alias="DevicePage.qml">../src/qml/pages/DevicePage.qml</file>
+    <file alias="ScenariosPage.qml">../src/qml/pages/ScenariosPage.qml</file>
+    <file alias="DevicesPage.qml">../src/qml/pages/DevicesPage.qml</file>
+    <file alias="SettingsPage.qml">../src/qml/pages/SettingsPage.qml</file>
   </qresource>
 
   <qresource prefix="/controls">

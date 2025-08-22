@@ -2,7 +2,6 @@ import QtQuick
 import QtQuick.Controls
 import Qt.labs.platform
 import Qt5Compat.GraphicalEffects
-import YandexHomeDesktop.Pages
 import YandexHomeDesktop.Ui
 
 Window {

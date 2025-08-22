@@ -4,7 +4,7 @@ import QtQuick.Controls
 import Qt5Compat.GraphicalEffects
 import Qt.labs.platform
 import YandexHomeDesktop.Ui as UI
-// import YandexHomeDesktop.Pages as Pages
+import YandexHomeDesktop.Pages as Pages
 import YandexHomeDesktop.Components as Components
 
 Item {
@@ -151,20 +151,11 @@ Item {
 
         currentIndex: topBar.activeTab
 
-        // Pages.DevicesPage {}
-        Loader {
-          source: "qrc:/pages/DevicesPage.qml"
-        }
+        Pages.DevicesPage {}
 
-        // Pages.ScenariosPage {}
-        Loader {
-          source: "qrc:/pages/ScenariosPage.qml"
-        }
+        Pages.ScenariosPage {}
 
-        // Pages.SettingsPage {}
-        Loader {
-          source: "qrc:/pages/SettingsPage.qml"
-        }
+        Pages.SettingsPage {}
       }
     }
   }

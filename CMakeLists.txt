@@ -98,7 +98,7 @@ target_link_libraries(appYandexHomeDesktop PRIVATE
         Qt6::QuickControls2
 
         YandexHomeDesktopUi
-#        YandexHomeDesktopPages
+        YandexHomeDesktopPages
         YandexHomeDesktopComponents
 
         YandexHomeApi

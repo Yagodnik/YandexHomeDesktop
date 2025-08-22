@@ -1,4 +1,6 @@
 #include "Settings.h"
+#include <QDir>
+#include <QCoreApplication>
 
 Settings::Settings(QObject *parent)
   : QObject(parent), settings_("ArtemYagodnik", "YandexHomeDesktop") {

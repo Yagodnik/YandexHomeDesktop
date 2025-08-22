@@ -100,7 +100,6 @@ target_link_libraries(appYandexHomeDesktop PRIVATE
         YandexHomeDesktopUi
         YandexHomeDesktopPages
         YandexHomeDesktopComponents
-        YandexHomeDesktopIotControls
 
         YandexHomeApi
         YandexAuth

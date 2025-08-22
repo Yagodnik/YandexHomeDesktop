@@ -48,15 +48,3 @@ qt_add_qml_module(YandexHomeDesktopComponents
         components/RoomDevicesList.qml
         components/AdaptiveGrid.qml
 )
-
-
-qt_add_qml_module(YandexHomeDesktopIotControls
-        URI YandexHomeDesktop.IotControls
-        OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/YandexHomeDesktop/IotControls"
-        VERSION 1.0
-        QML_FILES
-        controls/OnOff.qml
-        controls/Range.qml
-        controls/Mode.qml
-        controls/Unsupported.qml
-)

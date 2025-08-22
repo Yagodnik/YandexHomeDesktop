@@ -82,7 +82,7 @@ jobs:
         run: |
           set PATH=%Qt6_DIR%\bin;%PATH%
           cd deploy
-          windeployqt . --no-translations --qmldir "%GITHUB_WORKSPACE%\src"
+          windeployqt . --no-translations --qmldir "%GITHUB_WORKSPACE%\src\qml"
 
       - name: Upload deploy folder as artifact
         uses: actions/upload-artifact@v4

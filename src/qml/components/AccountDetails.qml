@@ -45,19 +45,11 @@ Item {
     color: themes.shadowColor
   }
 
-  Rectangle {
+  UI.Skeleton {
     anchors.fill: avatar
     radius: 45
     z: 200
     visible: userDetails.loading
-    color: "#e0e0e0"
-
-    layer.enabled: userDetails.loading
-    layer.smooth: true
-    layer.effect: ShaderEffect {
-      property real t: shaderParams.t
-      fragmentShader: "qrc:/shaders/highlight.frag.qsb"
-    }
   }
 
   Item {
@@ -103,34 +95,16 @@ Item {
     anchors.verticalCenter: parent.verticalCenter
     spacing: 4
 
-    Rectangle {
+    UI.Skeleton {
       width: userDetails.loading ? 120 : 0
       height: userDetails.loading ? 14 : 0
       visible: userDetails.loading
-      color: "#e0e0e0"
-      radius: 16
-
-      layer.enabled: userDetails.loading
-      layer.smooth: true
-      layer.effect: ShaderEffect {
-        property real t: shaderParams.t
-        fragmentShader: "qrc:/shaders/highlight.frag.qsb"
-      }
     }
 
-    Rectangle {
+    UI.Skeleton {
       width: userDetails.loading ? 180 : 0
       height: userDetails.loading ? 12 : 0
       visible: userDetails.loading
-      color: "#e0e0e0"
-      radius: 16
-
-      layer.enabled: userDetails.loading
-      layer.smooth: true
-      layer.effect: ShaderEffect {
-        property real t: shaderParams.t
-        fragmentShader: "qrc:/shaders/highlight.frag.qsb"
-      }
     }
 
     UI.DefaultText {

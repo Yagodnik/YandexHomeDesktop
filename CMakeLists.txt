@@ -71,7 +71,6 @@ if (APPLE)
 endif ()
 
 add_subdirectory(src/qml/)
-add_subdirectory(src/qml/shaders)
 
 qt_add_qml_module(appYandexHomeDesktop
         URI YandexHomeDesktop
@@ -110,8 +109,6 @@ target_link_libraries(appYandexHomeDesktop PRIVATE
         Utils
         Iot
 )
-
-add_dependencies(appYandexHomeDesktop compile_shaders)
 
 include(GNUInstallDirs)
 install(TARGETS appYandexHomeDesktop

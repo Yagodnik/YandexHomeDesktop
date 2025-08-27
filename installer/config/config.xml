@@ -10,4 +10,5 @@
   <WizardShowPageList>false</WizardShowPageList>
   <WizardDefaultWidth>600</WizardDefaultWidth>
   <WizardDefaultHeight>600</WizardDefaultHeight>
+  <InstallerApplicationIcon>YandexHomeDesktop.ico</InstallerApplicationIcon>
 </Installer>

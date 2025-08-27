@@ -25,6 +25,7 @@ ComboBox {
     leftPadding: 12
     anchors.fill: parent
     wrapMode: Text.WordWrap
+    font.pixelSize: 12
   }
 
   background: Rectangle {

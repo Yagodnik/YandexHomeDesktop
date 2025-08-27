@@ -71,7 +71,6 @@ if (APPLE)
 endif ()
 
 add_subdirectory(src/qml/)
-add_subdirectory(src/qml/shaders)
 
 qt_add_qml_module(appYandexHomeDesktop
         URI YandexHomeDesktop
@@ -101,7 +100,6 @@ target_link_libraries(appYandexHomeDesktop PRIVATE
         YandexHomeDesktopUi
         YandexHomeDesktopPages
         YandexHomeDesktopComponents
-        YandexHomeDesktopIotControls
 
         YandexHomeApi
         YandexAuth
@@ -111,14 +109,17 @@ target_link_libraries(appYandexHomeDesktop PRIVATE
         Iot
 )
 
-add_dependencies(appYandexHomeDesktop compile_shaders)
-
 include(GNUInstallDirs)
 install(TARGETS appYandexHomeDesktop
         BUNDLE DESTINATION .
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+
+if(WIN32)
+  set(APP_ICON_RESOURCE "${CMAKE_CURRENT_SOURCE_DIR}/resources/app.rc")
+  target_sources(appYandexHomeDesktop PRIVATE ${APP_ICON_RESOURCE})
+endif()
 
 if(UNIX AND NOT APPLE)
 else()

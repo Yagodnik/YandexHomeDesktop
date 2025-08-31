@@ -75,7 +75,6 @@ jobs:
           copy build\YandexHomeDesktop.exe deploy\
           xcopy build\YandexHomeDesktop deploy\YandexHomeDesktop /E /I /Y
           copy build\YandexHomeDesktopComponents.dll deploy\
-          copy build\YandexHomeDesktopIotControls.dll deploy\
           copy build\YandexHomeDesktopPages.dll deploy\
           copy build\YandexHomeDesktopUi.dll deploy\
 

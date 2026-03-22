@@ -40,6 +40,7 @@
 #include "utils/IconsProvider.h"
 #include "utils/LogManager.h"
 #include "utils/UnitsList.h"
+#include "viewmodels/DeviceViewModel.h"
 
 
 GuiApp::GuiApp(AppContext& app_context, QObject *parent) :
@@ -97,6 +98,7 @@ GuiApp::GuiApp(AppContext& app_context, QObject *parent) :
   RegisterModels();
   RegisterCapabilities();
   RegisterProperties();
+  RegisterViewModels();
 
   QObject::connect(
   &engine, &QQmlApplicationEngine::objectCreated,
@@ -155,4 +157,8 @@ void GuiApp::RegisterCapabilities() {
 void GuiApp::RegisterProperties() {
   qmlRegisterType<FloatProperty>("YandexHomeDesktop.Properties", 1, 0, "Float");
   qmlRegisterType<EventProperty>("YandexHomeDesktop.Properties", 1, 0, "Event");
+}
+
+void GuiApp::RegisterViewModels() {
+  qmlRegisterType<DeviceViewModel>("YandexHomeDesktop.ViewModels", 1, 0, "DeviceViewModel");
 }

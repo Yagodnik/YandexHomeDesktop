@@ -145,9 +145,6 @@ Item {
 
         ScrollBar.vertical: scrollBar
 
-        // flickableDirection: Flickable.VerticalFlick
-        // boundsBehavior: Flickable.StopAtBounds
-
         model: RoomsFilterModel {
           sourceModel: roomsModel
           householdId: householdsModel.currentHousehold

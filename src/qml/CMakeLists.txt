@@ -40,7 +40,16 @@ qt_add_qml_module(YandexHomeDesktopComponents
         OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/YandexHomeDesktop/Components"
         VERSION 1.0
         QML_FILES
-        components/TopBar.qml
+        components/HouseholdSelectWidget.qml
+        components/AppHeaderTabs.qml
+        components/SelectDialogLoadingIndicator.qml
+        components/SelectDialogItem.qml
+        components/ScenariosPageHeader.qml
+        components/SettingsOption.qml
+        components/SettingsComboOption.qml
+        components/SettingsReference.qml
+        components/AllSettings.qml
+        components/AppHeader.qml
         components/ScenarioDelegate.qml
         components/ScenariosList.qml
         components/AccountDetails.qml

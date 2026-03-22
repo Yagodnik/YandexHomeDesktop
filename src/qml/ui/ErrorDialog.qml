@@ -18,6 +18,7 @@ Dialog {
   property var dialogTitle
   property var dialogMessage
   property bool closing: false
+  property bool show: false
 
   function openDialog() {
     visible = true
@@ -31,6 +32,11 @@ Dialog {
     if (closing) return
     closing = true
     closeAnim.start()
+  }
+
+  onShowChanged: {
+    if (show) openDialog()
+    else closeAnimated()
   }
 
   background: Item {

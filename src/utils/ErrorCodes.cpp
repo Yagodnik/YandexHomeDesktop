@@ -14,6 +14,7 @@ ErrorCodes::ErrorCodes(QObject *parent) : QObject(parent) {
 QVariant ErrorCodes::GetDeviceError(const QString &error_code) {
   for (const auto& error : iot_errors_) {
     if (error.error_code == error_code) {
+      // TODO: Refactor this shit please
       QVariantMap temp = {
         { "short_description", error.short_description },
         { "full_description", error.full_description }

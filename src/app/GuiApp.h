@@ -15,6 +15,7 @@ private:
   void RegisterModels();
   void RegisterCapabilities();
   void RegisterProperties();
+  void RegisterViewModels();
 
   AppContext& app_context_;
   QQmlApplicationEngine engine;

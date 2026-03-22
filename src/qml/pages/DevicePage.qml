@@ -5,6 +5,7 @@ import Qt5Compat.GraphicalEffects
 import YandexHomeDesktop.Ui as UI
 import YandexHomeDesktop.Components as Components
 import YandexHomeDesktop.Models as Models
+import YandexHomeDesktop.ViewModels as ViewModels
 
 Item {
   id: root
@@ -14,27 +15,18 @@ Item {
     color: themes.background
   }
 
+  ViewModels.DeviceViewModel {
+    id: deviceViewModel
+    errorCodesDep: errorCodes
+    deviceControllerDep: deviceController
+  }
+
   UI.ErrorDialog {
     id: actionErrorDialog
 
     dialogTitle: "Ошибка"
-    dialogMessage: "!"
-  }
-
-  Connections {
-    target: deviceController
-
-    function onErrorOccurred(errorCode) {
-      const error = errorCodes.GetDeviceError(errorCode);
-
-      if (error == null) {
-        actionErrorDialog.dialogMessage = "Произошла ошибка!";
-      } else {
-        actionErrorDialog.dialogMessage = error.short_description + "\n\n" + error.full_description;
-      }
-
-      actionErrorDialog.openDialog();
-    }
+    dialogMessage: deviceViewModel.state.errorMessage
+    show: deviceViewModel.state.showErrorMessage
   }
 
   Item {
@@ -57,8 +49,6 @@ Item {
       samples: 16
       horizontalOffset: 0
       verticalOffset: 2
-      // color: "#66000000" // ?
-      // color: Qt.rgba(0, 32 / 255, 128 / 255, 0.04)
       color: themes.shadowColor
     }
 
@@ -84,7 +74,9 @@ Item {
         cursorShape: Qt.PointingHandCursor
 
         onClicked: {
+          // TODO: Move to application
           deviceController.ForgetDevice();
+
           router.goBack();
         }
       }
@@ -101,6 +93,7 @@ Item {
     MouseArea {
       id: hoverArea
       anchors.fill: deviceOffile
+      // TODO: Replace
       hoverEnabled: !root.deviceOnline
     }
 
@@ -111,6 +104,8 @@ Item {
       anchors.leftMargin: 4
       anchors.verticalCenter: deviceTitleText.verticalCenter
       source: "qrc:/images/warning.svg"
+
+      // TODO: Replace
       visible: !root.deviceOnline
 
       ToolTip.visible: hoverArea.containsMouse
@@ -221,6 +216,7 @@ Item {
           anchors.horizontalCenter: parent.horizontalCenter
 
           onClicked: {
+            // TODO: Move into application
             root.okCount = 0;
             deviceStates.currentIndex = 0;
             deviceController.TryReloadDevice();
@@ -237,7 +233,8 @@ Item {
 
       ScrollBar.vertical: ScrollBar {
         width: 10
-        policy: deviceControlsList.contentHeight > deviceControlsList.height ? ScrollBar.AlwaysOn : ScrollBar.AlwaysOff
+        policy: deviceControlsList.contentHeight > deviceControlsList.height ?
+          ScrollBar.AlwaysOn : ScrollBar.AlwaysOff
 
         opacity: hovered ? 1.0 : 0.2
         Behavior on opacity {
@@ -269,20 +266,18 @@ Item {
           id: capabilitiesText
           text: "Умения"
 
+          // TODO: Replace
           visible: capabilitiesModel.count !== 0
 
-          // anchors.top: parent.top
-          // anchors.topMargin: 4
           anchors.left: parent.left
           anchors.leftMargin: 16
         }
 
         ListView {
           id: capabilitiesList
-          // anchors.top: capabilitiesText.bottom
-          // anchors.topMargin: 4
           height: contentHeight
 
+          // TODO: Replace
           visible: capabilitiesModel.count !== 0
 
           anchors.left: parent.left
@@ -307,18 +302,15 @@ Item {
           id: propertiesText
           text: "Свойства"
 
+          // TODO: Replace
           visible: propertiesModel.count !== 0
 
-          // anchors.top: capabilitiesList.bottom
-          // anchors.topMargin: 4
           anchors.left: parent.left
           anchors.leftMargin: 16
         }
 
         ListView {
           id: propertiesList
-          // anchors.top: propertiesText.bottom
-          // anchors.topMargin: 4
 
           height: contentHeight + 12
 

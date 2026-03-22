@@ -40,7 +40,6 @@ QVariantMap ColorSettingCapability::Create(const QColor &value) {
 
     qInfo() << "ColorSettingCapability: Setting RGB: " << rgb_data;
 
-
     return {
       { "instance", "rgb" },
       { "value", rgb_data }

@@ -85,19 +85,26 @@ Window {
     target: authorizationService
 
     function onAuthorized() {
+      console.log("Authorized");
       router.navigateTo("main");
     }
 
     function onUnauthorized() {
+      console.log("Unauthorized");
+      // router.navigateTo("main");
       router.navigateTo("auth");
     }
 
     function onLogout() {
-      router.navigateTo("auth");
+      console.log("Logout");
+      router.navigateTo("main");
+      // router.navigateTo("auth");
     }
 
     function onAuthorizationFailed() {
-      router.navigateTo("error");
+      console.log("Authorization failed");
+      router.navigateTo("main");
+      // router.navigateTo("error");
     }
 
     function onInitializationFailed() {

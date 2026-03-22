@@ -8,19 +8,12 @@ import YandexHomeDesktop.Components as Components
 Item {
   id: root
 
+  property var isLoading: false
+
   Component.onCompleted: {
     isLoading = true;
     scenariosModel.RequestData();
   }
-
-  UI.ErrorDialog {
-    id: scenarioErrorDialog
-
-    dialogTitle: "Ошибка"
-    dialogMessage: "Не удалось выполнить сценарий"
-  }
-
-  property var isLoading: false
 
   Connections {
     target: scenariosModel
@@ -42,53 +35,24 @@ Item {
     }
   }
 
-  Item {
-    id: heading
-    width: parent.width
-    height: 32
+  UI.ErrorDialog {
+    id: scenarioErrorDialog
 
-    UI.HeadingText {
-      id: headingTitle
-      text: "Все сценарии"
-      anchors.left: parent.left
-      anchors.verticalCenter: parent.verticalCenter
-    }
+    dialogTitle: "Ошибка"
+    dialogMessage: "Не удалось выполнить сценарий"
+  }
 
-    UI.ImageButton {
-      id: reloadButton
-      source: "qrc:/images/reload.svg"
-
-      property real rotationAngle: 0
-
-      transform: Rotation {
-        id: rot
-        origin.x: reloadButton.width / 2
-        origin.y: reloadButton.height / 2
-        angle: reloadButton.rotationAngle
+  Components.ScenariosPageHeader {
+    id: header
+    
+    onReloadClicked: {
+      if (root.isLoading) {
+        return;
       }
+      root.isLoading = true;
 
-      anchors.verticalCenter: parent.verticalCenter
-      anchors.right: parent.right
-      anchors.rightMargin: 8
-
-      onClicked: {
-        if (root.isLoading) {
-          return;
-        }
-
-        root.isLoading = true;
-        scenariosStack.currentIndex = 0;
-        scenariosModel.RequestData();
-
-        reloadButton.rotationAngle += 360;
-      }
-
-      Behavior on rotationAngle {
-        NumberAnimation {
-          duration: 500
-          easing.type: Easing.InOutCubic
-        }
-      }
+      scenariosStack.currentIndex = 0;
+      scenariosModel.RequestData();
     }
   }
 
@@ -96,7 +60,7 @@ Item {
     id: scenariosStack
 
     width: parent.width
-    anchors.top: heading.bottom
+    anchors.top: header.bottom
     anchors.topMargin: 4
     anchors.bottom: parent.bottom
 

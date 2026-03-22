@@ -8,7 +8,7 @@ AppContext::AppContext(QGuiApplication *app): app_(app) {
     const auto token = authorization_service->GetToken();
     if (!token.has_value()) {
       qWarning() << "AuthorizationService::GetToken: no token provided";
-      QGuiApplication::exit(0);
+      // QGuiApplication::exit(0);
       return "";
     }
 

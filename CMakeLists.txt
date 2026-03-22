@@ -54,6 +54,15 @@ qt_add_executable(appYandexHomeDesktop
         src/app/CliApp.h
         src/app/GuiApp.cpp
         src/app/GuiApp.h
+
+        src/viewmodels/DeviceViewModel.cpp
+        src/viewmodels/DeviceViewModel.h
+        src/viewmodels/DeviceViewState.cpp
+        src/viewmodels/DeviceViewState.h
+        src/infrastructure/network/INetworkClient.cpp
+        src/infrastructure/network/INetworkClient.h
+        src/infrastructure/network/QtNetworkClient.cpp
+        src/infrastructure/network/QtNetworkClient.h
 )
 
 if (APPLE)

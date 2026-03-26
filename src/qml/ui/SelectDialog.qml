@@ -71,48 +71,6 @@ Item {
     }
   ]
 
-  // transitions: [
-  //   Transition {
-  //     from: "opened"
-  //     to: "closed"
-
-  //     SequentialAnimation {
-  //       NumberAnimation {
-  //         target: root
-  //         properties: "y"
-  //         duration: 300
-  //         easing.type: Easing.InOutQuad
-  //       }
-
-  //       NumberAnimation {
-  //         target: root
-  //         properties: "visible"
-  //         duration: 0
-  //       }
-  //     }
-  //   },
-
-  //   Transition {
-  //     from: "closed"
-  //     to: "opened"
-
-  //     SequentialAnimation {
-  //       NumberAnimation {
-  //         target: root
-  //         properties: "visible"
-  //         duration: 0
-  //       }
-
-  //       NumberAnimation {
-  //         target: root
-  //         properties: "y"
-  //         duration: 300
-  //         easing.type: Easing.InOutQuad
-  //       }
-  //     }
-  //   }
-  // ]
-
   Shape {
     id: background
     anchors.fill: parent
@@ -179,27 +137,6 @@ Item {
     clip: true
 
     model: root.model
-    // model: ListModel {
-    //     ListElement { name: "Abebeb 0" }
-
-    //     ListElement { name: "Abebeb 1" }
-
-    //     ListElement { name: "Abebeb 2" }
-
-    //     ListElement { name: "Abebeb 3" }
-
-    //     ListElement { name: "Abebeb 4" }
-
-    //     ListElement { name: "Abebeb 5" }
-
-    //     ListElement { name: "Abebeb 6" }
-
-    //     ListElement { name: "Abebeb 7" }
-
-    //     ListElement { name: "Abebeb 8" }
-
-    //     ListElement { name: "Abebeb 9" }
-    // }
 
     delegate: root.delegate
   }

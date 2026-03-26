@@ -12,13 +12,32 @@ Item {
     id: backdrop
     anchors.fill: parent
     color: "#80000000"
-    visible: householdSelectDialog.myVisible
-    enabled: householdSelectDialog.myVisible
+    visible: householdSelectDialog.myVisible || authorizationDialog.myVisible
+    enabled: householdSelectDialog.myVisible || authorizationDialog.myVisible
     z: 500
 
     MouseArea {
       anchors.fill: parent
-      onClicked: householdSelectDialog.close()
+
+      function checkIfInside(element, x, y) {
+        return (x >= element.x && x <= element.x + element.width &&
+          y >= element.y && y <= element.y + element.height)
+      }
+
+      function shouldCloseDialog(dialog, x, y) {
+        return dialog.myVisible && !checkIfInside(dialog, mouseX, mouseY);
+      }
+
+      onClicked: () => {
+        if (shouldCloseDialog(householdSelectDialog, mouseX, mouseY)) {
+          householdSelectDialog.close();
+        }
+
+        if (shouldCloseDialog(authorizationDialog, mouseX, mouseY)) {
+          authorizationDialog.close();
+        }
+      }
+
       enabled: true
     }
   }
@@ -53,12 +72,17 @@ Item {
 
       selected: model.householdId === householdsModel.currentHousehold
       elementsCount: householdsModel.count
+      text: model.name
 
       onClicked: {
         householdsModel.currentHousehold = model.householdId;
         householdSelectDialog.close();
       }
     }
+  }
+
+  Components.AuthorizationDialog {
+    id: authorizationDialog
   }
 
   Item {

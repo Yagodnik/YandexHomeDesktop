@@ -53,6 +53,15 @@ Item {
 
         Components.AccountDetails {}
 
+        UI.MyButton {
+          id: newAuthButton
+          text: "Авторизоваться (new)"
+
+          onClicked: () => {
+            authorizationDialog.open()
+          }
+        }
+
         Components.AllSettings {}
       }
     }

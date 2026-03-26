@@ -8,6 +8,7 @@ Column {
 
   property bool selected
   property int elementsCount
+  property string text
 
   signal clicked()
 
@@ -32,7 +33,7 @@ Column {
 
     UI.DefaultText {
       id: houseName
-      text: model.name
+      text: root.text
       anchors.left: householdIcon.right
       anchors.leftMargin: 12
       anchors.verticalCenter: parent.verticalCenter

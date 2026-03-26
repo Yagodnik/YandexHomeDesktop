@@ -135,23 +135,39 @@ Item {
     }
 
     Item {
-      ListView {
-        id: roomsList
+      Column {
         anchors.fill: parent
 
-        clip: true
+        UI.MyInputField {
+          id: searchField
+          width: parent.width
+          height: 32
 
-        spacing: 8
-
-        ScrollBar.vertical: scrollBar
-
-        model: RoomsFilterModel {
-          sourceModel: roomsModel
-          householdId: householdsModel.currentHousehold
+          placeholderText: "Введите название устройства"
         }
 
-        delegate: Components.RoomDevicesList {
-          width: roomsList.width
+        ListView {
+          id: roomsList
+          anchors.top: searchField.bottom
+          anchors.topMargin: 2
+          anchors.bottom: parent.bottom
+          anchors.left: parent.left
+          anchors.right: parent.right
+
+          clip: true
+
+          spacing: 8
+
+          ScrollBar.vertical: scrollBar
+
+          model: RoomsFilterModel {
+            sourceModel: roomsModel
+            householdId: householdsModel.currentHousehold
+          }
+
+          delegate: Components.RoomDevicesList {
+            width: roomsList.width
+          }
         }
       }
 

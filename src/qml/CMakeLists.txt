@@ -18,6 +18,7 @@ qt_add_qml_module(YandexHomeDesktopUi
         ui/ImageButton.qml
         ui/ErrorDialog.qml
         ui/Skeleton.qml
+        ui/MyInputField.qml
 )
 
 qt_add_qml_module(YandexHomeDesktopPages
@@ -49,6 +50,7 @@ qt_add_qml_module(YandexHomeDesktopComponents
         components/SettingsComboOption.qml
         components/SettingsReference.qml
         components/AllSettings.qml
+        components/AuthorizationDialog.qml
         components/AppHeader.qml
         components/ScenarioDelegate.qml
         components/ScenariosList.qml

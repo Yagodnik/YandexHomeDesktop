@@ -7,13 +7,33 @@ Column {
   id: room
   spacing: 8
 
-  Text {
-    id: roomTitle
-    text: name
-    color: themes.inactive
+  Row {
+    width: parent.width
+    height: 20
 
-    font.pointSize: 14
-    font.bold: true
+    Text {
+      id: roomTitle
+      text: name
+      color: themes.inactive
+
+      anchors.left: parent.left
+      anchors.verticalCenter: parent.verticalCenter
+
+      font.pointSize: 14
+      font.bold: true
+    }
+
+    UI.ImageButton {
+      id: minimizeButton
+
+      anchors.right: parent.right
+      anchors.verticalCenter: parent.verticalCenter
+
+      width: 16
+      height: 16
+
+      source: "qrc:/images/arrow.svg"
+    }
   }
 
   DevicesFilterModel {

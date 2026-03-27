@@ -3,13 +3,18 @@
 #include "QtKeyChainSecretsStorage.h"
 #include <QDebug>
 #include <QDesktopServices>
+#include <QNetworkReply>
 #include <QUrlQuery>
 #include <QUrl>
 
 #include "YandexOAuthSecrets.h"
 
-YandexTokenAuthorizationService::YandexTokenAuthorizationService(QObject *parent)
-  : IAuthorizationService(parent)
+YandexTokenAuthorizationService::YandexTokenAuthorizationService(
+  QNetworkAccessManager* network_manager,
+  QObject *parent
+) :
+  IAuthorizationService(parent),
+  network_manager_(network_manager)
 {
   secrets_storage_ = std::make_unique<QtKeyChainSecretsStorage>(kAppName, kSecureKey);
   auth_secrets_ = std::make_unique<YandexOAuthSecrets>();
@@ -67,18 +72,60 @@ void YandexTokenAuthorizationService::AttemptAuthorization(const QVariant& user_
 }
 
 void YandexTokenAuthorizationService::SaveAuthToken(const QString &token) {
-  token_req_url_ = GetAuthTokenUrl("https://oauth.yandex.ru/", token);
+  const auto auth_secrets = auth_secrets_->GetAuthSecrets().value();
 
-  secrets_storage_->TryWrite(token, [this](std::optional<ISecretsStorage::Error> error) {
-    if (error.has_value()) {
-      const auto [error_code, error_text] = error.value();
+  QNetworkRequest request(QUrl("https://oauth.yandex.ru/token"));
 
-      qWarning() << "AuthorizationService: Token write error -" << error_code << " " << error_text;
-      emit authorizationFailed();
+  // TODO: Load client secret
+  const QByteArray basic = QString("%1:%2")
+    .arg(auth_secrets.client_id)
+    .arg("")
+    .toUtf8()
+    .toBase64();
+
+  const QByteArray auth_header = QString("Basic %1")
+    .arg(basic)
+    .toUtf8();
+
+  request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+  request.setRawHeader("Authorization", auth_header);
+
+  QUrlQuery query;
+  query.addQueryItem("grant_type", "authorization_code");
+  query.addQueryItem("code", token);
+
+  const QByteArray data = query.toString(QUrl::FullyEncoded).toUtf8();
+  QNetworkReply* reply = network_manager_->post(request, data);
+
+  connect(reply, &QNetworkReply::finished, this, [reply, this]() {
+    if (reply->error() == QNetworkReply::NoError) {
+      const QByteArray response = reply->readAll();
+      qDebug() << "Success:" << response;
+
+      // TODO: Move to special parser for response
+      const QJsonDocument json = QJsonDocument::fromJson(response);
+      const QString auth_token = json.object().value("access_token").toString();
+
+      // TODO: Write all tokens
+      secrets_storage_->TryWrite(auth_token, [this, auth_token](std::optional<ISecretsStorage::Error> error) {
+        if (error.has_value()) {
+          const auto [error_code, error_text] = error.value();
+
+          qWarning() << "AuthorizationService: Token write error -" << error_code << " " << error_text;
+          emit authorizationFailed();
+        } else {
+          qInfo() << "AuthorizationService: Token stored successfully " << auth_token;
+
+          token_.reset();
+          token_ = auth_token;
+
+          emit authorized();
+        }
+      });
     } else {
-      qInfo() << "AuthorizationService: Token stored successfully!";
-      emit authorized();
+      qDebug() << "Error:" << reply->errorString();
     }
+    reply->deleteLater();
   });
 }
 
@@ -117,8 +164,12 @@ QUrl YandexTokenAuthorizationService::GetAuthCodeUrl(
   QUrl url(base_url);
 
   QUrlQuery query(url);
+
+  // Allows switching account during authorization
+  query.addQueryItem("force_confirm", "yes");
   query.addQueryItem("response_type", "code");
   query.addQueryItem("client_id", secrets.client_id);
+
   url.setQuery(query);
 
   return url;

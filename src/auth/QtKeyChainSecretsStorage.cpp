@@ -2,7 +2,7 @@
 #include <QDebug>
 
 QtKeyChainSecretsStorage::QtKeyChainSecretsStorage(
-  const QString &appName,
+  const QString& appName,
   const QString& secureKey,
   QObject *parent
 ) :

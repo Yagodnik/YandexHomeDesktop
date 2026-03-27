@@ -1,24 +1,26 @@
 #pragma once
 
+#include <QNetworkAccessManager>
+
 #include "IAuthorizationService.h"
 #include "IOAuthSecrets.h"
+#include "ISecretsStorage.h"
 #include "YandexOAuthSecrets.h"
-
-class ISecretsStorage;
 
 class YandexTokenAuthorizationService : public IAuthorizationService {
 public:
-  explicit YandexTokenAuthorizationService(QObject *parent = nullptr);
+  explicit YandexTokenAuthorizationService(QNetworkAccessManager* network_manager, QObject *parent = nullptr);
 
-  Q_INVOKABLE void TryLoadTokenFromStorage() override;
-  Q_INVOKABLE bool IsAuthorized() const override;
+  void TryLoadTokenFromStorage() override;
+  Q_INVOKABLE [[nodiscard]] bool IsAuthorized() const override;
   Q_INVOKABLE void AttemptAuthorization(const QVariant& user_data) override;
   Q_INVOKABLE void SaveAuthToken(const QString& token) override;
   Q_INVOKABLE void Logout() override;
-  Q_INVOKABLE QString GetLastErrorCode() const override;
-  Q_INVOKABLE std::optional<QString> GetToken() const override;
+  Q_INVOKABLE [[nodiscard]] QString GetLastErrorCode() const override;
+  Q_INVOKABLE [[nodiscard]] std::optional<QString> GetToken() const override;
 
 private:
+  QNetworkAccessManager* network_manager_;
   std::unique_ptr<ISecretsStorage> secrets_storage_;
   std::unique_ptr<IOAuthSecrets> auth_secrets_;
 

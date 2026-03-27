@@ -212,6 +212,16 @@ Item {
       Item {
         anchors.fill: parent
 
+        Connections {
+          target: authorizationSteps
+
+          onCurrentIndexChanged: () => {
+            if (authorizationSteps.currentIndex === 1) {
+              authorizationService.AttemptAuthorization({});
+            }
+          }
+        }
+
         Column {
           anchors.fill: parent
           anchors.leftMargin: 16
@@ -270,7 +280,7 @@ Item {
             spacing: 6
 
             UI.HeadingText {
-              text: "Введите авторизационный токен"
+              text: "Введите код подтверждения"
 
               anchors.left: parent.left
 
@@ -284,7 +294,7 @@ Item {
 
               invertedColors: true
 
-              placeholderText: "Ваш токен"
+              placeholderText: "Код подтверждения"
             }
           }
 
@@ -292,7 +302,13 @@ Item {
             target: authorizationService
 
             function onAuthorized() {
+              authorizationButton.loading = false;
               console.log("New authorization");
+            }
+
+            function onAuthorizationFailed() {
+              authorizationButton.loading = false;
+              console.log("Authorization failed");
             }
           }
 
@@ -303,14 +319,11 @@ Item {
 
             property bool loading: false
 
-            Timer {
-              id: timer
-            }
-
             onClicked: () => {
               loading = true;
 
-              authorizationService.AttemptAuthorization({});
+              console.log("Code: " + yandexTokenInput.text);
+              authorizationService.SaveAuthToken(yandexTokenInput.text);
             }
 
             Rectangle {

@@ -25,7 +25,7 @@ Item {
   }
 
   Component.onCompleted: {
-    authorizationService.AttemptLocalAuthorization();
+    authorizationService.TryLoadTokenFromStorage();
   }
 
   // UI.MyButton {

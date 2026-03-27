@@ -52,7 +52,7 @@ Item {
 
           anchors.horizontalCenter: col.horizontalCenter
 
-          onClicked: authorizationService.AttemptAuthorization();
+          onClicked: authorizationService.AttemptAuthorization({});
         }
       }
 

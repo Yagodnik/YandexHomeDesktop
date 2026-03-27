@@ -91,8 +91,8 @@ Window {
 
     function onUnauthorized() {
       console.log("Unauthorized");
-      // router.navigateTo("main");
-      router.navigateTo("auth");
+      router.navigateTo("main");
+      // router.navigateTo("auth");
     }
 
     function onLogout() {

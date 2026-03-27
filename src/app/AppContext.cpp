@@ -1,7 +1,7 @@
 #include "AppContext.h"
 
 AppContext::AppContext(QGuiApplication *app): app_(app) {
-  authorization_service = new AuthorizationService(app_);
+  authorization_service = new WebAuthorizationService(app_);
   platform_service = new PlatformService(app_);
 
   token_provider = [this] -> QString {

@@ -1,5 +1,6 @@
 #include "CliApp.h"
 
+#include "auth/WebAuthorizationService.h"
 #include "cli/CLI.h"
 
 CliApp::CliApp(AppContext &app_context, QObject *parent) :
@@ -7,31 +8,31 @@ CliApp::CliApp(AppContext &app_context, QObject *parent) :
 {
   connect(
     app_context_.authorization_service,
-    &AuthorizationService::authorized,
+    &IAuthorizationService::authorized,
     this,
     &CliApp::onAuthorized);
 
   connect(
     app_context_.authorization_service,
-    &AuthorizationService::authorizationFailed,
+    &IAuthorizationService::authorizationFailed,
     this,
     &CliApp::onAuthorizationFailed);
 
   connect(
     app_context_.authorization_service,
-    &AuthorizationService::authorizationCanceled,
+    &IAuthorizationService::authorizationCanceled,
     this,
     &CliApp::onAuthorizationFailed);
 
   connect(
     app_context_.authorization_service,
-    &AuthorizationService::unauthorized,
+    &IAuthorizationService::unauthorized,
     this,
     &CliApp::onAuthorized);
 
   // We need to hide icon when we run in CLI mode
   app_context_.platform_service->ShowOnlyInTray();
-  app_context_.authorization_service->AttemptLocalAuthorization();
+  app_context_.authorization_service->TryLoadTokenFromStorage();
 }
 
 int CliApp::Start() {

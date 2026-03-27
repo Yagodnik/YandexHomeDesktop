@@ -288,9 +288,63 @@ Item {
             }
           }
 
+          Connections {
+            target: authorizationService
+
+            function onAuthorized() {
+              console.log("New authorization");
+            }
+          }
+
           UI.MyButton {
+            id: authorizationButton
             width: parent.width
             text: "Авторизоваться"
+
+            property bool loading: false
+
+            Timer {
+              id: timer
+            }
+
+            onClicked: () => {
+              loading = true;
+
+              authorizationService.AttemptAuthorization({});
+            }
+
+            Rectangle {
+              anchors.fill: parent
+              color: "transparent"
+              visible: authorizationButton.loading
+              z: 1
+
+              Rectangle {
+                anchors.fill: parent
+                radius: 8
+                color: "#80000000"
+              }
+
+              UI.MyProgressIndicator {
+                anchors.centerIn: parent
+                visible: authorizationButton.loading
+              }
+            }
+
+            enabled: !loading
+          }
+
+          UI.DefaultText {
+            id: errorText
+            color: "red"
+
+            width: parent.width
+
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            wrapMode: Text.WordWrap
+
+            text: ""
           }
         }
       }

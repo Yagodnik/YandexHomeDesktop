@@ -16,13 +16,13 @@ void ResetCommand::Execute(AppContext& app_ctx, const CommandContext& command_ct
 
   connect(
     app_ctx.authorization_service,
-    &AuthorizationService::logoutFinished,
+    &WebAuthorizationService::logoutFinished,
     this,
     &ResetCommand::OnLogoutFinished);
 
   connect(
     app_ctx.authorization_service,
-    &AuthorizationService::logoutFailed,
+    &WebAuthorizationService::logoutFailed,
     this,
     &ResetCommand::OnLogoutFailed);
 

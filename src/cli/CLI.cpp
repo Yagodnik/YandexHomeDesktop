@@ -6,7 +6,7 @@
 #include "AccountInfoCommand.h"
 #include "ListDevicesCommand.h"
 #include "api/YandexHomeApi.h"
-#include "auth/AuthorizationService.h"
+#include "auth/WebAuthorizationService.h"
 
 CLI::CLI(AppContext& app_ctx,  QObject *parent) :
   QObject(parent),

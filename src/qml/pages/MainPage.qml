@@ -74,7 +74,7 @@ Item {
       elementsCount: householdsModel.count
       text: model.name
 
-      onClicked: {
+      onClicked: () => {
         householdsModel.currentHousehold = model.householdId;
         householdSelectDialog.close();
       }

@@ -98,7 +98,7 @@ Item {
     Components.AppHeader {
       id: appHeader
 
-      showHouseholdSelector: true
+      showHouseholdSelector: authorizationService.IsAuthorized()
     }
 
     Item {

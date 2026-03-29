@@ -10,6 +10,7 @@ struct AppContext {
   explicit AppContext(QGuiApplication *app);
 
   QGuiApplication *app_;
+  QNetworkAccessManager *network_manager_;
   IAuthorizationService *authorization_service;
   PlatformService *platform_service;
   YandexHomeApi *yandex_api;

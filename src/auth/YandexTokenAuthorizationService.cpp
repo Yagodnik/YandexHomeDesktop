@@ -6,6 +6,7 @@
 #include <QNetworkReply>
 #include <QUrlQuery>
 #include <QUrl>
+#include <QtEnvironmentVariables>
 
 #include "YandexOAuthSecrets.h"
 
@@ -76,10 +77,14 @@ void YandexTokenAuthorizationService::SaveAuthToken(const QString &token) {
 
   QNetworkRequest request(QUrl("https://oauth.yandex.ru/token"));
 
-  // TODO: Load client secret
+  // TODO: Load secret string from file...
+#ifndef QT_DEBUG
+#error "FIX TODO: Load secret string from file"
+#endif
+
   const QByteArray basic = QString("%1:%2")
     .arg(auth_secrets.client_id)
-    .arg("")
+    .arg(qgetenv("CLIENT_SECRET"))
     .toUtf8()
     .toBase64();
 
@@ -104,7 +109,9 @@ void YandexTokenAuthorizationService::SaveAuthToken(const QString &token) {
 
       // TODO: Move to special parser for response
       const QJsonDocument json = QJsonDocument::fromJson(response);
-      const QString auth_token = json.object().value("access_token").toString();
+
+      const auto auth_response = Serialization::From<AuthResponse>(json.object());
+      const QString auth_token = auth_response.access_token;
 
       // TODO: Write all tokens
       secrets_storage_->TryWrite(auth_token, [this, auth_token](std::optional<ISecretsStorage::Error> error) {

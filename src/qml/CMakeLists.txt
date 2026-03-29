@@ -58,4 +58,7 @@ qt_add_qml_module(YandexHomeDesktopComponents
         components/DeviceDelegate.qml
         components/RoomDevicesList.qml
         components/AdaptiveGrid.qml
+        components/SomethingWentWrongFrame.qml
+        components/RequiresAuthorizationFrame.qml
+        components/LoadingFrame.qml
 )

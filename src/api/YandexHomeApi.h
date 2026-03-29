@@ -15,7 +15,11 @@ class YandexHomeApi final : public QObject {
   Q_OBJECT
 public:
   using TokenProvider = std::function<QString()>;
-  explicit YandexHomeApi(TokenProvider token_provider, QObject *parent = nullptr);
+
+  explicit YandexHomeApi(
+    QNetworkAccessManager *network_access_manager,
+    TokenProvider token_provider,
+    QObject *parent = nullptr);
 
   Q_INVOKABLE void GetUserInfo();
   Q_INVOKABLE void GetScenarios();
@@ -109,7 +113,7 @@ private:
     const auto request = RequestFactory::CreateBearer(endpoint, token_provider_());
 
     PerformRequest<T>(
-      [this, &request]() { return network_access_manager_.get(request); },
+      [this, &request]() { return network_access_manager_->get(request); },
       std::move(ok_callback),
       std::move(error_callback)
     );
@@ -124,7 +128,7 @@ private:
     const auto request = RequestFactory::CreateBearer(endpoint, token_provider_());
 
     PerformRequest<T>(
-      [this, &request]() { return network_access_manager_.post(request, nullptr); },
+      [this, &request]() { return network_access_manager_->post(request, nullptr); },
       std::move(ok_callback),
       std::move(error_callback)
     );
@@ -140,12 +144,12 @@ private:
     const auto request = RequestFactory::CreateBearer(endpoint, token_provider_());
 
     PerformRequest<T>(
-      [this, &request, data]() { return network_access_manager_.post(request, data); },
+      [this, &request, data]() { return network_access_manager_->post(request, data); },
       std::move(ok_callback),
       std::move(error_callback)
     );
   }
 
-  QNetworkAccessManager network_access_manager_;
+  QNetworkAccessManager* network_access_manager_;
   TokenProvider token_provider_;
 };

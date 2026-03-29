@@ -5,8 +5,8 @@
 AppContext::AppContext(QGuiApplication *app): app_(app) {
   // authorization_service = new WebAuthorizationService(app_);
 
-  const auto network_manager = new QNetworkAccessManager(app_);
-  authorization_service = new YandexTokenAuthorizationService(network_manager, app_);
+  network_manager_ = new QNetworkAccessManager(app_);
+  authorization_service = new YandexTokenAuthorizationService(network_manager_, app_);
 
   platform_service = new PlatformService(app_);
 
@@ -21,8 +21,8 @@ AppContext::AppContext(QGuiApplication *app): app_(app) {
     return token.value();
   };
 
-  yandex_api = new YandexHomeApi(token_provider, app_);
-  yandex_account = new YandexAccount(token_provider, app_);
+  yandex_api = new YandexHomeApi(network_manager_, token_provider, app_);
+  yandex_account = new YandexAccount(network_manager_, token_provider, app_);
 
   settings = new Settings(app_);
 }

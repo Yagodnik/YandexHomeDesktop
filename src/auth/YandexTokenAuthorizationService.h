@@ -20,6 +20,14 @@ public:
   Q_INVOKABLE [[nodiscard]] std::optional<QString> GetToken() const override;
 
 private:
+  JSON_STRUCT(AuthResponse,
+    (QString, token_type),
+    (QString, access_token),
+    (uint64_t, expires_at),
+    (QString, refresh_token),
+    (QString, scope)
+  );
+
   QNetworkAccessManager* network_manager_;
   std::unique_ptr<ISecretsStorage> secrets_storage_;
   std::unique_ptr<IOAuthSecrets> auth_secrets_;

@@ -7,8 +7,13 @@
 #include "RequestFactory.h"
 #include "model/Actions.h"
 
-YandexHomeApi::YandexHomeApi(TokenProvider token_provider, QObject *parent)
-  : QObject(parent), token_provider_(std::move(token_provider)) {}
+YandexHomeApi::YandexHomeApi(
+  QNetworkAccessManager *network_access_manager,
+  TokenProvider token_provider,
+  QObject *parent
+) : QObject(parent),
+  network_access_manager_(network_access_manager),
+  token_provider_(std::move(token_provider)) {}
 
 void YandexHomeApi::GetUserInfo() {
   auto ok_callback = [this](auto& user_info) {

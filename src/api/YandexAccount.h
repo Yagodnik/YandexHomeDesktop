@@ -10,7 +10,11 @@ class YandexAccount : public QObject {
   Q_OBJECT
 public:
   using TokenProvider = std::function<QString()>;
-  explicit YandexAccount(TokenProvider token_provider, QObject *parent = nullptr);
+
+  explicit YandexAccount(
+    QNetworkAccessManager* network_manager,
+    TokenProvider token_provider,
+    QObject *parent = nullptr);
 
   Q_INVOKABLE void LoadData();
   Q_INVOKABLE [[nodiscard]] QString GetName() const;
@@ -32,7 +36,7 @@ private:
   const QString kAccountInfoEndpoint = "https://login.yandex.ru/info";
   const QString kAvatarUrl = "https://avatars.yandex.net/get-yapic/%1/";
 
-  QNetworkAccessManager network_manager_;
+  QNetworkAccessManager* network_manager_;
 
   QString name_;
   QString avatar_id_;

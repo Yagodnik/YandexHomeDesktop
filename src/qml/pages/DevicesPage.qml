@@ -60,7 +60,18 @@ Item {
 
   Component.onCompleted: {
     isLoading = true;
-    devicesModel.RequestData();
+
+    // Now we need to track status of authorization
+    // devicesModel.RequestData();
+
+    if (authorizationService.IsAuthorized()) {
+      console.log("User authorized -> requesting data");
+      devicesModel.RequestData();
+    } else {
+      rooms.isLoading = false;
+      console.log("User unauthorized -> showing instructions");
+      devicesStack.currentIndex = 3;
+    }
   }
 
   property var isLoading: false
@@ -89,49 +100,12 @@ Item {
     anchors.topMargin: 2
     anchors.bottom: parent.bottom
 
-    Item {
-      UI.MyProgressIndicator {
-        id: loadingProgress
-
-        anchors.centerIn: parent
-        width: 30
-        height: 30
-        strokeWidth: 2
-        opacity: (devicesStack.currentIndex === 0) ? 1 : 0
-        visible: opacity > 0
-
-        Behavior on opacity {
-          NumberAnimation {
-            duration: 200
-            easing.type: Easing.InOutQuad
-          }
-        }
-      }
+    Components.LoadingFrame {
+      showCondition: (scenariosStack.currentIndex === 0)
     }
 
-    Item {
-      opacity: (devicesStack.currentIndex === 1) ? 1 : 0
-      visible: opacity > 0
-
-      Behavior on opacity {
-        NumberAnimation {
-          duration: 200
-          easing.type: Easing.InOutQuad
-        }
-      }
-
-      Column {
-        id: errorMessage
-        anchors.centerIn: parent
-        spacing: 15
-
-        UI.DefaultText {
-          text: qsTr("Что-то пошло не так!")
-          color: themes.inactive
-
-          anchors.horizontalCenter: errorMessage.horizontalCenter
-        }
-      }
+    Components.SomethingWentWrongFrame {
+      showCondition: (scenariosStack.currentIndex === 1)
     }
 
     Item {
@@ -188,6 +162,10 @@ Item {
 
         background: Item {}
       }
+    }
+
+    Components.RequiresAuthorizationFrame {
+      showCondition: (devicesStack.currentIndex === 3)
     }
   }
 }

@@ -4,13 +4,18 @@
 
 #include "RequestFactory.h"
 
-YandexAccount::YandexAccount(TokenProvider token_provider, QObject *parent)
-  : QObject(parent), token_provider_(std::move(token_provider)) {}
+YandexAccount::YandexAccount(
+  QNetworkAccessManager* network_manager,
+  TokenProvider token_provider,
+  QObject *parent
+) : QObject(parent),
+  network_manager_(network_manager),
+  token_provider_(std::move(token_provider)) {}
 
 void YandexAccount::LoadData() {
   const auto request = RequestFactory::CreateBearer(kAccountInfoEndpoint, token_provider_());
 
-  auto reply = network_manager_.get(request);
+  auto reply = network_manager_->get(request);
 
   connect(reply, &QNetworkReply::finished, [this, reply]() {
     if (reply->error() != QNetworkReply::NoError) {

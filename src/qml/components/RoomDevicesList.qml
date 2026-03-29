@@ -7,6 +7,8 @@ Column {
   id: room
   spacing: 8
 
+  property bool collapsed: false
+
   Row {
     width: parent.width
     height: 20
@@ -33,6 +35,14 @@ Column {
       height: 16
 
       source: "qrc:/images/arrow.svg"
+
+      onClicked: collapsed = !collapsed
+
+      rotation: collapsed ? 180 : 0
+
+      Behavior on rotation {
+        NumberAnimation { duration: 150 }
+      }
     }
   }
 
@@ -46,7 +56,18 @@ Column {
   UI.DefaultText {
     text: "В этой комнате нет устройств!"
 
-    visible: filteredModel.count === 0
+    opacity: (!collapsed && filteredModel.count === 0) ? 1 : 0
+    height: (!collapsed && filteredModel.count === 0) ? implicitHeight : 0
+
+    Behavior on opacity {
+      NumberAnimation { duration: 150 }
+    }
+
+    Behavior on height {
+      NumberAnimation { duration: 150 }
+    }
+
+    visible:  height > 0 && filteredModel.count === 0
   }
 
   ListView {
@@ -56,7 +77,12 @@ Column {
     spacing: 8
 
     width: parent.width
-    height: contentHeight
+    // height: contentHeight
+    height: collapsed ? 0 : contentHeight
+
+    Behavior on height {
+      NumberAnimation { duration: 150 }
+    }
 
     model: filteredModel
 

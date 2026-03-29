@@ -14,3 +14,5 @@
 /resources/auth/secrets.json
 .DS_Store
 CMakeLists.txt.user
+.cache
+/resources/auth/secrets_old.json

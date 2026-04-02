@@ -8,6 +8,7 @@
 #include "api/YandexHomeApi.h"
 #include "app/CliApp.h"
 #include "cli/CLI.h"
+#include "infrastructure/settings/SettingsStorage.h"
 #include "iot/capabilities/ColorSettingCapability.h"
 #include "models/ScenariosModel/ScenariosModel.h"
 #include "models/DevicesModel//DevicesModel.h"
@@ -37,6 +38,7 @@
 #include "iot/properties/FloatProperty.h"
 #include "models/DeviceModel/DeviceController.h"
 #include "models/DeviceModel/DeviceDataModel.h"
+#include "models/DevicesModel/FavoriteDevicesModel.h"
 #include "utils/IconsProvider.h"
 #include "utils/LogManager.h"
 #include "utils/UnitsList.h"
@@ -68,6 +70,7 @@ GuiApp::GuiApp(AppContext& app_context, QObject *parent) :
   const auto properties_icons = new IconsProvider(":/data/propertiesIcons.json", "properties", app_context.app_);
   const auto capabilities_model = new CapabilitiesModel(device_controller, app_context.app_);
   const auto properties_model = new PropertiesModel(device_controller, app_context.app_);
+  const auto settings_storage = new SettingsStorage(app_context_.app_);
 
   root_context->setContextProperty("platformService", app_context.platform_service);
   root_context->setContextProperty("authorizationService", app_context.authorization_service);
@@ -93,6 +96,7 @@ GuiApp::GuiApp(AppContext& app_context, QObject *parent) :
   root_context->setContextProperty("deviceDataModel", device_data_model);
   root_context->setContextProperty("deviceIcons", device_icons);
   root_context->setContextProperty("propertiesIcons", properties_icons);
+  root_context->setContextProperty("settingsStorage", settings_storage);
 
   RegisterFonts();
   RegisterModels();
@@ -101,21 +105,21 @@ GuiApp::GuiApp(AppContext& app_context, QObject *parent) :
   RegisterViewModels();
 
   QObject::connect(
-  &engine, &QQmlApplicationEngine::objectCreated,
-  app_context_.app_, [themes, app_context]() {
-    if (app_context.settings->GetTrayModeEnabled()) {
-      app_context.platform_service->ShowOnlyInTray();
-    } else {
-      app_context.platform_service->ShowAsApp();
-    }
+    &engine, &QQmlApplicationEngine::objectCreated,
+    app_context_.app_, [themes, app_context] {
+      if (app_context.settings->GetTrayModeEnabled()) {
+        app_context.platform_service->ShowOnlyInTray();
+      } else {
+        app_context.platform_service->ShowAsApp();
+      }
 
-    themes->SetTheme(app_context.settings->GetCurrentTheme());
-  }, Qt::QueuedConnection
-);
+      themes->SetTheme(app_context.settings->GetCurrentTheme());
+    }, Qt::QueuedConnection
+  );
 
   QObject::connect(
     &engine, &QQmlApplicationEngine::objectCreationFailed,
-    app_context_.app_, [themes, app_context]() {
+    app_context_.app_, [themes, app_context] {
       qCritical() << "QQmlApplicationEngine::objectCreationFailed";
       QCoreApplication::exit(-1);
     }, Qt::QueuedConnection
@@ -128,7 +132,7 @@ int GuiApp::Start() {
   return app_context_.app_->exec();
 }
 
-void GuiApp::RegisterFonts() {
+void GuiApp::RegisterFonts() const {
   const int id = QFontDatabase::addApplicationFont(":/fonts/Manrope-Regular.ttf");
   QFontDatabase::addApplicationFont(":/fonts/Manrope-Bold.ttf");
 
@@ -139,26 +143,41 @@ void GuiApp::RegisterFonts() {
 }
 
 void GuiApp::RegisterModels() {
-  qmlRegisterType<DevicesFilterModel>("YandexHomeDesktop.Models", 1, 0, "DevicesFilterModel");
-  qmlRegisterType<RoomsFilterModel>("YandexHomeDesktop.Models", 1, 0, "RoomsFilterModel");
-  qmlRegisterType<ColorsFilterModel>("YandexHomeDesktop.Models", 1, 0, "ColorsFilterModel");
-  qmlRegisterType<ColorModesFilterModel>("YandexHomeDesktop.Models", 1, 0, "ColorModesFilterModel");
-  qmlRegisterType<ModesFilterModel>("YandexHomeDesktop.Models", 1, 0, "ModesFilterModel");
+  qmlRegisterType<DevicesFilterModel>(
+    "YandexHomeDesktop.Models", 1, 0, "DevicesFilterModel");
+  qmlRegisterType<RoomsFilterModel>(
+    "YandexHomeDesktop.Models", 1, 0, "RoomsFilterModel");
+  qmlRegisterType<ColorsFilterModel>(
+    "YandexHomeDesktop.Models", 1, 0, "ColorsFilterModel");
+  qmlRegisterType<ColorModesFilterModel>(
+    "YandexHomeDesktop.Models", 1, 0, "ColorModesFilterModel");
+  qmlRegisterType<ModesFilterModel>(
+    "YandexHomeDesktop.Models", 1, 0, "ModesFilterModel");
+  qmlRegisterType<FavoriteDevicesModel>(
+    "YandexHomeDesktop.Models", 1, 0, "FavoriteDevicesModel");
 }
 
 void GuiApp::RegisterCapabilities() {
-  qmlRegisterType<OnOffCapability>("YandexHomeDesktop.Capabilities", 1, 0, "OnOff");
-  qmlRegisterType<RangeCapability>("YandexHomeDesktop.Capabilities", 1, 0, "Range");
-  qmlRegisterType<ToggleCapability>("YandexHomeDesktop.Capabilities", 1, 0, "Toggle");
-  qmlRegisterType<ColorSettingCapability>("YandexHomeDesktop.Capabilities", 1, 0, "ColorSetting");
-  qmlRegisterType<ModesCapability>("YandexHomeDesktop.Capabilities", 1, 0, "Modes");
+  qmlRegisterType<OnOffCapability>(
+    "YandexHomeDesktop.Capabilities", 1, 0, "OnOff");
+  qmlRegisterType<RangeCapability>(
+    "YandexHomeDesktop.Capabilities", 1, 0, "Range");
+  qmlRegisterType<ToggleCapability>(
+    "YandexHomeDesktop.Capabilities", 1, 0, "Toggle");
+  qmlRegisterType<ColorSettingCapability>(
+    "YandexHomeDesktop.Capabilities", 1, 0, "ColorSetting");
+  qmlRegisterType<ModesCapability>(
+    "YandexHomeDesktop.Capabilities", 1, 0, "Modes");
 }
 
 void GuiApp::RegisterProperties() {
-  qmlRegisterType<FloatProperty>("YandexHomeDesktop.Properties", 1, 0, "Float");
-  qmlRegisterType<EventProperty>("YandexHomeDesktop.Properties", 1, 0, "Event");
+  qmlRegisterType<FloatProperty>(
+    "YandexHomeDesktop.Properties", 1, 0, "Float");
+  qmlRegisterType<EventProperty>(
+    "YandexHomeDesktop.Properties", 1, 0, "Event");
 }
 
 void GuiApp::RegisterViewModels() {
-  qmlRegisterType<DeviceViewModel>("YandexHomeDesktop.ViewModels", 1, 0, "DeviceViewModel");
+  qmlRegisterType<DeviceViewModel>(
+    "YandexHomeDesktop.ViewModels", 1, 0, "DeviceViewModel");
 }

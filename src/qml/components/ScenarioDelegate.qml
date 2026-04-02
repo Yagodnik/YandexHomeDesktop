@@ -87,6 +87,35 @@ Item {
   }
 
   Image {
+    id: favoriteButton
+    source: "qrc:/images/star.svg"
+
+    width: 32
+    height: 32
+
+    antialiasing: true
+    layer.enabled: true
+    layer.smooth: true
+    layer.samples: 8
+
+    fillMode: Image.PreserveAspectFit
+    scale: 0.5
+
+    anchors.verticalCenter: parent.verticalCenter
+    anchors.right: startButton.left
+    anchors.rightMargin: 8
+
+    MouseArea {
+      anchors.fill: parent
+      cursorShape: Qt.PointingHandCursor
+
+      onClicked: {
+
+      }
+    }
+  }
+
+  Image {
     id: startButton
     source: "qrc:/images/play.svg"
 

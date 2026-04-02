@@ -37,6 +37,8 @@ add_library(Models STATIC
         ModesModel/ModesFilterModel.h
         DeviceModel/DeviceDataModel.cpp
         DeviceModel/DeviceDataModel.h
+        DevicesModel/FavoriteDevicesModel.cpp
+        DevicesModel/FavoriteDevicesModel.h
 )
 
 target_link_libraries(Models PRIVATE Qt6::Core Qt6::Network Qt6::Gui YandexHomeApi Utils)

@@ -89,3 +89,4 @@ libs/boost/hana/...
 5) https://www.svgrepo.com/svg/500472/back
 6) https://www.svgrepo.com/svg/521486/arrow-up
 7) https://www.svgrepo.com/svg/458827/on-button
+8) https://www.svgrepo.com/svg/323143/round-star

@@ -12,9 +12,12 @@ QString RoomsFilterModel::householdId() const {
 
 void RoomsFilterModel::setHouseholdId(const QString &id) {
   if (id != household_id_) {
+    beginFilterChange();
+
     household_id_ = id;
     emit householdIdChanged();
-    invalidateFilter();
+
+    endFilterChange();
   }
 }
 

@@ -11,6 +11,7 @@
     <file>images/arrow.svg</file>
     <file>images/warning.svg</file>
     <file>images/on.svg</file>
+    <file>images/star.svg</file>
 
     <file>auth/secrets.json</file>
     <file>callback/index.html</file>

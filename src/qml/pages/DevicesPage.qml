@@ -101,11 +101,11 @@ Item {
     anchors.bottom: parent.bottom
 
     Components.LoadingFrame {
-      showCondition: (scenariosStack.currentIndex === 0)
+      showCondition: (devicesStack.currentIndex === 0)
     }
 
     Components.SomethingWentWrongFrame {
-      showCondition: (scenariosStack.currentIndex === 1)
+      showCondition: (devicesStack.currentIndex === 1)
     }
 
     Item {
@@ -118,7 +118,35 @@ Item {
           height: 32
 
           placeholderText: "Введите название устройства"
+
+          onTextChanged: () => {
+            roomsList.searchQuery = searchField.text
+          }
         }
+
+        // ListView {
+        //   id: favoriteList
+        //   anchors.top: searchField.bottom
+        //   anchors.topMargin: 2
+        //   anchors.left: parent.left
+        //   anchors.right: parent.right
+        //   height: contentHeight
+        //
+        //   clip: true
+        //
+        //   spacing: 8
+        //
+        //   ScrollBar.vertical: scrollBar
+        //
+        //   model: FavoriteDevicesModel {
+        //     sourceModel: devicesModel
+        //     settingsStorage2: settingsStorage
+        //   }
+        //
+        //   delegate: Components.DeviceDelegate {
+        //     width: favoriteList.width
+        //   }
+        // }
 
         ListView {
           id: roomsList

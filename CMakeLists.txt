@@ -59,10 +59,15 @@ qt_add_executable(appYandexHomeDesktop
         src/viewmodels/DeviceViewModel.h
         src/viewmodels/DeviceViewState.cpp
         src/viewmodels/DeviceViewState.h
+
+#        TODO: Move to special cmake
         src/infrastructure/network/INetworkClient.cpp
         src/infrastructure/network/INetworkClient.h
         src/infrastructure/network/QtNetworkClient.cpp
         src/infrastructure/network/QtNetworkClient.h
+        src/infrastructure/settings/ISettingsStorage.h
+        src/infrastructure/settings/SettingsStorage.cpp
+        src/infrastructure/settings/SettingsStorage.h
 )
 
 if (APPLE)

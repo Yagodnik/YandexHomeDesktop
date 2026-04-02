@@ -9,6 +9,8 @@ Column {
 
   property bool collapsed: false
 
+  property string searchQuery: ""
+
   Row {
     width: parent.width
     height: 20
@@ -51,6 +53,7 @@ Column {
     sourceModel: devicesModel
     householdId: model.householdId
     roomId: model.roomId
+    deviceName: searchQuery
   }
 
   UI.DefaultText {

@@ -11,7 +11,7 @@ public:
   int Start();
 
 private:
-  void RegisterFonts();
+  void RegisterFonts() const;
   void RegisterModels();
   void RegisterCapabilities();
   void RegisterProperties();

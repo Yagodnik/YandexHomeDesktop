@@ -109,7 +109,8 @@ Item {
     }
 
     Item {
-      Column {
+      Item {
+        id: wholeDevicesList
         anchors.fill: parent
 
         UI.MyInputField {
@@ -124,51 +125,57 @@ Item {
           }
         }
 
-        // ListView {
-        //   id: favoriteList
-        //   anchors.top: searchField.bottom
-        //   anchors.topMargin: 2
-        //   anchors.left: parent.left
-        //   anchors.right: parent.right
-        //   height: contentHeight
-        //
-        //   clip: true
-        //
-        //   spacing: 8
-        //
-        //   ScrollBar.vertical: scrollBar
-        //
-        //   model: FavoriteDevicesModel {
-        //     sourceModel: devicesModel
-        //     settingsStorage2: settingsStorage
-        //   }
-        //
-        //   delegate: Components.DeviceDelegate {
-        //     width: favoriteList.width
-        //   }
-        // }
-
-        ListView {
-          id: roomsList
+        Flickable {
           anchors.top: searchField.bottom
           anchors.topMargin: 2
-          anchors.bottom: parent.bottom
           anchors.left: parent.left
           anchors.right: parent.right
-
+          anchors.bottom: parent.bottom
           clip: true
+          contentHeight: favoriteAndAllDevices.height
 
-          spacing: 8
+          Column {
+            id: favoriteAndAllDevices
+            width: parent.width
+            spacing: 4
 
-          ScrollBar.vertical: scrollBar
+            Components.RoomDevicesList {
+              id: favoriteList
+              width: roomsList.width
+              name: "Избранные"
 
-          model: RoomsFilterModel {
-            sourceModel: roomsModel
-            householdId: householdsModel.currentHousehold
-          }
+              sourceModel: FavoriteDevicesModel {
+                sourceModel: devicesModel
+                settingsStorage2: settingsStorage
+              }
+            }
 
-          delegate: Components.RoomDevicesList {
-            width: roomsList.width
+            ListView {
+              id: roomsList
+              spacing: 8
+
+              width: parent.width
+              height: contentHeight
+              interactive: false
+
+              ScrollBar.vertical: scrollBar
+
+              model: RoomsFilterModel {
+                sourceModel: roomsModel
+                householdId: householdsModel.currentHousehold
+              }
+
+              delegate: Components.RoomDevicesList {
+                width: roomsList.width
+                name: model.name
+
+                sourceModel: DevicesFilterModel {
+                  sourceModel: devicesModel
+                  householdId: model.householdId
+                  roomId: model.roomId
+                }
+              }
+            }
           }
         }
       }
@@ -178,7 +185,7 @@ Item {
 
         width: 10
         height: roomsList.height
-        anchors.left: roomsList.right
+        anchors.left: parent.right
         anchors.leftMargin: 4
         policy: roomsList.contentHeight > roomsList.height ? ScrollBar.AlwaysOn : ScrollBar.AlwaysOff
 

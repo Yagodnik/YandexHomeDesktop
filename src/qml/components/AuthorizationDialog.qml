@@ -132,8 +132,6 @@ Item {
       currentIndex: 0
 
       Item {
-        anchors.fill: parent
-
         UI.HeadingText {
           id: selectProviderTitle
           text: "Выберите провайдера"
@@ -169,7 +167,7 @@ Item {
             }
           }
 
-          delegate: Row {
+          delegate: Item {
             width: parent.width
             height: 48
 
@@ -210,12 +208,10 @@ Item {
       }
 
       Item {
-        anchors.fill: parent
-
         Connections {
           target: authorizationSteps
 
-          onCurrentIndexChanged: () => {
+          function onCurrentIndexChanged() {
             if (authorizationSteps.currentIndex === 1) {
               authorizationService.AttemptAuthorization({});
             }
@@ -229,7 +225,7 @@ Item {
 
           spacing: 10
 
-          Row {
+          Item {
             width: parent.width
             height: 32
 

@@ -7,11 +7,12 @@ Column {
   id: room
   spacing: 8
 
+  property var name: ""
   property bool collapsed: false
-
+  property var sourceModel
   property string searchQuery: ""
 
-  Row {
+  Item {
     width: parent.width
     height: 20
 
@@ -48,19 +49,11 @@ Column {
     }
   }
 
-  DevicesFilterModel {
-    id: filteredModel
-    sourceModel: devicesModel
-    householdId: model.householdId
-    roomId: model.roomId
-    deviceName: searchQuery
-  }
-
   UI.DefaultText {
     text: "В этой комнате нет устройств!"
 
-    opacity: (!collapsed && filteredModel.count === 0) ? 1 : 0
-    height: (!collapsed && filteredModel.count === 0) ? implicitHeight : 0
+    opacity: (!collapsed && room.sourceModel.count === 0) ? 1 : 0
+    height: (!collapsed && room.sourceModel.count === 0) ? implicitHeight : 0
 
     Behavior on opacity {
       NumberAnimation { duration: 150 }
@@ -70,7 +63,7 @@ Column {
       NumberAnimation { duration: 150 }
     }
 
-    visible:  height > 0 && filteredModel.count === 0
+    visible:  height > 0 && room.sourceModel.count === 0
   }
 
   ListView {
@@ -87,7 +80,7 @@ Column {
       NumberAnimation { duration: 150 }
     }
 
-    model: filteredModel
+    model: room.sourceModel
 
     delegate: Components.DeviceDelegate {
       width: devicesList.width

@@ -143,6 +143,8 @@ Item {
               id: favoriteList
               width: roomsList.width
               name: "Избранные"
+              collapsed: settingsStorage.Contains("collapsed-rooms", "yhd-favorites")
+              roomId: "yhd-favorites"
 
               sourceModel: FavoriteDevicesModel {
                 sourceModel: devicesModel
@@ -168,6 +170,8 @@ Item {
               delegate: Components.RoomDevicesList {
                 width: roomsList.width
                 name: model.name
+                collapsed: model.collapsed
+                roomId: model.roomId
 
                 sourceModel: DevicesFilterModel {
                   sourceModel: devicesModel

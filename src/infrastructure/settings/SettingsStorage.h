@@ -11,6 +11,12 @@ public:
 
   Q_INVOKABLE QStringList GetList(const QString &name) override;
 
+  Q_INVOKABLE void AddToList(const QString &name, const QString &value) override;
+
+  Q_INVOKABLE void RemoveFromList(const QString &name, const QString &value) override;
+
+  Q_INVOKABLE bool Contains(const QString &name, const QString &value) override;
+
 private:
   QSettings settings_;
 };

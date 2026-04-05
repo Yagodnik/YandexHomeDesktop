@@ -7,6 +7,7 @@ Column {
   id: room
   spacing: 8
 
+  property var roomId: null
   property var name: ""
   property bool collapsed: false
   property var sourceModel
@@ -39,7 +40,17 @@ Column {
 
       source: "qrc:/images/arrow.svg"
 
-      onClicked: collapsed = !collapsed
+      onClicked: () => {
+        collapsed = !collapsed;
+
+        if (roomId !== null) {
+          if (collapsed) {
+            settingsStorage.AddToList("collapsed-rooms", roomId);
+          } else {
+            settingsStorage.RemoveFromList("collapsed-rooms", roomId);
+          }
+        }
+      }
 
       rotation: collapsed ? 180 : 0
 

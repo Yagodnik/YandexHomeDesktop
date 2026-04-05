@@ -53,9 +53,10 @@ GuiApp::GuiApp(AppContext& app_context, QObject *parent) :
   const auto root_context = engine.rootContext();
   const auto themes = new Themes(app_context.app_);
   const auto router = new Router(app_context.app_);
+  const auto settings_storage = new SettingsStorage(app_context_.app_);
   const auto scenarios_model = new ScenariosModel(app_context.yandex_api, app_context.app_);
   const auto devices_model = new DevicesModel(app_context.yandex_api, app_context.app_);
-  const auto rooms_model = new RoomsModel(app_context.yandex_api, app_context.app_);
+  const auto rooms_model = new RoomsModel(app_context.yandex_api, settings_storage, app_context.app_);
   const auto device_controller = new DeviceController(app_context.yandex_api, app_context.app_);
   const auto households_model = new HouseholdsModel(app_context.yandex_api, app_context.app_);
   const auto error_codes = new ErrorCodes(app_context.app_);
@@ -70,7 +71,6 @@ GuiApp::GuiApp(AppContext& app_context, QObject *parent) :
   const auto properties_icons = new IconsProvider(":/data/propertiesIcons.json", "properties", app_context.app_);
   const auto capabilities_model = new CapabilitiesModel(device_controller, app_context.app_);
   const auto properties_model = new PropertiesModel(device_controller, app_context.app_);
-  const auto settings_storage = new SettingsStorage(app_context_.app_);
 
   root_context->setContextProperty("platformService", app_context.platform_service);
   root_context->setContextProperty("authorizationService", app_context.authorization_service);

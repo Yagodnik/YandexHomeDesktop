@@ -28,6 +28,7 @@ add_subdirectory(src/models)
 add_subdirectory(src/platform)
 add_subdirectory(src/utils)
 add_subdirectory(src/iot)
+add_subdirectory(src/backend)
 
 qt_add_executable(appYandexHomeDesktop
         src/main.cpp
@@ -121,6 +122,7 @@ target_link_libraries(appYandexHomeDesktop PRIVATE
         PlatformService
         Utils
         Iot
+        Backend
 )
 
 include(GNUInstallDirs)

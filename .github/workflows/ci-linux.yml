@@ -1,0 +1,47 @@
+name: Linux portable tests
+
+on:
+  pull_request:
+    branches: [main, dev]
+  push:
+    branches: [main, dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: linux-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    env:
+      QT_QPA_PLATFORM: offscreen
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.9.1'
+          host: linux
+          target: desktop
+          arch: gcc_64
+          cache: true
+
+      - name: Configure portable tests
+        run: >-
+          cmake -S . -B build -G Ninja
+          -DCMAKE_CXX_COMPILER=g++-13
+          -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR"
+          -DCMAKE_BUILD_TYPE=Release
+          -DBUILD_DESKTOP_APP=OFF
+          -DBUILD_TESTING=ON
+
+      - name: Build tests
+        run: cmake --build build --parallel 4
+
+      - name: Run tests
+        run: ctest --test-dir build --output-on-failure

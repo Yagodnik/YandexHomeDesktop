@@ -11,10 +11,10 @@
   <string>YandexHomeDesktop</string>
 
   <key>CFBundleVersion</key>
-  <string>0.1</string>
+  <string>@PROJECT_VERSION@</string>
 
   <key>CFBundleShortVersionString</key>
-  <string>0.1</string>
+  <string>@PROJECT_VERSION@</string>
 
   <!-- Hide dock icon and prevent Cmd+Tab presence -->
   <!--

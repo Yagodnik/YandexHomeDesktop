@@ -1,0 +1,53 @@
+name: Windows build and tests
+
+on:
+  pull_request:
+    branches: [main, dev]
+  push:
+    branches: [main, dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt and matching MinGW
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.9.1'
+          host: windows
+          target: desktop
+          arch: win64_mingw
+          modules: qt5compat qtnetworkauth qtshadertools
+          tools: tools_mingw1310,qt.tools.win64_mingw1310
+          cache: true
+
+      - name: Create build-only OAuth config
+        shell: pwsh
+        run: python scripts/write-oauth-config.py --dummy --output "$env:RUNNER_TEMP\oauth.json"
+
+      - name: Configure
+        shell: pwsh
+        run: >-
+          cmake -S . -B build -G Ninja
+          -DCMAKE_CXX_COMPILER=g++.exe
+          -DCMAKE_PREFIX_PATH="$env:QT_ROOT_DIR"
+          -DCMAKE_BUILD_TYPE=Release
+          -DBUILD_DESKTOP_APP=ON
+          -DBUILD_TESTING=ON
+          -DAUTH_CONFIG_FILE="$env:RUNNER_TEMP\oauth.json"
+
+      - name: Build application and tests
+        run: cmake --build build --parallel 4
+
+      - name: Run tests
+        run: ctest --test-dir build -C Release --output-on-failure

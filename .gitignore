@@ -1,0 +1,5 @@
+/build/
+/build-*/
+/dist/
+/resources/auth/secrets.json
+__pycache__/

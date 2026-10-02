@@ -149,7 +149,7 @@ void ApiBoundaryTests::ParsingAndScenarioResults() {
   QCOMPARE(executions, 1);
 }
 
-void ApiBoundaryTests::ActionEventsArePreserved() {
+void ApiBoundaryTests::ActionResultIsAggregated() {
   FakeTransport transport;
   YandexHomeApi api([] { return QString("token"); }, &transport);
   QObject context;
@@ -169,10 +169,9 @@ void ApiBoundaryTests::ActionEventsArePreserved() {
   QCOMPARE(transport.pending[0].method, QByteArray("POST"));
   QVERIFY(transport.pending[0].body.contains("device-1"));
   transport.Reply(0, Json(R"({"status":"ok","devices":[{"id":"device-1","capabilities":[{"state":{"action_result":{"status":"DONE"}}},{"state":{"action_result":{"status":"ERROR","error_code":"BAD"}}}]}]})"));
-  QCOMPARE(events.size(), 2);
-  QVERIFY(events[0].has_value());
-  QVERIFY(!events[1].has_value());
-  QCOMPARE(events[1].error().message, QString("BAD"));
+  QCOMPARE(events.size(), 1);
+  QVERIFY(!events[0].has_value());
+  QCOMPARE(events[0].error().message, QString("BAD"));
 }
 
 void ApiBoundaryTests::AccountResults() {
@@ -185,12 +184,13 @@ void ApiBoundaryTests::AccountResults() {
     account = *result;
   });
   QCOMPARE(transport.pending[0].request.url().host(), QString("login.yandex.ru"));
-  transport.Reply(0, Json(R"({"display_name":"Ada","default_avatar_id":"avatar"})"));
+  transport.Reply(0, Json(R"({"display_name":"Ada","default_avatar_id":"avatar","default_email":"ada@example.com"})"));
   QCOMPARE(account.display_name, QString("Ada"));
   QCOMPARE(account.default_avatar_id, QString("avatar"));
+  QCOMPARE(account.default_email, QString("ada@example.com"));
 }
 
-void ApiBoundaryTests::TimeoutReportsBothLegacyErrors() {
+void ApiBoundaryTests::TimeoutReportsOnce() {
   HangingNetworkManager manager;
   QtHttpTransport transport(nullptr, 10, &manager);
   QObject context;
@@ -201,9 +201,9 @@ void ApiBoundaryTests::TimeoutReportsBothLegacyErrors() {
     errors.append(result.error().kind);
   });
 
-  QTRY_COMPARE_WITH_TIMEOUT(errors.size(), 2, 1000);
-  QVERIFY(errors.contains(ApiErrorKind::Network));
-  QVERIFY(errors.contains(ApiErrorKind::Timeout));
+  QTRY_COMPARE_WITH_TIMEOUT(errors.size(), 1, 1000);
+  QTest::qWait(20);
+  QCOMPARE(errors, QList<ApiErrorKind>{ApiErrorKind::Timeout});
 }
 
 void ApiBoundaryTests::DestroyedContextSuppressesEvents() {

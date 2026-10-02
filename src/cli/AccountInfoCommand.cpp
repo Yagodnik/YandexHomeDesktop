@@ -11,8 +11,6 @@ void AccountInfoCommand::Execute(AppContext &app_ctx, const CommandContext &comm
     QGuiApplication::exit(0);
   }
 
-  app_ctx.yandex_account->LoadData();
-
   connect(
     app_ctx.yandex_account,
     &AccountModel::dataLoaded,
@@ -34,4 +32,6 @@ void AccountInfoCommand::Execute(AppContext &app_ctx, const CommandContext &comm
       QGuiApplication::exit(0);
     }
   );
+
+  app_ctx.yandex_account->LoadData();
 }

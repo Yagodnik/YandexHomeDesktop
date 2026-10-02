@@ -8,6 +8,7 @@ private slots:
   void HomeRefreshUpdatesAllModels();
   void ScenarioResultsRemainScoped();
   void DeviceDataFlowsThroughController();
+  void ImmediateDeviceResultSurvivesReset();
   void ActionEventsReachController();
   void AccountModelKeepsQmlContract();
 };

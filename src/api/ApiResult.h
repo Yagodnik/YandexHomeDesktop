@@ -21,7 +21,6 @@ struct ApiError {
 template<typename T>
 using ApiResult = std::expected<T, ApiError>;
 
-// A request can report more than one result to retain the current timeout and
-// per-capability action behavior. Each result belongs only to its request.
+// Each request reports one result to its owning context.
 template<typename T>
 using ApiResultHandler = std::function<void(ApiResult<T>)>;

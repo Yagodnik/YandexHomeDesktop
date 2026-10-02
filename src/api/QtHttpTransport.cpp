@@ -3,6 +3,7 @@
 #include <QNetworkReply>
 #include <QPointer>
 #include <QTimer>
+#include <memory>
 
 QtHttpTransport::QtHttpTransport(QObject* parent, int timeout_ms, QNetworkAccessManager* manager)
   : QObject(parent), manager_(manager ? manager : &default_manager_), timeout_ms_(timeout_ms) {}
@@ -20,25 +21,28 @@ void QtHttpTransport::Post(const QNetworkRequest& request, const QByteArray& bod
 void QtHttpTransport::WatchReply(QNetworkReply* reply, QObject* context,
                                  ApiResultHandler<HttpResponse> handler) {
   QPointer<QObject> owner(context);
+  auto delivered = std::make_shared<bool>(false);
   auto* timer = new QTimer(reply);
   timer->setSingleShot(true);
   timer->start(timeout_ms_);
 
-  connect(timer, &QTimer::timeout, reply, [reply, owner, handler]() {
-    if (!reply->isRunning()) {
+  connect(timer, &QTimer::timeout, reply, [reply, owner, handler, delivered]() {
+    if (!reply->isRunning() || *delivered) {
       return;
     }
+    *delivered = true;
     reply->abort();
     if (owner) {
       handler(std::unexpected(ApiError{ApiErrorKind::Timeout, "Timeout reached!"}));
     }
   });
 
-  connect(reply, &QNetworkReply::finished, reply, [reply, owner, handler]() {
+  connect(reply, &QNetworkReply::finished, reply, [reply, owner, handler, delivered]() {
     reply->deleteLater();
-    if (!owner) {
+    if (!owner || *delivered) {
       return;
     }
+    *delivered = true;
 
     const int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     if (status != 0 && (status < 200 || status >= 300)) {

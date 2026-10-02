@@ -7,8 +7,8 @@ class ApiBoundaryTests final : public QObject {
 private slots:
   void HomeRequestsAreScoped();
   void ParsingAndScenarioResults();
-  void ActionEventsArePreserved();
+  void ActionResultIsAggregated();
   void AccountResults();
-  void TimeoutReportsBothLegacyErrors();
+  void TimeoutReportsOnce();
   void DestroyedContextSuppressesEvents();
 };

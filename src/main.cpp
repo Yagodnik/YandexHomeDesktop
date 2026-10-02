@@ -1,4 +1,4 @@
-#include <QGuiApplication>
+#include <QApplication>
 #include <QLocale>
 #include <QTranslator>
 
@@ -21,7 +21,7 @@ static bool UseRussianUi() {
 }
 
 int main(int argc, char *argv[]) {
-  QGuiApplication app(argc, argv);
+  QApplication app(argc, argv);
   qInstallMessageHandler(LOGGING_CALLBACK(log_manager));
 
   QTranslator english_translator;

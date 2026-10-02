@@ -2,6 +2,7 @@
 
 #include <QPointer>
 #include <QtTest>
+#include <optional>
 
 #include "api/IAccountApi.h"
 #include "api/IHomeApi.h"
@@ -29,6 +30,7 @@ struct PendingResult {
 
 class FakeHomeApi final : public IHomeApi {
 public:
+  std::optional<ApiResult<DeviceInfo>> immediate_device_result;
   QList<PendingResult<UserInfo>> user_requests;
   QList<PendingResult<QList<ScenarioObject>>> scenario_requests;
   QList<PendingResult<DeviceInfo>> device_requests;
@@ -42,6 +44,10 @@ public:
     scenario_requests.append({context, std::move(handler)});
   }
   void GetDeviceInfo(const QString&, QObject* context, ApiResultHandler<DeviceInfo> handler) override {
+    if (immediate_device_result) {
+      handler(*immediate_device_result);
+      return;
+    }
     device_requests.append({context, std::move(handler)});
   }
   void ExecuteScenario(const QString&, QObject* context, ApiResultHandler<void> handler) override {
@@ -104,8 +110,7 @@ void ModelBoundaryTests::HomeRefreshUpdatesAllModels() {
   QCOMPARE(api.user_requests.size(), 2);
   auto failure = std::unexpected(ApiError{ApiErrorKind::Timeout, "Timeout reached!"});
   api.user_requests[1].Send(failure);
-  api.user_requests[1].Send(failure);
-  QCOMPARE(rooms_failed.size(), 2);
+  QCOMPARE(rooms_failed.size(), 1);
 }
 
 void ModelBoundaryTests::ScenarioResultsRemainScoped() {
@@ -152,6 +157,26 @@ void ModelBoundaryTests::DeviceDataFlowsThroughController() {
   controller.StopPolling();
 }
 
+void ModelBoundaryTests::ImmediateDeviceResultSurvivesReset() {
+  FakeHomeApi api;
+  DeviceInfo info;
+  info.status = Status::Ok;
+  info.id = "device-1";
+  info.name = "Lamp";
+  info.state = DeviceState::Online;
+  api.immediate_device_result = info;
+
+  DeviceController controller(&api);
+  DeviceDataModel model(&controller);
+  QSignalSpy initialized(&model, &DeviceDataModel::initialized);
+
+  controller.LoadDevice("device-1");
+  QCOMPARE(model.GetDeviceName(), QString("Lamp"));
+  QVERIFY(model.IsDeviceOnline());
+  QCOMPARE(initialized.size(), 1);
+  controller.StopPolling();
+}
+
 void ModelBoundaryTests::ActionEventsReachController() {
   FakeHomeApi api;
   DeviceController controller(&api);
@@ -171,8 +196,7 @@ void ModelBoundaryTests::ActionEventsReachController() {
   QCOMPARE(api.action_requests.size(), 1);
   auto failure = std::unexpected(ApiError{ApiErrorKind::Service, "FAILED"});
   api.action_requests[0].Send(failure);
-  api.action_requests[0].Send(failure);
-  QCOMPARE(errors.size(), 2);
+  QCOMPARE(errors.size(), 1);
   controller.StopPolling();
 }
 
@@ -183,10 +207,11 @@ void ModelBoundaryTests::AccountModelKeepsQmlContract() {
   QSignalSpy failed(&model, &AccountModel::dataLoadingFailed);
 
   model.LoadData();
-  api.request.Send(AccountInfo{"Ada", "avatar-1"});
+  api.request.Send(AccountInfo{"Ada", "avatar-1", "ada@example.com"});
   QCOMPARE(loaded.size(), 1);
   QCOMPARE(model.GetName(), QString("Ada"));
   QCOMPARE(model.GetAvatarUrl(), QString("https://avatars.yandex.net/get-yapic/avatar-1/"));
+  QCOMPARE(model.GetEmail(), QString("ada@example.com"));
 
   model.LoadData();
   api.request.Send(std::unexpected(ApiError{ApiErrorKind::Network, "offline"}));

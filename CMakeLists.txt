@@ -25,7 +25,7 @@ if(BUILD_TESTING)
   find_package(Qt6 6.9 REQUIRED COMPONENTS Test)
 endif()
 if(BUILD_DESKTOP_APP)
-  find_package(Qt6 6.9 REQUIRED COMPONENTS Quick NetworkAuth QuickControls2 ShaderTools LinguistTools)
+  find_package(Qt6 6.9 REQUIRED COMPONENTS Quick NetworkAuth QuickControls2 Widgets LinguistTools)
 endif()
 qt_standard_project_setup(REQUIRES 6.8)
 
@@ -118,15 +118,6 @@ if(BUILD_DESKTOP_APP)
     PREFIX "/"
     FILES "${YH_AUTH_CONFIG_FILE}"
   )
-  qt_add_shaders(appYandexHomeDesktop "compiled_shaders"
-    PREFIX "/shaders"
-    BASE "${CMAKE_CURRENT_SOURCE_DIR}/src/qml/shaders"
-    GLSL "310 es"
-    HLSL 50
-    MSL 21
-    FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/qml/shaders/highlight.frag"
-  )
-
   if(APPLE)
     configure_file(macos/Info.plist "${CMAKE_CURRENT_BINARY_DIR}/Info.plist" @ONLY)
     set_target_properties(appYandexHomeDesktop PROPERTIES
@@ -168,7 +159,7 @@ if(BUILD_DESKTOP_APP)
   )
 
   target_link_libraries(appYandexHomeDesktop PRIVATE
-    Qt6::Quick Qt6::Core Qt6::NetworkAuth Qt6::Gui Qt6::QuickControls2
+    Qt6::Quick Qt6::Core Qt6::NetworkAuth Qt6::Gui Qt6::QuickControls2 Qt6::Widgets
     YandexHomeDesktopUi YandexHomeDesktopPages
     YandexHomeDesktopComponents
     YandexApiAdapter YandexAuth Models PlatformService Utils Iot

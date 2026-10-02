@@ -21,6 +21,8 @@ void DeviceController::LoadDevice(const QString &device_id) {
   capabilities_updates_.clear();
   is_in_use_ = true;
 
+  emit loadRequestMade();
+
   api_->GetDeviceInfo(device_id_, this, [this](ApiResult<DeviceInfo> result) {
     if (result) {
       emit deviceInfoReceived(*result);
@@ -31,7 +33,6 @@ void DeviceController::LoadDevice(const QString &device_id) {
     }
   });
 
-  emit loadRequestMade();
 }
 
 void DeviceController::TryReloadDevice() {

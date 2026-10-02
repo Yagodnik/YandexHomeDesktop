@@ -59,8 +59,8 @@ GuiApp::GuiApp(AppContext& app_context, QObject *parent) :
   const auto color_model = new ColorsModel(app_context.app_);
   const auto color_modes_model = new ColorModesModel(app_context.app_);
   const auto modes_model = new ModesModel(app_context.app_);
-  const auto titles_list = new TitlesProvider(":/data/instances.json", app_context.app_);
-  const auto events_list = new TitlesProvider(":/data/propertiesEvents.json", app_context.app_);
+  const auto titles_list = new TitlesProvider(":/data/instances.json", "DataInstances", app_context.app_);
+  const auto events_list = new TitlesProvider(":/data/propertiesEvents.json", "DataEvents", app_context.app_);
   const auto units_list = new UnitsList(app_context.app_);
   const auto device_data_model = new DeviceDataModel(device_controller, app_context.app_);
   const auto device_icons = new IconsProvider(":/data/deviceIcons.json", "devices", app_context.app_);

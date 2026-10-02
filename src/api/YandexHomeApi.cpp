@@ -100,13 +100,13 @@ void YandexHomeApi::PerformActions(const QList<DeviceActionsObject>& actions, QO
     for (const auto& device : result->devices) {
       for (const auto& capability : device.capabilities) {
         const auto& action_result = capability.state.action_result;
-        if (action_result.status == "DONE") {
-          handler({});
-        } else {
+        if (action_result.status != "DONE") {
           handler(std::unexpected(ApiError{ApiErrorKind::Service,
                                            action_result.error_code}));
+          return;
         }
       }
     }
+    handler({});
   });
 }

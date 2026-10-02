@@ -25,7 +25,7 @@ if(BUILD_TESTING)
   find_package(Qt6 6.9 REQUIRED COMPONENTS Test)
 endif()
 if(BUILD_DESKTOP_APP)
-  find_package(Qt6 6.9 REQUIRED COMPONENTS Quick NetworkAuth QuickControls2 Widgets LinguistTools)
+  find_package(Qt6 6.9 REQUIRED COMPONENTS Quick NetworkAuth QuickControls2 Widgets Svg LinguistTools)
 endif()
 qt_standard_project_setup(REQUIRES 6.8)
 
@@ -159,7 +159,7 @@ if(BUILD_DESKTOP_APP)
   )
 
   target_link_libraries(appYandexHomeDesktop PRIVATE
-    Qt6::Quick Qt6::Core Qt6::NetworkAuth Qt6::Gui Qt6::QuickControls2 Qt6::Widgets
+    Qt6::Quick Qt6::Core Qt6::NetworkAuth Qt6::Gui Qt6::QuickControls2 Qt6::Widgets Qt6::Svg
     YandexHomeDesktopUi YandexHomeDesktopPages
     YandexHomeDesktopComponents
     YandexApiAdapter YandexAuth Models PlatformService Utils Iot
@@ -171,10 +171,18 @@ if(BUILD_DESKTOP_APP)
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
   )
-  qt_generate_deploy_qml_app_script(
-    TARGET appYandexHomeDesktop
-    OUTPUT_SCRIPT deploy_script
-  )
+  if(APPLE)
+    qt_generate_deploy_qml_app_script(
+      TARGET appYandexHomeDesktop
+      OUTPUT_SCRIPT deploy_script
+      DEPLOY_TOOL_OPTIONS "-codesign=-"
+    )
+  else()
+    qt_generate_deploy_qml_app_script(
+      TARGET appYandexHomeDesktop
+      OUTPUT_SCRIPT deploy_script
+    )
+  endif()
   install(SCRIPT ${deploy_script})
 
   if(WIN32)

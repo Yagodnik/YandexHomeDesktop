@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QAbstractListModel>
-#include "api/YandexHomeApi.h"
+#include "api/IHomeApi.h"
 
 class ScenariosModel : public QAbstractListModel {
   Q_OBJECT
@@ -19,7 +19,7 @@ public:
     IsActiveRole
   };
 
-  explicit ScenariosModel(YandexHomeApi *api, QObject *parent = nullptr);
+  explicit ScenariosModel(IHomeApi *api, QObject *parent = nullptr);
 
   [[nodiscard]] int rowCount(const QModelIndex &parent) const override;
   [[nodiscard]] QVariant data(const QModelIndex &index, int role) const override;
@@ -36,7 +36,7 @@ signals:
   void scenarioExecutionFailed();
 
 private:
-  YandexHomeApi *api_;
+  IHomeApi *api_;
   QList<ScenarioModel> scenarios_;
 
 private slots:

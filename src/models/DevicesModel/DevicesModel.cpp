@@ -1,15 +1,15 @@
 #include "DevicesModel.h"
 
-DevicesModel::DevicesModel(YandexHomeApi *api, QObject *parent)
-  : QAbstractListModel(parent), api_(api)
+DevicesModel::DevicesModel(HomeSnapshotLoader *loader, QObject *parent)
+  : QAbstractListModel(parent), loader_(loader)
 {
-  connect(api_,
-    &YandexHomeApi::userInfoReceived,
+  connect(loader_,
+    &HomeSnapshotLoader::loaded,
     this,
     &DevicesModel::OnUserInfoReceived);
 
-  connect(api_,
-    &YandexHomeApi::userInfoReceivingFailed,
+  connect(loader_,
+    &HomeSnapshotLoader::failed,
     this,
     &DevicesModel::OnUserInfoReceivingFailed);
 }
@@ -62,7 +62,7 @@ void DevicesModel::RequestData() {
 
   endResetModel();
 
-  api_->GetUserInfo();
+  loader_->Refresh();
 }
 
 void DevicesModel::OnUserInfoReceived(const UserInfo &info) {

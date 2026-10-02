@@ -4,7 +4,7 @@
 class OnOffExecutor final : public IExecutor {
   Q_OBJECT
 public:
-  explicit OnOffExecutor(YandexHomeApi *api);
+  explicit OnOffExecutor(IHomeApi *api);
 
   void Execute(const QString& value) override;
   void PrintInfo() override;

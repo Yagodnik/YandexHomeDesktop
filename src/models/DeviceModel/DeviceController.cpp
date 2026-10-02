@@ -1,28 +1,8 @@
 #include "DeviceController.h"
 
-DeviceController::DeviceController(YandexHomeApi *api, QObject *parent)
+DeviceController::DeviceController(IHomeApi *api, QObject *parent)
   : QObject(parent), api_(api)
 {
-  connect(api_,
-    &YandexHomeApi::deviceInfoReceived,
-    this,
-    &DeviceController::OnDeviceInfoReceived);
-
-  connect(api_,
-    &YandexHomeApi::deviceInfoReceivingFailed,
-    this,
-    &DeviceController::OnDeviceInfoReceivingFailed);
-
-  connect(api_,
-    &YandexHomeApi::actionExecutingFinishedSuccessfully,
-    this,
-    &DeviceController::OnActionExecutionFinishedSuccessfully);
-
-  connect(api_,
-    &YandexHomeApi::actionExecutingFailed,
-    this,
-    &DeviceController::OnActionExecutionFailed);
-
   connect(&polling_timer_,
     &QTimer::timeout,
     this,
@@ -41,7 +21,15 @@ void DeviceController::LoadDevice(const QString &device_id) {
   capabilities_updates_.clear();
   is_in_use_ = true;
 
-  api_->GetDeviceInfo(device_id_);
+  api_->GetDeviceInfo(device_id_, this, [this](ApiResult<DeviceInfo> result) {
+    if (result) {
+      emit deviceInfoReceived(*result);
+      OnDeviceInfoReceived(*result);
+    } else {
+      emit deviceInfoReceivingFailed(result.error().message);
+      OnDeviceInfoReceivingFailed(result.error().message);
+    }
+  });
 
   emit loadRequestMade();
 }
@@ -89,16 +77,28 @@ void DeviceController::UseCapability(
     qInfo() << "Device Controller: Cant pause polling for" << index << "as it out of range:" << capabilities_updates_.size();
   }
 
-  api_->PerformActions({
-    action_object
-  }, index);
+  api_->PerformActions({action_object}, this, [this, index](ApiResult<void> result) {
+    if (result) {
+      OnActionExecutionFinishedSuccessfully(index);
+    } else {
+      OnActionExecutionFailed(result.error().message, index);
+    }
+  });
 }
 
 void DeviceController::OnTimerTimeout() {
   qInfo() << "Device Controller: Polling tick!";
 
   last_update_start_time_ = CurrentTime();
-  api_->GetDeviceInfo(device_id_);
+  api_->GetDeviceInfo(device_id_, this, [this](ApiResult<DeviceInfo> result) {
+    if (result) {
+      emit deviceInfoReceived(*result);
+      OnDeviceInfoReceived(*result);
+    } else {
+      emit deviceInfoReceivingFailed(result.error().message);
+      OnDeviceInfoReceivingFailed(result.error().message);
+    }
+  });
 
   qInfo() << "Device Controller: Update requested";
 }

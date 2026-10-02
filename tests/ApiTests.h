@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QtTest>
-#include "api/YandexHomeApi.h"
+#include "api/model/UserInfo.h"
 
 class ApiTests final : public QObject {
   Q_OBJECT

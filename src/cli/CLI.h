@@ -9,7 +9,7 @@
 class CLI : public QObject {
   Q_OBJECT
 public:
-  explicit CLI(QGuiApplication* app, YandexHomeApi* api, QObject *parent = nullptr);
+  explicit CLI(QGuiApplication* app, IHomeApi* api, QObject *parent = nullptr);
 
 private:
   const QMap<QString, ExecutorFactoryFunction> kCapabilityExecutors = {
@@ -20,6 +20,7 @@ private:
   [[nodiscard]] bool HandleCapabilities();
 
   QGuiApplication* app_;
-  YandexHomeApi* api_;
+  IHomeApi* api_;
+  std::unique_ptr<IExecutor> current_executor_;
   QCommandLineParser parser_;
 };

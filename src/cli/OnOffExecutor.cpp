@@ -5,12 +5,7 @@
 
 #include "iot/capabilities/OnOffCapability.h"
 
-OnOffExecutor::OnOffExecutor(YandexHomeApi *api) : IExecutor(api) {
-  connect(api_,
-    &YandexHomeApi::userInfoReceived,
-    this,
-    &OnOffExecutor::OnUserInfoReceived);
-}
+OnOffExecutor::OnOffExecutor(IHomeApi *api) : IExecutor(api) {}
 
 void OnOffExecutor::Execute(const QString& value) {
   qDebug() << "OnOffExecutor::Execute(" << value << ")";
@@ -25,7 +20,11 @@ void OnOffExecutor::Execute(const QString& value) {
     QGuiApplication::quit();
   }
 
-  api_->GetUserInfo();
+  api_->GetUserInfo(this, [this](ApiResult<UserInfo> result) {
+    if (result) {
+      OnUserInfoReceived(*result);
+    }
+  });
 }
 
 void OnOffExecutor::PrintInfo() {

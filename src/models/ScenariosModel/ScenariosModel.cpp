@@ -1,28 +1,8 @@
 #include "ScenariosModel.h"
 
-ScenariosModel::ScenariosModel(YandexHomeApi *api, QObject *parent)
+ScenariosModel::ScenariosModel(IHomeApi *api, QObject *parent)
   : QAbstractListModel(parent), api_(api)
-{
-  connect(api_,
-    &YandexHomeApi::scenariosReceivedSuccessfully,
-    this,
-    &ScenariosModel::OnScenariosReceived);
-
-  connect(api_,
-    &YandexHomeApi::scenariosReceivingFailed,
-    this,
-    &ScenariosModel::OnScenariosReceivingFailed);
-
-  connect(api_,
-    &YandexHomeApi::scenarioExecutionFinishedSuccessfully,
-    this,
-    &ScenariosModel::OnScenarioExecutionFinishedSuccessfully);
-
-  connect(api_,
-    &YandexHomeApi::scenarioExecutionFailed,
-    this,
-    &ScenariosModel::OnScenarioExecutionFailed);
-}
+{}
 
 int ScenariosModel::rowCount(const QModelIndex &parent) const {
   if (parent.isValid()) {
@@ -68,7 +48,13 @@ void ScenariosModel::RequestData() {
 
   endResetModel();
 
-  api_->GetScenarios();
+  api_->GetScenarios(this, [this](ApiResult<QList<ScenarioObject>> result) {
+    if (result) {
+      OnScenariosReceived(*result);
+    } else {
+      OnScenariosReceivingFailed(result.error().message);
+    }
+  });
 }
 
 void ScenariosModel::ExecuteScenario(int index) {
@@ -83,9 +69,13 @@ void ScenariosModel::ExecuteScenario(int index) {
   emit dataChanged(model_index, model_index, {IsWaitingResponseRole});
 
   const QString scenario_id = scenario.data.id;
-  const QVariant user_data = index;
-
-  api_->ExecuteScenario(scenario_id, user_data);
+  api_->ExecuteScenario(scenario_id, this, [this, scenario_id, index](ApiResult<void> result) {
+    if (result) {
+      OnScenarioExecutionFinishedSuccessfully(scenario_id, index);
+    } else {
+      OnScenarioExecutionFailed(result.error().message, index);
+    }
+  });
 }
 
 int ScenariosModel::Count() const {

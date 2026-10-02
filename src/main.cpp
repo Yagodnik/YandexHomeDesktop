@@ -5,7 +5,8 @@
 #include <QFont>
 #include <thread>
 #include "api/YandexHomeApi.h"
-#include "api/YandexAccount.h"
+#include "api/YandexAccountApi.h"
+#include "api/QtHttpTransport.h"
 #include "auth/AuthorizationService.h"
 #include "cli/CLI.h"
 #include "iot/capabilities/ColorSettingCapability.h"
@@ -37,6 +38,8 @@
 #include "iot/properties/FloatProperty.h"
 #include "models/DeviceModel/DeviceController.h"
 #include "models/DeviceModel/DeviceDataModel.h"
+#include "models/AccountModel.h"
+#include "models/HomeSnapshotLoader.h"
 #include "utils/IconsProvider.h"
 #include "utils/LogManager.h"
 #include "utils/UnitsList.h"
@@ -89,12 +92,13 @@ int main(int argc, char *argv[]) {
     return token.value();
   };
   const auto platform_service = new PlatformService(&app);
-  const auto yandex_api = new YandexHomeApi(token_provider, &app);
-  const auto yandex_account = new YandexAccount(token_provider, &app);
+  const auto transport = new QtHttpTransport(&app);
+  const auto yandex_api = new YandexHomeApi(token_provider, transport, &app);
+  const auto yandex_account_api = new YandexAccountApi(token_provider, transport, &app);
 
   if (app.arguments().size() > 1) {
     QObject::connect(authorization_service, &AuthorizationService::authorized, &app, [&app, yandex_api]() {
-      CLI cli(&app, yandex_api);
+      new CLI(&app, yandex_api, &app);
     });
 
     authorization_service->AttemptLocalAuthorization();
@@ -111,11 +115,13 @@ int main(int argc, char *argv[]) {
   const auto root_context = engine.rootContext();
   const auto themes = new Themes(&app);
   const auto router = new Router(&app);
+  const auto home_snapshot_loader = new HomeSnapshotLoader(yandex_api, &app);
+  const auto yandex_account = new AccountModel(yandex_account_api, &app);
   const auto scenarios_model = new ScenariosModel(yandex_api, &app);
-  const auto devices_model = new DevicesModel(yandex_api, &app);
-  const auto rooms_model = new RoomsModel(yandex_api, &app);
+  const auto devices_model = new DevicesModel(home_snapshot_loader, &app);
+  const auto rooms_model = new RoomsModel(home_snapshot_loader, &app);
   const auto device_controller = new DeviceController(yandex_api, &app);
-  const auto households_model = new HouseholdsModel(yandex_api, &app);
+  const auto households_model = new HouseholdsModel(home_snapshot_loader, &app);
   const auto error_codes = new ErrorCodes(&app);
   const auto color_model = new ColorsModel(&app);
   const auto color_modes_model = new ColorModesModel(&app);
@@ -124,7 +130,7 @@ int main(int argc, char *argv[]) {
   const auto titles_list = new TitlesProvider(":/data/instances.json", &app);
   const auto events_list = new TitlesProvider(":/data/propertiesEvents.json", &app);
   const auto units_list = new UnitsList(&app);
-  const auto device_data_model = new DeviceDataModel(yandex_api, &app);
+  const auto device_data_model = new DeviceDataModel(device_controller, &app);
   const auto device_icons = new IconsProvider(":/data/deviceIcons.json", "devices", &app);
   const auto properties_icons = new IconsProvider(":/data/propertiesIcons.json", "properties", &app);
   // const auto capabilities_model = new CapabilitiesModel(yandex_api, &app);

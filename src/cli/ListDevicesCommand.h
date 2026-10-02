@@ -2,18 +2,17 @@
 
 #include <QObject>
 
-#include "api/YandexHomeApi.h"
+#include "api/IHomeApi.h"
 
 class ListDevicesCommand : public QObject {
   Q_OBJECT
 public:
-  explicit ListDevicesCommand(YandexHomeApi* api, QObject *parent = nullptr);
+  explicit ListDevicesCommand(IHomeApi* api, QObject *parent = nullptr);
 
 private slots:
   static void OnUserInfoReceived(const UserInfo& info);
   static void OnUserInfoReceivingFailed(const QString& error);
 
 private:
-  YandexHomeApi* api_;
+  IHomeApi* api_;
 };
-

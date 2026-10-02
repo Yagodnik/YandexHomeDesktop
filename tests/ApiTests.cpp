@@ -1,5 +1,7 @@
 #include "ApiTests.h"
 
+#include <QJsonDocument>
+
 void ApiTests::TestCapabilities() {
   const QByteArray test_content = R"({
     "retrievable": true,

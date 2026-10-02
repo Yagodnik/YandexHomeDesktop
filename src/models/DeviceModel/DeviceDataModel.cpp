@@ -1,18 +1,18 @@
 #include "DeviceDataModel.h"
 
-DeviceDataModel::DeviceDataModel(YandexHomeApi *api, QObject *parent) :
+DeviceDataModel::DeviceDataModel(DeviceController *controller, QObject *parent) :
   QObject(parent),
-  api_(api),
+  controller_(controller),
   device_state_(DeviceState::Offline),
   is_initialized_(false)
 {
-  connect(api_,
-    &YandexHomeApi::deviceInfoReceived,
+  connect(controller_,
+    &DeviceController::deviceInfoReceived,
     this,
     &DeviceDataModel::OnDeviceInfoReceived);
 
-  connect(api_,
-    &YandexHomeApi::deviceInfoReceivingFailed,
+  connect(controller_,
+    &DeviceController::deviceInfoReceivingFailed,
     this,
     &DeviceDataModel::OnDeviceInfoReceivingFailed);
 }

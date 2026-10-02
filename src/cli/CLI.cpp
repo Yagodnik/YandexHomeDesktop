@@ -3,10 +3,10 @@
 #include <QGuiApplication>
 
 #include "ListDevicesCommand.h"
-#include "api/YandexHomeApi.h"
+#include "api/IHomeApi.h"
 #include "auth/AuthorizationService.h"
 
-CLI::CLI(QGuiApplication* app, YandexHomeApi* api, QObject *parent)
+CLI::CLI(QGuiApplication* app, IHomeApi* api, QObject *parent)
   : QObject(parent), app_(app), api_(api)
 {
   if (app_ == nullptr) {
@@ -55,13 +55,13 @@ void CLI::HandleReset() {
 bool CLI::HandleCapabilities() {
   for (const auto& option : parser_.optionNames()) {
     if (kCapabilityExecutors.contains(option)) {
-      const auto executor = kCapabilityExecutors[option](api_);
+      current_executor_ = kCapabilityExecutors[option](api_);
 
       if (parser_.isSet("info")) {
-        executor->PrintInfo();
+        current_executor_->PrintInfo();
       } else {
         const QString capability_value = parser_.value("value");
-        executor->Execute(capability_value);
+        current_executor_->Execute(capability_value);
       }
 
       return true;

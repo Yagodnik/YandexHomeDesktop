@@ -1,7 +1,6 @@
 #pragma once
 
 #include <QAbstractListModel>
-#include "api/YandexHomeApi.h"
 #include "DeviceAttribute.h"
 #include "DeviceController.h"
 

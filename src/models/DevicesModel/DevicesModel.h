@@ -1,12 +1,12 @@
 #pragma once
 
 #include <QAbstractListModel>
-#include "api/YandexHomeApi.h"
+#include "models/HomeSnapshotLoader.h"
 
 class DevicesModel : public QAbstractListModel {
   Q_OBJECT
 public:
-  explicit DevicesModel(YandexHomeApi *api, QObject *parent = nullptr);
+  explicit DevicesModel(HomeSnapshotLoader *loader, QObject *parent = nullptr);
 
   enum Roles {
     IdRole = Qt::UserRole + 1,
@@ -27,7 +27,7 @@ signals:
   void dataLoadingFailed();
 
 private:
-  YandexHomeApi *api_;
+  HomeSnapshotLoader *loader_;
   QList<DeviceObject> devices_;
 
 private slots:

@@ -3,7 +3,7 @@
 #include <QTimer>
 
 #include "DeviceAttribute.h"
-#include "api/YandexHomeApi.h"
+#include "api/IHomeApi.h"
 
 class DeviceController : public QObject {
   Q_OBJECT
@@ -11,7 +11,7 @@ public:
   using CapabilitiesList = QList<std::optional<CapabilityObject>>;
   using PropertiesList = QList<std::optional<PropertyObject>>;
 
-  explicit DeviceController(YandexHomeApi *api, QObject* parent = nullptr);
+  explicit DeviceController(IHomeApi *api, QObject* parent = nullptr);
 
   Q_INVOKABLE void LoadDevice(const QString& device_id);
   Q_INVOKABLE void ContinuePollingIfNeeded();
@@ -26,6 +26,8 @@ signals:
   void propertiesUpdateReady(const PropertiesList& properties);
   void capabilityUsed(int index, const QVariantMap& state);
   void errorOccurred(const QString& error_message);
+  void deviceInfoReceived(const DeviceInfo& info);
+  void deviceInfoReceivingFailed(const QString& message);
 
 private:
   static constexpr int kPollingInterval = 3000;
@@ -36,7 +38,7 @@ private:
   double last_update_start_time_;
 
   QTimer polling_timer_;
-  YandexHomeApi* api_;
+  IHomeApi* api_;
 
   static double CurrentTime() {
     return static_cast<double>(QDateTime::currentMSecsSinceEpoch()) / 1000;
@@ -50,5 +52,4 @@ private slots:
   void OnActionExecutionFinishedSuccessfully(const QVariant& user_data);
   void OnActionExecutionFailed(const QString& message, const QVariant& user_data);
 };
-
 

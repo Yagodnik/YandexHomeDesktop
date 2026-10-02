@@ -3,13 +3,16 @@
 #include <iostream>
 #include <QGuiApplication>
 
-ListDevicesCommand::ListDevicesCommand(YandexHomeApi *api, QObject *parent)
+ListDevicesCommand::ListDevicesCommand(IHomeApi *api, QObject *parent)
   : QObject(parent), api_(api)
 {
-  connect(api_, &YandexHomeApi::userInfoReceived, this, &ListDevicesCommand::OnUserInfoReceived);
-  connect(api_, &YandexHomeApi::userInfoReceivingFailed, this, &ListDevicesCommand::OnUserInfoReceivingFailed);
-
-  api_->GetUserInfo();
+  api_->GetUserInfo(this, [](ApiResult<UserInfo> result) {
+    if (result) {
+      OnUserInfoReceived(*result);
+    } else {
+      OnUserInfoReceivingFailed(result.error().message);
+    }
+  });
 }
 
 void ListDevicesCommand::OnUserInfoReceived(const UserInfo &info) {

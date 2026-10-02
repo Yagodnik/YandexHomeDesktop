@@ -3,7 +3,7 @@
 #include <QObject>
 
 #include "ICommand.h"
-#include "api/YandexHomeApi.h"
+#include "api/IHomeApi.h"
 
 class ListDevicesCommand : public ICommand {
   Q_OBJECT
@@ -16,4 +16,3 @@ private slots:
   static void OnUserInfoReceived(const UserInfo& info);
   static void OnUserInfoReceivingFailed(const QString& error);
 };
-

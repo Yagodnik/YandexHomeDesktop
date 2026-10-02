@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QAbstractListModel>
-#include "api/YandexHomeApi.h"
+#include "models/HomeSnapshotLoader.h"
 
 class HouseholdsModel : public QAbstractListModel {
   Q_OBJECT
@@ -18,7 +18,7 @@ class HouseholdsModel : public QAbstractListModel {
     NOTIFY currentHouseholdChanged
   )
 public:
-  explicit HouseholdsModel(YandexHomeApi *api, QObject *parent = nullptr);
+  explicit HouseholdsModel(HomeSnapshotLoader *loader, QObject *parent = nullptr);
 
   enum Roles {
     IdRole = Qt::UserRole + 1,
@@ -47,7 +47,7 @@ signals:
 private:
   std::optional<QString> current_;
   QList<HouseholdObject> households_;
-  YandexHomeApi *api_;
+  HomeSnapshotLoader *loader_;
 
 private slots:
   void OnUserInfoReceived(const UserInfo& info);

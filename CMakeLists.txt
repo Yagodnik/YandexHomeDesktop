@@ -149,7 +149,7 @@ target_link_libraries(appYandexHomeDesktop PRIVATE
         YandexHomeDesktopPages
         YandexHomeDesktopComponents
 
-        YandexHomeApi
+        YandexApiAdapter
         YandexAuth
         Models
         PlatformService

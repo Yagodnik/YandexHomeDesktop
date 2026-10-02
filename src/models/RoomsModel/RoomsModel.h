@@ -2,13 +2,12 @@
 
 #include <QAbstractListModel>
 
-#include "api/YandexHomeApi.h"
-#include "api/model/UserInfo.h"
+#include "models/HomeSnapshotLoader.h"
 
 class RoomsModel : public QAbstractListModel {
   Q_OBJECT
 public:
-  explicit RoomsModel(YandexHomeApi *api, QObject *parent = nullptr);
+  explicit RoomsModel(HomeSnapshotLoader *loader, QObject *parent = nullptr);
 
   enum Roles {
     IdRole = Qt::UserRole + 1,
@@ -27,11 +26,10 @@ signals:
   void dataLoadingFailed();
 
 private:
-  YandexHomeApi *api_;
+  HomeSnapshotLoader *loader_;
   QList<RoomObject> rooms_;
 
 private slots:
   void OnUserInfoReceived(const UserInfo& info);
   void OnUserInfoReceivingFailed(const QString& message);
 };
-

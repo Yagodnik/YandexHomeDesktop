@@ -1,15 +1,15 @@
 #include "RoomsModel.h"
 
-RoomsModel::RoomsModel(YandexHomeApi *api, QObject *parent)
-  : QAbstractListModel(parent), api_(api)
+RoomsModel::RoomsModel(HomeSnapshotLoader *loader, QObject *parent)
+  : QAbstractListModel(parent), loader_(loader)
 {
-  connect(api_,
-    &YandexHomeApi::userInfoReceived,
+  connect(loader_,
+    &HomeSnapshotLoader::loaded,
     this,
     &RoomsModel::OnUserInfoReceived);
 
-  connect(api_,
-    &YandexHomeApi::userInfoReceivingFailed,
+  connect(loader_,
+    &HomeSnapshotLoader::failed,
     this,
     &RoomsModel::OnUserInfoReceivingFailed);
 }
@@ -52,7 +52,7 @@ void RoomsModel::RequestData() {
 
   endResetModel();
 
-  api_->GetUserInfo();
+  loader_->Refresh();
 }
 
 void RoomsModel::OnUserInfoReceived(const UserInfo &info) {
@@ -72,5 +72,4 @@ void RoomsModel::OnUserInfoReceivingFailed(const QString &message) {
 
   emit dataLoadingFailed();
 }
-
 

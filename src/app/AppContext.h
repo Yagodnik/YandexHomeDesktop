@@ -5,8 +5,11 @@
 #include "../auth/AuthorizationService.h"
 #include "../platform/PlatformService.h"
 #include "../utils/Settings.h"
-#include "../api/YandexAccount.h"
+#include "../api/QtHttpTransport.h"
+#include "../api/YandexAccountApi.h"
 #include "../api/YandexHomeApi.h"
+#include "../models/AccountModel.h"
+#include "../models/HomeSnapshotLoader.h"
 
 struct AppContext {
   explicit AppContext(QGuiApplication *app);
@@ -14,8 +17,11 @@ struct AppContext {
   QGuiApplication *app_;
   AuthorizationService *authorization_service;
   PlatformService *platform_service;
+  QtHttpTransport *http_transport;
   YandexHomeApi *yandex_api;
-  YandexAccount *yandex_account;
+  YandexAccountApi *account_api;
+  AccountModel *yandex_account;
+  HomeSnapshotLoader *home_snapshot_loader;
   Settings *settings;
 
   std::function<QString()> token_provider;

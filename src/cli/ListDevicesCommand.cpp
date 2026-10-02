@@ -6,17 +6,13 @@
 ListDevicesCommand::ListDevicesCommand(QObject *parent) : ICommand("list-devices", parent) {}
 
 void ListDevicesCommand::Execute(AppContext &app_ctx, const CommandContext &command_ctx) {
-  connect(
-    app_ctx.yandex_api,
-    &YandexHomeApi::userInfoReceived,
-    &ListDevicesCommand::OnUserInfoReceived);
-
-  connect(
-    app_ctx.yandex_api,
-    &YandexHomeApi::userInfoReceivingFailed,
-    &ListDevicesCommand::OnUserInfoReceivingFailed);
-
-  app_ctx.yandex_api->GetUserInfo();
+  app_ctx.yandex_api->GetUserInfo(this, [](ApiResult<UserInfo> result) {
+    if (result) {
+      OnUserInfoReceived(*result);
+    } else {
+      OnUserInfoReceivingFailed(result.error().message);
+    }
+  });
 }
 
 void ListDevicesCommand::OnUserInfoReceived(const UserInfo &info) {

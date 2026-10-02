@@ -13,3 +13,7 @@ When changing build steps, resources, translations, or dependencies, make the Wi
 Keep reusable QML visuals in `src/qml/components/` or `src/qml/ui/` and register them in `src/qml/CMakeLists.txt`. Keep behavior in the existing page/controller wiring until a separate logic change is requested. See `docs/qml.md`.
 
 Wrap user-facing QML and C++ strings for translation, preserve placeholders, and keep the English catalog complete. For bundled JSON display values, regenerate `translations/DataStrings.cpp` with `scripts/update-data-translation-markers.py`. See `docs/localization.md`.
+
+## API and model boundaries
+
+Keep HTTP transport and Yandex API details in `src/api`, authentication in `src/auth`, and QML-facing state in `src/models`. Preserve QML-facing properties and signals while refactoring. Add deterministic Qt tests for changed behavior; avoid live API calls in unit tests. Never commit credentials or tokens or include them in logs and test output.

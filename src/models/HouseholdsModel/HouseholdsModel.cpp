@@ -1,15 +1,15 @@
 #include "HouseholdsModel.h"
 
-HouseholdsModel::HouseholdsModel(YandexHomeApi *api, QObject *parent)
-  : QAbstractListModel(parent), current_(std::nullopt), api_(api)
+HouseholdsModel::HouseholdsModel(HomeSnapshotLoader *loader, QObject *parent)
+  : QAbstractListModel(parent), current_(std::nullopt), loader_(loader)
 {
-  connect(api_,
-    &YandexHomeApi::userInfoReceived,
+  connect(loader_,
+    &HomeSnapshotLoader::loaded,
     this,
     &HouseholdsModel::OnUserInfoReceived);
 
-  connect(api_,
-    &YandexHomeApi::userInfoReceivingFailed,
+  connect(loader_,
+    &HomeSnapshotLoader::failed,
     this,
     &HouseholdsModel::OnUserInfoReceivingFailed);
 }
@@ -77,7 +77,7 @@ void HouseholdsModel::RequestData() {
 
   endResetModel();
 
-  api_->GetUserInfo();
+  loader_->Refresh();
 }
 
 void HouseholdsModel::SetCurrentHousehold(const QString &value) {

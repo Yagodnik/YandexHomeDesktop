@@ -3,12 +3,12 @@
 #include <functional>
 #include <QString>
 
-#include "api/YandexHomeApi.h"
+#include "api/IHomeApi.h"
 
 class IExecutor : public QObject {
   Q_OBJECT
 public:
-  explicit IExecutor(YandexHomeApi* api, QObject *parent) : QObject(parent), api_(api) {};
+  explicit IExecutor(IHomeApi* api, QObject *parent) : QObject(parent), api_(api) {};
 
   template <typename ExecutorType, typename... Args>
   static std::unique_ptr<IExecutor> Create(Args&&... args) {
@@ -21,10 +21,9 @@ public:
   virtual void PrintInfo() = 0;
 
 protected:
-  YandexHomeApi* api_{nullptr};
+  IHomeApi* api_{nullptr};
 };
 
-#define EXECUTOR_FACTORY(name) [](YandexHomeApi* api) -> std::unique_ptr<IExecutor> { return IExecutor::Create<name>(api); }
+#define EXECUTOR_FACTORY(name) [](IHomeApi* api) -> std::unique_ptr<IExecutor> { return IExecutor::Create<name>(api); }
 
-using ExecutorFactoryFunction = std::function<std::unique_ptr<IExecutor>(YandexHomeApi*)>;
-
+using ExecutorFactoryFunction = std::function<std::unique_ptr<IExecutor>(IHomeApi*)>;

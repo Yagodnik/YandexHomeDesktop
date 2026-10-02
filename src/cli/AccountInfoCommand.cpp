@@ -15,7 +15,7 @@ void AccountInfoCommand::Execute(AppContext &app_ctx, const CommandContext &comm
 
   connect(
     app_ctx.yandex_account,
-    &YandexAccount::dataLoaded,
+    &AccountModel::dataLoaded,
     [app_ctx]() {
       std::cout << "Account info: " << std::endl;
       std::cout << "Name: " << app_ctx.yandex_account->GetName().toStdString() << std::endl;
@@ -27,7 +27,7 @@ void AccountInfoCommand::Execute(AppContext &app_ctx, const CommandContext &comm
 
   connect(
     app_ctx.yandex_account,
-    &YandexAccount::dataLoadingFailed,
+    &AccountModel::dataLoadingFailed,
     [app_ctx]() {
       std::cout << "Account info loading failed!" << std::endl;
 

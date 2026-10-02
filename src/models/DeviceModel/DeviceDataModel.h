@@ -3,7 +3,6 @@
 #include <QObject>
 
 #include "DeviceController.h"
-#include "api/YandexHomeApi.h"
 
 class DeviceDataModel : public QObject {
   Q_OBJECT

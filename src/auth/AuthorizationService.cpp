@@ -208,8 +208,6 @@ void AuthorizationService::ReadTokenHandler(QKeychain::ReadPasswordJob *job) {
 
   token_ = job->textData();
 
-  qDebug() << "AuthorizationService: Token:" << token_.value();
-
   emit authorized();
 }
 

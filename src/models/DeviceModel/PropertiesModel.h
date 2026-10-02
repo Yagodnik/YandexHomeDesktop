@@ -3,7 +3,6 @@
 #include <QAbstractListModel>
 
 #include "DeviceController.h"
-#include "api/YandexHomeApi.h"
 #include "api/model/UserInfo.h"
 
 // #define ALLOW_FAKE_PROPERTIES
@@ -48,4 +47,3 @@ private slots:
   void OnPropertiesUpdateReady(const DeviceController::PropertiesList& properties);
   void OnPropertiesUpdateFailed(const QString& error_message);
 };
-

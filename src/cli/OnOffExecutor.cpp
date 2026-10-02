@@ -6,27 +6,7 @@
 
 #include "iot/capabilities/OnOffCapability.h"
 
-OnOffExecutor::OnOffExecutor(YandexHomeApi *api, QObject *parent) : IExecutor(api, parent) {
-  connect(api_,
-    &YandexHomeApi::userInfoReceived,
-    this,
-    &OnOffExecutor::OnUserInfoReceived);
-
-  connect(api_,
-    &YandexHomeApi::userInfoReceivingFailed,
-    this,
-    &OnOffExecutor::OnUserInfoReceivingFailed);
-
-  connect(api_,
-    &YandexHomeApi::actionExecutingFinishedSuccessfully,
-    this,
-    &OnOffExecutor::OnActionExecutionFinishedSuccessfully);
-
-  connect(api_,
-    &YandexHomeApi::actionExecutingFailed,
-    this,
-    &OnOffExecutor::OnActionExecutionFailed);
-}
+OnOffExecutor::OnOffExecutor(IHomeApi *api, QObject *parent) : IExecutor(api, parent) {}
 
 void OnOffExecutor::Execute(const QString& name, const QString& value) {
   if (value == "on") {
@@ -36,10 +16,17 @@ void OnOffExecutor::Execute(const QString& name, const QString& value) {
   } else {
     std::cout << "Incorrect value for OnOff: " << value.toStdString() << std::endl;
     QGuiApplication::exit(0);
+    return;
   }
 
   target_device_name_ = name;
-  api_->GetUserInfo();
+  api_->GetUserInfo(this, [this](ApiResult<UserInfo> result) {
+    if (result) {
+      OnUserInfoReceived(*result);
+    } else {
+      OnUserInfoReceivingFailed(result.error().message);
+    }
+  });
 }
 
 void OnOffExecutor::PrintInfo() {
@@ -69,7 +56,13 @@ void OnOffExecutor::OnUserInfoReceived(const UserInfo &userInfo) {
         .actions = { action }
       };
 
-      api_->PerformActions({ action_object }, {});
+      api_->PerformActions({ action_object }, this, [this](ApiResult<void> result) {
+        if (result) {
+          OnActionExecutionFinishedSuccessfully({});
+        } else {
+          OnActionExecutionFailed(result.error().message, {});
+        }
+      });
 
       return;
     }

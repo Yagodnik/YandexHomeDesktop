@@ -51,10 +51,10 @@ GuiApp::GuiApp(AppContext& app_context, QObject *parent) :
   const auto themes = new Themes(app_context.app_);
   const auto router = new Router(app_context.app_);
   const auto scenarios_model = new ScenariosModel(app_context.yandex_api, app_context.app_);
-  const auto devices_model = new DevicesModel(app_context.yandex_api, app_context.app_);
-  const auto rooms_model = new RoomsModel(app_context.yandex_api, app_context.app_);
+  const auto devices_model = new DevicesModel(app_context.home_snapshot_loader, app_context.app_);
+  const auto rooms_model = new RoomsModel(app_context.home_snapshot_loader, app_context.app_);
   const auto device_controller = new DeviceController(app_context.yandex_api, app_context.app_);
-  const auto households_model = new HouseholdsModel(app_context.yandex_api, app_context.app_);
+  const auto households_model = new HouseholdsModel(app_context.home_snapshot_loader, app_context.app_);
   const auto error_codes = new ErrorCodes(app_context.app_);
   const auto color_model = new ColorsModel(app_context.app_);
   const auto color_modes_model = new ColorModesModel(app_context.app_);

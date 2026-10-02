@@ -3,6 +3,10 @@ cmake_minimum_required(VERSION 3.16)
 find_package(Qt6 COMPONENTS Core Network Gui REQUIRED)
 
 add_library(Models STATIC
+        AccountModel.cpp
+        AccountModel.h
+        HomeSnapshotLoader.cpp
+        HomeSnapshotLoader.h
         DeviceModel/DeviceController.cpp
         DeviceModel/DeviceController.h
         ScenariosModel/ScenariosModel.cpp
@@ -39,4 +43,4 @@ add_library(Models STATIC
         DeviceModel/DeviceDataModel.h
 )
 
-target_link_libraries(Models PRIVATE Qt6::Core Qt6::Network Qt6::Gui YandexHomeApi Utils)
+target_link_libraries(Models PUBLIC ApiContracts PRIVATE Qt6::Core Qt6::Gui Utils)

@@ -6,10 +6,10 @@ add_library(YandexAuth STATIC
         AuthorizationService.cpp AuthorizationService.h
 )
 
-target_link_libraries(YandexAuth PRIVATE
+target_link_libraries(YandexAuth PUBLIC
+  qt6keychain
   Qt6::Core
   Qt6::Network
   Qt6::NetworkAuth
   Qt6::Gui
 )
-target_link_libraries(YandexAuth PUBLIC qt6keychain)

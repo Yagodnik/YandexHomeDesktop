@@ -6,6 +6,8 @@
 /build-debinfo
 /build-qt-debug
 /build-qt-profile
+/build-*/
+/dist/
 /deploy
 /libs
 /cmake

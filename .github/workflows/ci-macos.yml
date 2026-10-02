@@ -1,0 +1,60 @@
+name: macOS build and tests
+
+on:
+  pull_request:
+    branches: [main, dev, refactoring]
+  push:
+    branches: [main, dev, refactoring]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: macos-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            architecture: arm64
+          - runner: macos-15-intel
+            architecture: x86_64
+    runs-on: ${{ matrix.runner }}
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.9.1'
+          host: mac
+          target: desktop
+          arch: clang_64
+          modules: qt5compat qtnetworkauth qtshadertools qttools
+          cache: true
+
+      - name: Create build-only OAuth config
+        run: python3 scripts/write-oauth-config.py --dummy --output "$RUNNER_TEMP/oauth.json"
+
+      - name: Configure
+        run: >-
+          cmake -S . -B build -G Ninja
+          -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR"
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_OSX_ARCHITECTURES=${{ matrix.architecture }}
+          -DBUILD_DESKTOP_APP=ON
+          -DBUILD_TESTING=ON
+          -DAUTH_CONFIG_FILE="$RUNNER_TEMP/oauth.json"
+
+      - name: Build application and tests
+        run: cmake --build build --parallel 2
+
+      - name: Run tests
+        run: ctest --test-dir build --output-on-failure

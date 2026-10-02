@@ -12,55 +12,18 @@ Windows            |  MacOS
 В отличии от [предыдущей версии](https://github.com/Yagodnik/YandexHomeWidgets) теперь поддерживаются все устройства, умения (исключением является умение ```devices.capabilities.video_stream```) и свойства. Однако, далеко не все из них протестированны полноценно.
 
 # Сборка
-| Build Status         | Branch |
-|---------------------|---------|
-| [![Main Windows build](https://github.com/Yagodnik/YandexHomeDesktop/actions/workflows/build-windows.yml/badge.svg?branch=main)](https://github.com/Yagodnik/YandexHomeDesktop/actions/workflows/build-windows.yml) | main |
-| [![Dev Windows build](https://github.com/Yagodnik/YandexHomeDesktop/actions/workflows/build-windows.yml/badge.svg?branch=dev)](https://github.com/Yagodnik/YandexHomeDesktop/actions/workflows/build-windows.yml) | dev |
 
-Если вы очень хотите собрать проект самостоятельно:
+Для сборки на macOS и Windows нужны CMake 3.28+, Ninja, Qt 6.9+ (Quick, NetworkAuth, Qt5Compat, ShaderTools и LinguistTools) и компилятор C++23. CMake загрузит закреплённые версии Boost.Hana и QtKeychain. По умолчанию в приложение включается тестовая OAuth-конфигурация `resources/auth/example.json`: приложение соберётся, но вход в аккаунт с ней не работает.
 
-Создайте файл ```cmake/qt6-config.cmake``` и поместите туда вот это:
-```
-set(
-    CMAKE_PREFIX_PATH
-    "(тут будет ваш пусть до qt)/(версия, желательно 6.9)/lib/cmake"
-    CACHE STRING "Qt installation path"
-)
-
+```sh
+cmake -S . -B build -G Ninja -DCMAKE_PREFIX_PATH=/path/to/Qt/6.x/macos -DBUILD_DESKTOP_APP=ON
+cmake --build build --parallel 4
+ctest --test-dir build --output-on-failure
 ```
 
-Ну и стоит понимать, что для полноценной работы необходимо будет сгенерировать необходимые токены.
-Сгенерировать необходимые файлы можно с помощью скрипта (см workflow для Windows, этап сборки ```Generate secrets.json```)
-Однако сам client id вам нужно будет сделать самостоятельно. Вот как это сделать:
-1) Создайте веб приложение в https://oauth.yandex.ru/client/new
-2) Укажите redirect-url: http://127.0.0.1:1337
+Для работающего входа создайте свою конфигурацию OAuth и передайте `-DYH_AUTH_CONFIG_FILE=/path/to/oauth.json` (или `-DAUTH_CONFIG_FILE=...`). Файл встраивается в приложение. Инструкции и вариант для Linux-тестов приведены в [docs/build.md](docs/build.md).
 
-Заполняете всё остальное и получаете все необходимые данные, копируете client_id.
-
-### Windows
-Следуйте пунктам из workflow, вероятно там будет самый актуальный способ сборки. 
-Советую использовать Qt версии 6.9 и MinGW 13.10, я пробовал собирать на компиляторах старых версий, но там возникают проблемы из-за C++23.
-
-### MacOS
-Установите Qt 6.9, разместите необходимые библиотеки аналогично с workflow для Windows. Если хотите universal build, то 
-нужно будет собрать qtkeychain так же universal build. 
-То как примерно должна выглядит папка с либами:
-```
-find libs -maxdepth 2 -print 
-libs
-libs/qtkeychain
-libs/qtkeychain/include/...
-libs/qtkeychain/lib/libqt6keychain.dylib
-libs/boost
-libs/boost/hana.hpp
-libs/boost/hana/...
-```
-
-Дальше можете воспользоваться специальным скриптом ```scripts/macos-build.sh``` из корневой папки проекта
-
-### Linux
-А под линукс может быть потом билд сделаю =)
-В целом работать наверное будет, но tray режим будет требовать доработки, ~~а ещё возможно его нужно будет подгонять под каждое DE отдельно~~
+CI собирает и тестирует приложение на macOS и Windows, а на Linux запускает переносимые тесты. Сборки CI используют тестовую OAuth-конфигурацию. Для релизов используется тег `vMAJOR.MINOR.PATCH`; шаги описаны в [release workflow](.github/workflows/release.yml).
 
 # Аргументы CLI
 

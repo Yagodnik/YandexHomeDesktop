@@ -34,7 +34,7 @@ Item {
     }
 
     UI.MyButton {
-      text: "Попробовать ещё раз"
+      text: qsTr("Попробовать ещё раз")
 
       anchors.horizontalCenter: col.horizontalCenter
 

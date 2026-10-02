@@ -20,10 +20,8 @@ Item {
     id: content
     anchors.centerIn: parent
 
-    Rectangle {
+    UI.CardSurface {
       id: background
-      color: themes.headerBackground
-      radius: 16
       anchors.centerIn: parent
 
       Column {
@@ -48,7 +46,7 @@ Item {
         }
 
         UI.MyButton {
-          text: "Авторизоваться"
+          text: qsTr("Авторизоваться")
 
           anchors.horizontalCenter: col.horizontalCenter
 

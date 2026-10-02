@@ -5,10 +5,8 @@ Item {
   id: root
   height: 48
 
-  Rectangle {
+  UI.CardSurface {
     anchors.fill: parent
-    color: themes.headerBackground
-    radius: 16
   }
 
   UI.DefaultText {
@@ -16,6 +14,6 @@ Item {
     anchors.leftMargin: 12
     anchors.verticalCenter: parent.verticalCenter
 
-    text: "Неподдерживаемое умение: " + name
+    text: qsTr("Неподдерживаемое умение: %1").arg(name)
   }
 }

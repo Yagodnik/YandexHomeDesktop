@@ -14,10 +14,8 @@ Item {
     titlesList: iotTitles
   }
 
-  Rectangle {
+  UI.CardSurface {
     anchors.fill: parent
-    color: themes.headerBackground
-    radius: 16
   }
 
   UI.DefaultText {

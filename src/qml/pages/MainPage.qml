@@ -40,7 +40,7 @@ Item {
   UI.SelectDialog {
     id: householdSelectDialog
 
-    title: "Выберите Дом"
+    title: qsTr("Выберите Дом")
 
     model: householdsModel
 

@@ -16,10 +16,8 @@ Item {
     titlesList: iotTitles
   }
 
-  Rectangle {
+  UI.CardSurface {
     anchors.fill: parent
-    color: themes.headerBackground
-    radius: 16
   }
 
   RowLayout {
@@ -63,7 +61,7 @@ Item {
         }
 
         UI.DefaultText {
-          text: "Вкл"
+          text: qsTr("Вкл")
           anchors.horizontalCenter: parent.horizontalCenter
         }
       }
@@ -107,7 +105,7 @@ Item {
         }
 
         UI.DefaultText {
-          text: "Выкл"
+          text: qsTr("Выкл")
           anchors.horizontalCenter: parent.horizontalCenter
         }
       }

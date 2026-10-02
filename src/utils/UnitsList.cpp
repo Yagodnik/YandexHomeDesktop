@@ -1,4 +1,5 @@
 #include "UnitsList.h"
+#include "TranslateCatalog.h"
 
 UnitsList::UnitsList(QObject *parent) : QObject(parent) {
   const auto temp = JsonLoader::Load<UnitsListData>(":/data/units.json");
@@ -12,5 +13,5 @@ UnitsList::UnitsList(QObject *parent) : QObject(parent) {
 }
 
 QString UnitsList::GetUnit(const QString &unit_name) const {
-  return data_.units.value(unit_name, "").toString();
+  return TranslateCatalog("DataUnits", data_.units.value(unit_name, "").toString());
 }

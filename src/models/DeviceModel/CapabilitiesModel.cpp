@@ -35,7 +35,7 @@ QVariant CapabilitiesModel::data(const QModelIndex &index, int role) const {
       try {
         output = CapabilityType::AsString(capability.type);
       } catch (...) {
-        output = "Неизвестный тип умения";
+        output = tr("Неизвестный тип умения");
       }
 
       return output;

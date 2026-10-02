@@ -1,4 +1,3 @@
-import os
 import platform
 import subprocess
 import time
@@ -43,7 +42,7 @@ def main():
         print("✖ Unsupported OS for deployment.")
         exit(1)
 
-    project_root = Path.cwd()
+    project_root = Path(__file__).resolve().parents[1]
     build_dir = project_root / "build-release"
 
     if not build_dir.exists():
@@ -53,15 +52,18 @@ def main():
         print(f"📁 Using existing build directory: {build_dir}")
 
     print("\n=== Step 1: CMake Configuration ===")
-    run_command(["cmake", "-DCMAKE_BUILD_TYPE=Release", "..", "-G", "Ninja"], cwd=build_dir)
+    run_command([
+        "cmake", "-S", str(project_root), "-B", str(build_dir),
+        "-G", "Ninja", "-DCMAKE_BUILD_TYPE=Release"
+    ], cwd=project_root)
 
     print("\n=== Step 2: Building Project ===")
-    run_command(["cmake", "--build", ".", "--config", "Release"], cwd=build_dir)
+    run_command(["cmake", "--build", str(build_dir), "--config", "Release"], cwd=project_root)
 
     if is_mac:
         print("\n=== Step 3: Deploying App with macdeployqt ===")
         app_path = build_dir / "YandexHomeDesktop.app"
-        qml_path = build_dir / "src/qml/YandexHomeDesktop"
+        qml_path = project_root / "src/qml"
         run_command([
             "macdeployqt",
             str(app_path),
@@ -73,7 +75,7 @@ def main():
         run_command([
             "windeployqt",
             str(exe_path),
-            "--qmldir", str(build_dir / "src/qml/YandexHomeDesktop")
+            "--qmldir", str(project_root / "src/qml")
         ], cwd=build_dir)
 
     print("\n🚀 All steps completed successfully.")

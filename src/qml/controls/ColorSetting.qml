@@ -31,8 +31,8 @@ Item {
 
       Repeater {
         model: [
-          { label: "Цвета", index: 0 },
-          { label: "Режимы", index: 1 }
+          { label: qsTr("Цвета"), index: 0 },
+          { label: qsTr("Режимы"), index: 1 }
         ]
 
         delegate: Item {

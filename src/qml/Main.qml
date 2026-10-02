@@ -34,7 +34,7 @@ Window {
     z: 3000
     color: "red"
     font.pixelSize: 20
-    text: "FPS: " + fps
+    text: qsTr("Кадр/с: %1").arg(fps)
   }
 
   Component.onCompleted: {

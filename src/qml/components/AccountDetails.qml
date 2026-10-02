@@ -26,11 +26,9 @@ Item {
     }
   }
 
-  Rectangle {
+  UI.CardSurface {
     id: background
     anchors.fill: parent
-    color: themes.headerBackground
-    radius: 16
   }
 
   DropShadow {

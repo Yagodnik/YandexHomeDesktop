@@ -21,7 +21,7 @@ Item {
     anchors.horizontalCenter: parent.horizontalCenter
     color: themes.accent
 
-    text: "Загрузка..."
+    text: qsTr("Загрузка...")
   }
 
   Component.onCompleted: {

@@ -1,9 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
-import Qt5Compat.GraphicalEffects
 import YandexHomeDesktop.Ui as UI
 import YandexHomeDesktop.Components as Components
-import YandexHomeDesktop.Models as Models
 
 Item {
   id: root
@@ -16,7 +14,7 @@ Item {
   UI.ErrorDialog {
     id: actionErrorDialog
 
-    dialogTitle: "Ошибка"
+    dialogTitle: qsTr("Ошибка")
     dialogMessage: "!"
   }
 
@@ -35,7 +33,7 @@ Item {
       const error = errorCodes.GetDeviceError(errorCode);
 
       if (error == null) {
-        actionErrorDialog.dialogMessage = "Произошла ошибка!";
+        actionErrorDialog.dialogMessage = qsTr("Произошла ошибка!");
       } else {
         actionErrorDialog.dialogMessage = error.short_description + "\n\n" + error.full_description;
       }
@@ -44,64 +42,14 @@ Item {
     }
   }
 
-  Item {
+  Components.DeviceHeader {
     id: topHeader
-
     width: parent.width
-    height: 48
-    z: 200
+    title: deviceDataModel.name
 
-    Rectangle {
-      id: headerBackground
-      anchors.fill: parent
-      color: themes.headerBackground
-    }
-
-    DropShadow {
-      anchors.fill: headerBackground
-      source: headerBackground
-      radius: 12
-      samples: 16
-      horizontalOffset: 0
-      verticalOffset: 2
-      // color: "#66000000" // ?
-      // color: Qt.rgba(0, 32 / 255, 128 / 255, 0.04)
-      color: themes.shadowColor
-    }
-
-    Image {
-      id: backButton
-      source: "qrc:/images/back.svg"
-
-      property real rotationAngle: 0
-
-      antialiasing: true
-      layer.enabled: true
-      layer.smooth: true
-      layer.samples: 8
-
-      fillMode: Image.PreserveAspectFit
-
-      anchors.verticalCenter: parent.verticalCenter
-      anchors.left: parent.left
-      anchors.leftMargin: 12
-
-      MouseArea {
-        anchors.fill: parent
-        cursorShape: Qt.PointingHandCursor
-
-        onClicked: {
-          deviceController.ForgetDevice();
-          router.goBack();
-        }
-      }
-    }
-
-    UI.DefaultText {
-      text: deviceDataModel.name
-      anchors.verticalCenter: parent.verticalCenter
-      anchors.horizontalCenter: parent.horizontalCenter
-      color: themes.controlText
+    onBackClicked: {
+      deviceController.ForgetDevice();
+      router.goBack();
     }
   }
 
@@ -158,12 +106,12 @@ Item {
         }
 
         UI.DefaultText {
-          text: "Нет связи с устройством"
+          text: qsTr("Нет связи с устройством")
           anchors.horizontalCenter: parent.horizontalCenter
         }
 
         UI.MyButton {
-          text: "Попробовать снова"
+          text: qsTr("Попробовать снова")
           anchors.horizontalCenter: parent.horizontalCenter
         }
       }
@@ -180,79 +128,17 @@ Item {
         anchors.topMargin: 4
         spacing: 4
 
-        UI.HeadingText {
-          id: capabilitiesText
-          text: "Умения"
-
-          visible: capabilitiesModel.count !== 0
-
-          // anchors.top: parent.top
-          // anchors.topMargin: 4
-          anchors.left: parent.left
-          anchors.leftMargin: 16
+        Components.DeviceAttributeSection {
+          width: parent.width
+          title: qsTr("Умения")
+          sourceModel: capabilitiesModel
         }
 
-        ListView {
-          id: capabilitiesList
-          // anchors.top: capabilitiesText.bottom
-          // anchors.topMargin: 4
-          height: contentHeight
-
-          visible: capabilitiesModel.count !== 0
-
-          anchors.left: parent.left
-          anchors.leftMargin: 16
-          anchors.right: parent.right
-          anchors.rightMargin: 16
-
-          clip: true
-          interactive: false
-
-          spacing: 10
-
-          model: capabilitiesModel
-
-          delegate: Loader {
-            source: delegateSource
-            width: parent.width
-          }
-        }
-
-        UI.HeadingText {
-          id: propertiesText
-          text: "Свойства"
-
-          visible: propertiesModel.count !== 0
-
-          // anchors.top: capabilitiesList.bottom
-          // anchors.topMargin: 4
-          anchors.left: parent.left
-          anchors.leftMargin: 16
-        }
-
-        ListView {
-          id: propertiesList
-          // anchors.top: propertiesText.bottom
-          // anchors.topMargin: 4
-
-          height: contentHeight + 12
-
-          anchors.left: parent.left
-          anchors.leftMargin: 16
-          anchors.right: parent.right
-          anchors.rightMargin: 16
-
-          clip: true
-          interactive: false
-
-          spacing: 10
-
-          model: propertiesModel
-
-          delegate: Loader {
-            source: delegateSource
-            width: parent.width
-          }
+        Components.DeviceAttributeSection {
+          width: parent.width
+          title: qsTr("Свойства")
+          sourceModel: propertiesModel
+          bottomSpace: 12
         }
       }
     }

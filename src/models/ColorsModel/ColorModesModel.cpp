@@ -1,6 +1,7 @@
 #include "ColorModesModel.h"
 
 #include "utils/JsonLoader.h"
+#include "utils/TranslateCatalog.h"
 
 ColorModesModel::ColorModesModel(QObject *parent) : QAbstractListModel(parent) {
   const auto& modes_file = JsonLoader::Load<ColorModesFile>(kModesFile);
@@ -28,7 +29,7 @@ QVariant ColorModesModel::data(const QModelIndex &index, int role) const {
     case IdRole:
       return mode.id;
     case NameRole:
-      return mode.name;
+      return TranslateCatalog("DataColorModes", mode.name);
     case ImageRole:
       return kImagePrefix + mode.id + ".svg";
     default:

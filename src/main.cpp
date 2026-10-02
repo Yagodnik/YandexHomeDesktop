@@ -3,6 +3,8 @@
 #include <QQuickStyle>
 #include <QFontDatabase>
 #include <QFont>
+#include <QLocale>
+#include <QTranslator>
 #include <thread>
 #include "api/YandexHomeApi.h"
 #include "api/YandexAccount.h"
@@ -51,6 +53,21 @@ void RegisterFonts(QGuiApplication &app) {
   app.setFont(font);
 }
 
+bool UseRussianUi() {
+  for (const QString &language : QLocale::system().uiLanguages()) {
+    switch (QLocale(language).language()) {
+      case QLocale::Russian:
+        return true;
+      case QLocale::English:
+        return false;
+      default:
+        break;
+    }
+  }
+
+  return false;
+}
+
 void RegisterModels() {
   qmlRegisterType<DevicesFilterModel>("YandexHomeDesktop.Models", 1, 0, "DevicesFilterModel");
   qmlRegisterType<RoomsFilterModel>("YandexHomeDesktop.Models", 1, 0, "RoomsFilterModel");
@@ -77,6 +94,15 @@ static LogManager log_manager(LoggingMode::Console);
 int main(int argc, char *argv[]) {
   QGuiApplication app(argc, argv);
   qInstallMessageHandler(LOGGING_CALLBACK(log_manager));
+
+  QTranslator english_translator;
+  if (!UseRussianUi()) {
+    if (english_translator.load(":/i18n/YandexHomeDesktop_en.qm")) {
+      app.installTranslator(&english_translator);
+    } else {
+      qWarning() << "English translation catalog could not be loaded";
+    }
+  }
 
   const auto authorization_service = new AuthorizationService(&app);
   const auto token_provider = [authorization_service] {
@@ -121,8 +147,8 @@ int main(int argc, char *argv[]) {
   const auto color_modes_model = new ColorModesModel(&app);
   const auto modes_model = new ModesModel(&app);
   const auto settings = new Settings(&app);
-  const auto titles_list = new TitlesProvider(":/data/instances.json", &app);
-  const auto events_list = new TitlesProvider(":/data/propertiesEvents.json", &app);
+  const auto titles_list = new TitlesProvider(":/data/instances.json", "DataInstances", &app);
+  const auto events_list = new TitlesProvider(":/data/propertiesEvents.json", "DataEvents", &app);
   const auto units_list = new UnitsList(&app);
   const auto device_data_model = new DeviceDataModel(yandex_api, &app);
   const auto device_icons = new IconsProvider(":/data/deviceIcons.json", "devices", &app);

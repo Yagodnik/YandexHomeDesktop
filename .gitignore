@@ -1,0 +1,6 @@
+/build/
+/build-*/
+/libs/
+/resources/auth/secrets.json
+*.qm
+__pycache__/

@@ -17,10 +17,8 @@ Item {
     opacity = 1
   }
 
-  Rectangle {
+  UI.CardSurface {
     anchors.fill: parent
-    color: themes.headerBackground
-    radius: 16
   }
 
   Image {

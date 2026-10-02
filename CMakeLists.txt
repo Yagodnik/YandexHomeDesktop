@@ -1,6 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
-
-include(cmake/qt6-config.cmake)
+cmake_minimum_required(VERSION 3.18)
 
 project(YandexHomeDesktop VERSION 0.1 LANGUAGES CXX)
 
@@ -9,12 +7,41 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Quick Network NetworkAuth Gui QuickControls2)
+find_package(Qt6 6.8 REQUIRED COMPONENTS Quick Network NetworkAuth Gui QuickControls2 LinguistTools ShaderTools Test)
+
+# Pin dependencies and populate them under the build directory, so a clean
+# checkout does not depend on ignored local libraries.
+include(FetchContent)
+FetchContent_Declare(boost_hana
+        GIT_REPOSITORY https://github.com/boostorg/hana.git
+        GIT_TAG boost-1.87.0
+        GIT_SHALLOW TRUE
+        SOURCE_SUBDIR cmake-do-not-add
+)
+FetchContent_MakeAvailable(boost_hana)
+
+# QtKeychain defaults to Qt 5 and builds optional translations and tests.
+set(BUILD_WITH_QT6 ON)
+set(BUILD_SHARED_LIBS OFF)
+set(BUILD_TRANSLATIONS OFF)
+set(BUILD_TESTING OFF)
+FetchContent_Declare(qtkeychain
+        GIT_REPOSITORY https://github.com/frankosterfeld/qtkeychain.git
+        GIT_TAG aa6da344e1a20b9194e12bace3665caeea6b6304
+        GIT_SHALLOW FALSE
+)
+FetchContent_MakeAvailable(qtkeychain)
+unset(BUILD_WITH_QT6)
+unset(BUILD_SHARED_LIBS)
+unset(BUILD_TRANSLATIONS)
+unset(BUILD_TESTING)
+
+include(CTest)
 
 qt_standard_project_setup(REQUIRES 6.8)
 qt_add_resources(RESOURCES resources/resources.qrc)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs)
+include_directories(${boost_hana_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 add_subdirectory(src/api)
@@ -55,7 +82,27 @@ if (APPLE)
 endif ()
 
 add_subdirectory(src/qml/)
-add_subdirectory(src/qml/shaders)
+qt_add_shaders(appYandexHomeDesktop "highlight_shader"
+        PREFIX "/shaders"
+        BASE "${CMAKE_CURRENT_SOURCE_DIR}/src/qml/shaders"
+        GLSL "310 es"
+        HLSL 50
+        MSL 21
+        FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/qml/shaders/highlight.frag"
+)
+
+# Embed a credential-free template by default. Developers can configure an
+# ignored local OAuth file without making it a build prerequisite for CI.
+set(YH_AUTH_CONFIG_FILE "${CMAKE_CURRENT_SOURCE_DIR}/resources/auth/example.json"
+        CACHE FILEPATH "OAuth configuration JSON to embed in the application")
+if (NOT EXISTS "${YH_AUTH_CONFIG_FILE}")
+  message(FATAL_ERROR "OAuth configuration not found: ${YH_AUTH_CONFIG_FILE}")
+endif ()
+set_source_files_properties("${YH_AUTH_CONFIG_FILE}" PROPERTIES
+        QT_RESOURCE_ALIAS "auth/secrets.json")
+qt_add_resources(appYandexHomeDesktop "auth_config"
+        PREFIX "/"
+        FILES "${YH_AUTH_CONFIG_FILE}")
 
 qt_add_qml_module(appYandexHomeDesktop
         URI YandexHomeDesktop
@@ -95,7 +142,19 @@ target_link_libraries(appYandexHomeDesktop PRIVATE
         Iot
 )
 
-add_dependencies(appYandexHomeDesktop compile_shaders)
+file(GLOB_RECURSE QML_TRANSLATION_SOURCES CONFIGURE_DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/qml/*.qml")
+
+qt_add_translations(appYandexHomeDesktop
+        TS_FILES "${CMAKE_CURRENT_SOURCE_DIR}/translations/YandexHomeDesktop_en.ts"
+        SOURCE_TARGETS appYandexHomeDesktop
+        SOURCES
+        ${QML_TRANSLATION_SOURCES}
+        translations/DataStrings.cpp
+        src/models/DeviceModel/CapabilitiesModel.cpp
+        src/models/DeviceModel/PropertiesModel.cpp
+        RESOURCE_PREFIX "/i18n"
+)
 
 include(GNUInstallDirs)
 install(TARGETS appYandexHomeDesktop
@@ -109,4 +168,6 @@ set_target_properties(appYandexHomeDesktop PROPERTIES
         MACOSX_BUNDLE TRUE
 )
 
-add_subdirectory(tests)
+if (BUILD_TESTING)
+  add_subdirectory(tests)
+endif ()

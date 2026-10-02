@@ -18,6 +18,10 @@ qt_add_qml_module(YandexHomeDesktopUi
         ui/ImageButton.qml
         ui/ErrorDialog.qml
         ui/Skeleton.qml
+        ui/CardSurface.qml
+        ui/RefreshHeader.qml
+        ui/LoadingPane.qml
+        ui/LoadErrorPane.qml
 )
 
 qt_add_qml_module(YandexHomeDesktopPages
@@ -47,4 +51,6 @@ qt_add_qml_module(YandexHomeDesktopComponents
         components/DeviceDelegate.qml
         components/RoomDevicesList.qml
         components/AdaptiveGrid.qml
+        components/DeviceHeader.qml
+        components/DeviceAttributeSection.qml
 )

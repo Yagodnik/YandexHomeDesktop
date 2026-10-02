@@ -8,53 +8,21 @@ import YandexHomeDesktop.Models 1.0
 Item {
   id: rooms
 
-  Item {
+  UI.RefreshHeader {
     id: heading
     width: parent.width
-    height: 32
+    title: qsTr("Комнаты")
 
-    UI.HeadingText {
-      id: roomsText
-      text: "Комнаты"
-      anchors.left: parent.left
-      anchors.verticalCenter: parent.verticalCenter
-    }
-
-    UI.ImageButton {
-      id: reloadButton
-      source: "qrc:/images/reload.svg"
-
-      property real rotationAngle: 0
-
-      transform: Rotation {
-        id: rot
-        origin.x: reloadButton.width / 2
-        origin.y: reloadButton.height / 2
-        angle: reloadButton.rotationAngle
+    onRefreshClicked: {
+      if (rooms.isLoading) {
+        return;
       }
 
-      anchors.verticalCenter: parent.verticalCenter
-      anchors.right: parent.right
-      anchors.rightMargin: 8
+      rooms.isLoading = true;
+      devicesStack.currentIndex = 0;
+      devicesModel.RequestData();
 
-      onClicked: {
-        if (rooms.isLoading) {
-          return;
-        }
-
-        rooms.isLoading = true;
-        devicesStack.currentIndex = 0;
-        devicesModel.RequestData();
-
-        reloadButton.rotationAngle += 360;
-      }
-
-      Behavior on rotationAngle {
-        NumberAnimation {
-          duration: 500
-          easing.type: Easing.InOutCubic
-        }
-      }
+      heading.rotationAngle += 360;
     }
   }
 
@@ -89,49 +57,13 @@ Item {
     anchors.topMargin: 2
     anchors.bottom: parent.bottom
 
-    Item {
-      UI.MyProgressIndicator {
-        id: loadingProgress
-
-        anchors.centerIn: parent
-        width: 30
-        height: 30
-        strokeWidth: 2
-        opacity: (devicesStack.currentIndex === 0) ? 1 : 0
-        visible: opacity > 0
-
-        Behavior on opacity {
-          NumberAnimation {
-            duration: 200
-            easing.type: Easing.InOutQuad
-          }
-        }
-      }
+    UI.LoadingPane {
+      active: devicesStack.currentIndex === 0
     }
 
-    Item {
-      opacity: (devicesStack.currentIndex === 1) ? 1 : 0
-      visible: opacity > 0
-
-      Behavior on opacity {
-        NumberAnimation {
-          duration: 200
-          easing.type: Easing.InOutQuad
-        }
-      }
-
-      Column {
-        id: errorMessage
-        anchors.centerIn: parent
-        spacing: 15
-
-        UI.DefaultText {
-          text: qsTr("Что-то пошло не так!")
-          color: themes.inactive
-
-          anchors.horizontalCenter: errorMessage.horizontalCenter
-        }
-      }
+    UI.LoadErrorPane {
+      active: devicesStack.currentIndex === 1
+      message: qsTr("Что-то пошло не так!")
     }
 
     Item {

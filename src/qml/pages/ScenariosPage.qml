@@ -16,8 +16,8 @@ Item {
   UI.ErrorDialog {
     id: scenarioErrorDialog
 
-    dialogTitle: "Ошибка"
-    dialogMessage: "Не удалось выполнить сценарий"
+    dialogTitle: qsTr("Ошибка")
+    dialogMessage: qsTr("Не удалось выполнить сценарий")
   }
 
   property var isLoading: false
@@ -42,53 +42,21 @@ Item {
     }
   }
 
-  Item {
+  UI.RefreshHeader {
     id: heading
     width: parent.width
-    height: 32
+    title: qsTr("Все сценарии")
 
-    UI.HeadingText {
-      id: headingTitle
-      text: "Все сценарии"
-      anchors.left: parent.left
-      anchors.verticalCenter: parent.verticalCenter
-    }
-
-    UI.ImageButton {
-      id: reloadButton
-      source: "qrc:/images/reload.svg"
-
-      property real rotationAngle: 0
-
-      transform: Rotation {
-        id: rot
-        origin.x: reloadButton.width / 2
-        origin.y: reloadButton.height / 2
-        angle: reloadButton.rotationAngle
+    onRefreshClicked: {
+      if (root.isLoading) {
+        return;
       }
 
-      anchors.verticalCenter: parent.verticalCenter
-      anchors.right: parent.right
-      anchors.rightMargin: 8
+      root.isLoading = true;
+      scenariosStack.currentIndex = 0;
+      scenariosModel.RequestData();
 
-      onClicked: {
-        if (root.isLoading) {
-          return;
-        }
-
-        root.isLoading = true;
-        scenariosStack.currentIndex = 0;
-        scenariosModel.RequestData();
-
-        reloadButton.rotationAngle += 360;
-      }
-
-      Behavior on rotationAngle {
-        NumberAnimation {
-          duration: 500
-          easing.type: Easing.InOutCubic
-        }
-      }
+      heading.rotationAngle += 360;
     }
   }
 
@@ -102,49 +70,13 @@ Item {
 
     currentIndex: 0
 
-    Item {
-      UI.MyProgressIndicator {
-        id: loadingProgress
-
-        anchors.centerIn: parent
-        width: 30
-        height: 30
-        strokeWidth: 2
-        opacity: (scenariosStack.currentIndex === 0) ? 1 : 0
-        visible: opacity > 0
-
-        Behavior on opacity {
-          NumberAnimation {
-            duration: 200
-            easing.type: Easing.InOutQuad
-          }
-        }
-      }
+    UI.LoadingPane {
+      active: scenariosStack.currentIndex === 0
     }
 
-    Item {
-      opacity: (scenariosStack.currentIndex === 1) ? 1 : 0
-      visible: opacity > 0
-
-      Behavior on opacity {
-        NumberAnimation {
-          duration: 200
-          easing.type: Easing.InOutQuad
-        }
-      }
-
-      Column {
-        id: errorMessage
-        anchors.centerIn: parent
-        spacing: 15
-
-        UI.DefaultText {
-          text: qsTr("Что-то пошло не так!")
-          color: themes.inactive
-
-          anchors.horizontalCenter: errorMessage.horizontalCenter
-        }
-      }
+    UI.LoadErrorPane {
+      active: scenariosStack.currentIndex === 1
+      message: qsTr("Что-то пошло не так!")
     }
 
     Item {
@@ -152,7 +84,7 @@ Item {
 
       UI.DefaultText {
         anchors.centerIn: parent
-        text: "Пока что у вас нет сценариев"
+        text: qsTr("Пока что у вас нет сценариев")
 
         visible: scenariosModel.count === 0
       }

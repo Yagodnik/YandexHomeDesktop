@@ -70,7 +70,7 @@ Dialog {
     }
 
     UI.MyButton {
-      text: "Ок"
+      text: qsTr("Ок")
       Layout.alignment: Qt.AlignRight
       onClicked: errorDialog.closeAnimated()
     }

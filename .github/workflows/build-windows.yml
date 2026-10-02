@@ -1,107 +1,48 @@
 name: Windows build
 
 on:
+  push:
+  pull_request:
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: windows-2022
 
     steps:
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.4.0
 
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v4
+      - name: Install Qt 6.9.1
+        uses: jurplel/install-qt-action@v4.3.0
         with:
-          aqtversion: '==3.1.*'
+          aqtversion: '==3.3.0'
           version: '6.9.1'
-          host: 'windows'
-          target: 'desktop'
-          arch: 'win64_mingw'
-          modules: 'qt5compat qtnetworkauth qtshadertools'
-          tools: 'tools_ifw tools_mingw1310'
+          host: windows
+          target: desktop
+          arch: win64_msvc2022_64
+          modules: 'qt5compat qtnetworkauth qtshadertools qtsvg qttools'
           cache: true
 
-      - name: Install Boost.Hana
-        shell: cmd
+      - name: Check committed translations
         run: |
-          git clone --depth=1 https://github.com/boostorg/hana.git temp_hana
-          mkdir libs\boost
-          xcopy /E /I /Y temp_hana\include\boost libs\boost
-          copy temp_hana\include\boost\hana.hpp libs\boost\hana.hpp
+          python scripts/update-data-translation-markers.py --check
+          python scripts/check-translations.py
 
-      - name: Clone and build QtKeychain with Qt6
-        run: |
-          git clone --depth=1 https://github.com/frankosterfeld/qtkeychain.git qtkeychain
-          cd qtkeychain
-          mkdir build
-          cd build
-          cmake -G "MinGW Makefiles" -DBUILD_WITH_QT6=1 ..
-          cmake --build . 
+      - name: Configure from a clean checkout
+        run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="$env:QT_ROOT_DIR"
 
-      - name: Copy QtKeychain headers and DLL
-        run: |
-          mkdir libs\qtkeychain\include\qtkeychain
-          mkdir libs\qtkeychain\lib
-          
-          copy qtkeychain\build\bin\libqt6keychain.dll libs\qtkeychain\lib\libqt6keychain.dll
-          copy qtkeychain\build\qtkeychain\qkeychain_export.h libs\qtkeychain\include\qtkeychain\qkeychain_export.h
-          copy qtkeychain\qtkeychain\keychain.h libs\qtkeychain\include\qtkeychain\keychain.h
-        shell: cmd
+      - name: Build
+        run: cmake --build build --config Release --parallel 2
 
-      - name: Generate secrets.json
-        run: python3 scripts/generate-secrets.py
+      - name: Test
         env:
-          YANDEX_CLIENT_ID: ${{ secrets.YANDEX_CLIENT_ID }}
+          QT_QPA_PLATFORM: offscreen
+        run: ctest --test-dir build -C Release --output-on-failure
 
-      - name: Building application
-        run: |
-          mkdir build
-          cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="%Qt6_DIR%" -G "MinGW Makefiles"
-          cmake --build . --config Release --parallel
-
-      - name: Upload build folder as artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4.6.2
         with:
-          name: build-folder
-          path: build/
-
-      - name: Setup deploy folder
-        run: |
-          mkdir deploy
-          copy libs\qtkeychain\lib\libqt6keychain.dll deploy\
-          copy build\YandexHomeDesktop.exe deploy\
-          xcopy build\YandexHomeDesktop deploy\YandexHomeDesktop /E /I /Y
-          copy build\YandexHomeDesktopComponents.dll deploy\
-          copy build\YandexHomeDesktopPages.dll deploy\
-          copy build\YandexHomeDesktopUi.dll deploy\
-
-      - name: Run windeployqt
-        shell: cmd
-        run: |
-          set PATH=%Qt6_DIR%\bin;%PATH%
-          cd deploy
-          windeployqt . --no-translations --qmldir "%GITHUB_WORKSPACE%\src"
-
-      - name: Upload deploy folder as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: deploy-folder
-          path: deploy/
-
-      - name: Copy deploy folder into installer package
-        run: |
-          mkdir -p installer/packages/com.artemyagodnik.yandexhomedesktop/data
-          xcopy /E /I deploy installer\packages\com.artemyagodnik.yandexhomedesktop\data
-
-      - name: Create installer
-        run: |
-          & binarycreator.exe -c "installer/config/config.xml" -p "installer/packages" "yhd-installer.exe"
-
-      - name: Upload installer
-        uses: actions/upload-artifact@v4
-        with:
-          name: Installer
-          path: yhd-installer.exe
+          name: windows-build
+          path: build/Release/YandexHomeDesktop.exe
+          if-no-files-found: error

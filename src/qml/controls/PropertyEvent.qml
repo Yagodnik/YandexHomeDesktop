@@ -15,10 +15,8 @@ Item {
     valuesTitles: eventTitles
   }
 
-  Rectangle {
+  UI.CardSurface {
     anchors.fill: parent
-    radius: 16
-    color: themes.headerBackground
   }
 
   Item {

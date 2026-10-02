@@ -25,10 +25,8 @@ Item {
 
   height: properHeight
 
-  Rectangle {
+  UI.CardSurface {
     anchors.fill: parent
-    color: themes.headerBackground
-    radius: 16
   }
 
   Item {
@@ -169,4 +167,3 @@ Item {
     }
   }
 }
-

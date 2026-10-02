@@ -85,21 +85,21 @@ Item {
       width: parent.width
 
       UI.MyTab {
-        text: "Устройства"
+        text: qsTr("Устройства")
         leftCorner: true
         active: topBar.activeTab === 0
         onClicked: topBar.activeTab = 0
       }
 
       UI.MyTab {
-        text: "Сценарии"
+        text: qsTr("Сценарии")
         leftCorner: true
         active: topBar.activeTab === 1
         onClicked: topBar.activeTab = 1
       }
 
       UI.MyTab {
-        text: "Настройки"
+        text: qsTr("Настройки")
         leftCorner: true
         active: topBar.activeTab === 2
         onClicked: topBar.activeTab = 2

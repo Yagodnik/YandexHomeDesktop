@@ -24,7 +24,7 @@ Column {
   }
 
   UI.DefaultText {
-    text: "В этой комнате нет устройств!"
+    text: qsTr("В этой комнате нет устройств!")
 
     visible: filteredModel.count === 0
   }

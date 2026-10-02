@@ -53,7 +53,7 @@ QVariant PropertiesModel::data(const QModelIndex &index, int role) const {
       try {
         output = PropertyType::AsString(property.type);
       } catch (...) {
-        output = "Неизвестный тип свойства";
+        output = tr("Неизвестный тип свойства");
       }
 
       return output;

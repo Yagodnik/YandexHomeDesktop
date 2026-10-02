@@ -12,7 +12,6 @@
     <file>images/warning.svg</file>
     <file>images/on.svg</file>
 
-    <file>auth/secrets.json</file>
     <file>callback/index.html</file>
 
     <file>themes/light.json</file>

@@ -14,3 +14,5 @@
 /resources/auth/secrets.json
 .DS_Store
 CMakeLists.txt.user
+*.qm
+__pycache__/

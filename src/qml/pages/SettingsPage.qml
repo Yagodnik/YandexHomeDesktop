@@ -39,7 +39,7 @@ Item {
 
       UI.HeadingText {
         id: heading
-        text: "Настройки"
+        text: qsTr("Настройки")
         width: parent.width
       }
 
@@ -56,11 +56,9 @@ Item {
           width: parent.width
           height: elements.implicitHeight
 
-          Rectangle {
+          UI.CardSurface {
             id: background2
             anchors.fill: parent
-            color: themes.headerBackground
-            radius: 16
           }
 
           Column {
@@ -78,11 +76,11 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
 
                 UI.DefaultText {
-                  text: "Tray-режим"
+                  text: qsTr("Tray-режим")
                 }
 
                 UI.SubheadingText {
-                  text: "Приложение будет отображаться\nкак иконка на панели задач"
+                  text: qsTr("Приложение будет отображаться\nкак иконка на панели задач")
                 }
               }
 
@@ -108,7 +106,7 @@ Item {
               height: 50
 
               UI.DefaultText {
-                text: "Тема"
+                text: qsTr("Тема")
                 anchors.left: parent.left
                 anchors.leftMargin: 10
                 anchors.verticalCenter: parent.verticalCenter
@@ -121,15 +119,7 @@ Item {
 
                 currentIndex: settings.currentTheme
 
-                model: ListModel {
-                  ListElement {
-                    displayText: "Светлая"
-                  }
-
-                  ListElement {
-                    displayText: "Тёмная"
-                  }
-                }
+                model: [qsTr("Светлая"), qsTr("Тёмная")]
 
                 onActivated: {
                   console.log("Selected index:", currentIndex, "value:", currentText)

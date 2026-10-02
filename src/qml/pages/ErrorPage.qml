@@ -13,7 +13,7 @@ Item {
     spacing: 15
 
     UI.AnimatedText {
-      text: "Что-то пошло не так! " + authorizationService.GetLastErrorCode();
+      text: qsTr("Что-то пошло не так! %1").arg(authorizationService.GetLastErrorCode());
       color: themes.inactive
       pixelSize: 24
 
@@ -26,7 +26,7 @@ Item {
 
       UI.MyButton {
         width: col.width
-        text: "Попробовать ещё раз"
+        text: qsTr("Попробовать ещё раз")
 
         anchors.horizontalCenter: col.horizontalCenter
 
@@ -37,7 +37,7 @@ Item {
 
       UI.MyButton {
         width: col.width
-        text: "Выйти из аккаунта"
+        text: qsTr("Выйти из аккаунта")
 
         anchors.horizontalCenter: col.horizontalCenter
 

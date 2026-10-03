@@ -86,6 +86,16 @@ if(BUILD_DESKTOP_APP)
   add_subdirectory(src/platform)
   add_subdirectory(src/qml)
 
+  if(BUILD_TESTING)
+    add_executable(QmlPageLoadTest tests/QmlPageLoadTest.cpp)
+    target_link_libraries(QmlPageLoadTest PRIVATE Qt6::Gui Qt6::Qml)
+    add_test(NAME DevicePageLoads COMMAND QmlPageLoadTest
+      "${CMAKE_CURRENT_SOURCE_DIR}/src/qml/pages/DevicePage.qml"
+      "${CMAKE_CURRENT_BINARY_DIR}")
+    set_tests_properties(DevicePageLoads PROPERTIES
+      ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+  endif()
+
   qt_add_resources(RESOURCES resources/resources.qrc)
   qt_add_executable(appYandexHomeDesktop
     src/main.cpp

@@ -3,8 +3,6 @@ name: Linux portable tests
 on:
   pull_request:
     branches: [main, dev, refactoring]
-  push:
-    branches: [main, dev, refactoring]
   workflow_dispatch:
 
 permissions:
@@ -28,7 +26,7 @@ jobs:
           version: '6.9.1'
           host: linux
           target: desktop
-          arch: gcc_64
+          arch: linux_gcc_64
           cache: true
 
       - name: Configure portable tests

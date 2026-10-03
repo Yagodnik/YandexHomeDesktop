@@ -138,7 +138,6 @@ Item {
             deviceStates.currentIndex = 0;
             deviceController.TryReloadDevice();
           }
-          anchors.horizontalCenter: parent.horizontalCenter
         }
       }
     }

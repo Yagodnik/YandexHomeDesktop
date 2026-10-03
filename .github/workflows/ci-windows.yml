@@ -3,8 +3,6 @@ name: Windows build and tests
 on:
   pull_request:
     branches: [main, dev, refactoring]
-  push:
-    branches: [main, dev, refactoring]
   workflow_dispatch:
 
 permissions:

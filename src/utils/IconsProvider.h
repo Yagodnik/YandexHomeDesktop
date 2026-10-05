@@ -1,6 +1,6 @@
 #pragma once
 
-#include "serialization/Serialization.h"
+#include "serialization/SerializationTypes.h"
 
 class IconsProvider : public QObject {
   Q_OBJECT

@@ -1,6 +1,8 @@
 #pragma once
 
 #include <QTimer>
+#include <QDateTime>
+#include <optional>
 
 #include "DeviceAttribute.h"
 #include "api/IHomeApi.h"

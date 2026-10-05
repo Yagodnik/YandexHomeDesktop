@@ -1,4 +1,5 @@
 #include "RoomsModel.h"
+#include <QDebug>
 
 RoomsModel::RoomsModel(HomeSnapshotLoader *loader, QObject *parent)
   : QAbstractListModel(parent), loader_(loader)

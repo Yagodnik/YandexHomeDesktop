@@ -1,4 +1,5 @@
 #include "SerializationTests.h"
+#include "serialization/Serialization.h"
 
 void SerializationTests::FromJsonSimple() {
   QByteArray raw = R"({

@@ -14,6 +14,10 @@ concurrency:
 
 jobs:
   test:
+    strategy:
+      fail-fast: false
+      matrix:
+        pch: ['ON', 'OFF']
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
@@ -47,6 +51,7 @@ jobs:
           -DCMAKE_BUILD_TYPE=Release
           -DBUILD_DESKTOP_APP=ON
           -DBUILD_TESTING=ON
+          -DYH_ENABLE_PCH=${{ matrix.pch }}
           -DAUTH_CONFIG_FILE="$env:RUNNER_TEMP\oauth.json"
 
       - name: Build application and tests

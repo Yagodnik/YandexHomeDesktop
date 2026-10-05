@@ -1,4 +1,5 @@
 #include "ScenariosModel.h"
+#include <QDebug>
 
 ScenariosModel::ScenariosModel(IHomeApi *api, QObject *parent)
   : QAbstractListModel(parent), api_(api)

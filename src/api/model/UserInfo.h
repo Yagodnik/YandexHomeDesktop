@@ -1,6 +1,6 @@
 #pragma once
 
-#include "serialization/Serialization.h"
+#include "serialization/SerializationTypes.h"
 #include "Status.h"
 #include "Capabilites.h"
 #include "Properties.h"
@@ -76,3 +76,12 @@ JSON_STRUCT(UserInfo,
   (QList<ScenarioObject>, scenarios),
   (QList<HouseholdObject>, households)
 );
+
+// Shared codecs are instantiated once in Serialization.cpp.
+extern template RoomObject Serialization::From<RoomObject>(const QJsonObject&);
+extern template GroupObject Serialization::From<GroupObject>(const QJsonObject&);
+extern template DeviceObject Serialization::From<DeviceObject>(const QJsonObject&);
+extern template DeviceInfo Serialization::From<DeviceInfo>(const QJsonObject&);
+extern template ScenarioObject Serialization::From<ScenarioObject>(const QJsonObject&);
+extern template HouseholdObject Serialization::From<HouseholdObject>(const QJsonObject&);
+extern template UserInfo Serialization::From<UserInfo>(const QJsonObject&);

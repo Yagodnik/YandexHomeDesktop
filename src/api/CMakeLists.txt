@@ -4,8 +4,7 @@ find_package(Qt6 COMPONENTS Core Network Gui REQUIRED)
 
 add_library(ApiContracts INTERFACE)
 target_include_directories(ApiContracts INTERFACE
-        ${CMAKE_SOURCE_DIR}/src
-        ${CMAKE_SOURCE_DIR}/libs)
+        ${CMAKE_SOURCE_DIR}/src)
 target_link_libraries(ApiContracts INTERFACE Qt6::Core)
 
 add_library(YandexApiAdapter STATIC
@@ -17,6 +16,7 @@ add_library(YandexApiAdapter STATIC
         QtHttpTransport.h
         RequestFactory.cpp
         model/Properties.h
+        model/Serialization.cpp
 )
 
 target_link_libraries(YandexApiAdapter PUBLIC ApiContracts Qt6::Network PRIVATE Qt6::Gui)

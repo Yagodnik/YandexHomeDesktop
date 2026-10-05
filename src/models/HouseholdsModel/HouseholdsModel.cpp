@@ -1,4 +1,5 @@
 #include "HouseholdsModel.h"
+#include <QDebug>
 
 HouseholdsModel::HouseholdsModel(HomeSnapshotLoader *loader, QObject *parent)
   : QAbstractListModel(parent), current_(std::nullopt), loader_(loader)

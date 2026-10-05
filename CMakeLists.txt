@@ -7,6 +7,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
+option(YH_ENABLE_PCH "Use precompiled headers for C++ targets" ON)
+
 include(CTest)
 include(FetchContent)
 
@@ -208,4 +210,13 @@ if(BUILD_DESKTOP_APP)
     set(CPACK_NSIS_DISPLAY_NAME "Yandex Home Desktop")
     include(CPack)
   endif()
+endif()
+
+if(YH_ENABLE_PCH)
+  foreach(_pch_target YandexApiAdapter Models Utils Iot AppTests appYandexHomeDesktop)
+    if(TARGET ${_pch_target})
+      target_precompile_headers(${_pch_target} PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/serialization/PrecompiledHeaders.h")
+    endif()
+  endforeach()
 endif()

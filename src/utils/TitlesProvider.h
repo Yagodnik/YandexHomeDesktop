@@ -1,7 +1,8 @@
 #pragma once
 
 #include <QByteArray>
-#include "JsonLoader.h"
+#include <QObject>
+#include <QJsonObject>
 
 class TitlesProvider : public QObject {
   Q_OBJECT

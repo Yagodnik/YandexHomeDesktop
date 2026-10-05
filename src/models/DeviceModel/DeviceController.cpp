@@ -1,4 +1,6 @@
 #include "DeviceController.h"
+#include <QDebug>
+#include <ranges>
 
 DeviceController::DeviceController(IHomeApi *api, QObject *parent)
   : QObject(parent), api_(api)

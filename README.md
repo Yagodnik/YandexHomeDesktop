@@ -21,6 +21,12 @@ cmake --build build --parallel 4
 ctest --test-dir build --output-on-failure
 ```
 
+Для ускорения сборки по умолчанию включены предкомпилированные заголовки (PCH).
+Их можно отключить при конфигурации CMake с помощью `-DYH_ENABLE_PCH=OFF`.
+Объявления сериализуемых типов находятся в `serialization/SerializationTypes.h`;
+полный `serialization/Serialization.h` нужен для инстанцирования сериализаторов.
+Используемые сериализаторы общих API-моделей компилируются один раз в библиотеке `YandexApiAdapter`.
+
 Для работающего входа создайте свою конфигурацию OAuth и передайте `-DYH_AUTH_CONFIG_FILE=/path/to/oauth.json` (или `-DAUTH_CONFIG_FILE=...`). Файл встраивается в приложение. Инструкции и вариант для Linux-тестов приведены в [docs/build.md](docs/build.md).
 
 CI собирает и тестирует приложение на macOS и Windows, а на Linux запускает переносимые тесты. Сборки CI используют тестовую OAuth-конфигурацию. Для релизов используется тег `vMAJOR.MINOR.PATCH`; шаги описаны в [release workflow](.github/workflows/release.yml).

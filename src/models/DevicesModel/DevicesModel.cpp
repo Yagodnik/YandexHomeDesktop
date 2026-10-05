@@ -1,4 +1,5 @@
 #include "DevicesModel.h"
+#include <QDebug>
 
 DevicesModel::DevicesModel(HomeSnapshotLoader *loader, QObject *parent)
   : QAbstractListModel(parent), loader_(loader)

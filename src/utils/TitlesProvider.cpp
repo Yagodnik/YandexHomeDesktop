@@ -1,5 +1,8 @@
 #include "TitlesProvider.h"
 #include "TranslateCatalog.h"
+#include "JsonLoaderRaw.h"
+
+#include <QDebug>
 
 TitlesProvider::TitlesProvider(const QString& path, const char *translationContext, QObject *parent)
   : QObject(parent), translation_context_(translationContext) {

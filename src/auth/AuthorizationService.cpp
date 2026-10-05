@@ -1,9 +1,21 @@
 #include "AuthorizationService.h"
+#include "serialization/Serialization.h"
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QUrlQuery>
 #include <QFile>
 #include <QDesktopServices>
+
+namespace {
+  JSON_STRUCT(AuthSecrets,
+    (QString, auth_url),
+    (QString, access_token_url),
+    (QString, client_id),
+    (QString, redirect_base),
+    (int, redirect_port),
+    (QStringList, scopes)
+  );
+}
 
 AuthorizationService::AuthorizationService(QObject *parent) :
   QObject{parent},

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "utils/JsonLoader.h"
+#include <QObject>
+#include <QVariant>
 
 class UnitsList : public QObject {
   Q_OBJECT
@@ -10,9 +11,5 @@ public:
   [[nodiscard]] QString GetUnit(const QString &unit_name) const;
 
 private:
-  JSON_STRUCT(UnitsListData,
-    (QVariantMap, units)
-  );
-
-  UnitsListData data_;
+  QVariantMap units_;
 };

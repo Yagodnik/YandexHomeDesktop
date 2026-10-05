@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QAbstractListModel>
+#include <optional>
 #include "models/HomeSnapshotLoader.h"
 
 class HouseholdsModel : public QAbstractListModel {

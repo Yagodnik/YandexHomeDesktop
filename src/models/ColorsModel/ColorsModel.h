@@ -1,8 +1,9 @@
 #pragma once
 
 #include <QAbstractListModel>
+#include <optional>
 
-#include "serialization/Serialization.h"
+#include "serialization/SerializationTypes.h"
 
 class ColorsModel : public QAbstractListModel {
   Q_OBJECT

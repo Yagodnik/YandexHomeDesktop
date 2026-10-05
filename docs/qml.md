@@ -36,7 +36,7 @@ Pages compose `Ui` and `Components` types rather than defining rectangles, mouse
 | `components/BasicSettingsCard.qml`, `ui/Setting*Row.qml` | Settings presentation; the page applies tray and theme changes |
 | `components/RoomsPane.qml`, `components/ScenariosPane.qml` | List viewports; the scenarios pane forwards execution requests to its page |
 
-`TopBar.householdSelectRequested` is handled by `MainPage`, which opens the picker. The picker emits `householdSelected`; the page updates the household model and closes the sheet. The scenarios viewport uses one scrolling list with an attached scrollbar. Settings uses `ScrollColumn` so the scroll extent follows the actual content height.
+`TopBar.householdSelectRequested` is handled by `MainPage`, which opens the picker. The picker emits `householdSelected`; the page calls `homeViewModel.SelectHousehold(id)` and closes the sheet. The scenarios viewport uses one scrolling list with an attached scrollbar. Settings uses `ScrollColumn` so the scroll extent follows the actual content height.
 
 The extracted visual components receive titles, models, and state through properties. `ui/RefreshHeader.qml` and `components/DeviceHeader.qml` emit click signals; their page handlers retain the refresh and back actions. `ui/LoadingPane.qml` and `ui/LoadErrorPane.qml` render the states chosen by each page. `components/DeviceControlsPane.qml` owns the selected device's scrolling and padding, including the bottom gap when either attribute section is empty. `components/DeviceAttributeSection.qml` renders either model using its `delegateSource` role; a column of repeated loaders measures every control's height without a nested scrolling list. `components/PropertyValueCard.qml` shares the icon, value, and title layout between float and event controls, which retain their own property helpers and model bindings. `ui/CardSurface.qml` provides the shared rounded background used by cards and controls.
 
@@ -47,14 +47,16 @@ The extracted visual components receive titles, models, and state through proper
 | Context property | Used for |
 | --- | --- |
 | `authorizationService`, `router`, `platformService` | Sign-in, page navigation, window and tray behavior |
-| `devicesModel`, `roomsModel`, `householdsModel`, `scenariosModel`, `yandexAccount` | Lists, household selection, scenarios, account details |
+| `homeViewModel`, `scenariosViewModel`, `yandexAccount` | Home lists and household selection, scenario operations, account details |
 | `deviceController`, `deviceDataModel`, `capabilitiesModel`, `propertiesModel` | Selected-device loading, polling, actions, and displayed attributes |
 | `themes`, `settings` | Theme colors and persisted UI settings |
 | `colorModel`, `colorModesModel`, `modesModel`, `iotTitles`, `eventTitles`, `unitsList`, `deviceIcons`, `propertiesIcons`, `errorCodes` | Control choices, labels, units, icons, and error messages |
 
 `GuiApp::RegisterModels()` makes the filter models available through `YandexHomeDesktop.Models`. `RegisterCapabilities()` and `RegisterProperties()` expose the C++ attribute helpers used by controls through `YandexHomeDesktop.Capabilities` and `YandexHomeDesktop.Properties`.
 
-`DevicesPage.qml` requests user info through `devicesModel.RequestData()`. The devices, rooms, and households models each consume the resulting API response. `RoomsFilterModel` filters by the current household, and each `RoomDevicesList` uses `DevicesFilterModel` for its room. `ScenariosPage.qml` requests its own scenario list and calls `scenariosModel.ExecuteScenario(index)` from a scenario row.
+`DevicesPage.qml` receives a required `HomeViewModel` and calls `EnsureLoaded()` or `Refresh()`. The view model exposes page state, household selection, and the devices/rooms/households lists. `HomeService` in `src/services` owns the cached snapshot, selection validation, request correlation, and session reset. The three list models expose rows and notifications. The view model owns a `RoomsFilterModel` for the selected household, while each `RoomDevicesList` receives the device list explicitly and uses `DevicesFilterModel` for its room. Loading and error visuals bind to the view model state.
+
+`ScenariosPage.qml` receives a required `ScenariosViewModel`, binds its state and list, and calls `ExecuteScenario(id)`. `ScenarioService` owns execution guards, pending requests, and session reset; `ScenariosModel` provides the row roles. `GuiApp` constructs the view models, and `AppContext` supplies services using `IHomeApi`. Logout resets both services. Debug fixture mode supplies the same interfaces with local JSON data; see `docs/build.md`.
 
 For a selected device, `DeviceController` receives device info and updates `capabilitiesModel` and `propertiesModel`. Both models expose a `delegateSource` role. `DeviceAttributeSection.qml` uses that role as each `Loader.source`, so the model's URL map determines which QML control appears. Capability controls create an action with their C++ helper, then call `capabilitiesModel.UseCapability(model.index, action)`. Property controls display values from `Properties.Event` or `Properties.Float`. The window pauses and resumes device polling as it loses or gains activity.
 

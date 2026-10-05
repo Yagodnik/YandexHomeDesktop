@@ -6,10 +6,14 @@ import YandexHomeDesktop.Models 1.0
 Column {
   id: room
   spacing: 8
+  required property var devicesModel
+  required property string name
+  required property string roomId
+  required property string householdId
 
   Text {
     id: roomTitle
-    text: name
+    text: room.name
     color: themes.inactive
 
     font.pointSize: 14
@@ -18,9 +22,9 @@ Column {
 
   DevicesFilterModel {
     id: filteredModel
-    sourceModel: devicesModel
-    householdId: model.householdId
-    roomId: model.roomId
+    sourceModel: room.devicesModel
+    householdId: room.householdId
+    roomId: room.roomId
   }
 
   UI.DefaultText {

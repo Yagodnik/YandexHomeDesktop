@@ -4,23 +4,9 @@ import YandexHomeDesktop.Pages as Pages
 import YandexHomeDesktop.Components as Components
 
 UI.PageSurface {
-  Connections {
-    target: householdsModel
-
-    function onDataLoadingFailed() {
-      householdPicker.loading = false;
-      console.log("Households Model: Data Load - FAIL");
-    }
-
-    function onDataLoaded() {
-      householdPicker.loading = false;
-      console.log("Households Model: Data Load - OK");
-    }
-  }
-
   Components.TopBar {
     id: topBar
-    householdName: householdsModel.currentHouseholdName
+    householdName: homeViewModel.currentHouseholdName
     onHouseholdSelectRequested: householdPicker.open()
   }
 
@@ -34,8 +20,8 @@ UI.PageSurface {
       anchors.fill: parent
       currentIndex: topBar.activeTab
 
-      Pages.DevicesPage {}
-      Pages.ScenariosPage {}
+      Pages.DevicesPage { viewModel: homeViewModel }
+      Pages.ScenariosPage { viewModel: scenariosViewModel }
       Pages.SettingsPage {}
     }
   }
@@ -45,11 +31,12 @@ UI.PageSurface {
     objectName: "householdPicker"
     anchors.fill: parent
     title: qsTr("Выберите Дом")
-    sourceModel: householdsModel
-    currentHousehold: householdsModel.currentHousehold
+    sourceModel: homeViewModel.households
+    loading: homeViewModel.loading
+    currentHousehold: homeViewModel.currentHousehold
 
     onHouseholdSelected: function(householdId) {
-      householdsModel.currentHousehold = householdId;
+      homeViewModel.SelectHousehold(householdId);
       householdPicker.close();
     }
   }

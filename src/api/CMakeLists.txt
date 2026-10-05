@@ -20,3 +20,6 @@ add_library(YandexApiAdapter STATIC
 )
 
 target_link_libraries(YandexApiAdapter PUBLIC ApiContracts Qt6::Network PRIVATE Qt6::Gui)
+
+add_library(FixtureApi STATIC EXCLUDE_FROM_ALL debug/FixtureApi.cpp debug/FixtureApi.h)
+target_link_libraries(FixtureApi PUBLIC ApiContracts PRIVATE YandexApiAdapter)

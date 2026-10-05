@@ -21,6 +21,9 @@ QString AccountModel::GetName() const {
 }
 
 QString AccountModel::GetAvatarUrl() const {
+  if (avatar_id_.isEmpty()) {
+    return "qrc:/images/icon.png";
+  }
   return kAvatarUrl.arg(avatar_id_);
 }
 

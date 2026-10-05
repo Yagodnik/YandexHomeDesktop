@@ -1,0 +1,202 @@
+{
+  "latency_ms": 150,
+  "account_info": {
+    "display_name": "Demo User",
+    "default_email": "demo@example.invalid"
+  },
+  "user_info": {
+    "status": "ok",
+    "message": "",
+    "request_id": "fixture",
+    "households": [
+      {
+        "id": "home",
+        "name": "Home"
+      },
+      {
+        "id": "cabin",
+        "name": "Cabin"
+      }
+    ],
+    "rooms": [
+      {
+        "id": "office",
+        "name": "Office",
+        "household_id": "home",
+        "devices": [
+          "lamp"
+        ]
+      },
+      {
+        "id": "living",
+        "name": "Living room",
+        "household_id": "home",
+        "devices": [
+          "socket"
+        ]
+      },
+      {
+        "id": "cabin-room",
+        "name": "Cabin room",
+        "household_id": "cabin",
+        "devices": [
+          "cabin-lamp"
+        ]
+      }
+    ],
+    "devices": [
+      {
+        "id": "lamp",
+        "name": "Desk lamp",
+        "type": "devices.types.light",
+        "room": "office",
+        "household_id": "home",
+        "aliases": [],
+        "capabilities": [
+          {
+            "type": "devices.capabilities.on_off",
+            "retrievable": true,
+            "state": {
+              "instance": "on",
+              "value": false
+            },
+            "parameters": {},
+            "last_updated": 0
+          }
+        ],
+        "properties": []
+      },
+      {
+        "id": "socket",
+        "name": "Reading socket",
+        "type": "devices.types.socket",
+        "room": "living",
+        "household_id": "home",
+        "aliases": [],
+        "capabilities": [
+          {
+            "type": "devices.capabilities.on_off",
+            "retrievable": true,
+            "state": {
+              "instance": "on",
+              "value": false
+            },
+            "parameters": {},
+            "last_updated": 0
+          }
+        ],
+        "properties": []
+      },
+      {
+        "id": "cabin-lamp",
+        "name": "Cabin lamp",
+        "type": "devices.types.light",
+        "room": "cabin-room",
+        "household_id": "cabin",
+        "aliases": [],
+        "capabilities": [
+          {
+            "type": "devices.capabilities.on_off",
+            "retrievable": true,
+            "state": {
+              "instance": "on",
+              "value": false
+            },
+            "parameters": {},
+            "last_updated": 0
+          }
+        ],
+        "properties": []
+      }
+    ],
+    "groups": [],
+    "scenarios": [
+      {
+        "id": "evening",
+        "name": "Evening lights",
+        "is_active": true
+      },
+      {
+        "id": "failure",
+        "name": "Example execution failure",
+        "is_active": true
+      },
+      {
+        "id": "inactive",
+        "name": "Inactive scenario",
+        "is_active": false
+      }
+    ]
+  },
+  "device_info": {
+    "lamp": {
+      "status": "ok",
+      "id": "lamp",
+      "name": "Desk lamp",
+      "type": "devices.types.light",
+      "state": "online",
+      "request_id": "fixture",
+      "message": "",
+      "capabilities": [
+        {
+          "type": "devices.capabilities.on_off",
+          "retrievable": true,
+          "state": {
+            "instance": "on",
+            "value": false
+          },
+          "parameters": {},
+          "last_updated": 0
+        }
+      ],
+      "properties": []
+    },
+    "socket": {
+      "status": "ok",
+      "id": "socket",
+      "name": "Reading socket",
+      "type": "devices.types.socket",
+      "state": "online",
+      "request_id": "fixture",
+      "message": "",
+      "capabilities": [
+        {
+          "type": "devices.capabilities.on_off",
+          "retrievable": true,
+          "state": {
+            "instance": "on",
+            "value": false
+          },
+          "parameters": {},
+          "last_updated": 0
+        }
+      ],
+      "properties": []
+    },
+    "cabin-lamp": {
+      "status": "ok",
+      "id": "cabin-lamp",
+      "name": "Cabin lamp",
+      "type": "devices.types.light",
+      "state": "online",
+      "request_id": "fixture",
+      "message": "",
+      "capabilities": [
+        {
+          "type": "devices.capabilities.on_off",
+          "retrievable": true,
+          "state": {
+            "instance": "on",
+            "value": false
+          },
+          "parameters": {},
+          "last_updated": 0
+        }
+      ],
+      "properties": []
+    }
+  },
+  "scenario_errors": {
+    "failure": "Example fixture error"
+  }
+}

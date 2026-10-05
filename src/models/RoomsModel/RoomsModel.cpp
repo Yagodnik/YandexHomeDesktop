@@ -1,76 +1,43 @@
 #include "RoomsModel.h"
-#include <QDebug>
 
-RoomsModel::RoomsModel(HomeSnapshotLoader *loader, QObject *parent)
-  : QAbstractListModel(parent), loader_(loader)
-{
-  connect(loader_,
-    &HomeSnapshotLoader::loaded,
-    this,
-    &RoomsModel::OnUserInfoReceived);
+RoomsModel::RoomsModel(QObject* parent) : QAbstractListModel(parent) {}
 
-  connect(loader_,
-    &HomeSnapshotLoader::failed,
-    this,
-    &RoomsModel::OnUserInfoReceivingFailed);
+int RoomsModel::rowCount(const QModelIndex& parent) const {
+  return parent.isValid() ? 0 : rooms_.size();
 }
 
-int RoomsModel::rowCount(const QModelIndex &parent) const {
-  return rooms_.size();
-}
-
-QVariant RoomsModel::data(const QModelIndex &index, int role) const {
-  if (!index.isValid() || index.row() >= rooms_.size()) {
+QVariant RoomsModel::data(const QModelIndex& index, int role) const {
+  if (!index.isValid() || index.model() != this || index.row() < 0 ||
+      index.row() >= rooms_.size() || index.column() != 0) {
     return {};
   }
-
   const auto& room = rooms_.at(index.row());
-
   switch (role) {
-    case NameRole:
-      return room.name;
-    case IdRole:
-      return room.id;
-    case HouseholdIdRole:
-      return room.household_id;
-    default:
-      return {};
+    case IdRole: return room.id;
+    case NameRole: return room.name;
+    case HouseholdIdRole: return room.household_id;
+    default: return {};
   }
 }
 
 QHash<int, QByteArray> RoomsModel::roleNames() const {
   return {
-    { NameRole, "name" },
-    { IdRole, "roomId" },
-    { HouseholdIdRole, "householdId" }
+    {IdRole, "roomId"},
+    {NameRole, "name"},
+    {HouseholdIdRole, "householdId"}
   };
 }
 
-void RoomsModel::RequestData() {
+int RoomsModel::GetCount() const {
+  return rooms_.size();
+}
+
+void RoomsModel::SetRooms(const QList<RoomObject>& items) {
+  const auto old_count = GetCount();
   beginResetModel();
-
-  rooms_.clear();
-
+  rooms_ = items;
   endResetModel();
-
-  loader_->Refresh();
+  if (old_count != GetCount()) {
+    emit countChanged();
+  }
 }
-
-void RoomsModel::OnUserInfoReceived(const UserInfo &info) {
-  beginResetModel();
-
-  rooms_.clear();
-
-  rooms_ = info.rooms;
-
-  endResetModel();
-
-  emit dataLoaded();
-}
-
-void RoomsModel::OnUserInfoReceivingFailed(const QString &message) {
-  qWarning() << "RoomsModel: Error receiving rooms:" << message;
-
-  emit dataLoadingFailed();
-}
-

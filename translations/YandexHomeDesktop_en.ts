@@ -48,7 +48,7 @@ your devices</translation>
 <context>
     <name>CapabilitiesModel</name>
     <message>
-        <location filename="../src/models/DeviceModel/CapabilitiesModel.cpp" line="38"/>
+        <location filename="../src/models/DeviceModel/CapabilitiesModel.cpp" line="39"/>
         <source>Неизвестный тип умения</source>
         <translation>Unknown capability type</translation>
     </message>
@@ -1320,7 +1320,7 @@ your devices</translation>
 <context>
     <name>DeviceHeader</name>
     <message>
-        <location filename="../src/qml/components/DeviceHeader.qml" line="71"/>
+        <location filename="../src/qml/components/DeviceHeader.qml" line="70"/>
         <source>Устройство оффлайн!</source>
         <translation>Device is offline!</translation>
     </message>
@@ -1361,12 +1361,12 @@ your devices</translation>
 <context>
     <name>DevicesPage</name>
     <message>
-        <location filename="../src/qml/pages/DevicesPage.qml" line="12"/>
+        <location filename="../src/qml/pages/DevicesPage.qml" line="16"/>
         <source>Комнаты</source>
         <translation>Rooms</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/DevicesPage.qml" line="64"/>
+        <location filename="../src/qml/pages/DevicesPage.qml" line="38"/>
         <source>Что-то пошло не так!</source>
         <translation>Something went wrong!</translation>
     </message>
@@ -1374,7 +1374,7 @@ your devices</translation>
 <context>
     <name>ErrorDialog</name>
     <message>
-        <location filename="../src/qml/ui/ErrorDialog.qml" line="73"/>
+        <location filename="../src/qml/ui/ErrorDialog.qml" line="72"/>
         <source>Ок</source>
         <translation>OK</translation>
     </message>
@@ -1420,7 +1420,7 @@ your devices</translation>
 <context>
     <name>MainPage</name>
     <message>
-        <location filename="../src/qml/pages/MainPage.qml" line="47"/>
+        <location filename="../src/qml/pages/MainPage.qml" line="33"/>
         <source>Выберите Дом</source>
         <translation>Select a home</translation>
     </message>
@@ -1449,7 +1449,7 @@ your devices</translation>
 <context>
     <name>PropertiesModel</name>
     <message>
-        <location filename="../src/models/DeviceModel/PropertiesModel.cpp" line="56"/>
+        <location filename="../src/models/DeviceModel/PropertiesModel.cpp" line="59"/>
         <source>Неизвестный тип свойства</source>
         <translation>Unknown property type</translation>
     </message>
@@ -1457,7 +1457,7 @@ your devices</translation>
 <context>
     <name>RoomDevicesList</name>
     <message>
-        <location filename="../src/qml/components/RoomDevicesList.qml" line="27"/>
+        <location filename="../src/qml/components/RoomDevicesList.qml" line="31"/>
         <source>В этой комнате нет устройств!</source>
         <translation>No devices in this room!</translation>
     </message>
@@ -1465,29 +1465,37 @@ your devices</translation>
 <context>
     <name>ScenariosPage</name>
     <message>
-        <location filename="../src/qml/pages/ScenariosPage.qml" line="16"/>
+        <location filename="../src/qml/pages/ScenariosPage.qml" line="17"/>
         <source>Ошибка</source>
         <translation>Error</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/ScenariosPage.qml" line="17"/>
+        <location filename="../src/qml/pages/ScenariosPage.qml" line="18"/>
         <source>Не удалось выполнить сценарий</source>
         <translation>Could not run the scenario</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/ScenariosPage.qml" line="45"/>
+        <location filename="../src/qml/pages/ScenariosPage.qml" line="33"/>
         <source>Все сценарии</source>
         <translation>All scenarios</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/ScenariosPage.qml" line="76"/>
+        <location filename="../src/qml/pages/ScenariosPage.qml" line="62"/>
         <source>Что-то пошло не так!</source>
         <translation>Something went wrong!</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/ScenariosPage.qml" line="81"/>
+        <location filename="../src/qml/pages/ScenariosPage.qml" line="67"/>
         <source>Пока что у вас нет сценариев</source>
         <translation>No scenarios yet</translation>
+    </message>
+</context>
+<context>
+    <name>ScenariosViewModel</name>
+    <message>
+        <location filename="../src/models/ScenariosModel/ScenariosViewModel.cpp" line="14"/>
+        <source>Не удалось выполнить сценарий</source>
+        <translation>Could not run the scenario</translation>
     </message>
 </context>
 <context>
@@ -1533,17 +1541,17 @@ in the system tray</translation>
 <context>
     <name>TopBar</name>
     <message>
-        <location filename="../src/qml/components/TopBar.qml" line="91"/>
+        <location filename="../src/qml/components/TopBar.qml" line="89"/>
         <source>Устройства</source>
         <translation>Devices</translation>
     </message>
     <message>
-        <location filename="../src/qml/components/TopBar.qml" line="98"/>
+        <location filename="../src/qml/components/TopBar.qml" line="96"/>
         <source>Сценарии</source>
         <translation>Scenarios</translation>
     </message>
     <message>
-        <location filename="../src/qml/components/TopBar.qml" line="105"/>
+        <location filename="../src/qml/components/TopBar.qml" line="103"/>
         <source>Настройки</source>
         <translation>Settings</translation>
     </message>

@@ -1,40 +1,28 @@
 import QtQuick
 import YandexHomeDesktop.Ui as UI
 import YandexHomeDesktop.Components as Components
+import YandexHomeDesktop.ViewModels as ViewModels
 
 UI.PageSurface {
   id: root
 
-  Component.onCompleted: {
-    isLoading = true;
-    scenariosModel.RequestData();
-  }
+  required property ViewModels.ScenariosViewModel viewModel
+
+  Component.onCompleted: viewModel.EnsureLoaded()
 
   UI.ErrorDialog {
     id: scenarioErrorDialog
+    objectName: "scenarioErrorDialog"
 
     dialogTitle: qsTr("Ошибка")
     dialogMessage: qsTr("Не удалось выполнить сценарий")
   }
 
-  property bool isLoading: false
-
   Connections {
-    target: scenariosModel
+    target: root.viewModel
 
-    function onDataLoadingFailed() {
-      root.isLoading = false;
-      console.log("Scenarios Model: Data Load - FAIL");
-      scenariosStack.currentIndex = 1;
-    }
-
-    function onDataLoaded() {
-      root.isLoading = false;
-      console.log("Scenarios Model: Data Load - OK");
-      scenariosStack.currentIndex = 2;
-    }
-
-    function onScenarioExecutionFailed() {
+    function onExecutionFailed(message) {
+      scenarioErrorDialog.dialogMessage = message;
       scenarioErrorDialog.openDialog();
     }
   }
@@ -44,28 +32,26 @@ UI.PageSurface {
     width: parent.width
     title: qsTr("Все сценарии")
 
+    objectName: "scenarioRefreshButton"
+    enabled: !root.viewModel.loading
+
     onRefreshClicked: {
-      if (root.isLoading) {
-        return;
-      }
-
-      root.isLoading = true;
-      scenariosStack.currentIndex = 0;
-      scenariosModel.RequestData();
-
+      root.viewModel.Refresh();
       heading.rotationAngle += 360;
     }
   }
 
   UI.PageStates {
     id: scenariosStack
+    objectName: "scenariosStack"
 
     width: parent.width
     anchors.top: heading.bottom
     anchors.topMargin: 4
     anchors.bottom: parent.bottom
 
-    currentIndex: 0
+    currentIndex: root.viewModel.state === ViewModels.ScenariosViewModel.Ready ? 2
+                : root.viewModel.state === ViewModels.ScenariosViewModel.Error ? 1 : 0
 
     UI.LoadingPane {
       active: scenariosStack.currentIndex === 0
@@ -77,9 +63,9 @@ UI.PageSurface {
     }
 
     Components.ScenariosPane {
-      sourceModel: scenariosModel
+      sourceModel: root.viewModel.scenarios
       emptyMessage: qsTr("Пока что у вас нет сценариев")
-      onScenarioRequested: function(index) { scenariosModel.ExecuteScenario(index); }
+      onScenarioRequested: function(scenarioId) { root.viewModel.ExecuteScenario(scenarioId); }
     }
   }
 }

@@ -18,6 +18,7 @@ jobs:
       fail-fast: false
       matrix:
         pch: ['ON', 'OFF']
+        configuration: ['Debug', 'Release']
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
@@ -48,7 +49,7 @@ jobs:
           cmake -S . -B build -G Ninja
           -DCMAKE_CXX_COMPILER=g++.exe
           -DCMAKE_PREFIX_PATH="$env:QT_ROOT_DIR"
-          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_BUILD_TYPE=${{ matrix.configuration }}
           -DBUILD_DESKTOP_APP=ON
           -DBUILD_TESTING=ON
           -DYH_ENABLE_PCH=${{ matrix.pch }}
@@ -58,4 +59,4 @@ jobs:
         run: cmake --build build --parallel 4
 
       - name: Run C++ and QML tests
-        run: ctest --test-dir build -C Release --output-on-failure
+        run: ctest --test-dir build -C ${{ matrix.configuration }} --output-on-failure

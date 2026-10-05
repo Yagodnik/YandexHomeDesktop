@@ -1,24 +1,18 @@
 #include "ScenariosModel.h"
-#include <QDebug>
 
-ScenariosModel::ScenariosModel(IHomeApi *api, QObject *parent)
-  : QAbstractListModel(parent), api_(api)
-{}
+ScenariosModel::ScenariosModel(QObject *parent) : QAbstractListModel(parent) {}
 
 int ScenariosModel::rowCount(const QModelIndex &parent) const {
-  if (parent.isValid()) {
-    return 0;
-  }
-
-  return scenarios_.size();
+  return parent.isValid() ? 0 : scenarios_.size();
 }
 
 QVariant ScenariosModel::data(const QModelIndex &index, int role) const {
-  if (!index.isValid() || index.row() >= scenarios_.size()) {
+  if (!index.isValid() || index.model() != this || index.row() < 0 ||
+      index.row() >= scenarios_.size() || index.column() != 0) {
     return {};
   }
 
-  const auto& scenario = scenarios_[index.row()];
+  const auto& scenario = scenarios_.at(index.row());
   switch (role) {
     case NameRole:
       return scenario.data.name;
@@ -35,110 +29,39 @@ QVariant ScenariosModel::data(const QModelIndex &index, int role) const {
 
 QHash<int, QByteArray> ScenariosModel::roleNames() const {
   return {
-    { NameRole, "name" },
-    { IdRole, "scenario_id" },
-    { IsWaitingResponseRole, "is_waiting_response" },
-    { IsActiveRole, "is_active"}
+    {NameRole, "name"},
+    {IdRole, "scenario_id"},
+    {IsWaitingResponseRole, "is_waiting_response"},
+    {IsActiveRole, "is_active"}
   };
-}
-
-void ScenariosModel::RequestData() {
-  beginResetModel();
-
-  scenarios_.clear();
-
-  endResetModel();
-
-  api_->GetScenarios(this, [this](ApiResult<QList<ScenarioObject>> result) {
-    if (result) {
-      OnScenariosReceived(*result);
-    } else {
-      OnScenariosReceivingFailed(result.error().message);
-    }
-  });
-}
-
-void ScenariosModel::ExecuteScenario(int index) {
-  if (index < 0 || index >= scenarios_.size()) {
-    return;
-  }
-
-  auto& scenario = scenarios_.at(index);
-  scenario.is_executing = true;
-
-  const QModelIndex model_index = createIndex(index, 0);
-  emit dataChanged(model_index, model_index, {IsWaitingResponseRole});
-
-  const QString scenario_id = scenario.data.id;
-  api_->ExecuteScenario(scenario_id, this, [this, scenario_id, index](ApiResult<void> result) {
-    if (result) {
-      OnScenarioExecutionFinishedSuccessfully(scenario_id, index);
-    } else {
-      OnScenarioExecutionFailed(result.error().message, index);
-    }
-  });
 }
 
 int ScenariosModel::Count() const {
   return scenarios_.size();
 }
 
-void ScenariosModel::OnScenariosReceived(const QList<ScenarioObject> &scenarios) {
+void ScenariosModel::SetScenarios(const QList<ScenarioObject>& scenarios) {
+  const auto previous_count = Count();
   beginResetModel();
-
   scenarios_.clear();
-
   for (const auto& scenario : scenarios) {
-    scenarios_.append({
-      .data = scenario,
-      .is_executing = false
-    });
+    scenarios_.append({.data = scenario});
   }
-
   endResetModel();
 
-  emit dataLoaded();
-}
-
-void ScenariosModel::OnScenariosReceivingFailed(const QString &message) {
-  emit dataLoadingFailed();
-
-  qWarning() << "ScenariosModel: Loading scenarios failed:" << message;
-}
-
-void ScenariosModel::OnScenarioExecutionFinishedSuccessfully(
-  const QString &scenario_id, const QVariant &user_data
-) {
-  const int index = user_data.toInt();
-  if (index < 0 || index >= scenarios_.size()) {
-    return;
+  if (Count() != previous_count) {
+    emit countChanged();
   }
-
-  auto& scenario = scenarios_[index];
-
-  scenario.is_executing = false;
-
-  const QModelIndex updated_index = createIndex(index, 0);
-  emit dataChanged(updated_index, updated_index, {IsWaitingResponseRole});
-
-  qInfo() << "ScenariosModel: Scenario" << scenario_id << "(" << index << ") finished executing.";
 }
 
-void ScenariosModel::OnScenarioExecutionFailed(
-  const QString &message, const QVariant &user_data
-) {
-  const int index = user_data.toInt();
-  if (index < 0 || index >= scenarios_.size()) {
-    return;
+void ScenariosModel::SetExecuting(const QString& scenario_id, bool executing) {
+  for (int row = 0; row < scenarios_.size(); ++row) {
+    auto& scenario = scenarios_[row];
+    if (scenario.data.id == scenario_id && scenario.is_executing != executing) {
+      scenario.is_executing = executing;
+      const auto model_index = index(row);
+      emit dataChanged(model_index, model_index, {IsWaitingResponseRole});
+      return;
+    }
   }
-
-  auto& scenario = scenarios_.at(index);
-
-  scenario.is_executing = false;
-
-  const QModelIndex updated_index = createIndex(index, 0);
-  emit dataChanged(updated_index, updated_index, {IsWaitingResponseRole});
-
-  qWarning() << "ScenariosModel: Scenario" << message << "(" << index << ") failed.";
-  emit scenarioExecutionFailed();
 }

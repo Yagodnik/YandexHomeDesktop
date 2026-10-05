@@ -35,7 +35,7 @@ CLI::CLI(AppContext& app_ctx,  QObject *parent) :
   });
   parser_.addOption({"reset", "resets all app stored data"});
 
-  parser_.process(app_ctx_.app_->arguments());
+  parser_.process(app_ctx_.cli_arguments);
 
   CommandContext command_ctx{
     .pro_mode = parser_.isSet("i-know-what-i-am-doing")

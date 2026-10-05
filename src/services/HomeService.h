@@ -1,0 +1,35 @@
+#pragma once
+
+#include <QObject>
+#include <QUuid>
+#include <optional>
+#include "api/IHomeApi.h"
+
+class HomeService final : public QObject {
+  Q_OBJECT
+public:
+  enum class LoadState { NotLoaded, Loading, Ready, Error };
+  explicit HomeService(IHomeApi* api, QObject* parent = nullptr);
+
+  [[nodiscard]] LoadState GetLoadState() const;
+  [[nodiscard]] const UserInfo& GetSnapshot() const;
+  [[nodiscard]] QString GetCurrentHousehold() const;
+  [[nodiscard]] QString GetCurrentHouseholdName() const;
+  void EnsureLoaded();
+  void Refresh();
+  void SelectHousehold(const QString& id);
+  void Reset();
+
+signals:
+  void loadStateChanged();
+  void snapshotChanged();
+  void currentHouseholdChanged();
+
+private:
+  void SetLoadState(LoadState state);
+  IHomeApi* api_;
+  LoadState state_ = LoadState::NotLoaded;
+  UserInfo snapshot_{};
+  QString current_household_;
+  std::optional<QUuid> request_;
+};

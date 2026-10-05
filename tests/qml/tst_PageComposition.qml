@@ -153,7 +153,7 @@ TestCase {
     tryVerify(function() { return scrollBar.view.contentHeight > pane.height; });
     mouseClick(findChild(pane, "scenarioStart"));
     compare(scenarioSpy.count, 1);
-    compare(scenarioSpy.signalArguments[0][0], 0);
+    compare(scenarioSpy.signalArguments[0][0], "scenario-0");
 
     scrollBar.position = 0.5;
     tryVerify(function() { return scrollBar.view.contentY > 0; });

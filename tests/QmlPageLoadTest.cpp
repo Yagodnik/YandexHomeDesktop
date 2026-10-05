@@ -1,5 +1,6 @@
 #include <QGuiApplication>
 #include <QQmlComponent>
+#include <QQmlContext>
 #include <QQmlEngine>
 #include <QUrl>
 #include <QDebug>
@@ -25,7 +26,14 @@ int main(int argc, char* argv[]) {
     qCritical().noquote() << page.errorString();
     return 1;
   }
-  std::unique_ptr<QObject> instance(page.create());
+  QVariantMap initial_properties;
+  if (QString::fromLocal8Bit(argv[1]).endsWith("ScenariosPage.qml")) {
+    initial_properties.insert("viewModel", engine.rootContext()->contextProperty("scenariosViewModel"));
+  }
+  if (QString::fromLocal8Bit(argv[1]).endsWith("DevicesPage.qml")) {
+    initial_properties.insert("viewModel", engine.rootContext()->contextProperty("homeViewModel"));
+  }
+  std::unique_ptr<QObject> instance(page.createWithInitialProperties(initial_properties));
   if (!instance) {
     qCritical().noquote() << page.errorString();
     return 1;

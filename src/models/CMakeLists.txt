@@ -5,12 +5,14 @@ find_package(Qt6 COMPONENTS Core Network Gui REQUIRED)
 add_library(Models STATIC
         AccountModel.cpp
         AccountModel.h
-        HomeSnapshotLoader.cpp
-        HomeSnapshotLoader.h
+        HomeViewModel.cpp
+        HomeViewModel.h
         DeviceModel/DeviceController.cpp
         DeviceModel/DeviceController.h
         ScenariosModel/ScenariosModel.cpp
         ScenariosModel/ScenariosModel.h
+        ScenariosModel/ScenariosViewModel.h
+        ScenariosModel/ScenariosViewModel.cpp
         DevicesModel/DevicesModel.cpp
         DevicesModel/DevicesModel.h
         DevicesModel/DevicesFilterModel.cpp
@@ -43,4 +45,4 @@ add_library(Models STATIC
         DeviceModel/DeviceDataModel.h
 )
 
-target_link_libraries(Models PUBLIC ApiContracts PRIVATE Qt6::Core Qt6::Gui Utils)
+target_link_libraries(Models PUBLIC ApiContracts PRIVATE Qt6::Core Qt6::Gui Utils AppServices)

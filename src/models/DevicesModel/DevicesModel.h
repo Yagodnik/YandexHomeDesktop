@@ -1,12 +1,13 @@
 #pragma once
 
 #include <QAbstractListModel>
-#include "models/HomeSnapshotLoader.h"
+#include "api/model/UserInfo.h"
 
 class DevicesModel : public QAbstractListModel {
   Q_OBJECT
+  Q_PROPERTY(int count READ GetCount NOTIFY countChanged)
 public:
-  explicit DevicesModel(HomeSnapshotLoader *loader, QObject *parent = nullptr);
+  explicit DevicesModel(QObject* parent = nullptr);
 
   enum Roles {
     IdRole = Qt::UserRole + 1,
@@ -16,21 +17,15 @@ public:
     TypeRole
   };
 
-  [[nodiscard]] int rowCount(const QModelIndex &parent) const override;
-  [[nodiscard]] QVariant data(const QModelIndex &index, int role) const override;
+  [[nodiscard]] int rowCount(const QModelIndex& parent = {}) const override;
+  [[nodiscard]] QVariant data(const QModelIndex& index, int role) const override;
   [[nodiscard]] QHash<int, QByteArray> roleNames() const override;
-
-  Q_INVOKABLE void RequestData();
+  [[nodiscard]] int GetCount() const;
+  void SetDevices(const QList<DeviceObject>& items);
 
 signals:
-  void dataLoaded();
-  void dataLoadingFailed();
+  void countChanged();
 
 private:
-  HomeSnapshotLoader *loader_;
   QList<DeviceObject> devices_;
-
-private slots:
-  void OnUserInfoReceived(const UserInfo& info);
-  void OnUserInfoReceivingFailed(const QString& message);
 };

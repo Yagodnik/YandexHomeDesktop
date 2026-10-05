@@ -4,6 +4,11 @@ import YandexHomeDesktop.Ui as UI
 Item {
   id: delegateItem
   height: 48
+  objectName: "scenarioDelegate_" + scenario_id
+  required property string scenario_id
+  required property string name
+  required property bool is_active
+  required property bool is_waiting_response
   signal executeRequested()
 
   opacity: 0
@@ -23,7 +28,7 @@ Item {
     id: darkOverlay
     anchors.fill: parent
     color: Qt.rgba(0, 0, 0, 0.1)
-    visible: !is_active
+    visible: !delegateItem.is_active
     radius: 16
     z: 100
 
@@ -58,13 +63,11 @@ Item {
   }
 
   UI.DefaultText {
-    text: name
+    text: delegateItem.name
     anchors.verticalCenter: parent.verticalCenter
     anchors.left: parent.left
     anchors.leftMargin: 16
   }
-
-  property var show: false
 
   UI.MyProgressIndicator {
     width: 30
@@ -73,7 +76,7 @@ Item {
     anchors.right: parent.right
     anchors.rightMargin: 9
     anchors.verticalCenter: parent.verticalCenter
-    opacity: is_waiting_response ? 1 : 0
+    opacity: delegateItem.is_waiting_response ? 1 : 0
     visible: opacity > 0
 
     Behavior on opacity {
@@ -89,7 +92,7 @@ Item {
     objectName: "scenarioStart"
     source: "qrc:/images/play.svg"
 
-    opacity: is_waiting_response ? 0 : 1
+    opacity: delegateItem.is_waiting_response ? 0 : 1
     visible: opacity > 0
 
     Behavior on opacity {
@@ -114,11 +117,9 @@ Item {
     MouseArea {
       anchors.fill: parent
       cursorShape: Qt.PointingHandCursor
+      enabled: delegateItem.is_active && !delegateItem.is_waiting_response
 
-      onClicked: {
-        console.log("Executing " + scenario_id);
-        delegateItem.executeRequested();
-      }
+      onClicked: delegateItem.executeRequested()
     }
   }
 }

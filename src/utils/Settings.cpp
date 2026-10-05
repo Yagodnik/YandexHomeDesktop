@@ -2,8 +2,11 @@
 #include <QDir>
 #include <QCoreApplication>
 
-Settings::Settings(QObject *parent)
-  : QObject(parent), settings_("ArtemYagodnik", "YandexHomeDesktop") {
+Settings::Settings(QObject *parent, bool temporary)
+  : QObject(parent), settings_("ArtemYagodnik", "YandexHomeDesktop"), temporary_(temporary) {
+  if (temporary_) {
+    return;
+  }
 
   qInfo() << "Settings: CurrentTheme = " << GetCurrentTheme();
   qInfo() << "Settings: Stored at" << settings_.fileName();
@@ -16,14 +19,19 @@ Settings::Settings(QObject *parent)
 }
 
 bool Settings::GetTrayModeEnabled() const {
-  return settings_.value("trayModeEnabled", false).toBool();
+  return temporary_ ? temporary_tray_ : settings_.value("trayModeEnabled", false).toBool();
 }
 
 int Settings::GetCurrentTheme() const {
-  return settings_.value("currentTheme", 0).toInt();
+  return temporary_ ? temporary_theme_ : settings_.value("currentTheme", 0).toInt();
 }
 
 void Settings::Reset() {
+  if (temporary_) {
+    SetCurrentTheme(0);
+    SetTrayModeEnabled(false);
+    return;
+  }
   settings_.remove("trayModeEnabled");
   settings_.remove("currentTheme");
 }
@@ -34,7 +42,7 @@ void Settings::SetCurrentTheme(const int theme) {
   }
 
   qDebug() << "Settings::SetCurrentTheme" << theme;
-  settings_.setValue("currentTheme", theme);
+  if (temporary_) { temporary_theme_ = theme; } else { settings_.setValue("currentTheme", theme); }
   emit currentThemeChanged();
 }
 
@@ -45,8 +53,7 @@ void Settings::SetTrayModeEnabled(bool enabled) {
 
   qInfo() << "Settings: SetTrayModeEnabled" << enabled;
 
-  settings_.setValue("trayModeEnabled", enabled);
+  if (temporary_) { temporary_tray_ = enabled; } else { settings_.setValue("trayModeEnabled", enabled); }
   emit trayModeEnabledChanged();
 }
-
 

@@ -54,5 +54,5 @@ jobs:
       - name: Build application and tests
         run: cmake --build build --parallel 2
 
-      - name: Run tests
+      - name: Run C++ and QML tests
         run: ctest --test-dir build --output-on-failure

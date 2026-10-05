@@ -1,161 +1,46 @@
-import QtQuick 2.15
-import QtQuick.Layouts 2.15
-import Qt5Compat.GraphicalEffects
+import QtQuick
 import YandexHomeDesktop.Ui as UI
 import YandexHomeDesktop.Components as Components
 
-Item {
-  QtObject {
-    id: shaderParams
-    property real t: 0
-
-    SequentialAnimation on t {
-      loops: Animation.Infinite
-      NumberAnimation {
-        to: 1
-        duration: 600
-        easing.type: Easing.InBack
-      }
-      NumberAnimation {
-        to: 0
-        duration: 600
-        easing.type: Easing.InBack
-      }
-    }
-  }
-
-  Flickable {
-    id: flickable
+UI.PageSurface {
+  UI.ScrollColumn {
+    objectName: "settingsContent"
     anchors.fill: parent
-    contentWidth: parent.width
-    contentHeight: contentItem.implicitHeight
+    spacing: 12
 
-    interactive: true
-    flickableDirection: Flickable.VerticalFlick
+    UI.HeadingText {
+      text: qsTr("Настройки")
+      width: parent.width
+    }
 
-    Item {
-      id: contentItem
-      width: flickable.width
+    Components.AccountDetails {}
 
-      UI.HeadingText {
-        id: heading
-        text: qsTr("Настройки")
-        width: parent.width
-      }
+    Components.BasicSettingsCard {
+      objectName: "basicSettings"
+      width: parent.width
+      trayTitle: qsTr("Tray-режим")
+      trayDescription: qsTr("Приложение будет отображаться\nкак иконка на панели задач")
+      trayModeEnabled: settings.trayModeEnabled
+      themeTitle: qsTr("Тема")
+      themeNames: [qsTr("Светлая"), qsTr("Тёмная")]
+      currentTheme: settings.currentTheme
+      projectLinkText: qsTr("GitHub")
 
-      Column {
-        width: parent.width
-        anchors.top: heading.bottom
-        anchors.topMargin: 12
-        spacing: 8
-
-        Components.AccountDetails {}
-
-        Item {
-          id: basicSettings
-          width: parent.width
-          height: elements.implicitHeight
-
-          UI.CardSurface {
-            id: background2
-            anchors.fill: parent
-          }
-
-          Column {
-            id: elements
-            anchors.fill: parent
-
-            Item {
-              width: parent.width
-              height: details2.height + 20
-
-              Column {
-                id: details2
-                anchors.left: parent.left
-                anchors.leftMargin: 10
-                anchors.verticalCenter: parent.verticalCenter
-
-                UI.DefaultText {
-                  text: qsTr("Tray-режим")
-                }
-
-                UI.SubheadingText {
-                  text: qsTr("Приложение будет отображаться\nкак иконка на панели задач")
-                }
-              }
-
-              UI.MySwitch {
-                anchors.right: parent.right
-                anchors.rightMargin: 10
-                anchors.verticalCenter: parent.verticalCenter
-                checked: settings.trayModeEnabled
-
-                onToggled: function (checked) {
-                  settings.trayModeEnabled = checked
-                  if (checked) {
-                    platformService.ShowOnlyInTray();
-                  } else {
-                    platformService.ShowAsApp();
-                  }
-                }
-              }
-            }
-
-            Item {
-              width: parent.width
-              height: 50
-
-              UI.DefaultText {
-                text: qsTr("Тема")
-                anchors.left: parent.left
-                anchors.leftMargin: 10
-                anchors.verticalCenter: parent.verticalCenter
-              }
-
-              UI.MyComboBox {
-                anchors.right: parent.right
-                anchors.rightMargin: 10
-                anchors.verticalCenter: parent.verticalCenter
-
-                currentIndex: settings.currentTheme
-
-                model: [qsTr("Светлая"), qsTr("Тёмная")]
-
-                onActivated: {
-                  console.log("Selected index:", currentIndex, "value:", currentText)
-
-                  settings.currentTheme = currentIndex;
-                  themes.SetTheme(currentIndex);
-                }
-              }
-            }
-
-            Item {
-              width: parent.width
-              height: 48
-
-              UI.DefaultText {
-                id: githubLink
-
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.left: parent.left
-                anchors.leftMargin: 10
-
-                text: "GitHub"
-
-                MouseArea {
-                  anchors.fill: parent
-                  cursorShape: Qt.PointingHandCursor
-
-                  onClicked: {
-                    Qt.openUrlExternally("https://github.com/Yagodnik/YandexHomeDesktop")
-                  }
-                }
-              }
-            }
-          }
+      onTrayModeToggled: function(enabled) {
+        settings.trayModeEnabled = enabled;
+        if (enabled) {
+          platformService.ShowOnlyInTray();
+        } else {
+          platformService.ShowAsApp();
         }
       }
+
+      onThemeSelected: function(index) {
+        settings.currentTheme = index;
+        themes.SetTheme(index);
+      }
+
+      onProjectLinkClicked: Qt.openUrlExternally("https://github.com/Yagodnik/YandexHomeDesktop")
     }
   }
 }

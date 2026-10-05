@@ -1,11 +1,9 @@
 import QtQuick
-import QtQuick.Layouts
-import QtQuick.Controls
 import YandexHomeDesktop.Ui as UI
 import YandexHomeDesktop.Components as Components
 import YandexHomeDesktop.Models 1.0
 
-Item {
+UI.PageSurface {
   id: rooms
 
   UI.RefreshHeader {
@@ -31,7 +29,7 @@ Item {
     devicesModel.RequestData();
   }
 
-  property var isLoading: false
+  property bool isLoading: false
 
   Connections {
     target: devicesModel
@@ -49,7 +47,7 @@ Item {
     }
   }
 
-  StackLayout {
+  UI.PageStates {
     id: devicesStack
     width: parent.width
 
@@ -66,46 +64,10 @@ Item {
       message: qsTr("Что-то пошло не так!")
     }
 
-    Item {
-      ListView {
-        id: roomsList
-        anchors.fill: parent
-
-        clip: true
-
-        spacing: 8
-
-        ScrollBar.vertical: scrollBar
-
-        // flickableDirection: Flickable.VerticalFlick
-        // boundsBehavior: Flickable.StopAtBounds
-
-        model: RoomsFilterModel {
-          sourceModel: roomsModel
-          householdId: householdsModel.currentHousehold
-        }
-
-        delegate: Components.RoomDevicesList {
-          width: roomsList.width
-        }
-      }
-
-      ScrollBar {
-        id: scrollBar
-
-        width: 10
-        height: roomsList.height
-        anchors.left: roomsList.right
-        anchors.leftMargin: 4
-        policy: roomsList.contentHeight > roomsList.height ? ScrollBar.AlwaysOn : ScrollBar.AlwaysOff
-
-        contentItem: Rectangle {
-          implicitWidth: 10
-          radius: 4
-          color: themes.headerBackground
-        }
-
-        background: Item {}
+    Components.RoomsPane {
+      sourceModel: RoomsFilterModel {
+        sourceModel: roomsModel
+        householdId: householdsModel.currentHousehold
       }
     }
   }

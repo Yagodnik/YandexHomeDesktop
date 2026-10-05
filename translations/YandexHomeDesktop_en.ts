@@ -4,17 +4,17 @@
 <context>
     <name>AuthCanceledPage</name>
     <message>
-        <location filename="../src/qml/pages/AuthCanceledPage.qml" line="20"/>
+        <location filename="../src/qml/pages/AuthCanceledPage.qml" line="7"/>
         <source>Не удалось получить доступ к хранилищу!</source>
         <translation>Could not access secure storage!</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/AuthCanceledPage.qml" line="28"/>
+        <location filename="../src/qml/pages/AuthCanceledPage.qml" line="9"/>
         <source>Это необходимо для работы приложения</source>
         <translation>The app needs it to work</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/AuthCanceledPage.qml" line="37"/>
+        <location filename="../src/qml/pages/AuthCanceledPage.qml" line="10"/>
         <source>Попробовать ещё раз</source>
         <translation>Try again</translation>
     </message>
@@ -22,7 +22,12 @@
 <context>
     <name>AuthPage</name>
     <message>
-        <location filename="../src/qml/pages/AuthPage.qml" line="41"/>
+        <location filename="../src/qml/pages/AuthPage.qml" line="16"/>
+        <source>Yandex Home Desktop</source>
+        <translation>Yandex Home Desktop</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/pages/AuthPage.qml" line="17"/>
         <source>Необходимо войти в аккаунт, чтобы
 приложение могло получить доступ
 к вашим устройствам</source>
@@ -30,9 +35,14 @@
 your devices</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/AuthPage.qml" line="49"/>
+        <location filename="../src/qml/pages/AuthPage.qml" line="18"/>
         <source>Авторизоваться</source>
         <translation>Sign in</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/pages/AuthPage.qml" line="26"/>
+        <source>GitHub</source>
+        <translation>GitHub</translation>
     </message>
 </context>
 <context>
@@ -1308,14 +1318,22 @@ your devices</translation>
     </message>
 </context>
 <context>
+    <name>DeviceHeader</name>
+    <message>
+        <location filename="../src/qml/components/DeviceHeader.qml" line="71"/>
+        <source>Устройство оффлайн!</source>
+        <translation>Device is offline!</translation>
+    </message>
+</context>
+<context>
     <name>DevicePage</name>
     <message>
-        <location filename="../src/qml/pages/DevicePage.qml" line="17"/>
+        <location filename="../src/qml/pages/DevicePage.qml" line="11"/>
         <source>Ошибка</source>
         <translation>Error</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/DevicePage.qml" line="36"/>
+        <location filename="../src/qml/pages/DevicePage.qml" line="22"/>
         <source>Произошла ошибка!</source>
         <translation>An error occurred!</translation>
     </message>
@@ -1325,17 +1343,17 @@ your devices</translation>
         <translation>No connection to the device</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/DevicePage.qml" line="114"/>
+        <location filename="../src/qml/pages/DevicePage.qml" line="110"/>
         <source>Попробовать снова</source>
         <translation>Try again</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/DevicePage.qml" line="133"/>
+        <location filename="../src/qml/pages/DevicePage.qml" line="121"/>
         <source>Умения</source>
         <translation>Capabilities</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/DevicePage.qml" line="139"/>
+        <location filename="../src/qml/pages/DevicePage.qml" line="122"/>
         <source>Свойства</source>
         <translation>Properties</translation>
     </message>
@@ -1343,12 +1361,12 @@ your devices</translation>
 <context>
     <name>DevicesPage</name>
     <message>
-        <location filename="../src/qml/pages/DevicesPage.qml" line="13"/>
+        <location filename="../src/qml/pages/DevicesPage.qml" line="12"/>
         <source>Комнаты</source>
         <translation>Rooms</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/DevicesPage.qml" line="65"/>
+        <location filename="../src/qml/pages/DevicesPage.qml" line="64"/>
         <source>Что-то пошло не так!</source>
         <translation>Something went wrong!</translation>
     </message>
@@ -1364,17 +1382,17 @@ your devices</translation>
 <context>
     <name>ErrorPage</name>
     <message>
-        <location filename="../src/qml/pages/ErrorPage.qml" line="16"/>
+        <location filename="../src/qml/pages/ErrorPage.qml" line="7"/>
         <source>Что-то пошло не так! %1</source>
         <translation>Something went wrong! %1</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/ErrorPage.qml" line="29"/>
+        <location filename="../src/qml/pages/ErrorPage.qml" line="8"/>
         <source>Попробовать ещё раз</source>
         <translation>Try again</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/ErrorPage.qml" line="40"/>
+        <location filename="../src/qml/pages/ErrorPage.qml" line="9"/>
         <source>Выйти из аккаунта</source>
         <translation>Sign out</translation>
     </message>
@@ -1382,7 +1400,7 @@ your devices</translation>
 <context>
     <name>LoadingPage</name>
     <message>
-        <location filename="../src/qml/pages/LoadingPage.qml" line="24"/>
+        <location filename="../src/qml/pages/LoadingPage.qml" line="10"/>
         <source>Загрузка...</source>
         <translation>Loading...</translation>
     </message>
@@ -1395,15 +1413,14 @@ your devices</translation>
         <translation>Yandex Home Desktop</translation>
     </message>
     <message>
-        <location filename="../src/qml/Main.qml" line="37"/>
         <source>Кадр/с: %1</source>
-        <translation>FPS: %1</translation>
+        <translation type="vanished">FPS: %1</translation>
     </message>
 </context>
 <context>
     <name>MainPage</name>
     <message>
-        <location filename="../src/qml/pages/MainPage.qml" line="43"/>
+        <location filename="../src/qml/pages/MainPage.qml" line="47"/>
         <source>Выберите Дом</source>
         <translation>Select a home</translation>
     </message>
@@ -1432,7 +1449,7 @@ your devices</translation>
 <context>
     <name>PropertiesModel</name>
     <message>
-        <location filename="../src/models/DeviceModel/PropertiesModel.cpp" line="51"/>
+        <location filename="../src/models/DeviceModel/PropertiesModel.cpp" line="56"/>
         <source>Неизвестный тип свойства</source>
         <translation>Unknown property type</translation>
     </message>
@@ -1448,27 +1465,27 @@ your devices</translation>
 <context>
     <name>ScenariosPage</name>
     <message>
-        <location filename="../src/qml/pages/ScenariosPage.qml" line="18"/>
+        <location filename="../src/qml/pages/ScenariosPage.qml" line="16"/>
         <source>Ошибка</source>
         <translation>Error</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/ScenariosPage.qml" line="19"/>
+        <location filename="../src/qml/pages/ScenariosPage.qml" line="17"/>
         <source>Не удалось выполнить сценарий</source>
         <translation>Could not run the scenario</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/ScenariosPage.qml" line="47"/>
+        <location filename="../src/qml/pages/ScenariosPage.qml" line="45"/>
         <source>Все сценарии</source>
         <translation>All scenarios</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/ScenariosPage.qml" line="78"/>
+        <location filename="../src/qml/pages/ScenariosPage.qml" line="76"/>
         <source>Что-то пошло не так!</source>
         <translation>Something went wrong!</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/ScenariosPage.qml" line="86"/>
+        <location filename="../src/qml/pages/ScenariosPage.qml" line="81"/>
         <source>Пока что у вас нет сценариев</source>
         <translation>No scenarios yet</translation>
     </message>
@@ -1476,52 +1493,57 @@ your devices</translation>
 <context>
     <name>SettingsPage</name>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="42"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="12"/>
         <source>Настройки</source>
         <translation>Settings</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="79"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="21"/>
         <source>Tray-режим</source>
         <translation>Tray mode</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="83"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="22"/>
         <source>Приложение будет отображаться
 как иконка на панели задач</source>
         <translation>The app will appear as an icon
 in the system tray</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="109"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="24"/>
         <source>Тема</source>
         <translation>Theme</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="122"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="25"/>
         <source>Светлая</source>
         <translation>Light</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="122"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="25"/>
         <source>Тёмная</source>
         <translation>Dark</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="27"/>
+        <source>GitHub</source>
+        <translation>GitHub</translation>
     </message>
 </context>
 <context>
     <name>TopBar</name>
     <message>
-        <location filename="../src/qml/components/TopBar.qml" line="88"/>
+        <location filename="../src/qml/components/TopBar.qml" line="91"/>
         <source>Устройства</source>
         <translation>Devices</translation>
     </message>
     <message>
-        <location filename="../src/qml/components/TopBar.qml" line="95"/>
+        <location filename="../src/qml/components/TopBar.qml" line="98"/>
         <source>Сценарии</source>
         <translation>Scenarios</translation>
     </message>
     <message>
-        <location filename="../src/qml/components/TopBar.qml" line="102"/>
+        <location filename="../src/qml/components/TopBar.qml" line="105"/>
         <source>Настройки</source>
         <translation>Settings</translation>
     </message>

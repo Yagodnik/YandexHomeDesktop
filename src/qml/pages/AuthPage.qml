@@ -1,13 +1,8 @@
 import QtQuick
-import Qt5Compat.GraphicalEffects
 import YandexHomeDesktop.Ui as UI
+import YandexHomeDesktop.Components as Components
 
-Item {
-  Rectangle {
-    anchors.fill: parent
-    color: themes.background
-  }
-
+UI.PageSurface {
   Connections {
     target: authorizationService
 
@@ -16,107 +11,20 @@ Item {
     }
   }
 
-  Item {
-    id: content
+  Components.SignInCard {
     anchors.centerIn: parent
-
-    UI.CardSurface {
-      id: background
-      anchors.centerIn: parent
-
-      Column {
-        id: col
-        spacing: 10
-        anchors.centerIn: parent
-
-        UI.AnimatedText {
-          text: "Yandex Home Desktop"
-          color: themes.accent
-          pixelSize: 24
-
-          anchors.horizontalCenter: col.horizontalCenter
-        }
-
-        UI.AnimatedText {
-          text: qsTr("Необходимо войти в аккаунт, чтобы\nприложение могло получить доступ\nк вашим устройствам")
-          color: themes.inactive
-          pixelSize: 16
-
-          anchors.horizontalCenter: col.horizontalCenter
-        }
-
-        UI.MyButton {
-          text: qsTr("Авторизоваться")
-
-          anchors.horizontalCenter: col.horizontalCenter
-
-          onClicked: authorizationService.AttemptAuthorization();
-        }
-      }
-
-      width: col.implicitWidth + 40
-      height: col.implicitHeight + 40
-    }
-
-    DropShadow {
-      anchors.fill: background
-      source: background
-      horizontalOffset: 0
-      verticalOffset: 2
-      radius: 6
-      samples: 16
-      // color: Qt.rgba(0, 32 / 255, 128 / 255, 0.04)
-      color: themes.shadowColor
-    }
+    title: qsTr("Yandex Home Desktop")
+    message: qsTr("Необходимо войти в аккаунт, чтобы\nприложение могло получить доступ\nк вашим устройствам")
+    buttonText: qsTr("Авторизоваться")
+    onSignInRequested: authorizationService.AttemptAuthorization()
   }
 
-  Item {
-    id: githubFooter
-
-    height: 48
+  UI.LinkFooter {
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.bottom: parent.bottom
-
-    Item {
-      anchors.horizontalCenter: githubFooter.horizontalCenter
-      anchors.verticalCenter: githubFooter.verticalCenter
-
-      Image {
-        id: githubLogo
-        source: "qrc:/images/login_github.svg"
-
-        antialiasing: true
-        layer.enabled: true
-        layer.smooth: true
-        layer.samples: 8
-
-        fillMode: Image.PreserveAspectFit
-        scale: 0.9
-
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.right: githubLink.left
-        anchors.rightMargin: 8
-      }
-
-      UI.DefaultText {
-        id: githubLink
-
-        color: themes.inactive
-
-        anchors.verticalCenter: parent.verticalCenter
-
-        text: "GitHub"
-
-        MouseArea {
-          anchors.fill: parent
-          cursorShape: Qt.PointingHandCursor
-
-          onClicked: {
-            Qt.openUrlExternally("https://github.com/Yagodnik/YandexHomeDesktop")
-          }
-        }
-      }
-    }
+    text: qsTr("GitHub")
+    iconSource: "qrc:/images/login_github.svg"
+    onClicked: Qt.openUrlExternally("https://github.com/Yagodnik/YandexHomeDesktop")
   }
 }

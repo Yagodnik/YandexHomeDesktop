@@ -1,46 +1,13 @@
 import QtQuick
 import YandexHomeDesktop.Ui as UI
 
-Item {
-  Rectangle {
+UI.PageSurface {
+  UI.MessageActionsPane {
     anchors.fill: parent
-    color: themes.background
-  }
-
-  Column {
-    id: col
-    anchors.centerIn: parent
-    spacing: 15
-
-    Column {
-      anchors.horizontalCenter: col.horizontalCenter
-      spacing: 5
-
-      UI.AnimatedText {
-        text: qsTr("Не удалось получить доступ к хранилищу!")
-        color: themes.inactive
-        pixelSize: 16
-
-        anchors.horizontalCenter: parent.horizontalCenter
-      }
-
-      UI.AnimatedText {
-        text: qsTr("Это необходимо для работы приложения")
-        color: themes.inactive
-        pixelSize: 12
-
-        anchors.horizontalCenter: parent.horizontalCenter
-      }
-    }
-
-    UI.MyButton {
-      text: qsTr("Попробовать ещё раз")
-
-      anchors.horizontalCenter: col.horizontalCenter
-
-      onClicked: {
-        router.navigateTo("loading");
-      }
-    }
+    message: qsTr("Не удалось получить доступ к хранилищу!")
+    messagePixelSize: 16
+    detail: qsTr("Это необходимо для работы приложения")
+    primaryButtonText: qsTr("Попробовать ещё раз")
+    onPrimaryClicked: router.navigateTo("loading")
   }
 }

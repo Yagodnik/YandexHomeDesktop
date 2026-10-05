@@ -3,6 +3,8 @@
 #include <QQmlEngine>
 #include <QUrl>
 #include <QDebug>
+#include <memory>
+#include "QmlTestEnvironment.h"
 
 int main(int argc, char* argv[]) {
   QGuiApplication app(argc, argv);
@@ -12,12 +14,24 @@ int main(int argc, char* argv[]) {
   }
 
   QQmlEngine engine;
+  initializeQmlTestEnvironment(&engine);
   engine.addImportPath(QString::fromLocal8Bit(argv[2]));
+  bool warningsOccurred = false;
+  QObject::connect(&engine, &QQmlEngine::warnings, &engine,
+    [&warningsOccurred](const QList<QQmlError>&) { warningsOccurred = true; });
   QQmlComponent page(&engine, QUrl::fromLocalFile(QString::fromLocal8Bit(argv[1])),
                      QQmlComponent::PreferSynchronous);
   if (page.status() != QQmlComponent::Ready) {
     qCritical().noquote() << page.errorString();
     return 1;
   }
-  return 0;
+  std::unique_ptr<QObject> instance(page.create());
+  if (!instance) {
+    qCritical().noquote() << page.errorString();
+    return 1;
+  }
+  instance->setProperty("width", 350);
+  instance->setProperty("height", 460);
+  QCoreApplication::processEvents();
+  return warningsOccurred ? 1 : 0;
 }

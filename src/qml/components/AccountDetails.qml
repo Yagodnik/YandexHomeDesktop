@@ -32,7 +32,7 @@ Item {
     anchors.fill: parent
   }
 
-  DropShadow {
+  UI.Shadow {
     anchors.fill: background
     source: background
     horizontalOffset: 0

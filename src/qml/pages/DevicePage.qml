@@ -1,16 +1,9 @@
 import QtQuick
-import QtQuick.Layouts
-import QtQuick.Controls
 import YandexHomeDesktop.Ui as UI
 import YandexHomeDesktop.Components as Components
 
-Item {
+UI.PageSurface {
   id: root
-
-  Rectangle {
-    anchors.fill: parent
-    color: themes.background
-  }
 
   UI.ErrorDialog {
     id: actionErrorDialog
@@ -47,7 +40,7 @@ Item {
     }
   }
 
-  property var okCount: 0
+  property int okCount: 0
 
   function initializationOk() {
     okCount++;
@@ -96,91 +89,37 @@ Item {
     }
   }
 
-  StackLayout {
+  UI.PageStates {
     id: deviceStates
+    objectName: "deviceStates"
     width: parent.width
     anchors.top: topHeader.bottom
     anchors.bottom: parent.bottom
 
     currentIndex: 0
 
-    Item {
-      UI.MyProgressIndicator {
-        width: 32
-        height: 32
+    UI.LoadingPane {
+      active: deviceStates.currentIndex === 0
+      indicatorSize: 32
+      strokeWidth: 3
+    }
 
-        anchors.centerIn: parent
+    UI.RetryPane {
+      iconSource: "qrc:/images/warning.svg"
+      message: qsTr("Нет связи с устройством")
+      buttonText: qsTr("Попробовать снова")
+      onRetryRequested: {
+        root.okCount = 0;
+        deviceStates.currentIndex = 0;
+        deviceController.TryReloadDevice();
       }
     }
 
-    Item {
-      Column {
-        spacing: 4
-        anchors.centerIn: parent
-
-        Image {
-          width: 32
-          height: 32
-          source: "qrc:/images/warning.svg"
-          anchors.horizontalCenter: parent.horizontalCenter
-        }
-
-        UI.DefaultText {
-          text: qsTr("Нет связи с устройством")
-          anchors.horizontalCenter: parent.horizontalCenter
-        }
-
-        UI.MyButton {
-          text: qsTr("Попробовать снова")
-          anchors.horizontalCenter: parent.horizontalCenter
-          onClicked: {
-            root.okCount = 0;
-            deviceStates.currentIndex = 0;
-            deviceController.TryReloadDevice();
-          }
-        }
-      }
-    }
-
-    Flickable {
-      id: deviceControlsList
-      contentHeight: contentItem.childrenRect.height
-      clip: true
-      interactive: true
-
-      ScrollBar.vertical: ScrollBar {
-        width: 10
-        policy: deviceControlsList.contentHeight > deviceControlsList.height ? ScrollBar.AlwaysOn : ScrollBar.AlwaysOff
-        opacity: hovered ? 1.0 : 0.2
-        anchors.right: parent.right
-        anchors.rightMargin: 3
-
-        contentItem: Rectangle {
-          implicitWidth: 10
-          radius: 16
-          color: themes.headerBackground
-        }
-      }
-
-      Column {
-        width: parent.width
-        anchors.top: parent.top
-        anchors.topMargin: 4
-        spacing: 4
-
-        Components.DeviceAttributeSection {
-          width: parent.width
-          title: qsTr("Умения")
-          sourceModel: capabilitiesModel
-        }
-
-        Components.DeviceAttributeSection {
-          width: parent.width
-          title: qsTr("Свойства")
-          sourceModel: propertiesModel
-          bottomSpace: 12
-        }
-      }
+    Components.DeviceControlsPane {
+      capabilitiesSourceModel: capabilitiesModel
+      propertiesSourceModel: propertiesModel
+      capabilitiesTitle: qsTr("Умения")
+      propertiesTitle: qsTr("Свойства")
     }
   }
 }

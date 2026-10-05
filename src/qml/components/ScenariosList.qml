@@ -7,7 +7,7 @@ ListView {
   width: parent.width
   implicitHeight: contentHeight
 
-  model: scenariosModel
+  signal scenarioRequested(int index)
 
   spacing: 5
   interactive: false
@@ -15,5 +15,6 @@ ListView {
 
   delegate: Components.ScenarioDelegate {
     width: scenariouses.width
+    onExecuteRequested: scenariouses.scenarioRequested(index)
   }
 }

@@ -1,38 +1,14 @@
 import QtQuick
 import YandexHomeDesktop.Ui as UI
 
-Item {
-  Rectangle {
+UI.PageSurface {
+  UI.LoadingPane {
     anchors.fill: parent
-    color: themes.background
+    active: true
+    indicatorSize: 48
+    strokeWidth: 3
+    message: qsTr("Загрузка...")
   }
 
-  UI.MyProgressIndicator {
-    id: progress
-    width: 48
-    height: 48
-    anchors.centerIn: parent
-    anchors.horizontalCenter: parent.horizontalCenter
-  }
-
-  UI.DefaultText {
-    anchors.top: progress.bottom
-    anchors.topMargin: 15
-    anchors.horizontalCenter: parent.horizontalCenter
-    color: themes.accent
-
-    text: qsTr("Загрузка...")
-  }
-
-  Component.onCompleted: {
-    authorizationService.AttemptLocalAuthorization();
-  }
-
-  // UI.MyButton {
-  //   text: "Nav"
-  //
-  //   onClicked: {
-  //     router.navigateTo("auth");
-  //   }
-  // }
+  Component.onCompleted: authorizationService.AttemptLocalAuthorization()
 }

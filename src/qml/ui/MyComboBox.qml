@@ -1,7 +1,7 @@
+import YandexHomeDesktop.Ui as UI
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
-import Qt5Compat.GraphicalEffects
 
 ComboBox {
   id: root
@@ -57,7 +57,7 @@ ComboBox {
         color: root.popupBackground
       }
 
-      DropShadow {
+      UI.Shadow {
         anchors.fill: popupBackground
         source: popupBackground
         radius: 12

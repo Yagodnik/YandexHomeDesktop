@@ -1,31 +1,48 @@
 # QML UI guide
 
-This describes the UI as it is wired in the current source tree. The QML lives in `src/qml/`; the C++ objects it uses are created in `src/main.cpp`.
+This describes the UI as it is wired in the current source tree. The QML lives in `src/qml/`; `src/app/GuiApp.cpp` creates its models and exposes the shared services from `AppContext`.
 
 ## Entry point and file layout
 
-`src/main.cpp` loads `YandexHomeDesktop.Main` with `QQmlApplicationEngine::loadFromModule()`. The root `src/qml/Main.qml` owns the window, tray icon, authorization signal handling, and page `StackView`. It registers route names and their `qrc:/pages/...` URLs before opening the `loading` route.
+`GuiApp::Start()` loads `YandexHomeDesktop.Main` with `QQmlApplicationEngine::loadFromModule()`. The root `src/qml/Main.qml` owns the window, tray icon, authorization signal handling, and page `StackView`. It registers route names and their `qrc:/pages/...` URLs before opening the `loading` route.
 
 | Directory | Purpose | Packaging |
 | --- | --- | --- |
-| `src/qml/pages/` | Authorization, loading, error, main, device, and tab pages | Most are in the `YandexHomeDesktop.Pages` module; the routes used by `Main.qml` are also listed under `/pages` in `resources/resources.qrc`. `DevicePage.qml` is loaded through that resource list only. |
+| `src/qml/pages/` | Authorization, loading, error, main, device, and tab pages | All are in the `YandexHomeDesktop.Pages` module; the routes used by `Main.qml` are also listed under `/pages` in `resources/resources.qrc`. |
 | `src/qml/components/` | Reusable app pieces such as the top bar, device rows, device header, and attribute list section | `YandexHomeDesktop.Components` module |
 | `src/qml/ui/` | Shared text, buttons, switches, dialogs, card surfaces, refresh headers, and load states | `YandexHomeDesktop.Ui` module |
-| `src/qml/controls/` | Capability and property controls for a selected device | Loaded by URL from `/controls` in `resources/resources.qrc`; `OnOff`, `Range`, `Mode`, and `Unsupported` are also in the `YandexHomeDesktop.IotControls` module. |
+| `src/qml/controls/` | Capability and property controls for a selected device | Loaded by URL from `/controls` in `resources/resources.qrc`. |
 
-The module file lists are in `src/qml/CMakeLists.txt`. Images, fonts, theme JSON, and other data are declared in `resources/resources.qrc`. QML refers to those assets with `qrc:/...` URLs. The root `CMakeLists.txt` compiles `src/qml/shaders/highlight.frag` into the `/shaders` resource at build time.
+The module file lists are in `src/qml/CMakeLists.txt`. Images, fonts, theme JSON, and other data are declared in `resources/resources.qrc`. QML refers to those assets with `qrc:/...` URLs.
 
 ## Navigation
 
 `Main.qml` registers `loading`, `auth`, `main`, `error`, `device`, and `authCanceled` with the C++ `Router` (`src/utils/Router.*`). `Router::navigateTo()` invokes a QML helper that pushes the URL onto the `StackView`; `goBack()` pops it. The loading page attempts local authorization. Authorization signals route to the main, auth, error, or canceled pages.
 
-`MainPage.qml` contains a `StackLayout` for the Devices, Scenarios, and Settings tabs, selected by `components/TopBar.qml`. These tabs are within the main page; they are not router destinations. A device row calls `deviceController.LoadDevice(deviceId)` and then navigates to the `device` route. The back button on `DevicePage.qml` forgets the selected device and pops the route.
+`MainPage.qml` uses `ui/PageStates.qml` for the Devices, Scenarios, and Settings tabs, selected by `components/TopBar.qml`. These tabs are within the main page; they are not router destinations. A device row calls `deviceController.LoadDevice(deviceId)` and then navigates to the `device` route. The back button on `DevicePage.qml` forgets the selected device and pops the route.
 
-The extracted visual components receive titles, models, and state through properties. `ui/RefreshHeader.qml` and `components/DeviceHeader.qml` emit click signals; their page handlers retain the refresh and back actions. `ui/LoadingPane.qml` and `ui/LoadErrorPane.qml` render the states chosen by each page. `components/DeviceAttributeSection.qml` renders either the capability or property model using its `delegateSource` role. `ui/CardSurface.qml` provides the shared rounded background used by cards and controls.
+## Page composition
+
+Pages compose `Ui` and `Components` types rather than defining rectangles, mouse areas, lists, or inline control delegates. Keep translated labels and the model/controller event handlers in the pages. Components receive display data through properties and report user intent through signals; they do not reach into a page's IDs.
+
+| Component | Responsibility |
+| --- | --- |
+| `ui/PageSurface.qml`, `ui/PageStates.qml`, `ui/InsetPane.qml` | Page background, state/tab layout, and clipped content with consistent insets |
+| `ui/ScrollColumn.qml`, `ui/ListScrollBar.qml` | Measured vertical content and the shared list scrollbar |
+| `ui/Shadow.qml` | Shared shadow parameters and deferred shader effects when a graphics backend is available |
+| `ui/LoadingPane.qml`, `ui/RetryPane.qml`, `ui/MessageActionsPane.qml` | Loading, retry, and authorization/error messages with action signals |
+| `components/SignInCard.qml`, `ui/LinkFooter.qml` | Sign-in presentation and footer link |
+| `components/HouseholdPicker.qml`, `components/HouseholdDelegate.qml` | Selection sheet, backdrop, and household rows |
+| `components/BasicSettingsCard.qml`, `ui/Setting*Row.qml` | Settings presentation; the page applies tray and theme changes |
+| `components/RoomsPane.qml`, `components/ScenariosPane.qml` | List viewports; the scenarios pane forwards execution requests to its page |
+
+`TopBar.householdSelectRequested` is handled by `MainPage`, which opens the picker. The picker emits `householdSelected`; the page updates the household model and closes the sheet. The scenarios viewport uses one scrolling list with an attached scrollbar. Settings uses `ScrollColumn` so the scroll extent follows the actual content height.
+
+The extracted visual components receive titles, models, and state through properties. `ui/RefreshHeader.qml` and `components/DeviceHeader.qml` emit click signals; their page handlers retain the refresh and back actions. `ui/LoadingPane.qml` and `ui/LoadErrorPane.qml` render the states chosen by each page. `components/DeviceControlsPane.qml` owns the selected device's scrolling and padding, including the bottom gap when either attribute section is empty. `components/DeviceAttributeSection.qml` renders either model using its `delegateSource` role; a column of repeated loaders measures every control's height without a nested scrolling list. `components/PropertyValueCard.qml` shares the icon, value, and title layout between float and event controls, which retain their own property helpers and model bindings. `ui/CardSurface.qml` provides the shared rounded background used by cards and controls.
 
 ## C++ to QML data flow
 
-`src/main.cpp` sets QML context properties for the shared objects. The ones most relevant to UI work are:
+`src/app/GuiApp.cpp` sets QML context properties for the shared objects. The ones most relevant to UI work are:
 
 | Context property | Used for |
 | --- | --- |
@@ -35,22 +52,22 @@ The extracted visual components receive titles, models, and state through proper
 | `themes`, `settings` | Theme colors and persisted UI settings |
 | `colorModel`, `colorModesModel`, `modesModel`, `iotTitles`, `eventTitles`, `unitsList`, `deviceIcons`, `propertiesIcons`, `errorCodes` | Control choices, labels, units, icons, and error messages |
 
-`RegisterModels()` in `src/main.cpp` makes the filter models available through `YandexHomeDesktop.Models`. `RegisterCapabilities()` and `RegisterProperties()` expose the C++ attribute helpers used by controls through `YandexHomeDesktop.Capabilities` and `YandexHomeDesktop.Properties`.
+`GuiApp::RegisterModels()` makes the filter models available through `YandexHomeDesktop.Models`. `RegisterCapabilities()` and `RegisterProperties()` expose the C++ attribute helpers used by controls through `YandexHomeDesktop.Capabilities` and `YandexHomeDesktop.Properties`.
 
 `DevicesPage.qml` requests user info through `devicesModel.RequestData()`. The devices, rooms, and households models each consume the resulting API response. `RoomsFilterModel` filters by the current household, and each `RoomDevicesList` uses `DevicesFilterModel` for its room. `ScenariosPage.qml` requests its own scenario list and calls `scenariosModel.ExecuteScenario(index)` from a scenario row.
 
-For a selected device, `DeviceController` receives device info and updates `capabilitiesModel` and `propertiesModel`. Both models expose a `delegateSource` role. `DevicePage.qml` uses that role as each `Loader.source`, so the model's URL map determines which QML control appears. Capability controls create an action with their C++ helper, then call `capabilitiesModel.UseCapability(model.index, action)`. Property controls display values from `Properties.Event` or `Properties.Float`. The window pauses and resumes device polling as it loses or gains activity.
+For a selected device, `DeviceController` receives device info and updates `capabilitiesModel` and `propertiesModel`. Both models expose a `delegateSource` role. `DeviceAttributeSection.qml` uses that role as each `Loader.source`, so the model's URL map determines which QML control appears. Capability controls create an action with their C++ helper, then call `capabilitiesModel.UseCapability(model.index, action)`. Property controls display values from `Properties.Event` or `Properties.Float`. The window pauses and resumes device polling as it loses or gains activity.
 
 ## Where to make changes
 
 - For a new routed page, add the QML file to `resources/resources.qrc` under `/pages` and register its route in `Main.qml`. Add it to `YandexHomeDesktop.Pages` in `src/qml/CMakeLists.txt` if another QML file will import it as a module type.
 - For a new reusable component or visual primitive, add the QML file to the appropriate module in `src/qml/CMakeLists.txt` and import that module where needed.
-- For a new device control, register its `qrc:/controls/...` resource, map the corresponding capability or property type to that URL in `CapabilitiesModel` or `PropertiesModel`, and use an appropriate C++ QML type for action or value handling. Add it to the `IotControls` module only if it also needs module import.
+- For a new device control, register its `qrc:/controls/...` resource, map the corresponding capability or property type to that URL in `CapabilitiesModel` or `PropertiesModel`, and use an appropriate C++ QML type for action or value handling.
 - For a new image, theme data file, or other bundled asset, add it to `resources/resources.qrc`. Reuse `themes` properties and `ui/` types for consistent colors and typography.
 
 ## Current source notes
 
-- `DevicePage.qml` currently fixes its `StackLayout.currentIndex` at `2`; its loading and offline branches are present but bypassed.
-- `Main.qml` currently displays an FPS text overlay in the window.
-- QML files are not covered by the tests in `tests/`; those tests target C++ code.
+- `DevicePage.qml` starts in the loading state; its model initialization signals select the loaded or offline state.
+- The FPS overlay in `Main.qml` is commented out.
+- `tests/qml/` covers device-control spacing, settings scrolling and actions, scenario scrolling and execution signals, household selection, sign-in, and device retry/initialization. Desktop builds also create every page with local test models and fail on QML warnings. These checks run through CTest; see `docs/build.md`.
 - The clean build uses the credential-free auth template; see `docs/build.md` for local sign-in configuration.

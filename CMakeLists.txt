@@ -89,16 +89,38 @@ if(BUILD_DESKTOP_APP)
   add_subdirectory(src/qml)
 
   if(BUILD_TESTING)
-    add_executable(QmlPageLoadTest tests/QmlPageLoadTest.cpp)
-    target_link_libraries(QmlPageLoadTest PRIVATE Qt6::Gui Qt6::Qml)
-    add_test(NAME DevicePageLoads COMMAND QmlPageLoadTest
-      "${CMAKE_CURRENT_SOURCE_DIR}/src/qml/pages/DevicePage.qml"
-      "${CMAKE_CURRENT_BINARY_DIR}")
-    set_tests_properties(DevicePageLoads PROPERTIES
-      ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+    find_package(Qt6 6.9 REQUIRED COMPONENTS QuickTest)
+    add_executable(QmlPageLoadTest tests/QmlPageLoadTest.cpp
+      tests/QmlTestEnvironment.cpp tests/QmlTestEnvironment.h)
+    target_link_libraries(QmlPageLoadTest PRIVATE Qt6::Gui Qt6::Qml Models Utils)
+    add_dependencies(QmlPageLoadTest YandexHomeDesktopComponentsplugin
+      YandexHomeDesktopUiplugin YandexHomeDesktopPagesplugin)
+    foreach(_qml_page AuthPage AuthCanceledPage ErrorPage LoadingPage MainPage
+        DevicePage DevicesPage ScenariosPage SettingsPage)
+      add_test(NAME ${_qml_page}Loads COMMAND QmlPageLoadTest
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/qml/pages/${_qml_page}.qml"
+        "${CMAKE_CURRENT_BINARY_DIR}")
+      set_tests_properties(${_qml_page}Loads PROPERTIES
+        ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software;QT_QUICK_CONTROLS_STYLE=Basic")
+    endforeach()
+
+    add_executable(QmlLayoutTests tests/QmlLayoutTests.cpp
+      tests/QmlTestEnvironment.cpp tests/QmlTestEnvironment.h)
+    target_link_libraries(QmlLayoutTests PRIVATE Qt6::QuickTest Qt6::Qml Qt6::Gui Models Utils)
+    add_dependencies(QmlLayoutTests YandexHomeDesktopComponentsplugin
+      YandexHomeDesktopUiplugin YandexHomeDesktopPagesplugin)
+    add_test(NAME QmlLayouts COMMAND QmlLayoutTests
+      -input "${CMAKE_CURRENT_SOURCE_DIR}/tests/qml"
+      -import "${CMAKE_CURRENT_BINARY_DIR}")
+    set_tests_properties(QmlLayouts PROPERTIES
+      ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software;QT_QUICK_CONTROLS_STYLE=Basic")
   endif()
 
   qt_add_resources(RESOURCES resources/resources.qrc)
+  if(BUILD_TESTING)
+    target_sources(QmlPageLoadTest PRIVATE ${RESOURCES})
+    target_sources(QmlLayoutTests PRIVATE ${RESOURCES})
+  endif()
   qt_add_executable(appYandexHomeDesktop
     src/main.cpp
     src/utils/Router.cpp

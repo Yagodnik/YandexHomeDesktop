@@ -1,11 +1,8 @@
 import QtQuick
-import QtQuick.Layouts 2.15
-import QtQuick.Dialogs
-import QtQuick.Controls
 import YandexHomeDesktop.Ui as UI
 import YandexHomeDesktop.Components as Components
 
-Item {
+UI.PageSurface {
   id: root
 
   Component.onCompleted: {
@@ -20,7 +17,7 @@ Item {
     dialogMessage: qsTr("Не удалось выполнить сценарий")
   }
 
-  property var isLoading: false
+  property bool isLoading: false
 
   Connections {
     target: scenariosModel
@@ -60,7 +57,7 @@ Item {
     }
   }
 
-  StackLayout {
+  UI.PageStates {
     id: scenariosStack
 
     width: parent.width
@@ -79,48 +76,10 @@ Item {
       message: qsTr("Что-то пошло не так!")
     }
 
-    Item {
-      clip: true
-
-      UI.DefaultText {
-        anchors.centerIn: parent
-        text: qsTr("Пока что у вас нет сценариев")
-
-        visible: scenariosModel.count === 0
-      }
-
-      Flickable {
-        id: flickable
-        anchors.fill: parent
-        contentWidth: parent.width
-        contentHeight: scenariosList.implicitHeight
-        visible: scenariosModel.count !== 0
-
-        interactive: true
-        flickableDirection: Flickable.VerticalFlick
-
-        Components.ScenariosList {
-          id: scenariosList
-        }
-      }
-
-      ScrollBar {
-        id: scrollBar
-
-        width: 10
-        height: flickable.height
-        anchors.left: flickable.right
-        anchors.leftMargin: 4
-        policy: flickable.contentHeight > flickable.height ? ScrollBar.AlwaysOn : ScrollBar.AlwaysOff
-
-        contentItem: Rectangle {
-          implicitWidth: 10
-          radius: 4
-          color: themes.headerBackground
-        }
-
-        background: Item {}
-      }
+    Components.ScenariosPane {
+      sourceModel: scenariosModel
+      emptyMessage: qsTr("Пока что у вас нет сценариев")
+      onScenarioRequested: function(index) { scenariosModel.ExecuteScenario(index); }
     }
   }
 }

@@ -1,10 +1,10 @@
 import QtQuick
-import Qt5Compat.GraphicalEffects
 import YandexHomeDesktop.Ui as UI
 
 Item {
   id: delegateItem
   height: 48
+  signal executeRequested()
 
   opacity: 0
 
@@ -41,7 +41,7 @@ Item {
     opacity: visible ? 1 : 0
   }
 
-  DropShadow {
+  UI.Shadow {
     anchors.fill: background
     source: background
     horizontalOffset: 0
@@ -86,6 +86,7 @@ Item {
 
   Image {
     id: startButton
+    objectName: "scenarioStart"
     source: "qrc:/images/play.svg"
 
     opacity: is_waiting_response ? 0 : 1
@@ -116,7 +117,7 @@ Item {
 
       onClicked: {
         console.log("Executing " + scenario_id);
-        scenariosModel.ExecuteScenario(index);
+        delegateItem.executeRequested();
       }
     }
   }

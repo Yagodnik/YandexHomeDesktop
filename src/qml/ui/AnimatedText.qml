@@ -6,12 +6,15 @@ Item {
   property alias text: label.text
   property color color: themes.mainText;
   property var pixelSize: 20
+  property real wrapWidth: 0
 
-  width: label.implicitWidth
+  width: wrapWidth > 0 ? wrapWidth : label.implicitWidth
   height: label.implicitHeight
 
   Text {
     id: label
+    width: root.width
+    wrapMode: root.wrapWidth > 0 ? Text.Wrap : Text.NoWrap
     anchors.horizontalCenter: parent.horizontalCenter
     y: root.height
     opacity: 0

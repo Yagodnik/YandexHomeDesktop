@@ -15,6 +15,8 @@ Item {
   }
 
   property int activeTab: 0
+  property string householdName
+  signal householdSelectRequested()
 
   Column {
     id: layout
@@ -38,9 +40,7 @@ Item {
 
         UI.HeadingText {
           id: heading
-          text: householdsModel.currentHouseholdName
-          font.pointSize: 24
-          font.bold: true
+          text: topBar.householdName
           anchors.left: parent.left
           anchors.verticalCenter: parent.verticalCenter
         }
@@ -67,10 +67,11 @@ Item {
         }
 
         MouseArea {
+          objectName: "householdSelector"
           anchors.fill: parent
 
           onClicked: {
-            householdSelectDialog.open();
+            topBar.householdSelectRequested();
           }
         }
       }

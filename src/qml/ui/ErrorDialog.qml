@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import Qt5Compat.GraphicalEffects
 import YandexHomeDesktop.Ui as UI
 
 Dialog {
@@ -41,7 +40,7 @@ Dialog {
       radius: 16
     }
 
-    DropShadow {
+    UI.Shadow {
       anchors.fill: parent
       horizontalOffset: 0
       verticalOffset: 4

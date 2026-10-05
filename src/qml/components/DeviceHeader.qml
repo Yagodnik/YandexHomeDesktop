@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Controls
-import Qt5Compat.GraphicalEffects
 import YandexHomeDesktop.Ui as UI
 
 Item {
@@ -19,7 +18,7 @@ Item {
     color: themes.headerBackground
   }
 
-  DropShadow {
+  UI.Shadow {
     anchors.fill: headerBackground
     source: headerBackground
     radius: 12

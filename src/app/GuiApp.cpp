@@ -9,7 +9,8 @@
 #include "app/CliApp.h"
 #include "cli/CLI.h"
 #include "iot/capabilities/ColorSettingCapability.h"
-#include "models/ScenariosModel/ScenariosModel.h"
+#include "models/ScenariosModel/ScenariosViewModel.h"
+#include "models/HomeViewModel.h"
 #include "models/DevicesModel//DevicesModel.h"
 #include "models/DevicesModel/DevicesFilterModel.h"
 #include "models/RoomsModel/RoomsModel.h"
@@ -50,11 +51,9 @@ GuiApp::GuiApp(AppContext& app_context, QObject *parent) :
   const auto root_context = engine.rootContext();
   const auto themes = new Themes(app_context.app_);
   const auto router = new Router(app_context.app_);
-  const auto scenarios_model = new ScenariosModel(app_context.yandex_api, app_context.app_);
-  const auto devices_model = new DevicesModel(app_context.home_snapshot_loader, app_context.app_);
-  const auto rooms_model = new RoomsModel(app_context.home_snapshot_loader, app_context.app_);
+  const auto scenarios_view_model = new ScenariosViewModel(app_context.scenario_service, app_context.app_);
+  const auto home_view_model = new HomeViewModel(app_context.home_service, app_context.app_);
   const auto device_controller = new DeviceController(app_context.yandex_api, app_context.app_);
-  const auto households_model = new HouseholdsModel(app_context.home_snapshot_loader, app_context.app_);
   const auto error_codes = new ErrorCodes(app_context.app_);
   const auto color_model = new ColorsModel(app_context.app_);
   const auto color_modes_model = new ColorModesModel(app_context.app_);
@@ -71,12 +70,10 @@ GuiApp::GuiApp(AppContext& app_context, QObject *parent) :
   root_context->setContextProperty("platformService", app_context.platform_service);
   root_context->setContextProperty("authorizationService", app_context.authorization_service);
   root_context->setContextProperty("router", router);
-  root_context->setContextProperty("scenariosModel", scenarios_model);
-  root_context->setContextProperty("devicesModel", devices_model);
+  root_context->setContextProperty("scenariosViewModel", scenarios_view_model);
+  root_context->setContextProperty("homeViewModel", home_view_model);
   root_context->setContextProperty("propertiesModel", properties_model);
   root_context->setContextProperty("deviceController", device_controller);
-  root_context->setContextProperty("roomsModel", rooms_model);
-  root_context->setContextProperty("yandexApi", app_context.yandex_api);
   root_context->setContextProperty("yandexAccount", app_context.yandex_account);
   root_context->setContextProperty("themes", themes);
   root_context->setContextProperty("capabilitiesModel", capabilities_model);
@@ -84,7 +81,6 @@ GuiApp::GuiApp(AppContext& app_context, QObject *parent) :
   root_context->setContextProperty("colorModel", color_model);
   root_context->setContextProperty("colorModesModel", color_modes_model);
   root_context->setContextProperty("modesModel", modes_model);
-  root_context->setContextProperty("householdsModel", households_model);
   root_context->setContextProperty("settings", app_context.settings);
   root_context->setContextProperty("iotTitles", titles_list);
   root_context->setContextProperty("eventTitles", events_list);
@@ -137,6 +133,18 @@ void GuiApp::RegisterFonts() {
 }
 
 void GuiApp::RegisterModels() {
+  qmlRegisterUncreatableType<HomeViewModel>("YandexHomeDesktop.ViewModels", 1, 0,
+    "HomeViewModel", "Supplied by the application");
+  qmlRegisterUncreatableType<DevicesModel>("YandexHomeDesktop.ViewModels", 1, 0,
+    "DevicesModel", "Supplied by the application");
+  qmlRegisterUncreatableType<RoomsModel>("YandexHomeDesktop.ViewModels", 1, 0,
+    "RoomsModel", "Supplied by the application");
+  qmlRegisterUncreatableType<HouseholdsModel>("YandexHomeDesktop.ViewModels", 1, 0,
+    "HouseholdsModel", "Supplied by the application");
+  qmlRegisterUncreatableType<ScenariosViewModel>("YandexHomeDesktop.ViewModels", 1, 0,
+    "ScenariosViewModel", "ScenariosViewModel is supplied by the application");
+  qmlRegisterUncreatableType<ScenariosModel>("YandexHomeDesktop.ViewModels", 1, 0,
+    "ScenariosModel", "ScenariosModel is supplied by ScenariosViewModel");
   qmlRegisterType<DevicesFilterModel>("YandexHomeDesktop.Models", 1, 0, "DevicesFilterModel");
   qmlRegisterType<RoomsFilterModel>("YandexHomeDesktop.Models", 1, 0, "RoomsFilterModel");
   qmlRegisterType<ColorsFilterModel>("YandexHomeDesktop.Models", 1, 0, "ColorsFilterModel");

@@ -8,7 +8,7 @@ Item {
   property var sourceModel: null
   property string emptyMessage
   readonly property bool empty: sourceModel === null || sourceModel.count === 0
-  signal scenarioRequested(int index)
+  signal scenarioRequested(string scenarioId)
 
   UI.DefaultText {
     anchors.centerIn: parent
@@ -18,12 +18,13 @@ Item {
 
   Components.ScenariosList {
     id: scenariosList
+    objectName: "scenariosList"
     anchors.fill: parent
     model: root.sourceModel
     visible: !root.empty
     interactive: true
     ScrollBar.vertical: scrollBar
-    onScenarioRequested: function(index) { root.scenarioRequested(index); }
+    onScenarioRequested: function(scenarioId) { root.scenarioRequested(scenarioId); }
   }
 
   UI.ListScrollBar {

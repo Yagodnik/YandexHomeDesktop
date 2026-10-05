@@ -44,7 +44,11 @@ include_directories(${hana_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/app)
 
+add_library(AppStartup STATIC src/app/StartupOptions.cpp src/app/StartupOptions.h)
+target_link_libraries(AppStartup PUBLIC Qt6::Core)
+
 add_subdirectory(src/api)
+add_subdirectory(src/services)
 add_subdirectory(src/models)
 add_subdirectory(src/utils)
 add_subdirectory(src/iot)
@@ -85,11 +89,25 @@ if(BUILD_DESKTOP_APP)
   unset(BUILD_TEST_APPLICATION)
 
   add_subdirectory(src/auth)
+  target_compile_definitions(YandexAuth PRIVATE "$<$<CONFIG:Debug>:YH_DEBUG_FAKE_API>")
   add_subdirectory(src/platform)
   add_subdirectory(src/qml)
 
   if(BUILD_TESTING)
     find_package(Qt6 6.9 REQUIRED COMPONENTS QuickTest)
+    target_compile_definitions(ApiFixtureTests PRIVATE "$<$<CONFIG:Debug>:YH_DEBUG_FAKE_API>")
+    target_link_libraries(ApiFixtureTests PRIVATE "$<$<CONFIG:Debug>:YandexAuth>")
+    target_sources(HomeTests PRIVATE tests/QmlTestEnvironment.cpp tests/QmlTestEnvironment.h)
+    target_compile_definitions(HomeTests PRIVATE
+      HOME_QML_TESTS HOME_IMPORT_PATH="${CMAKE_CURRENT_BINARY_DIR}")
+    target_link_libraries(HomeTests PRIVATE Qt6::Quick Qt6::QuickControls2)
+    add_dependencies(HomeTests YandexHomeDesktopComponentsplugin
+      YandexHomeDesktopUiplugin YandexHomeDesktopPagesplugin)
+    target_compile_definitions(ScenariosTests PRIVATE
+      SCENARIOS_QML_TESTS SCENARIOS_IMPORT_PATH="${CMAKE_CURRENT_BINARY_DIR}")
+    target_link_libraries(ScenariosTests PRIVATE Qt6::Quick Qt6::QuickControls2)
+    add_dependencies(ScenariosTests YandexHomeDesktopComponentsplugin
+      YandexHomeDesktopUiplugin YandexHomeDesktopPagesplugin)
     add_executable(QmlPageLoadTest tests/QmlPageLoadTest.cpp
       tests/QmlTestEnvironment.cpp tests/QmlTestEnvironment.h)
     target_link_libraries(QmlPageLoadTest PRIVATE Qt6::Gui Qt6::Qml Models Utils)
@@ -117,9 +135,12 @@ if(BUILD_DESKTOP_APP)
   endif()
 
   qt_add_resources(RESOURCES resources/resources.qrc)
+  qt_add_resources(DEBUG_FIXTURE_RESOURCES resources/debug/debug.qrc)
   if(BUILD_TESTING)
     target_sources(QmlPageLoadTest PRIVATE ${RESOURCES})
     target_sources(QmlLayoutTests PRIVATE ${RESOURCES})
+    target_sources(ScenariosTests PRIVATE ${RESOURCES})
+    target_sources(HomeTests PRIVATE ${RESOURCES})
   endif()
   qt_add_executable(appYandexHomeDesktop
     src/main.cpp
@@ -146,6 +167,8 @@ if(BUILD_DESKTOP_APP)
     src/app/GuiApp.cpp
     src/app/GuiApp.h
   )
+  target_compile_definitions(appYandexHomeDesktop PRIVATE "$<$<CONFIG:Debug>:YH_DEBUG_FAKE_API>")
+  target_sources(appYandexHomeDesktop PRIVATE "$<$<CONFIG:Debug>:${DEBUG_FIXTURE_RESOURCES}>")
 
   set_source_files_properties("${YH_AUTH_CONFIG_FILE}" PROPERTIES QT_RESOURCE_ALIAS "auth/secrets.json")
   qt_add_resources(appYandexHomeDesktop "oauth_config"
@@ -181,6 +204,7 @@ if(BUILD_DESKTOP_APP)
       translations/DataStrings.cpp
       src/models/DeviceModel/CapabilitiesModel.cpp
       src/models/DeviceModel/PropertiesModel.cpp
+      src/models/ScenariosModel/ScenariosViewModel.cpp
     RESOURCE_PREFIX "/i18n"
   )
 
@@ -197,7 +221,31 @@ if(BUILD_DESKTOP_APP)
     YandexHomeDesktopUi YandexHomeDesktopPages
     YandexHomeDesktopComponents
     YandexApiAdapter YandexAuth Models PlatformService Utils Iot
+    AppStartup "$<$<CONFIG:Debug>:FixtureApi>"
   )
+
+  if(BUILD_TESTING)
+    set(_fixture_debug_configs)
+    set(_fixture_release_configs)
+    if(CMAKE_CONFIGURATION_TYPES)
+      set(_fixture_debug_configs CONFIGURATIONS Debug)
+      set(_fixture_release_configs CONFIGURATIONS Release RelWithDebInfo MinSizeRel)
+    endif()
+    if(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE STREQUAL "Debug")
+      add_test(NAME DebugFixtureCli ${_fixture_debug_configs}
+        COMMAND appYandexHomeDesktop --fake-api --list-devices)
+      set_tests_properties(DebugFixtureCli PROPERTIES
+        TIMEOUT 15 PASS_REGULAR_EXPRESSION "Desk lamp"
+        ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+    endif()
+    if(CMAKE_CONFIGURATION_TYPES OR NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+      add_test(NAME ReleaseRejectsFixture ${_fixture_release_configs} COMMAND "${CMAKE_COMMAND}"
+        "-DAPP_PATH=$<TARGET_FILE:appYandexHomeDesktop>"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/RejectFakeApi.cmake")
+      set_tests_properties(ReleaseRejectsFixture PROPERTIES
+        TIMEOUT 15 ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+    endif()
+  endif()
 
   include(GNUInstallDirs)
   install(TARGETS appYandexHomeDesktop

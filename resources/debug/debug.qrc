@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="/debug">
+    <file>api.json</file>
+  </qresource>
+</RCC>

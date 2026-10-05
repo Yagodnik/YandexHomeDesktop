@@ -9,20 +9,24 @@
 #include "../api/YandexAccountApi.h"
 #include "../api/YandexHomeApi.h"
 #include "../models/AccountModel.h"
-#include "../models/HomeSnapshotLoader.h"
+#include "services/HomeService.h"
+#include "services/ScenarioService.h"
+#include "StartupOptions.h"
 
 struct AppContext {
-  explicit AppContext(QGuiApplication *app);
+  explicit AppContext(QGuiApplication *app, const StartupOptions& options = {});
 
   QGuiApplication *app_;
   AuthorizationService *authorization_service;
   PlatformService *platform_service;
-  QtHttpTransport *http_transport;
-  YandexHomeApi *yandex_api;
-  YandexAccountApi *account_api;
+  QtHttpTransport *http_transport = nullptr;
+  IHomeApi *yandex_api;
+  IAccountApi *account_api;
   AccountModel *yandex_account;
-  HomeSnapshotLoader *home_snapshot_loader;
+  HomeService *home_service;
+  ScenarioService *scenario_service;
   Settings *settings;
+  QStringList cli_arguments;
 
   std::function<QString()> token_provider;
 };

@@ -7,14 +7,15 @@ ListView {
   width: parent.width
   implicitHeight: contentHeight
 
-  signal scenarioRequested(int index)
+  signal scenarioRequested(string scenarioId)
 
   spacing: 5
   interactive: false
   clip: true
 
   delegate: Components.ScenarioDelegate {
+    id: scenarioDelegate
     width: scenariouses.width
-    onExecuteRequested: scenariouses.scenarioRequested(index)
+    onExecuteRequested: scenariouses.scenarioRequested(scenarioDelegate.scenario_id)
   }
 }

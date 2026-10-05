@@ -7,7 +7,7 @@ class Settings : public QObject {
   Q_PROPERTY(int currentTheme READ GetCurrentTheme WRITE SetCurrentTheme NOTIFY currentThemeChanged)
   Q_PROPERTY(bool trayModeEnabled READ GetTrayModeEnabled WRITE SetTrayModeEnabled NOTIFY trayModeEnabledChanged)
 public:
-  explicit Settings(QObject *parent = nullptr);
+  explicit Settings(QObject *parent = nullptr, bool temporary = false);
 
   [[nodiscard]] bool GetTrayModeEnabled() const;
   [[nodiscard]] int GetCurrentTheme() const;
@@ -23,4 +23,7 @@ public slots:
 
 private:
   QSettings settings_;
+  bool temporary_ = false;
+  int temporary_theme_ = 0;
+  bool temporary_tray_ = false;
 };

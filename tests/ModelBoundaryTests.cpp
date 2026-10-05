@@ -10,10 +10,10 @@
 #include "models/DeviceModel/DeviceController.h"
 #include "models/DeviceModel/DeviceDataModel.h"
 #include "models/DevicesModel/DevicesModel.h"
-#include "models/HomeSnapshotLoader.h"
+#include "models/HomeViewModel.h"
 #include "models/HouseholdsModel/HouseholdsModel.h"
 #include "models/RoomsModel/RoomsModel.h"
-#include "models/ScenariosModel/ScenariosModel.h"
+#include "models/ScenariosModel/ScenariosViewModel.h"
 
 namespace {
 template<typename T>
@@ -70,16 +70,14 @@ public:
 
 void ModelBoundaryTests::HomeRefreshUpdatesAllModels() {
   FakeHomeApi api;
-  HomeSnapshotLoader loader(&api);
-  DevicesModel devices(&loader);
-  RoomsModel rooms(&loader);
-  HouseholdsModel households(&loader);
-  QSignalSpy devices_loaded(&devices, &DevicesModel::dataLoaded);
-  QSignalSpy rooms_loaded(&rooms, &RoomsModel::dataLoaded);
-  QSignalSpy households_loaded(&households, &HouseholdsModel::dataLoaded);
-  QSignalSpy rooms_failed(&rooms, &RoomsModel::dataLoadingFailed);
+  HomeService service(&api);
+  HomeViewModel view_model(&service);
+  auto& devices = *view_model.GetDevices();
+  auto& rooms = *view_model.GetRooms();
+  auto& households = *view_model.GetHouseholds();
+  QSignalSpy loaded(&service, &HomeService::snapshotChanged);
 
-  devices.RequestData();
+  view_model.EnsureLoaded();
   QCOMPARE(api.user_requests.size(), 1);
 
   UserInfo info;
@@ -91,6 +89,7 @@ void ModelBoundaryTests::HomeRefreshUpdatesAllModels() {
   RoomObject room;
   room.id = "room-1";
   room.name = "Office";
+  room.household_id = "house-1";
   info.rooms.append(room);
   HouseholdObject household;
   household.id = "house-1";
@@ -101,24 +100,25 @@ void ModelBoundaryTests::HomeRefreshUpdatesAllModels() {
   QCOMPARE(devices.rowCount({}), 1);
   QCOMPARE(rooms.rowCount({}), 1);
   QCOMPARE(households.rowCount({}), 1);
-  QCOMPARE(devices_loaded.size(), 1);
-  QCOMPARE(rooms_loaded.size(), 1);
-  QCOMPARE(households_loaded.size(), 1);
-  QCOMPARE(households.GetCurrentHousehold(), QString("house-1"));
+  QCOMPARE(loaded.size(), 1);
+  QCOMPARE(view_model.GetCurrentHousehold(), QString("house-1"));
 
-  devices.RequestData();
+  view_model.Refresh();
   QCOMPARE(api.user_requests.size(), 2);
   auto failure = std::unexpected(ApiError{ApiErrorKind::Timeout, "Timeout reached!"});
   api.user_requests[1].Send(failure);
-  QCOMPARE(rooms_failed.size(), 1);
+  QCOMPARE(view_model.GetState(), HomeViewModel::Error);
+
 }
 
 void ModelBoundaryTests::ScenarioResultsRemainScoped() {
   FakeHomeApi api;
-  ScenariosModel model(&api);
-  QSignalSpy loaded(&model, &ScenariosModel::dataLoaded);
-  QSignalSpy failed(&model, &ScenariosModel::scenarioExecutionFailed);
-  model.RequestData();
+  ScenarioService service(&api);
+  ScenariosViewModel view_model(&service);
+  auto& model = *view_model.GetScenarios();
+  QSignalSpy loaded(&service, &ScenarioService::scenariosChanged);
+  QSignalSpy failed(&view_model, &ScenariosViewModel::executionFailed);
+  view_model.EnsureLoaded();
   QCOMPARE(api.scenario_requests.size(), 1);
 
   ScenarioObject scenario;
@@ -129,7 +129,7 @@ void ModelBoundaryTests::ScenarioResultsRemainScoped() {
   QCOMPARE(loaded.size(), 1);
   QCOMPARE(model.rowCount({}), 1);
 
-  model.ExecuteScenario(0);
+  view_model.ExecuteScenario("s1");
   QCOMPARE(api.execution_requests.size(), 1);
   QCOMPARE(model.data(model.index(0), ScenariosModel::IsWaitingResponseRole).toBool(), true);
   api.execution_requests[0].Send(std::unexpected(ApiError{ApiErrorKind::Service, "failed"}));

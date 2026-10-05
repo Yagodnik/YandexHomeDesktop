@@ -6,6 +6,7 @@ import YandexHomeDesktop.Components as Components
 Item {
   id: root
   property var sourceModel: null
+  property var devicesModel: null
 
   ListView {
     id: roomsList
@@ -17,6 +18,7 @@ Item {
 
     delegate: Components.RoomDevicesList {
       width: roomsList.width
+      devicesModel: root.devicesModel
     }
   }
 

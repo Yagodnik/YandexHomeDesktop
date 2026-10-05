@@ -39,7 +39,7 @@ int CliApp::Start() {
 }
 
 void CliApp::onAuthorized() {
-  CLI cli(app_context_, app_context_.yandex_api);
+  CLI cli(app_context_, this);
 }
 
 void CliApp::onUnauthorized() {

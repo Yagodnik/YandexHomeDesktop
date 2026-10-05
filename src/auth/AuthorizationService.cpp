@@ -5,6 +5,8 @@
 #include <QUrlQuery>
 #include <QFile>
 #include <QDesktopServices>
+#include <QTimer>
+#include <stdexcept>
 
 namespace {
   JSON_STRUCT(AuthSecrets,
@@ -17,10 +19,18 @@ namespace {
   );
 }
 
-AuthorizationService::AuthorizationService(QObject *parent) :
+AuthorizationService::AuthorizationService(QObject *parent, bool use_fake_api) :
   QObject{parent},
-  reply_handler_(kDefaultPort)
+  use_fake_api_(use_fake_api)
 {
+  if (use_fake_api_) {
+#ifdef YH_DEBUG_FAKE_API
+    return;
+#else
+    throw std::runtime_error("The fake API is available only in Debug builds");
+#endif
+  }
+  reply_handler_ = std::make_unique<QOAuthHttpServerReplyHandler>(kDefaultPort);
   const auto auth_secrets_object = GetAuthSecrets();
 
   if (!auth_secrets_object.has_value() || !PrepareCallbackPage()) {
@@ -32,7 +42,7 @@ AuthorizationService::AuthorizationService(QObject *parent) :
   auto auth_secrets = Serialization::From<AuthSecrets>(
     auth_secrets_object.value());
 
-  oauth2_.setReplyHandler(&reply_handler_);
+  oauth2_.setReplyHandler(reply_handler_.get());
   oauth2_.setAuthorizationUrl({auth_secrets.auth_url});
   oauth2_.setTokenUrl({auth_secrets.access_token_url});
   oauth2_.setClientIdentifier(auth_secrets.client_id);
@@ -50,18 +60,44 @@ AuthorizationService::AuthorizationService(QObject *parent) :
 }
 
 void AuthorizationService::AttemptLocalAuthorization() {
+#ifdef YH_DEBUG_FAKE_API
+  if (use_fake_api_) {
+    QTimer::singleShot(0, this, [this] {
+      if (fixture_authorized_) { emit authorized(); } else { emit unauthorized(); }
+    });
+    return;
+  }
+#endif
   TryRead();
 }
 
 bool AuthorizationService::IsAuthorized() const {
+#ifdef YH_DEBUG_FAKE_API
+  if (use_fake_api_) { return fixture_authorized_; }
+#endif
   return token_.has_value();
 }
 
 void AuthorizationService::AttemptAuthorization() {
+#ifdef YH_DEBUG_FAKE_API
+  if (use_fake_api_) {
+    fixture_authorized_ = true;
+    QTimer::singleShot(0, this, [this] { if (fixture_authorized_) { emit authorized(); } });
+    return;
+  }
+#endif
   oauth2_.grant();
 }
 
 void AuthorizationService::Logout() {
+#ifdef YH_DEBUG_FAKE_API
+  if (use_fake_api_) {
+    fixture_authorized_ = false;
+    emit logout();
+    QTimer::singleShot(0, this, [this] { emit logoutFinished(); });
+    return;
+  }
+#endif
   token_.reset();
   TryDelete();
 
@@ -75,6 +111,9 @@ QString AuthorizationService::GetLastErrorCode() const {
 }
 
 std::optional<QString> AuthorizationService::GetToken() const {
+#ifdef YH_DEBUG_FAKE_API
+  if (use_fake_api_) { return std::nullopt; }
+#endif
   if (!token_.has_value()) {
     qCritical() << "AuthorizationService::GetToken: no token provided";
     return std::nullopt;
@@ -152,7 +191,7 @@ bool AuthorizationService::PrepareCallbackPage() {
     return false;
   }
 
-  reply_handler_.setCallbackText(callback_index.readAll());
+  reply_handler_->setCallbackText(callback_index.readAll());
   callback_index.close();
 
   return true;

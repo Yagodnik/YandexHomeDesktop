@@ -1,9 +1,12 @@
 #include <QApplication>
 #include <QLocale>
 #include <QTranslator>
+#include <exception>
+#include <iostream>
 
 #include "app/CliApp.h"
 #include "app/GuiApp.h"
+#include "app/StartupOptions.h"
 
 #include "utils/LogManager.h"
 
@@ -33,19 +36,32 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  if (QGuiApplication::arguments().size() > 1) {
+#ifdef YH_DEBUG_FAKE_API
+  constexpr bool allow_fake_api = true;
+#else
+  constexpr bool allow_fake_api = false;
+#endif
+  const auto options = ParseStartupOptions(app.arguments(), allow_fake_api);
+  if (!options) {
+    qCritical().noquote() << options.error();
+    return 2;
+  }
+  if (options->cli_arguments.size() > 1) {
     // Disable garbage in console during CLI run
     // Duplicate of condition to disable logging before initializing context
     log_manager.DisableConsole();
   }
 
-  AppContext app_context(&app);
-
-  if (QGuiApplication::arguments().size() > 1) {
-    CliApp cli_app(app_context, &app);
-    return cli_app.Start();
+  try {
+    AppContext app_context(&app, *options);
+    if (options->cli_arguments.size() > 1) {
+      CliApp cli_app(app_context, &app);
+      return cli_app.Start();
+    }
+    GuiApp gui_app(app_context, &app);
+    return gui_app.Start();
+  } catch (const std::exception& error) {
+    std::cerr << error.what() << std::endl;
+    return 2;
   }
-
-  GuiApp gui_app(app_context, &app);
-  return gui_app.Start();
 }

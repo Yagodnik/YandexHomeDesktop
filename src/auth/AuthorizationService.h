@@ -3,6 +3,7 @@
 #include <QObject>
 #include <QJsonObject>
 #include <optional>
+#include <memory>
 #include <QtNetworkAuth/QOAuthHttpServerReplyHandler>
 #include <QtNetworkAuth/QOAuth2AuthorizationCodeFlow>
 #include "qtkeychain/keychain.h"
@@ -10,7 +11,7 @@
 class AuthorizationService : public QObject {
   Q_OBJECT
 public:
-  explicit AuthorizationService(QObject *parent = nullptr);
+  explicit AuthorizationService(QObject *parent = nullptr, bool use_fake_api = false);
 
   Q_INVOKABLE void AttemptLocalAuthorization();
   Q_INVOKABLE [[nodiscard]] bool IsAuthorized() const;
@@ -50,7 +51,9 @@ private:
   void DeleteTokenHandler(QKeychain::DeletePasswordJob *job);
 
   QOAuth2AuthorizationCodeFlow oauth2_;
-  QOAuthHttpServerReplyHandler reply_handler_;
+  std::unique_ptr<QOAuthHttpServerReplyHandler> reply_handler_;
+  bool use_fake_api_ = false;
+  bool fixture_authorized_ = true;
   int last_error_code_{0};
   std::optional<QString> token_;
 

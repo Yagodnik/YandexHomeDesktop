@@ -1,4 +1,6 @@
 #include "HouseholdsModel.h"
+#include "api/YandexHomeApi.h"
+#include <QDebug>
 
 HouseholdsModel::HouseholdsModel(YandexHomeApi *api, QObject *parent)
   : QAbstractListModel(parent), current_(std::nullopt), api_(api)

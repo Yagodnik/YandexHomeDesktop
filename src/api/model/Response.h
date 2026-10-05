@@ -1,6 +1,6 @@
 #pragma once
 
-#include "serialization/Serialization.h"
+#include "serialization/SerializationTypes.h"
 #include "Status.h"
 
 JSON_STRUCT(Response,
@@ -8,3 +8,6 @@ JSON_STRUCT(Response,
   (Status, status),
   (QString, message)
 );
+
+// Shared codecs are instantiated once in Serialization.cpp.
+extern template Response Serialization::From<Response>(const QJsonObject&);

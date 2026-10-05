@@ -9,6 +9,7 @@ add_library(YandexHomeApi STATIC
         YandexAccount.h
         RequestFactory.cpp
         model/Properties.h
+        model/Serialization.cpp
 )
 
 target_link_libraries(YandexHomeApi PRIVATE Qt6::Core Qt6::Network Qt6::Gui)

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QtTest>
-#include "serialization/Serialization.h"
+#include "serialization/SerializationTypes.h"
 
 JSON_STRUCT(TestStruct,
   (int, a),

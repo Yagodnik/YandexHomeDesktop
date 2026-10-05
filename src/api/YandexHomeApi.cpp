@@ -2,10 +2,107 @@
 
 #include <QDebug>
 #include <QNetworkReply>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QScopedPointer>
+#include <QTimer>
 
 #include "model/Response.h"
 #include "RequestFactory.h"
 #include "model/Actions.h"
+
+template<Serialization::Serializable T>
+void YandexHomeApi::PerformRequest(
+  std::function<QNetworkReply*()> send_fn,
+  std::function<void(const T&)> ok_callback,
+  std::function<void(const QString&)> error_callback
+) {
+  using ReplyGuard = QScopedPointer<QNetworkReply, QScopedPointerDeleteLater>;
+
+  QNetworkReply *reply = send_fn();
+
+  auto timeout = new QTimer(reply);
+  timeout->setSingleShot(true);
+  timeout->start(kApiTimeout);
+
+  connect(timeout, &QTimer::timeout, reply, [reply, error_callback]() {
+    if (reply->isRunning()) {
+      reply->abort();
+      error_callback("Timeout reached!");
+    }
+  });
+
+  connect(reply, &QNetworkReply::finished, [reply, ok_callback, error_callback]() {
+    ReplyGuard guard(reply);
+
+    if (reply->error() != QNetworkReply::NoError) {
+      error_callback(reply->errorString());
+      return;
+    }
+
+    const auto response_bytes = reply->readAll();
+
+    qDebug() << "";
+    qDebug() << response_bytes.toStdString();
+    qDebug() << "";
+
+    const auto response_object = ParseResponseAsObject(response_bytes);
+
+    if (!response_object.has_value()) {
+      error_callback(response_object.error());
+      return;
+    }
+
+    const auto response = Serialization::From<T>(response_object.value());
+    ok_callback(response);
+  });
+}
+
+template<Serialization::Serializable T>
+void YandexHomeApi::MakeGetRequest(
+  const QString &endpoint,
+  std::function<void(const T&)> ok_callback,
+  std::function<void(const QString&)> error_callback
+) {
+  const auto request = RequestFactory::CreateBearer(endpoint, token_provider_());
+
+  PerformRequest<T>(
+    [this, &request]() { return network_access_manager_.get(request); },
+    std::move(ok_callback),
+    std::move(error_callback)
+  );
+}
+
+template<Serialization::Serializable T>
+void YandexHomeApi::MakePostRequest(
+  const QString &endpoint,
+  std::function<void(const T&)> ok_callback,
+  std::function<void(const QString&)> error_callback
+) {
+  const auto request = RequestFactory::CreateBearer(endpoint, token_provider_());
+
+  PerformRequest<T>(
+    [this, &request]() { return network_access_manager_.post(request, nullptr); },
+    std::move(ok_callback),
+    std::move(error_callback)
+  );
+}
+
+template<Serialization::Serializable T>
+void YandexHomeApi::MakePostRequest(
+  const QString &endpoint,
+  std::function<void(const T&)> ok_callback,
+  std::function<void(const QString&)> error_callback,
+  const QByteArray& data
+) {
+  const auto request = RequestFactory::CreateBearer(endpoint, token_provider_());
+
+  PerformRequest<T>(
+    [this, &request, data]() { return network_access_manager_.post(request, data); },
+    std::move(ok_callback),
+    std::move(error_callback)
+  );
+}
 
 YandexHomeApi::YandexHomeApi(TokenProvider token_provider, QObject *parent)
   : QObject(parent), token_provider_(std::move(token_provider)) {}

@@ -1,4 +1,5 @@
 #include "SerializationTests.h"
+#include "serialization/Serialization.h"
 
 void SerializationTests::FromJsonSimple() {
   QByteArray raw = R"({
@@ -84,9 +85,9 @@ void SerializationTests::ToJsonSubObject() {
 void SerializationTests::JsonEnumTest() {
   MyEnumeration my_enum;
 
-  QVERIFY(my_enum["MyEnum::A"] == MyEnumeration::A);
-  QVERIFY(my_enum["MyEnum::A"] != MyEnumeration::B);
-  QVERIFY(my_enum["MagicString!"] == MyEnumeration::Magic);
+  QVERIFY(MyEnumeration::AsValue("MyEnum::A") == MyEnumeration::A);
+  QVERIFY(MyEnumeration::AsValue("MyEnum::A") != MyEnumeration::B);
+  QVERIFY(MyEnumeration::AsValue("MagicString!") == MyEnumeration::Magic);
 
   QVERIFY(my_enum.AsString(MyEnumeration::A) == "MyEnum::A");
   QVERIFY(my_enum.AsString(MyEnumeration::B) != "MyEnum::A");

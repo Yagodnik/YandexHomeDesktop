@@ -1,9 +1,13 @@
 #pragma once
 
 #include <QTimer>
+#include <QDateTime>
+#include <optional>
 
 #include "DeviceAttribute.h"
-#include "api/YandexHomeApi.h"
+#include "api/model/UserInfo.h"
+
+class YandexHomeApi;
 
 class DeviceController : public QObject {
   Q_OBJECT
@@ -52,5 +56,4 @@ private slots:
   void OnActionExecutionFinishedSuccessfully(const QVariant& user_data);
   void OnActionExecutionFailed(const QString& message, const QVariant& user_data);
 };
-
 

@@ -1,9 +1,10 @@
 #pragma once
 
 #include <QObject>
+#include <QJsonObject>
+#include <optional>
 #include <QtNetworkAuth/QOAuthHttpServerReplyHandler>
 #include <QtNetworkAuth/QOAuth2AuthorizationCodeFlow>
-#include "serialization/Serialization.h"
 #include "qtkeychain/keychain.h"
 
 class AuthorizationService : public QObject {
@@ -35,15 +36,6 @@ private:
   static constexpr int kDefaultPort = 1337;
   const QString kAuthSecretsPath = ":/auth/secrets.json";
   const QString kCallbackPath = ":/callback/index.html";
-
-  JSON_STRUCT(AuthSecrets,
-    (QString, auth_url),
-    (QString, access_token_url),
-    (QString, client_id),
-    (QString, redirect_base),
-    (int, redirect_port),
-    (QStringList, scopes)
-  );
 
   void TryWrite(const QString& key);
   void TryRead();

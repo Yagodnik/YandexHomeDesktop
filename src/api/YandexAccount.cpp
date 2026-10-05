@@ -1,8 +1,19 @@
 #include "YandexAccount.h"
+#include "serialization/Serialization.h"
 
 #include <QNetworkReply>
+#include <QJsonDocument>
 
 #include "RequestFactory.h"
+
+namespace {
+  JSON_STRUCT(AccountInfo,
+    (QString, login),
+    (QString, display_name),
+    (QString, default_avatar_id),
+    (QString, default_email)
+  );
+}
 
 YandexAccount::YandexAccount(TokenProvider token_provider, QObject *parent)
   : QObject(parent), token_provider_(std::move(token_provider)) {}

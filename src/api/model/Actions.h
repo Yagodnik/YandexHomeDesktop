@@ -2,7 +2,7 @@
 
 #include "Capabilites.h"
 #include "Status.h"
-#include "serialization/Serialization.h"
+#include "serialization/SerializationTypes.h"
 
 JSON_STRUCT(DeviceActionsObject,
   (QString, id),
@@ -40,3 +40,11 @@ JSON_STRUCT(DeviceActionResponse,
   (QString, request_id),
   (QList<DeviceActionsResponse>, devices)
 );
+
+// Shared codecs are instantiated once in Serialization.cpp.
+extern template ActionResult Serialization::From<ActionResult>(const QJsonObject&);
+extern template CapabilityResponseState Serialization::From<CapabilityResponseState>(const QJsonObject&);
+extern template CapabilityResponse Serialization::From<CapabilityResponse>(const QJsonObject&);
+extern template DeviceActionsResponse Serialization::From<DeviceActionsResponse>(const QJsonObject&);
+extern template DeviceActionResponse Serialization::From<DeviceActionResponse>(const QJsonObject&);
+extern template QJsonObject Serialization::To<DeviceActionsObject>(const DeviceActionsObject&);

@@ -1,4 +1,6 @@
 #include "DevicesModel.h"
+#include "api/YandexHomeApi.h"
+#include <QDebug>
 
 DevicesModel::DevicesModel(YandexHomeApi *api, QObject *parent)
   : QAbstractListModel(parent), api_(api)

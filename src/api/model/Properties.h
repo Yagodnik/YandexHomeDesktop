@@ -1,6 +1,6 @@
 #pragma once
 
-#include "serialization/Serialization.h"
+#include "serialization/SerializationTypes.h"
 
 JSON_ENUMERATION(PropertyType,
   ("devices.properties.float", Float),
@@ -14,3 +14,6 @@ JSON_STRUCT(PropertyObject,
   (QVariantMap, parameters),
   (double, last_updated)
 );
+
+// Shared codecs are instantiated once in Serialization.cpp.
+extern template PropertyObject Serialization::From<PropertyObject>(const QJsonObject&);

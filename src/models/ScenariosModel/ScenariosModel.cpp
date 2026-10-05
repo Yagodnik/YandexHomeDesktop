@@ -1,4 +1,6 @@
 #include "ScenariosModel.h"
+#include "api/YandexHomeApi.h"
+#include <QDebug>
 
 ScenariosModel::ScenariosModel(YandexHomeApi *api, QObject *parent)
   : QAbstractListModel(parent), api_(api)

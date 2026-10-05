@@ -13,6 +13,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
+option(YH_ENABLE_PCH "Use precompiled headers for C++ targets" ON)
+
 find_package(Qt6 REQUIRED COMPONENTS Quick Network NetworkAuth Gui QuickControls2)
 
 qt_standard_project_setup(REQUIRES 6.8)
@@ -130,3 +132,10 @@ else()
 endif()
 
 add_subdirectory(tests)
+
+if(YH_ENABLE_PCH)
+  foreach(target appYandexHomeDesktop YandexHomeApi Models Utils Iot AppTests)
+    target_precompile_headers(${target} PRIVATE
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/serialization/PrecompiledHeaders.h")
+  endforeach()
+endif()

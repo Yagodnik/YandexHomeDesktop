@@ -1,4 +1,11 @@
 #include "UnitsList.h"
+#include "JsonLoader.h"
+
+namespace {
+  JSON_STRUCT(UnitsListData,
+    (QVariantMap, units)
+  );
+}
 
 UnitsList::UnitsList(QObject *parent) : QObject(parent) {
   const auto temp = JsonLoader::Load<UnitsListData>(":/data/units.json");
@@ -8,9 +15,9 @@ UnitsList::UnitsList(QObject *parent) : QObject(parent) {
     return;
   }
 
-  data_ = temp.value();
+  units_ = temp->units;
 }
 
 QString UnitsList::GetUnit(const QString &unit_name) const {
-  return data_.units.value(unit_name, "").toString();
+  return units_.value(unit_name, "").toString();
 }

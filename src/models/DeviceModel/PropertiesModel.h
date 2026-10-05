@@ -3,7 +3,6 @@
 #include <QAbstractListModel>
 
 #include "DeviceController.h"
-#include "api/YandexHomeApi.h"
 #include "api/model/UserInfo.h"
 
 // #define ALLOW_FAKE_PROPERTIES

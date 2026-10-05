@@ -2,9 +2,7 @@
 
 #include <QNetworkAccessManager>
 #include <QObject>
-#include <QImage>
-
-#include "serialization/Serialization.h"
+#include <functional>
 
 class YandexAccount : public QObject {
   Q_OBJECT
@@ -22,13 +20,6 @@ signals:
   void dataLoadingFailed();
 
 private:
-  JSON_STRUCT(AccountInfo,
-    (QString, login),
-    (QString, display_name),
-    (QString, default_avatar_id),
-    (QString, default_email)
-  );
-
   const QString kAccountInfoEndpoint = "https://login.yandex.ru/info";
   const QString kAvatarUrl = "https://avatars.yandex.net/get-yapic/%1/";
 

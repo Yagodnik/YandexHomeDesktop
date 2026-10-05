@@ -1,4 +1,7 @@
 #include "DeviceController.h"
+#include "api/YandexHomeApi.h"
+#include <QDebug>
+#include <ranges>
 
 DeviceController::DeviceController(YandexHomeApi *api, QObject *parent)
   : QObject(parent), api_(api)

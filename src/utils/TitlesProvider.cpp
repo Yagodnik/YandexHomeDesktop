@@ -1,4 +1,7 @@
 #include "TitlesProvider.h"
+#include "JsonLoaderRaw.h"
+
+#include <QDebug>
 
 TitlesProvider::TitlesProvider(const QString& path, QObject *parent) : QObject(parent) {
   const auto temp = JsonLoader::LoadRaw(path);

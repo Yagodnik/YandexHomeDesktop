@@ -1,4 +1,6 @@
 #include "RoomsModel.h"
+#include "api/YandexHomeApi.h"
+#include <QDebug>
 
 RoomsModel::RoomsModel(YandexHomeApi *api, QObject *parent)
   : QAbstractListModel(parent), api_(api)

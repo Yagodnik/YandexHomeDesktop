@@ -17,6 +17,7 @@ add_library(Utils STATIC
         IconsProvider.h
         JsonLoader.cpp
         JsonLoader.h
+        JsonLoaderRaw.h
         LogManager.cpp
         LogManager.h
 )

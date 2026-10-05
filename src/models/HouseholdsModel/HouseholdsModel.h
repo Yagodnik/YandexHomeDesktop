@@ -1,7 +1,10 @@
 #pragma once
 
 #include <QAbstractListModel>
-#include "api/YandexHomeApi.h"
+#include <optional>
+#include "api/model/UserInfo.h"
+
+class YandexHomeApi;
 
 class HouseholdsModel : public QAbstractListModel {
   Q_OBJECT

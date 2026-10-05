@@ -1,6 +1,9 @@
 #include "PropertiesModel.h"
 
 #include <QRandomGenerator>
+#include <QDateTime>
+#include <QJsonDocument>
+#include <ranges>
 
 #include "CapabilitiesModel.h"
 

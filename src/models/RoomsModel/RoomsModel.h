@@ -2,8 +2,9 @@
 
 #include <QAbstractListModel>
 
-#include "api/YandexHomeApi.h"
 #include "api/model/UserInfo.h"
+
+class YandexHomeApi;
 
 class RoomsModel : public QAbstractListModel {
   Q_OBJECT

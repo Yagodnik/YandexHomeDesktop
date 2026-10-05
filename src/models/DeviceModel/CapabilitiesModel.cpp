@@ -1,4 +1,5 @@
 #include "CapabilitiesModel.h"
+#include <ranges>
 
 CapabilitiesModel::CapabilitiesModel(DeviceController *controller, QObject *parent)
   : QAbstractListModel(parent), controller_(controller)

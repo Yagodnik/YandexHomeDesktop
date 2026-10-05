@@ -2,6 +2,7 @@
 
 #include <QTimer>
 #include <QDateTime>
+#include <functional>
 #include <optional>
 
 #include "DeviceAttribute.h"
@@ -12,8 +13,11 @@ class DeviceController : public QObject {
 public:
   using CapabilitiesList = QList<std::optional<CapabilityObject>>;
   using PropertiesList = QList<std::optional<PropertyObject>>;
+  using TimeProvider = std::function<double()>;
 
-  explicit DeviceController(IHomeApi *api, QObject* parent = nullptr);
+  // Tests can advance the suppression window without waiting on wall-clock time.
+  explicit DeviceController(IHomeApi *api, QObject* parent = nullptr,
+                            TimeProvider time_provider = {});
 
   Q_INVOKABLE void LoadDevice(const QString& device_id);
   Q_INVOKABLE void TryReloadDevice();
@@ -43,6 +47,7 @@ private:
 
   QTimer polling_timer_;
   IHomeApi* api_;
+  TimeProvider time_provider_;
 
   static double CurrentTime() {
     return static_cast<double>(QDateTime::currentMSecsSinceEpoch()) / 1000;
@@ -56,4 +61,3 @@ private slots:
   void OnActionExecutionFinishedSuccessfully(const QVariant& user_data);
   void OnActionExecutionFailed(const QString& message, const QVariant& user_data);
 };
-

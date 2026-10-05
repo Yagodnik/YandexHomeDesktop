@@ -2,8 +2,9 @@
 #include <QDebug>
 #include <ranges>
 
-DeviceController::DeviceController(IHomeApi *api, QObject *parent)
-  : QObject(parent), api_(api)
+DeviceController::DeviceController(IHomeApi *api, QObject *parent, TimeProvider time_provider)
+  : QObject(parent), api_(api),
+    time_provider_(time_provider ? std::move(time_provider) : TimeProvider{CurrentTime})
 {
   connect(&polling_timer_,
     &QTimer::timeout,
@@ -19,7 +20,7 @@ void DeviceController::LoadDevice(const QString &device_id) {
 
   qDebug() << "Device Controller: Load device" << device_id;
 
-  last_update_start_time_ = CurrentTime();
+  last_update_start_time_ = time_provider_();
   capabilities_updates_.clear();
   is_in_use_ = true;
 
@@ -79,7 +80,7 @@ void DeviceController::UseCapability(
   };
 
   if (index < capabilities_updates_.size()) {
-    capabilities_updates_[index].PausePolling();
+    capabilities_updates_[index].PausePolling(time_provider_());
   } else {
     qInfo() << "Device Controller: Cant pause polling for" << index << "as it out of range:" << capabilities_updates_.size();
   }
@@ -96,7 +97,7 @@ void DeviceController::UseCapability(
 void DeviceController::OnTimerTimeout() {
   qInfo() << "Device Controller: Polling tick!";
 
-  last_update_start_time_ = CurrentTime();
+  last_update_start_time_ = time_provider_();
   api_->GetDeviceInfo(device_id_, this, [this](ApiResult<DeviceInfo> result) {
     if (result) {
       emit deviceInfoReceived(*result);
@@ -120,7 +121,7 @@ void DeviceController::OnDeviceInfoReceived(const DeviceInfo& info) {
 
   emit deviceDataReady(info);
 
-  const double receive_time = CurrentTime();
+  const double receive_time = time_provider_();
   constexpr double ignore_delta = 0.8;
 
   qInfo() << "Device Controller: received device info:" << info.name;
@@ -174,7 +175,7 @@ void DeviceController::OnActionExecutionFinishedSuccessfully(const QVariant &use
   const int index = user_data.toInt();
 
   if (index < capabilities_updates_.size()) {
-    capabilities_updates_[index].ResumePolling();
+    capabilities_updates_[index].ResumePolling(time_provider_());
   }
 }
 
@@ -186,7 +187,7 @@ void DeviceController::OnActionExecutionFailed(const QString &message, const QVa
   const int index = user_data.toInt();
 
   if (index < capabilities_updates_.size()) {
-    capabilities_updates_[index].ResumePolling();
+    capabilities_updates_[index].ResumePolling(time_provider_());
   }
 
   emit errorOccurred(message);

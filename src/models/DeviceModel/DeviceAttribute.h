@@ -13,6 +13,8 @@ struct DeviceAttribute {
 
   void PausePolling();
   void ResumePolling();
+  void PausePolling(double time);
+  void ResumePolling(double time);
 
   void UpdateFrom(const CapabilityObject& source);
   void UpdateFrom(const PropertyObject& source);

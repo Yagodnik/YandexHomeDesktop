@@ -18,6 +18,16 @@ void DeviceAttribute::ResumePolling() {
   SetPollingEndTime();
 }
 
+void DeviceAttribute::PausePolling(const double time) {
+  SetPending(true);
+  SetPollingStartTime(time);
+}
+
+void DeviceAttribute::ResumePolling(const double time) {
+  SetPending(false);
+  SetPollingEndTime(time);
+}
+
 void DeviceAttribute::UpdateFrom(const CapabilityObject &source) {
   name = CapabilityType::AsString(source.type);
   state = source.state;

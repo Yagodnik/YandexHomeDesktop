@@ -20,6 +20,8 @@ The `Scenarios` test covers loading, execution, refresh, and session reset throu
 
 `Home` checks the shared home snapshot, list models, household selection, filtering, and stale responses after logout. Desktop builds also exercise refresh and household selection through QML. `ApiFixture` checks fixture playback, startup flags, callback lifetimes, and temporary settings. Debug desktop builds additionally test local sign-in and run the executable with `--fake-api --list-devices`. Windows CI builds and tests both Debug and Release with PCH on and off.
 
+`DeviceControl` characterizes concurrent desktop actions and external device changes through the real controller and QML-facing models, using a scripted API and controlled clock. It covers polling suppression, action failures, repeated commands, out-of-order reads, and the exact 800 ms boundaries without sleeps or live API access. Its current-behavior contract, including known surprising outcomes, is in [device-control-behavior.md](device-control-behavior.md).
+
 ## Debug fixture API
 
 Configure with `-DCMAKE_BUILD_TYPE=Debug` (or select the Debug configuration in a multi-config build). Start the executable directly to show the normal UI with bundled dummy data:

@@ -19,6 +19,11 @@ target_link_libraries(AppTests PRIVATE Qt6::Core Qt6::Network Qt6::Test Qt6::Gui
 
 add_test(NAME All COMMAND AppTests)
 
+add_executable(DeviceControlTests DeviceControlTests.cpp)
+target_link_libraries(DeviceControlTests PRIVATE Qt6::Test Models)
+add_test(NAME DeviceControl COMMAND DeviceControlTests)
+set_tests_properties(DeviceControl PROPERTIES TIMEOUT 30)
+
 add_executable(HomeTests HomeTests.cpp)
 target_link_libraries(HomeTests PRIVATE Qt6::Test Models)
 add_test(NAME Home COMMAND HomeTests)

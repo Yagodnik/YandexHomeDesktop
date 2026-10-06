@@ -1,10 +1,10 @@
 #pragma once
 
+#include "CliArguments.h"
+#include "ICommand.h"
 #include <QCommandLineParser>
 #include <functional>
 #include <memory>
-#include "CliArguments.h"
-#include "ICommand.h"
 
 class CommandRegistry {
   Q_DECLARE_TR_FUNCTIONS(CommandRegistry)
@@ -34,15 +34,18 @@ public:
   QString Help(const QString& program) const;
   Result Create(QStringList path, CliArguments arguments) const;
   static CommandRegistry Builtin();
+
 private:
   struct ResolvedCommand {
     QStringList path;
     CliArguments arguments;
     bool help = false;
   };
-  std::expected<ResolvedCommand, QString> ResolveLegacy(QStringList path, CliArguments arguments) const;
+  std::expected<ResolvedCommand, QString> ResolveLegacy(QStringList path,
+                                                        CliArguments arguments) const;
   const Definition* Find(const QStringList& path) const;
-  static std::expected<void, QString> ValidateOptions(const Definition& command, const CliArguments& arguments);
+  static std::expected<void, QString> ValidateOptions(const Definition& command,
+                                                      const CliArguments& arguments);
   QList<QCommandLineOption> options_;
   QList<Definition> commands_;
   QList<LegacyAlias> legacy_;

@@ -22,6 +22,7 @@ public:
   void Register(const QString& name, std::shared_ptr<const ICapabilityInput> input);
   std::expected<CapabilityAction, QString> Parse(const CliArguments& arguments) const;
   static CapabilityCommands Builtin();
+
 private:
   QMap<QString, std::shared_ptr<const ICapabilityInput>> inputs_;
 };

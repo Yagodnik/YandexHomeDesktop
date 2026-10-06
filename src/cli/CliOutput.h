@@ -1,5 +1,5 @@
 #pragma once
-#include <QJsonObject>
 #include "api/model/UserInfo.h"
+#include <QJsonObject>
 
 QJsonObject DeviceJson(const DeviceInfo& device);

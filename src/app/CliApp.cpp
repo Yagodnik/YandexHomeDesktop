@@ -1,30 +1,44 @@
 #include "CliApp.h"
 
+#include "api/QtHttpTransport.h"
+#include "api/YandexAccountApi.h"
+#include "api/YandexHomeApi.h"
+#include "auth/AuthorizationService.h"
+#include "cli/CliProgress.h"
+#include "cli/CliRunner.h"
+#include "utils/Settings.h"
 #include <QElapsedTimer>
-#include <QPointer>
 #include <QTimer>
 #include <cstdio>
 #include <memory>
-#include "auth/AuthorizationService.h"
-#include "api/QtHttpTransport.h"
-#include "api/YandexHomeApi.h"
-#include "api/YandexAccountApi.h"
-#include "cli/CliRunner.h"
-#include "utils/Settings.h"
+#ifdef Q_OS_WIN
+#include <io.h>
+#else
+#include <unistd.h>
+#endif
 #ifdef YH_DEBUG_FAKE_API
 #include "api/debug/FixtureApi.h"
 #endif
 
 namespace {
+bool IsTerminal(FILE* stream) {
+#ifdef Q_OS_WIN
+  return _isatty(_fileno(stream)) != 0;
+#else
+  return isatty(fileno(stream)) != 0;
+#endif
+}
+
 void Write(const QByteArray& text, bool error) {
   FILE* stream = error ? stderr : stdout;
   std::fwrite(text.constData(), 1, text.size(), stream);
   std::fflush(stream);
 }
-}
+} // namespace
 
 int RunCli(QCoreApplication& app, const StartupOptions& options) {
-  const bool json = options.cli_arguments.contains("--json") || options.cli_arguments.contains("-j");
+  const bool json =
+      options.cli_arguments.contains("--json") || options.cli_arguments.contains("-j");
   const auto parsed = CliCommand::Parse(options.cli_arguments);
   if (!parsed) {
     Write(CliRunner::FormatError(json, "usage", parsed.error()), true);
@@ -62,18 +76,33 @@ int RunCli(QCoreApplication& app, const StartupOptions& options) {
   DeviceService devices(home_api);
   ScenarioService scenarios(home_api);
   AccountService account(account_api);
-  CliRunner runner({&home, &devices, &scenarios, &account,
-    [&auth, &options](QObject* context, ApiResultHandler<void> handler) {
-      auto delivered = std::make_shared<bool>(false);
-      QObject::connect(&auth, &AuthorizationService::logoutFinished, context, [handler, delivered] {
-        if (!*delivered) { *delivered = true; handler(ApiResult<void>{}); }
-      });
-      QObject::connect(&auth, &AuthorizationService::logoutFailed, context, [handler, delivered](const QString& error) {
-        if (!*delivered) { *delivered = true; handler(std::unexpected(ApiError{ApiErrorKind::Service, error})); }
-      });
-      if (!options.use_fake_api) { Settings::ResetStoredSettings(); }
-      auth.Logout();
-    }}, Write);
+  CliProgress progress(CliProgress::EnabledFor(*parsed, IsTerminal(stderr)),
+                       [](const QByteArray& text) { Write(text, true); });
+  const auto write_result = [&progress](const QByteArray& text, bool error) {
+    progress.Stop();
+    Write(text, error);
+  };
+  const auto reset = [&auth, &options](QObject* context, ApiResultHandler<void> handler) {
+    auto delivered = std::make_shared<bool>(false);
+    QObject::connect(&auth, &AuthorizationService::logoutFinished, context, [handler, delivered] {
+      if (!*delivered) {
+        *delivered = true;
+        handler(ApiResult<void>{});
+      }
+    });
+    QObject::connect(&auth, &AuthorizationService::logoutFailed, context,
+                     [handler, delivered](const QString& error) {
+                       if (!*delivered) {
+                         *delivered = true;
+                         handler(std::unexpected(ApiError{ApiErrorKind::Service, error}));
+                       }
+                     });
+    if (!options.use_fake_api) {
+      Settings::ResetStoredSettings();
+    }
+    auth.Logout();
+  };
+  CliRunner runner({&home, &devices, &scenarios, &account, reset}, write_result);
   QObject::connect(&runner, &CliRunner::finished, &app, &QCoreApplication::exit);
 
   QElapsedTimer elapsed;
@@ -81,48 +110,61 @@ int RunCli(QCoreApplication& app, const StartupOptions& options) {
   auth_timeout.setSingleShot(true);
   bool dispatched = false;
   const auto fail_auth = [&](int code, const QString& error_code, const QString& message) {
-    if (dispatched) { return; }
+    if (dispatched) {
+      return;
+    }
     dispatched = true;
     auth_timeout.stop();
-    Write(CliRunner::FormatError(parsed->json, error_code, message), true);
+    write_result(CliRunner::FormatError(parsed->json, error_code, message), true);
     app.exit(code);
   };
   const auto dispatch = [&] {
-    if (dispatched) { return; }
+    if (dispatched) {
+      return;
+    }
     const auto remaining = parsed->timeout_ms - elapsed.elapsed();
     if (remaining <= 0) {
-      fail_auth(CliRunner::Timeout, "timeout", QCoreApplication::translate("CliApp", "Время выполнения команды истекло."));
+      fail_auth(CliRunner::Timeout, "timeout",
+                QCoreApplication::translate("CliApp", "Время выполнения команды истекло."));
       return;
     }
     dispatched = true;
     auth_timeout.stop();
     auto command = *parsed;
     command.timeout_ms = static_cast<int>(remaining);
+    progress.SetMessage(QCoreApplication::translate("CliApp", "Выполнение команды..."));
     runner.Start(command);
   };
   QObject::connect(&auth, &AuthorizationService::authorized, &app, dispatch);
   QObject::connect(&auth, &AuthorizationService::unauthorized, &app, [&] {
     fail_auth(CliRunner::Unauthorized, "authorization_required",
-      QCoreApplication::translate("CliApp", "Сначала войдите в аккаунт через приложение."));
+              QCoreApplication::translate("CliApp", "Сначала войдите в аккаунт через приложение."));
   });
   QObject::connect(&auth, &AuthorizationService::authorizationFailed, &app, [&] {
-    fail_auth(CliRunner::Unauthorized, "authorization_failed",
-      QCoreApplication::translate("CliApp", "Не удалось прочитать сохранённые данные входа."));
+    fail_auth(
+        CliRunner::Unauthorized, "authorization_failed",
+        QCoreApplication::translate("CliApp", "Не удалось прочитать сохранённые данные входа."));
   });
   QObject::connect(&auth, &AuthorizationService::authorizationCanceled, &app, [&] {
     fail_auth(CliRunner::Unauthorized, "authorization_canceled",
-      QCoreApplication::translate("CliApp", "Доступ к сохранённым данным входа отменён."));
+              QCoreApplication::translate("CliApp", "Доступ к сохранённым данным входа отменён."));
   });
   QObject::connect(&auth_timeout, &QTimer::timeout, &app, [&] {
-    fail_auth(CliRunner::Timeout, "timeout", QCoreApplication::translate("CliApp", "Время выполнения команды истекло."));
+    fail_auth(CliRunner::Timeout, "timeout",
+              QCoreApplication::translate("CliApp", "Время выполнения команды истекло."));
   });
   // Synchronous API implementations can finish immediately, so dispatch only
   // after the event loop starts. Reset works without a valid saved login.
   QTimer::singleShot(0, &app, [&] {
     elapsed.start();
     auth_timeout.start(parsed->timeout_ms);
-    if (!parsed->operation->RequiresAuthorization()) { dispatch(); }
-    else { auth.AttemptLocalAuthorization(); }
+    if (!parsed->operation->RequiresAuthorization()) {
+      dispatch();
+    } else {
+      progress.SetMessage(QCoreApplication::translate(
+          "CliApp", "Чтение сохранённых данных входа; подтвердите запрос системы..."));
+      auth.AttemptLocalAuthorization();
+    }
   });
   return app.exec();
 }

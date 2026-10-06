@@ -1,9 +1,9 @@
 #pragma once
 
-#include <QTimer>
-#include <memory>
 #include "CliCommand.h"
 #include "CliContext.h"
+#include <QTimer>
+#include <memory>
 
 // Execution mechanics only. ICommand implementations own business operations.
 class CliRunner final : public QObject, public CliContext {
@@ -13,17 +13,19 @@ public:
   explicit CliRunner(CliServices services, Writer writer, QObject* parent = nullptr);
   void Start(const CliCommand& command);
   static QByteArray FormatError(bool json, const QString& code, const QString& message,
-                               const QJsonObject& details = {});
+                                const QJsonObject& details = {});
   QObject* Owner() const override;
   const CliServices& Services() const override;
   void Complete(const QJsonObject& output, const QString& text) override;
   void FailApi(const ApiError& error) override;
-  void Fail(int exit_code, const QString& code, const QString& message, const QJsonObject& details = {}) override;
+  void Fail(int exit_code, const QString& code, const QString& message,
+            const QJsonObject& details = {}) override;
 
 signals:
   void finished(int exit_code);
 private slots:
   void OnTimeout();
+
 private:
   void Finish(int exit_code, const QByteArray& output);
   CliServices services_;

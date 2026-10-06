@@ -1,11 +1,11 @@
 #pragma once
 
-#include <QJsonObject>
-#include <functional>
 #include "services/AccountService.h"
 #include "services/DeviceService.h"
 #include "services/HomeService.h"
 #include "services/ScenarioService.h"
+#include <QJsonObject>
+#include <functional>
 
 struct CliServices {
   HomeService* home;
@@ -17,7 +17,14 @@ struct CliServices {
 
 class CliContext {
 public:
-  enum ExitCode { Success = 0, RequestFailed = 1, Usage = 2, Unauthorized = 3, NotFound = 4, Timeout = 5 };
+  enum ExitCode {
+    Success = 0,
+    RequestFailed = 1,
+    Usage = 2,
+    Unauthorized = 3,
+    NotFound = 4,
+    Timeout = 5
+  };
   virtual ~CliContext() = default;
   virtual QObject* Owner() const = 0;
   virtual const CliServices& Services() const = 0;

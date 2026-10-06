@@ -11,6 +11,8 @@ public:
     return Iot::State::Mode(arguments.Value("instance"), arguments.Value("value"));
   }
 };
+} // namespace
+std::shared_ptr<const ICapabilityInput> Mode() {
+  return std::make_shared<ModeInput>();
 }
-std::shared_ptr<const ICapabilityInput> Mode() { return std::make_shared<ModeInput>(); }
-}
+} // namespace CliCapability

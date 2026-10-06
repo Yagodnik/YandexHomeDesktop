@@ -6,7 +6,7 @@ add_library(AppCli STATIC
   capabilities/ValueParsers.h capabilities/ValueParsers.cpp
   capabilities/BooleanInput.cpp capabilities/RangeInput.cpp
   capabilities/ModeInput.cpp capabilities/ColorInput.cpp CliOutput.h CliOutput.cpp
-  CliRunner.h CliRunner.cpp
+  CliRunner.h CliRunner.cpp CliProgress.h CliProgress.cpp
   commands/DeviceCommands.h commands/DeviceCommands.cpp
   commands/ScenarioCommands.h commands/ScenarioCommands.cpp
   commands/LocalCommands.h commands/LocalCommands.cpp)

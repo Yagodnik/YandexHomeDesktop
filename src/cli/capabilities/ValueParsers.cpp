@@ -6,10 +6,12 @@
 
 namespace CliCapability {
 ValueResult BooleanValue(const QString& text) {
-  static const QMap<QString, bool> values{{"on", true}, {"true", true}, {"off", false}, {"false", false}};
+  static const QMap<QString, bool> values{
+      {"on", true}, {"true", true}, {"off", false}, {"false", false}};
   const auto found = values.constFind(text);
   if (found == values.cend()) {
-    return std::unexpected(CliValueParsers::tr("Логическое значение должно быть on/off или true/false."));
+    return std::unexpected(
+        CliValueParsers::tr("Логическое значение должно быть on/off или true/false."));
   }
   return QVariant(*found);
 }
@@ -37,5 +39,7 @@ ValueResult HsvValue(const QString& text) {
   }
   return QVariant(document.object().toVariantMap());
 }
-ValueResult TextValue(const QString& text) { return QVariant(text); }
+ValueResult TextValue(const QString& text) {
+  return QVariant(text);
 }
+} // namespace CliCapability

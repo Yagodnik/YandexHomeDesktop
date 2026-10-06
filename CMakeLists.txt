@@ -44,7 +44,7 @@ include_directories(${hana_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/app)
 
-add_library(AppStartup STATIC src/app/StartupOptions.cpp src/app/StartupOptions.h)
+add_library(AppStartup STATIC src/app/StartupOptions.cpp src/app/StartupOptions.h src/app/CliApplication.h)
 target_link_libraries(AppStartup PUBLIC Qt6::Core)
 
 add_subdirectory(src/api)

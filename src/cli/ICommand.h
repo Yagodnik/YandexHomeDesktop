@@ -7,7 +7,11 @@ class CliContext;
 class ICommand {
 public:
   virtual ~ICommand() = default;
-  [[nodiscard]] virtual bool RequiresAuthorization() const { return true; }
-  [[nodiscard]] virtual bool UsesServices() const { return true; }
+  [[nodiscard]] virtual bool RequiresAuthorization() const {
+    return true;
+  }
+  [[nodiscard]] virtual bool UsesServices() const {
+    return true;
+  }
   virtual void Execute(CliContext& context) const = 0;
 };

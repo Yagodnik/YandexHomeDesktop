@@ -8,6 +8,11 @@ read the same saved keychain token. `--help` and argument validation run before
 authentication. Confirmed reset does not require reading a saved login. The CLI
 does not open a browser to sign in.
 
+On macOS, both console entry points select Qt's Core Foundation event dispatcher
+before constructing the application. QtKeychain delivers completion callbacks
+through the native main queue; the default console dispatcher would leave these
+callbacks pending after the password prompt.
+
 The build produces `<build-dir>/YandexHomeCli` on macOS and
 `<build-dir>/YandexHomeCli.exe` on Windows. Installation places it alongside the
 Windows desktop executable, or inside
@@ -69,12 +74,26 @@ YandexHomeCli --reset --i-know-what-i-am-doing
 
 ## Automation contract
 
+Interactive commands show an animated progress bar on stderr while reading the
+saved login and executing the command. Results are printed after the indicator
+is cleared. Add `--no-progress` to disable it:
+
+```sh
+YandexHomeCli devices list --no-progress
+```
+
+Progress is automatically disabled with `--json` and when stderr is not a
+terminal. Redirect stderr as well when capturing plain output without progress.
+Help and argument validation do not display progress.
+
 Add `--json` or `-j` for a single JSON object on stdout on success, or stderr on
 failure. Protocol keys and error codes are stable strings; display messages use
 the system UI language. Commands reject unknown, repeated, and inapplicable
 options. `--timeout` sets the total budget, including saved-token lookup and all
 requests (1–3600000 milliseconds; default 30000). Timeout cancels callback delivery;
 an action already sent to the API may still have taken effect.
+macOS password prompts also count toward this budget. Use, for example,
+`--timeout 120000` if approving Keychain access needs more time.
 
 Examples:
 

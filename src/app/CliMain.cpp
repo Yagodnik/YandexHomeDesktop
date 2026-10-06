@@ -1,10 +1,12 @@
-#include "CliApp.h"
 #include "AppTranslations.h"
+#include "CliApp.h"
+#include "CliApplication.h"
 #include "cli/CliRunner.h"
 #include <cstdio>
 #include <exception>
 
 int main(int argc, char* argv[]) {
+  PrepareCliApplication();
   QCoreApplication app(argc, argv);
   app.setApplicationName("YandexHomeCli");
   // CLI output is owned by the runner; diagnostic logs must not enter JSON.
@@ -23,9 +25,11 @@ int main(int argc, char* argv[]) {
     std::fwrite(error.constData(), 1, error.size(), stderr);
     return CliRunner::Usage;
   }
-  try { return RunCli(app, *options); }
-  catch (const std::exception& exception) {
-    const auto error = CliRunner::FormatError(json, "startup_error", QString::fromUtf8(exception.what()));
+  try {
+    return RunCli(app, *options);
+  } catch (const std::exception& exception) {
+    const auto error =
+        CliRunner::FormatError(json, "startup_error", QString::fromUtf8(exception.what()));
     std::fwrite(error.constData(), 1, error.size(), stderr);
     return CliRunner::RequestFailed;
   }

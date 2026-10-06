@@ -10,10 +10,14 @@ public:
   RangeInput() : Input(Iot::Rules::Range()) {}
   StateResult Parse(const CliArguments& arguments) const override {
     const auto value = NumberValue(arguments.Value("value"));
-    if (!value) { return std::unexpected(value.error()); }
+    if (!value) {
+      return std::unexpected(value.error());
+    }
     return Iot::State::Range(arguments.Value("instance"), value->toDouble());
   }
 };
+} // namespace
+std::shared_ptr<const ICapabilityInput> Range() {
+  return std::make_shared<RangeInput>();
 }
-std::shared_ptr<const ICapabilityInput> Range() { return std::make_shared<RangeInput>(); }
-}
+} // namespace CliCapability

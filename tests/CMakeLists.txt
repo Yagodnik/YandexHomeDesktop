@@ -50,7 +50,7 @@ if(BUILD_DESKTOP_APP)
 endif()
 
 add_executable(CliTests CliTests.cpp)
-target_link_libraries(CliTests PRIVATE Qt6::Test AppCli)
+target_link_libraries(CliTests PRIVATE Qt6::Test AppCli AppStartup)
 add_test(NAME Cli COMMAND CliTests)
 set_tests_properties(Cli PROPERTIES TIMEOUT 30)
 

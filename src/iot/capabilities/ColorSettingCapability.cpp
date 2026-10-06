@@ -1,5 +1,7 @@
 #include "ColorSettingCapability.h"
 #include <QColor>
+#include "iot/core/CapabilityState.h"
+#include "iot/core/CapabilityParameters.h"
 
 ColorSettingCapability::ColorSettingCapability(QObject *parent) : IotObject("base", parent) {}
 
@@ -20,73 +22,50 @@ QVariant ColorSettingCapability::GetValue() const {
 }
 
 QVariantMap ColorSettingCapability::Create(const QColor &value) {
-  if (parameters_["color_model"] == "hsv") {
-    QVariantMap hsv_data = {
-      { "h", static_cast<int>(value.hue()) },
-      { "s", static_cast<int>(value.saturation() / 255.0 * 100) },
-      { "v", static_cast<int>(value.value() / 255.0 * 100) }
-    };
-
-    qInfo() << "ColorSettingCapability: Setting HSV: " << hsv_data;
-
-    return {
-        { "instance", "hsv" },
-        { "value", hsv_data }
-    };
+  const auto model = Iot::ColorParameters(parameters_).Model();
+  if (model == "hsv") {
+    // Preserve the desktop's integer truncation and QColor's undefined hue (-1).
+    const auto hsv = Iot::State::HsvComponents(value.hue(),
+      static_cast<int>(value.saturation() / 255.0 * 100),
+      static_cast<int>(value.value() / 255.0 * 100));
+    qInfo() << "ColorSettingCapability: Setting HSV:" << hsv;
+    return Iot::State::Hsv(hsv);
   }
-
-  if (parameters_["color_model"] == "rgb") {
-    uint32_t rgb_data = (value.red() << 16) | (value.green() << 8) | value.blue();
-
-    qInfo() << "ColorSettingCapability: Setting RGB: " << rgb_data;
-
-
-    return {
-      { "instance", "rgb" },
-      { "value", rgb_data }
-    };
+  if (model == "rgb") {
+    const auto rgb = Iot::State::PackRgb(value.red(), value.green(), value.blue());
+    qInfo() << "ColorSettingCapability: Setting RGB:" << rgb;
+    return Iot::State::Rgb(rgb);
   }
-
   qWarning() << "CapabilityFactory::CreateColorSetting: Unknown color model:" << parameters_["color_model"];
-
   return {};
 }
 
 QVariantMap ColorSettingCapability::Create(const int value) {
-  return {
-    { "instance", "temperature_k" },
-    { "value", value }
-  };
+  return Iot::State::Temperature(value);
 }
 
 QVariantMap ColorSettingCapability::Create(const QString &value) {
-  return {
-    { "instance", "scene" },
-    { "value", value }
-  };
+  return Iot::State::Scene(value);
 }
 
 int ColorSettingCapability::GetTemperatureMin() const {
-  const auto temperature_k = parameters_["temperature_k"].toMap();
-  return temperature_k["min"].toInt();
+  return Iot::ColorParameters(parameters_).Temperature().IntMin();
 }
 
 int ColorSettingCapability::GetTemperatureMax() const {
-  const auto temperature_k = parameters_["temperature_k"].toMap();
-  return temperature_k["max"].toInt();
+  return Iot::ColorParameters(parameters_).Temperature().IntMax();
 }
 
 QVariantList ColorSettingCapability::GetAvailableScenes() const {
-  const auto color_scene = parameters_["color_scene"].toMap();
-  return color_scene["scenes"].toList();
+  return Iot::ColorParameters(parameters_).Scenes();
 }
 
 bool ColorSettingCapability::GetSupportsColors() const {
-  return parameters_.contains("color_model");
+  return Iot::ColorParameters(parameters_).HasColors();
 }
 
 bool ColorSettingCapability::GetSupportsTemperature() const {
-  return parameters_.contains("temperature_k");
+  return Iot::ColorParameters(parameters_).HasTemperature();
 }
 
 void ColorSettingCapability::SetParameters(const QVariantMap &parameters) {

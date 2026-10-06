@@ -42,6 +42,7 @@ AppContext::AppContext(QGuiApplication *app, const StartupOptions& options)
   QObject::connect(authorization_service, &AuthorizationService::logout,
     home_service, &HomeService::Reset);
   scenario_service = new ScenarioService(yandex_api, app_);
+  device_service = new DeviceService(yandex_api, app_);
   QObject::connect(authorization_service, &AuthorizationService::logout,
     scenario_service, &ScenarioService::Reset);
 

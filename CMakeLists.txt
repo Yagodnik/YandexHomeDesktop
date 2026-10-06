@@ -48,10 +48,11 @@ add_library(AppStartup STATIC src/app/StartupOptions.cpp src/app/StartupOptions.
 target_link_libraries(AppStartup PUBLIC Qt6::Core)
 
 add_subdirectory(src/api)
+add_subdirectory(src/iot)
 add_subdirectory(src/services)
+add_subdirectory(src/cli)
 add_subdirectory(src/models)
 add_subdirectory(src/utils)
-add_subdirectory(src/iot)
 
 if(BUILD_TESTING)
   add_subdirectory(tests)
@@ -100,7 +101,7 @@ if(BUILD_DESKTOP_APP)
     target_sources(HomeTests PRIVATE tests/QmlTestEnvironment.cpp tests/QmlTestEnvironment.h)
     target_compile_definitions(HomeTests PRIVATE
       HOME_QML_TESTS HOME_IMPORT_PATH="${CMAKE_CURRENT_BINARY_DIR}")
-    target_link_libraries(HomeTests PRIVATE Qt6::Quick Qt6::QuickControls2)
+    target_link_libraries(HomeTests PRIVATE Qt6::Quick Qt6::QuickControls2 Iot)
     add_dependencies(HomeTests YandexHomeDesktopComponentsplugin
       YandexHomeDesktopUiplugin YandexHomeDesktopPagesplugin)
     target_compile_definitions(ScenariosTests PRIVATE
@@ -110,7 +111,7 @@ if(BUILD_DESKTOP_APP)
       YandexHomeDesktopUiplugin YandexHomeDesktopPagesplugin)
     add_executable(QmlPageLoadTest tests/QmlPageLoadTest.cpp
       tests/QmlTestEnvironment.cpp tests/QmlTestEnvironment.h)
-    target_link_libraries(QmlPageLoadTest PRIVATE Qt6::Gui Qt6::Qml Models Utils)
+    target_link_libraries(QmlPageLoadTest PRIVATE Qt6::Gui Qt6::Qml Qt6::Test Models Utils Iot)
     add_dependencies(QmlPageLoadTest YandexHomeDesktopComponentsplugin
       YandexHomeDesktopUiplugin YandexHomeDesktopPagesplugin)
     foreach(_qml_page AuthPage AuthCanceledPage ErrorPage LoadingPage MainPage
@@ -124,7 +125,7 @@ if(BUILD_DESKTOP_APP)
 
     add_executable(QmlLayoutTests tests/QmlLayoutTests.cpp
       tests/QmlTestEnvironment.cpp tests/QmlTestEnvironment.h)
-    target_link_libraries(QmlLayoutTests PRIVATE Qt6::QuickTest Qt6::Qml Qt6::Gui Models Utils)
+    target_link_libraries(QmlLayoutTests PRIVATE Qt6::QuickTest Qt6::Qml Qt6::Gui Models Utils Iot)
     add_dependencies(QmlLayoutTests YandexHomeDesktopComponentsplugin
       YandexHomeDesktopUiplugin YandexHomeDesktopPagesplugin)
     add_test(NAME QmlLayouts COMMAND QmlLayoutTests
@@ -147,26 +148,21 @@ if(BUILD_DESKTOP_APP)
     src/utils/Router.cpp
     src/utils/Router.h
     ${RESOURCES}
-    src/cli/CLI.cpp
-    src/cli/CLI.h
-    src/cli/OnOffExecutor.cpp
-    src/cli/OnOffExecutor.h
-    src/cli/IExecutor.cpp
-    src/cli/IExecutor.h
-    src/cli/ListDevicesCommand.cpp
-    src/cli/ListDevicesCommand.h
-    src/cli/ResetCommand.cpp
-    src/cli/ResetCommand.h
-    src/cli/ICommand.h
-    src/cli/AccountInfoCommand.cpp
-    src/cli/AccountInfoCommand.h
     src/app/AppContext.cpp
     src/app/AppContext.h
-    src/app/CliApp.cpp
     src/app/CliApp.h
     src/app/GuiApp.cpp
     src/app/GuiApp.h
   )
+  add_library(CliBootstrap STATIC src/app/CliApp.cpp src/app/CliApp.h)
+  target_compile_definitions(CliBootstrap PRIVATE "$<$<CONFIG:Debug>:YH_DEBUG_FAKE_API>")
+  target_link_libraries(CliBootstrap PUBLIC AppCli AppStartup YandexAuth YandexApiAdapter Utils
+    "$<$<CONFIG:Debug>:FixtureApi>")
+  add_executable(YandexHomeCli src/app/CliMain.cpp)
+  target_compile_definitions(YandexHomeCli PRIVATE "$<$<CONFIG:Debug>:YH_DEBUG_FAKE_API>")
+  target_link_libraries(YandexHomeCli PRIVATE CliBootstrap)
+  target_sources(YandexHomeCli PRIVATE "$<$<CONFIG:Debug>:${DEBUG_FIXTURE_RESOURCES}>")
+
   target_compile_definitions(appYandexHomeDesktop PRIVATE "$<$<CONFIG:Debug>:YH_DEBUG_FAKE_API>")
   target_sources(appYandexHomeDesktop PRIVATE "$<$<CONFIG:Debug>:${DEBUG_FIXTURE_RESOURCES}>")
 
@@ -196,9 +192,9 @@ if(BUILD_DESKTOP_APP)
 
   file(GLOB_RECURSE QML_TRANSLATION_SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/src/qml/*.qml")
-  qt_add_translations(appYandexHomeDesktop
+  qt_add_translations(appYandexHomeDesktop TARGETS YandexHomeCli
     TS_FILES "${CMAKE_CURRENT_SOURCE_DIR}/translations/YandexHomeDesktop_en.ts"
-    SOURCE_TARGETS appYandexHomeDesktop
+    SOURCE_TARGETS appYandexHomeDesktop AppCli CliBootstrap IotCore
     SOURCES
       ${QML_TRANSLATION_SOURCES}
       translations/DataStrings.cpp
@@ -221,10 +217,17 @@ if(BUILD_DESKTOP_APP)
     YandexHomeDesktopUi YandexHomeDesktopPages
     YandexHomeDesktopComponents
     YandexApiAdapter YandexAuth Models PlatformService Utils Iot
-    AppStartup "$<$<CONFIG:Debug>:FixtureApi>"
+    AppStartup CliBootstrap "$<$<CONFIG:Debug>:FixtureApi>"
   )
 
   if(BUILD_TESTING)
+    foreach(_cli_target YandexHomeCli appYandexHomeDesktop)
+      add_test(NAME CliProcess_${_cli_target} COMMAND "${CMAKE_COMMAND}"
+        "-DAPP_PATH=$<TARGET_FILE:${_cli_target}>"
+        "-DCONFIGURATION=$<CONFIG>"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/CliSmoke.cmake")
+      set_tests_properties(CliProcess_${_cli_target} PROPERTIES TIMEOUT 30)
+    endforeach()
     set(_fixture_debug_configs)
     set(_fixture_release_configs)
     if(CMAKE_CONFIGURATION_TYPES)
@@ -253,6 +256,12 @@ if(BUILD_DESKTOP_APP)
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
   )
+  if(APPLE)
+    set_target_properties(YandexHomeCli PROPERTIES INSTALL_RPATH "@executable_path/../Frameworks")
+    install(TARGETS YandexHomeCli RUNTIME DESTINATION "YandexHomeDesktop.app/Contents/MacOS")
+  else()
+    install(TARGETS YandexHomeCli RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+  endif()
   if(APPLE)
     qt_generate_deploy_qml_app_script(
       TARGET appYandexHomeDesktop

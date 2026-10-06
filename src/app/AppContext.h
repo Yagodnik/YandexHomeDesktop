@@ -11,6 +11,7 @@
 #include "../models/AccountModel.h"
 #include "services/HomeService.h"
 #include "services/ScenarioService.h"
+#include "services/DeviceService.h"
 #include "StartupOptions.h"
 
 struct AppContext {
@@ -25,6 +26,7 @@ struct AppContext {
   AccountModel *yandex_account;
   HomeService *home_service;
   ScenarioService *scenario_service;
+  DeviceService *device_service;
   Settings *settings;
   QStringList cli_arguments;
 

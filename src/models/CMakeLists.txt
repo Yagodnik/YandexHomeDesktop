@@ -9,6 +9,8 @@ add_library(Models STATIC
         HomeViewModel.h
         DeviceModel/DeviceController.cpp
         DeviceModel/DeviceController.h
+        DeviceModel/DeviceViewModel.h
+        DeviceModel/DeviceViewModel.cpp
         ScenariosModel/ScenariosModel.cpp
         ScenariosModel/ScenariosModel.h
         ScenariosModel/ScenariosViewModel.h
@@ -33,8 +35,6 @@ add_library(Models STATIC
         ColorsModel/ColorModesFilterModel.h
         HouseholdsModel/HouseholdsModel.cpp
         HouseholdsModel/HouseholdsModel.h
-        DeviceModel/DeviceAttribute.h
-        DeviceModel/DeviceAttribute.cpp
         DeviceModel/PropertiesModel.cpp
         DeviceModel/PropertiesModel.h
         ModesModel/ModesModel.cpp

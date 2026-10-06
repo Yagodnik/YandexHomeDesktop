@@ -1,4 +1,5 @@
 import QtQuick
+import YandexHomeDesktop.ViewModels
 import YandexHomeDesktop.Ui as UI
 import YandexHomeDesktop.Components as Components
 
@@ -7,13 +8,14 @@ UI.PageSurface {
 
   UI.ErrorDialog {
     id: actionErrorDialog
+    objectName: "deviceErrorDialog"
 
     dialogTitle: qsTr("Ошибка")
     dialogMessage: "!"
   }
 
   Connections {
-    target: deviceController
+    target: deviceViewModel
 
     function onErrorOccurred(errorCode) {
       const error = errorCodes.GetDeviceError(errorCode);
@@ -31,61 +33,12 @@ UI.PageSurface {
   Components.DeviceHeader {
     id: topHeader
     width: parent.width
-    title: deviceDataModel.name
-    online: deviceDataModel.isOnline ?? false
+    title: deviceViewModel.deviceData.name
+    online: deviceViewModel.deviceData.isOnline ?? false
 
     onBackClicked: {
-      deviceController.ForgetDevice();
+      deviceViewModel.ForgetDevice();
       router.goBack();
-    }
-  }
-
-  property int okCount: 0
-
-  function initializationOk() {
-    okCount++;
-    if (okCount >= 3) {
-      deviceStates.currentIndex = 2;
-    }
-  }
-
-  function initializationFailed() {
-    deviceStates.currentIndex = 1;
-  }
-
-  Connections {
-    target: capabilitiesModel
-
-    function onInitialized() {
-      initializationOk();
-    }
-
-    function onInitializeFailed() {
-      initializationFailed();
-    }
-  }
-
-  Connections {
-    target: propertiesModel
-
-    function onInitialized() {
-      initializationOk();
-    }
-
-    function onInitializeFailed() {
-      initializationFailed();
-    }
-  }
-
-  Connections {
-    target: deviceDataModel
-
-    function onInitialized() {
-      initializationOk();
-    }
-
-    function onInitializeFailed() {
-      initializationFailed();
     }
   }
 
@@ -96,7 +49,7 @@ UI.PageSurface {
     anchors.top: topHeader.bottom
     anchors.bottom: parent.bottom
 
-    currentIndex: 0
+    currentIndex: deviceViewModel.state
 
     UI.LoadingPane {
       active: deviceStates.currentIndex === 0
@@ -109,15 +62,13 @@ UI.PageSurface {
       message: qsTr("Нет связи с устройством")
       buttonText: qsTr("Попробовать снова")
       onRetryRequested: {
-        root.okCount = 0;
-        deviceStates.currentIndex = 0;
-        deviceController.TryReloadDevice();
+        deviceViewModel.TryReloadDevice();
       }
     }
 
     Components.DeviceControlsPane {
-      capabilitiesSourceModel: capabilitiesModel
-      propertiesSourceModel: propertiesModel
+      capabilitiesSourceModel: deviceViewModel.capabilities
+      propertiesSourceModel: deviceViewModel.properties
       capabilitiesTitle: qsTr("Умения")
       propertiesTitle: qsTr("Свойства")
     }

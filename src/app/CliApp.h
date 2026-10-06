@@ -1,22 +1,8 @@
 #pragma once
 
-#include <QObject>
+#include <QCoreApplication>
+#include "StartupOptions.h"
 
-#include "AppContext.h"
-
-
-class CliApp : public QObject {
-public:
-  explicit CliApp(AppContext& app_context, QObject *parent = nullptr);
-
-  int Start();
-
-private slots:
-  void onAuthorized();
-  void onUnauthorized();
-  void onAuthorizationFailed();
-
-private:
-
-  AppContext& app_context_;
-};
+// Headless bootstrap. Help/validation run before auth; commands use services and
+// saved credentials without creating AppContext, QML, widgets, or tray objects.
+int RunCli(QCoreApplication& app, const StartupOptions& options);

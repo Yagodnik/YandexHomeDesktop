@@ -6,8 +6,6 @@
 #include <QFont>
 
 #include "api/YandexHomeApi.h"
-#include "app/CliApp.h"
-#include "cli/CLI.h"
 #include "iot/capabilities/ColorSettingCapability.h"
 #include "models/ScenariosModel/ScenariosViewModel.h"
 #include "models/HomeViewModel.h"
@@ -36,7 +34,7 @@
 #include "iot/capabilities/ModesCapability.h"
 #include "iot/properties/EventProperty.h"
 #include "iot/properties/FloatProperty.h"
-#include "models/DeviceModel/DeviceController.h"
+#include "models/DeviceModel/DeviceViewModel.h"
 #include "models/DeviceModel/DeviceDataModel.h"
 #include "utils/IconsProvider.h"
 #include "utils/LogManager.h"
@@ -53,7 +51,7 @@ GuiApp::GuiApp(AppContext& app_context, QObject *parent) :
   const auto router = new Router(app_context.app_);
   const auto scenarios_view_model = new ScenariosViewModel(app_context.scenario_service, app_context.app_);
   const auto home_view_model = new HomeViewModel(app_context.home_service, app_context.app_);
-  const auto device_controller = new DeviceController(app_context.yandex_api, app_context.app_);
+  const auto device_view_model = new DeviceViewModel(app_context.device_service, app_context.app_);
   const auto error_codes = new ErrorCodes(app_context.app_);
   const auto color_model = new ColorsModel(app_context.app_);
   const auto color_modes_model = new ColorModesModel(app_context.app_);
@@ -61,11 +59,11 @@ GuiApp::GuiApp(AppContext& app_context, QObject *parent) :
   const auto titles_list = new TitlesProvider(":/data/instances.json", "DataInstances", app_context.app_);
   const auto events_list = new TitlesProvider(":/data/propertiesEvents.json", "DataEvents", app_context.app_);
   const auto units_list = new UnitsList(app_context.app_);
-  const auto device_data_model = new DeviceDataModel(device_controller, app_context.app_);
+  const auto device_data_model = device_view_model->GetDeviceData();
   const auto device_icons = new IconsProvider(":/data/deviceIcons.json", "devices", app_context.app_);
   const auto properties_icons = new IconsProvider(":/data/propertiesIcons.json", "properties", app_context.app_);
-  const auto capabilities_model = new CapabilitiesModel(device_controller, app_context.app_);
-  const auto properties_model = new PropertiesModel(device_controller, app_context.app_);
+  const auto capabilities_model = device_view_model->GetCapabilities();
+  const auto properties_model = device_view_model->GetProperties();
 
   root_context->setContextProperty("platformService", app_context.platform_service);
   root_context->setContextProperty("authorizationService", app_context.authorization_service);
@@ -73,7 +71,8 @@ GuiApp::GuiApp(AppContext& app_context, QObject *parent) :
   root_context->setContextProperty("scenariosViewModel", scenarios_view_model);
   root_context->setContextProperty("homeViewModel", home_view_model);
   root_context->setContextProperty("propertiesModel", properties_model);
-  root_context->setContextProperty("deviceController", device_controller);
+  root_context->setContextProperty("deviceViewModel", device_view_model);
+  root_context->setContextProperty("deviceController", device_view_model);
   root_context->setContextProperty("yandexAccount", app_context.yandex_account);
   root_context->setContextProperty("themes", themes);
   root_context->setContextProperty("capabilitiesModel", capabilities_model);
@@ -133,6 +132,14 @@ void GuiApp::RegisterFonts() {
 }
 
 void GuiApp::RegisterModels() {
+  qmlRegisterUncreatableType<DeviceViewModel>("YandexHomeDesktop.ViewModels", 1, 0,
+    "DeviceViewModel", "Supplied by the application");
+  qmlRegisterUncreatableType<CapabilitiesModel>("YandexHomeDesktop.ViewModels", 1, 0,
+    "CapabilitiesModel", "Supplied by the view model");
+  qmlRegisterUncreatableType<PropertiesModel>("YandexHomeDesktop.ViewModels", 1, 0,
+    "PropertiesModel", "Supplied by the view model");
+  qmlRegisterUncreatableType<DeviceDataModel>("YandexHomeDesktop.ViewModels", 1, 0,
+    "DeviceDataModel", "Supplied by the view model");
   qmlRegisterUncreatableType<HomeViewModel>("YandexHomeDesktop.ViewModels", 1, 0,
     "HomeViewModel", "Supplied by the application");
   qmlRegisterUncreatableType<DevicesModel>("YandexHomeDesktop.ViewModels", 1, 0,

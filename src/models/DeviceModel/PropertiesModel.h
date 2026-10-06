@@ -2,7 +2,9 @@
 
 #include <QAbstractListModel>
 
-#include "DeviceController.h"
+#include "services/DeviceSession.h"
+
+class DeviceController;
 #include "api/model/UserInfo.h"
 
 // #define ALLOW_FAKE_PROPERTIES
@@ -16,6 +18,7 @@ class PropertiesModel : public QAbstractListModel {
   Q_OBJECT
   Q_PROPERTY(int count READ rowCount NOTIFY dataLoaded)
 public:
+  explicit PropertiesModel(QObject* parent = nullptr);
   explicit PropertiesModel(DeviceController* controller, QObject* parent = nullptr);
 
   enum Roles {
@@ -28,6 +31,8 @@ public:
   };
 
   void ResetModel();
+  void OnPropertiesUpdateReady(const DeviceSession::PropertiesList& properties);
+  void OnPropertiesUpdateFailed(const QString& error_message);
 
   [[nodiscard]] int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   [[nodiscard]] QVariant data(const QModelIndex &index, int role) const override;
@@ -39,11 +44,7 @@ signals:
   void initializeFailed();
 
 private:
-  DeviceController* controller_;
   QList<PropertyObject> properties_;
   bool is_initialized_ = false;
 
-private slots:
-  void OnPropertiesUpdateReady(const DeviceController::PropertiesList& properties);
-  void OnPropertiesUpdateFailed(const QString& error_message);
 };

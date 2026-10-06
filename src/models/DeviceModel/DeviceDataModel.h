@@ -2,14 +2,20 @@
 
 #include <QObject>
 
-#include "DeviceController.h"
+#include "services/DeviceSession.h"
+
+class DeviceController;
 
 class DeviceDataModel : public QObject {
   Q_OBJECT
   Q_PROPERTY(QString name READ GetDeviceName NOTIFY deviceNameChanged)
   Q_PROPERTY(bool isOnline READ IsDeviceOnline NOTIFY deviceStateChanged)
 public:
-  explicit DeviceDataModel(DeviceController *controller, QObject *parent = nullptr);
+  explicit DeviceDataModel(QObject* parent = nullptr);
+  explicit DeviceDataModel(DeviceController* controller, QObject* parent = nullptr);
+  void ResetModel();
+  void OnDeviceInfoReceived(const DeviceInfo& info);
+  void OnDeviceInfoReceivingFailed(const QString& message);
 
   [[nodiscard]] QString GetDeviceName() const;
   [[nodiscard]] bool IsDeviceOnline() const;
@@ -21,19 +27,12 @@ signals:
   void initializeFailed();
 
 private:
-  void ResetModel();
-
   void SetDeviceName(const QString &name);
   void SetDeviceStatus(DeviceState state);
 
-  DeviceController *controller_;
-
   QString device_name_;
-  DeviceState device_state_;
+  DeviceState device_state_ = DeviceState::Offline;
 
-  bool is_initialized_;
+  bool is_initialized_ = false;
 
-private slots:
-  void OnDeviceInfoReceived(const DeviceInfo& info);
-  void OnDeviceInfoReceivingFailed(const QString& message);
 };

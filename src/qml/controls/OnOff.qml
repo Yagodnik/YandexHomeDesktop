@@ -30,6 +30,7 @@ Item {
       // Layout.alignment: Qt.AlignVCenter
 
       MouseArea {
+        objectName: "deviceOnAction"
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
         onClicked: {
@@ -74,6 +75,7 @@ Item {
       // Layout.alignment: Qt.AlignVCenter
 
       MouseArea {
+        objectName: "deviceOffAction"
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
         onClicked: {

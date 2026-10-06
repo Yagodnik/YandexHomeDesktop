@@ -11,7 +11,8 @@
 class AuthorizationService : public QObject {
   Q_OBJECT
 public:
-  explicit AuthorizationService(QObject *parent = nullptr, bool use_fake_api = false);
+  explicit AuthorizationService(QObject *parent = nullptr, bool use_fake_api = false,
+                                bool interactive = true);
 
   Q_INVOKABLE void AttemptLocalAuthorization();
   Q_INVOKABLE [[nodiscard]] bool IsAuthorized() const;

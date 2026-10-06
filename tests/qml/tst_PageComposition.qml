@@ -1,5 +1,6 @@
 import QtQuick
 import QtTest
+import YandexHomeDesktop.ViewModels
 import YandexHomeDesktop.Pages as Pages
 import YandexHomeDesktop.Components as Components
 
@@ -46,7 +47,9 @@ TestCase {
   function init() {
     failOnWarning(/.?/);
     authorizationService.resetCalls();
-    deviceController.resetCalls();
+    deviceViewModel.StopPolling();
+    deviceTestApi.reset();
+    deviceViewModel.LoadDevice("test-device");
     platformService.resetCalls();
     settings.trayModeEnabled = false;
     settings.currentTheme = 0;
@@ -55,6 +58,10 @@ TestCase {
     scenarios.clear();
     householdSpy.clear();
     scenarioSpy.clear();
+  }
+
+  function cleanup() {
+    deviceViewModel.StopPolling();
   }
 
   function test_authAction() {
@@ -72,19 +79,50 @@ TestCase {
     verify(page !== null);
     const states = findChild(page, "deviceStates");
     compare(states.currentIndex, 0);
-    deviceDataModel.initializeFailed();
+    deviceTestApi.ReplyDevice(false);
     compare(states.currentIndex, 1);
+    const dialog = findChild(page, "deviceErrorDialog");
+    tryCompare(dialog, "opacity", 1);
+    mouseClick(findChild(dialog, "errorDismissAction"));
+    tryCompare(dialog, "visible", false);
 
     const action = findChild(page, "retryAction");
     mouseClick(action);
-    compare(deviceController.lastCall, "TryReloadDevice");
+    compare(deviceTestApi.requestCount, 2);
+    compare(deviceTestApi.deviceId, "test-device");
     compare(states.currentIndex, 0);
-    compare(page.okCount, 0);
-
-    capabilitiesModel.initialized();
-    propertiesModel.initialized();
-    deviceDataModel.initialized();
+    deviceTestApi.ReplyDevice(true);
     compare(states.currentIndex, 2);
+  }
+
+  function test_deviceReadyBeforePageCreation() {
+    // Loading starts on the device row before navigation creates the page.
+    deviceTestApi.ReplyDevice(true);
+    const page = createTemporaryObject(devicePage, testCase);
+    verify(page !== null);
+    compare(findChild(page, "deviceStates").currentIndex, DeviceViewModel.Ready);
+  }
+
+  function test_deviceCommandThroughRealDelegate() {
+    const page = createTemporaryObject(devicePage, testCase);
+    verify(page !== null);
+    deviceTestApi.withCapability = true;
+    deviceTestApi.ReplyDevice(true);
+    deviceViewModel.StopPolling();
+    tryVerify(function() { return findChild(page, "deviceOnAction") !== null; });
+    const onAction = findChild(page, "deviceOnAction");
+    tryVerify(function() { return onAction.visible && onAction.width > 0 && onAction.height > 0; });
+    waitForRendering(onAction);
+    mouseClick(onAction);
+    compare(deviceTestApi.actionCount, 1);
+    compare(deviceTestApi.actionDeviceId, "test-device");
+    compare(deviceTestApi.actionState.instance, "on");
+    compare(deviceTestApi.actionState.value, true);
+    compare(capabilitiesModel.GetState(0).value, true);
+    mouseClick(findChild(page, "deviceOffAction"));
+    compare(deviceTestApi.actionCount, 2);
+    compare(deviceTestApi.actionState.value, false);
+    compare(capabilitiesModel.GetState(0).value, false);
   }
 
   function test_mainHouseholdPicker() {

@@ -32,7 +32,7 @@ void ScenarioService::Refresh() {
   const auto request_id = QUuid::createUuid();
   load_request_ = request_id;
   SetLoadState(LoadState::Loading);
-  api_->GetScenarios(this, [this, request_id](ApiResult<QList<ScenarioObject>> result) {
+  ListScenarios(this, [this, request_id](ApiResult<QList<ScenarioObject>> result) {
     if (load_request_ != request_id) {
       return;
     }
@@ -63,7 +63,7 @@ void ScenarioService::ExecuteScenario(const QString& scenario_id) {
   const auto request_id = QUuid::createUuid();
   executions_.insert(scenario_id, request_id);
   emit executionStateChanged(scenario_id);
-  api_->ExecuteScenario(scenario_id, this, [this, scenario_id, request_id](ApiResult<void> result) {
+  RunScenario(scenario_id, this, [this, scenario_id, request_id](ApiResult<void> result) {
     if (!FinishExecution(scenario_id, request_id)) {
       return;
     }
@@ -72,6 +72,14 @@ void ScenarioService::ExecuteScenario(const QString& scenario_id) {
       emit executionFailed(scenario_id, result.error().message);
     }
   });
+}
+
+void ScenarioService::ListScenarios(QObject* context, ApiResultHandler<QList<ScenarioObject>> handler) {
+  api_->GetScenarios(context, std::move(handler));
+}
+
+void ScenarioService::RunScenario(const QString& id, QObject* context, ApiResultHandler<void> handler) {
+  api_->ExecuteScenario(id, context, std::move(handler));
 }
 
 void ScenarioService::Reset() {

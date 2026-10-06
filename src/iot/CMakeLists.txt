@@ -1,6 +1,14 @@
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui)
 
+add_library(IotCore STATIC
+        core/CapabilityState.h core/CapabilityState.cpp
+        core/CapabilityParameters.h core/CapabilityParameters.cpp
+        core/CapabilityRules.h core/Validation.h core/Validation.cpp
+        core/BooleanRules.cpp core/RangeRules.cpp core/ModeRules.cpp core/ColorRules.cpp
+)
+target_link_libraries(IotCore PUBLIC ApiContracts Qt6::Core)
+
 add_library(Iot STATIC
         capabilities/OnOffCapability.cpp
         capabilities/OnOffCapability.h
@@ -22,4 +30,4 @@ add_library(Iot STATIC
         properties/EventProperty.h
 )
 
-target_link_libraries(Iot PRIVATE Qt6::Core Qt6::Gui Utils)
+target_link_libraries(Iot PUBLIC IotCore PRIVATE Qt6::Core Qt6::Gui Utils)

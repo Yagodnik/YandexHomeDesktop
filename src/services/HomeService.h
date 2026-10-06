@@ -19,6 +19,8 @@ public:
   void Refresh();
   void SelectHousehold(const QString& id);
   void Reset();
+  // One-shot consumers own delivery without changing the GUI snapshot/selection.
+  void ReadHome(QObject* context, ApiResultHandler<UserInfo> handler);
 
 signals:
   void loadStateChanged();

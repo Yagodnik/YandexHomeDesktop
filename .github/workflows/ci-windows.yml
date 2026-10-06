@@ -55,8 +55,19 @@ jobs:
           -DYH_ENABLE_PCH=${{ matrix.pch }}
           -DAUTH_CONFIG_FILE="$env:RUNNER_TEMP\oauth.json"
 
-      - name: Build application and tests
+      - name: Build desktop, console CLI, and tests
         run: cmake --build build --parallel 4
 
-      - name: Run C++ and QML tests
+      - name: Run C++, QML, and CLI process tests
         run: ctest --test-dir build -C ${{ matrix.configuration }} --output-on-failure
+
+      - name: Check installed console CLI
+        if: matrix.configuration == 'Release'
+        shell: pwsh
+        run: |
+          cmake --install build --prefix build/stage
+          if ($LASTEXITCODE -ne 0) { throw 'Deployment failed' }
+          $cli = Get-ChildItem build/stage -Recurse -File -Filter YandexHomeCli.exe | Select-Object -First 1
+          if (-not $cli) { throw 'Missing installed console CLI' }
+          cmake "-DAPP_PATH=$($cli.FullName)" -DCONFIGURATION=Release -P tests/CliSmoke.cmake
+          if ($LASTEXITCODE -ne 0) { throw 'Installed console CLI failed' }

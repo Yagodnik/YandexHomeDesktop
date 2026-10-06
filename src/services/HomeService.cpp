@@ -31,7 +31,7 @@ void HomeService::Refresh() {
   const auto request = QUuid::createUuid();
   request_ = request;
   SetLoadState(LoadState::Loading);
-  api_->GetUserInfo(this, [this, request](ApiResult<UserInfo> result) {
+  ReadHome(this, [this, request](ApiResult<UserInfo> result) {
     if (request_ != request) {
       return;
     }
@@ -56,6 +56,10 @@ void HomeService::Refresh() {
     }
     SetLoadState(LoadState::Ready);
   });
+}
+
+void HomeService::ReadHome(QObject* context, ApiResultHandler<UserInfo> handler) {
+  api_->GetUserInfo(context, std::move(handler));
 }
 
 void HomeService::SelectHousehold(const QString& id) {

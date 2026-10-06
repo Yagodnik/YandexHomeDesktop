@@ -1,4 +1,5 @@
 #include "PropertiesModel.h"
+#include "DeviceController.h"
 
 #include <QRandomGenerator>
 #include <QDateTime>
@@ -7,8 +8,10 @@
 
 #include "CapabilitiesModel.h"
 
+PropertiesModel::PropertiesModel(QObject* parent) : QAbstractListModel(parent) {}
+
 PropertiesModel::PropertiesModel(DeviceController* controller, QObject* parent)
-  : QAbstractListModel(parent), controller_(controller)
+  : PropertiesModel(parent)
 {
   connect(controller,
     &DeviceController::loadRequestMade,
@@ -109,10 +112,10 @@ QHash<int, QByteArray> PropertiesModel::roleNames() const {
   };
 }
 
-void PropertiesModel::OnPropertiesUpdateReady(const DeviceController::PropertiesList &properties2) {
+void PropertiesModel::OnPropertiesUpdateReady(const DeviceSession::PropertiesList &properties2) {
   qInfo() << "PropertiesModel: Properties received:" << properties2.size() << "without fake data";
 
-  DeviceController::PropertiesList properties = properties2;
+  DeviceSession::PropertiesList properties = properties2;
 
   if (!is_initialized_) {
     /* -- Adding fake data */

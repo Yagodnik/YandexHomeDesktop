@@ -1,24 +1,13 @@
 #pragma once
 
-#include <QGuiApplication>
-#include <QString>
+class CliContext;
 
-#include "app/AppContext.h"
-
-struct CommandContext {
-  bool pro_mode;
-};
-
-class ICommand : public QObject {
-  Q_OBJECT
+// A parsed command owns its arguments and executes against a shared context.
+// New commands register a factory; parsing and execution never switch on enums.
+class ICommand {
 public:
-  explicit ICommand(const QString& command_name, QObject *parent)
-    : command_name_(command_name), QObject(parent) {}
-
   virtual ~ICommand() = default;
-
-  virtual void Execute(AppContext& app_ctx, const CommandContext& command_ctx) = 0;
-
-protected:
-  QString command_name_;
+  [[nodiscard]] virtual bool RequiresAuthorization() const { return true; }
+  [[nodiscard]] virtual bool UsesServices() const { return true; }
+  virtual void Execute(CliContext& context) const = 0;
 };

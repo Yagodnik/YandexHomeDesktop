@@ -69,6 +69,7 @@ Dialog {
     }
 
     UI.MyButton {
+      objectName: "errorDismissAction"
       text: qsTr("Ок")
       Layout.alignment: Qt.AlignRight
       onClicked: errorDialog.closeAnimated()

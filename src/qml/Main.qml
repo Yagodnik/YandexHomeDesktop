@@ -50,9 +50,9 @@ Window {
 
   onActiveChanged: {
     if (active) {
-      deviceController.ContinuePollingIfNeeded();
+      deviceViewModel.ContinuePollingIfNeeded();
     } else {
-      deviceController.StopPolling();
+      deviceViewModel.StopPolling();
     }
   }
 

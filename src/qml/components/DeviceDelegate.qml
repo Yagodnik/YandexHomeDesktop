@@ -51,7 +51,7 @@ Item {
       console.log("Device Delegate: Device Id: ", deviceId, " Room Id: ", deviceRoomId, " Household Id: ", deviceHouseholdId)
 
       // capabilitiesModel.RequestData(deviceId);
-      deviceController.LoadDevice(deviceId);
+      deviceViewModel.LoadDevice(deviceId);
 
       router.navigateTo("device");
     }

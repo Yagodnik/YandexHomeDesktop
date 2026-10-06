@@ -10,4 +10,6 @@ private slots:
   static void TestColorSetting();
   static void TestRange();
   static void TestToggle();
+  static void SharedBuildersPreserveDesktopPayloads();
+  static void SharedParametersPreserveDesktopDefaults();
 };

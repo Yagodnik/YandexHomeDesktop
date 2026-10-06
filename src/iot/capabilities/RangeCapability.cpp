@@ -1,4 +1,6 @@
 #include "RangeCapability.h"
+#include "iot/core/CapabilityState.h"
+#include "iot/core/CapabilityParameters.h"
 
 RangeCapability::RangeCapability(QObject *parent) : IotObject("range", parent) {}
 
@@ -20,22 +22,19 @@ QVariant RangeCapability::GetValue() const {
 }
 
 bool RangeCapability::GetRandomAccessSupport() const {
-  return parameters_.value("random_access", false).toBool();
+  return Iot::RangeParameters(parameters_).RandomAccess();
 }
 
 double RangeCapability::GetMin() const {
-  const auto range = parameters_["range"].toMap();
-  return range["min"].toDouble();
+  return Iot::RangeParameters(parameters_).Limits().Min();
 }
 
 double RangeCapability::GetMax() const {
-  const auto range = parameters_["range"].toMap();
-  return range["max"].toDouble();
+  return Iot::RangeParameters(parameters_).Limits().Max();
 }
 
 double RangeCapability::GetPrecision() const {
-  const auto range = parameters_["range"].toMap();
-  return range["precision"].toDouble();
+  return Iot::RangeParameters(parameters_).Limits().Precision();
 }
 
 QString RangeCapability::GetUnit() const {
@@ -56,22 +55,11 @@ QString RangeCapability::GetFormattedValue() const {
 }
 
 QVariantMap RangeCapability::Create(double value) {
-  const auto instance = GetInstance();
-
-  return {
-    { "instance", instance },
-    { "value", value }
-  };
+  return Iot::State::Range(GetInstance(), value);
 }
 
 QVariantMap RangeCapability::CreateRelative(double delta) {
-  const auto instance = GetInstance();
-
-  return {
-    { "instance", instance },
-    { "value", delta },
-    { "relative", true }
-  };
+  return Iot::State::RelativeRange(GetInstance(), delta);
 }
 
 void RangeCapability::SetMin(double value) {

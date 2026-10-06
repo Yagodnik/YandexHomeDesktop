@@ -19,7 +19,7 @@ The module file lists are in `src/qml/CMakeLists.txt`. Images, fonts, theme JSON
 
 `Main.qml` registers `loading`, `auth`, `main`, `error`, `device`, and `authCanceled` with the C++ `Router` (`src/utils/Router.*`). `Router::navigateTo()` invokes a QML helper that pushes the URL onto the `StackView`; `goBack()` pops it. The loading page attempts local authorization. Authorization signals route to the main, auth, error, or canceled pages.
 
-`MainPage.qml` uses `ui/PageStates.qml` for the Devices, Scenarios, and Settings tabs, selected by `components/TopBar.qml`. These tabs are within the main page; they are not router destinations. A device row calls `deviceController.LoadDevice(deviceId)` and then navigates to the `device` route. The back button on `DevicePage.qml` forgets the selected device and pops the route.
+`MainPage.qml` uses `ui/PageStates.qml` for the Devices, Scenarios, and Settings tabs, selected by `components/TopBar.qml`. These tabs are within the main page; they are not router destinations. A device row calls `deviceViewModel.LoadDevice(deviceId)` and then navigates to the `device` route. The back button on `DevicePage.qml` forgets the selected device and pops the route. Device page state binds to the view model, so it also works when loading completes before navigation.
 
 ## Page composition
 
@@ -48,7 +48,8 @@ The extracted visual components receive titles, models, and state through proper
 | --- | --- |
 | `authorizationService`, `router`, `platformService` | Sign-in, page navigation, window and tray behavior |
 | `homeViewModel`, `scenariosViewModel`, `yandexAccount` | Home lists and household selection, scenario operations, account details |
-| `deviceController`, `deviceDataModel`, `capabilitiesModel`, `propertiesModel` | Selected-device loading, polling, actions, and displayed attributes |
+| `deviceViewModel` | Selected-device loading, page state, actions, and owned display models |
+| `deviceController`, `deviceDataModel`, `capabilitiesModel`, `propertiesModel` | Compatibility aliases for the device view model and its models |
 | `themes`, `settings` | Theme colors and persisted UI settings |
 | `colorModel`, `colorModesModel`, `modesModel`, `iotTitles`, `eventTitles`, `unitsList`, `deviceIcons`, `propertiesIcons`, `errorCodes` | Control choices, labels, units, icons, and error messages |
 
@@ -58,7 +59,7 @@ The extracted visual components receive titles, models, and state through proper
 
 `ScenariosPage.qml` receives a required `ScenariosViewModel`, binds its state and list, and calls `ExecuteScenario(id)`. `ScenarioService` owns execution guards, pending requests, and session reset; `ScenariosModel` provides the row roles. `GuiApp` constructs the view models, and `AppContext` supplies services using `IHomeApi`. Logout resets both services. Debug fixture mode supplies the same interfaces with local JSON data; see `docs/build.md`.
 
-For a selected device, `DeviceController` receives device info and updates `capabilitiesModel` and `propertiesModel`. Both models expose a `delegateSource` role. `DeviceAttributeSection.qml` uses that role as each `Loader.source`, so the model's URL map determines which QML control appears. Capability controls create an action with their C++ helper, then call `capabilitiesModel.UseCapability(model.index, action)`. Property controls display values from `Properties.Event` or `Properties.Float`. The window pauses and resumes device polling as it loses or gains activity.
+For a selected device, `DeviceViewModel` projects updates from its `DeviceSession` into `capabilitiesModel` and `propertiesModel`. Both models expose a `delegateSource` role. `DeviceAttributeSection.qml` uses that role as each `Loader.source`, so the model's URL map determines which QML control appears. Capability controls create an action with their C++ helper, then call `capabilitiesModel.UseCapability(model.index, action)`. The model updates the displayed state and emits a request that the view model routes through the session and `DeviceService`. Property controls display values from `Properties.Event` or `Properties.Float`. The window pauses and resumes device polling as it loses or gains activity. See [device-control-architecture.md](device-control-architecture.md) for service boundaries and the preserved conflict behavior.
 
 ## Where to make changes
 

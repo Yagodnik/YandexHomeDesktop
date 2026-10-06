@@ -12,6 +12,7 @@ public:
   [[nodiscard]] bool GetTrayModeEnabled() const;
   [[nodiscard]] int GetCurrentTheme() const;
   void Reset();
+  static void ResetStoredSettings();
 
 signals:
   void trayModeEnabledChanged();

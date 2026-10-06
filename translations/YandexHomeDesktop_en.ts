@@ -48,9 +48,239 @@ your devices</translation>
 <context>
     <name>CapabilitiesModel</name>
     <message>
-        <location filename="../src/models/DeviceModel/CapabilitiesModel.cpp" line="39"/>
+        <location filename="../src/models/DeviceModel/CapabilitiesModel.cpp" line="33"/>
         <source>Неизвестный тип умения</source>
         <translation>Unknown capability type</translation>
+    </message>
+</context>
+<context>
+    <name>CapabilityCommands</name>
+    <message>
+        <source>Значение должно быть конечным числом.</source>
+        <translation type="vanished">The value must be a finite number.</translation>
+    </message>
+    <message>
+        <source>Значение выходит за допустимые границы устройства.</source>
+        <translation type="vanished">The value is outside the device limits.</translation>
+    </message>
+    <message>
+        <source>Укажите --instance; для on_off используется on.</source>
+        <translation type="vanished">Specify --instance; on_off uses on.</translation>
+    </message>
+    <message>
+        <source>Логическое значение должно быть on/off или true/false.</source>
+        <translation type="vanished">A boolean value must be on/off or true/false.</translation>
+    </message>
+    <message>
+        <source>Для этого умения требуется --instance.</source>
+        <translation type="vanished">This capability requires --instance.</translation>
+    </message>
+    <message>
+        <source>Это range поддерживает только --relative.</source>
+        <translation type="vanished">This range only supports --relative.</translation>
+    </message>
+    <message>
+        <source>Для mode требуются непустые --instance и --value.</source>
+        <translation type="vanished">Mode requires nonempty --instance and --value.</translation>
+    </message>
+    <message>
+        <source>Устройство не поддерживает такой режим или сцену.</source>
+        <translation type="vanished">The device does not support this mode or scene.</translation>
+    </message>
+    <message>
+        <source>Режим или сцена не должны быть пустыми.</source>
+        <translation type="vanished">The mode or scene must not be empty.</translation>
+    </message>
+    <message>
+        <source>HSV должен быть JSON-объектом с h, s и v.</source>
+        <translation type="vanished">HSV must be a JSON object with h, s, and v.</translation>
+    </message>
+    <message>
+        <source>HSV: h должен быть 0–360; s и v — 0–100.</source>
+        <translation type="vanished">HSV: h must be 0–360; s and v must be 0–100.</translation>
+    </message>
+    <message>
+        <source>Цвет: rgb — целое 0–16777215; temperature_k — положительное целое; также доступны hsv и scene.</source>
+        <translation type="vanished">Color: rgb must be an integer from 0–16777215; temperature_k must be a positive integer; hsv and scene are also available.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/CapabilityCommands.cpp" line="14"/>
+        <source>Укажите поддерживаемый --capability и --value.</source>
+        <translation>Specify a supported --capability and --value.</translation>
+    </message>
+    <message>
+        <source>--relative поддерживается только для range.</source>
+        <translation type="vanished">--relative is only supported for range.</translation>
+    </message>
+</context>
+<context>
+    <name>CapabilityMessages</name>
+    <message>
+        <location filename="../src/iot/core/Validation.cpp" line="14"/>
+        <source>Для этого умения требуется экземпляр.</source>
+        <translation>This capability requires an instance.</translation>
+    </message>
+    <message>
+        <location filename="../src/iot/core/Validation.cpp" line="20"/>
+        <source>Значение выходит за допустимые границы устройства.</source>
+        <translation>The value is outside the device limits.</translation>
+    </message>
+    <message>
+        <location filename="../src/iot/core/Validation.cpp" line="26"/>
+        <source>Относительное изменение поддерживается только для range.</source>
+        <translation>Relative changes are only supported for range.</translation>
+    </message>
+    <message>
+        <location filename="../src/iot/core/BooleanRules.cpp" line="13"/>
+        <source>Укажите экземпляр умения; для on_off используется on.</source>
+        <translation>Specify a capability instance; on_off uses on.</translation>
+    </message>
+    <message>
+        <location filename="../src/iot/core/BooleanRules.cpp" line="16"/>
+        <source>Логическое значение должно быть true или false.</source>
+        <translation>A boolean value must be true or false.</translation>
+    </message>
+    <message>
+        <location filename="../src/iot/core/RangeRules.cpp" line="13"/>
+        <location filename="../src/iot/core/ColorRules.cpp" line="13"/>
+        <source>Значение должно быть конечным числом.</source>
+        <translation>The value must be a finite number.</translation>
+    </message>
+    <message>
+        <location filename="../src/iot/core/RangeRules.cpp" line="24"/>
+        <source>Это range поддерживает только относительное изменение.</source>
+        <translation>This range only supports relative changes.</translation>
+    </message>
+    <message>
+        <location filename="../src/iot/core/ModeRules.cpp" line="10"/>
+        <source>Для mode требуются непустые экземпляр и значение.</source>
+        <translation>Mode requires a nonempty instance and value.</translation>
+    </message>
+    <message>
+        <location filename="../src/iot/core/ModeRules.cpp" line="19"/>
+        <location filename="../src/iot/core/ColorRules.cpp" line="65"/>
+        <source>Устройство не поддерживает такой режим или сцену.</source>
+        <translation>The device does not support this mode or scene.</translation>
+    </message>
+    <message>
+        <location filename="../src/iot/core/ColorRules.cpp" line="9"/>
+        <source>Цвет: rgb — целое 0–16777215; temperature_k — положительное целое; также доступны hsv и scene.</source>
+        <translation>Color: rgb must be an integer from 0–16777215; temperature_k must be a positive integer; hsv and scene are also available.</translation>
+    </message>
+    <message>
+        <location filename="../src/iot/core/ColorRules.cpp" line="25"/>
+        <source>Режим или сцена не должны быть пустыми.</source>
+        <translation>The mode or scene must not be empty.</translation>
+    </message>
+    <message>
+        <location filename="../src/iot/core/ColorRules.cpp" line="35"/>
+        <source>HSV должен быть JSON-объектом с h, s и v.</source>
+        <translation>HSV must be a JSON object with h, s, and v.</translation>
+    </message>
+    <message>
+        <location filename="../src/iot/core/ColorRules.cpp" line="39"/>
+        <source>HSV: h должен быть 0–360; s и v — 0–100.</source>
+        <translation>HSV: h must be 0–360; s and v must be 0–100.</translation>
+    </message>
+</context>
+<context>
+    <name>CliApp</name>
+    <message>
+        <location filename="../src/app/CliApp.cpp" line="94"/>
+        <location filename="../src/app/CliApp.cpp" line="117"/>
+        <source>Время выполнения команды истекло.</source>
+        <translation>The command timed out.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/CliApp.cpp" line="106"/>
+        <source>Сначала войдите в аккаунт через приложение.</source>
+        <translation>Sign in through the desktop application first.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/CliApp.cpp" line="110"/>
+        <source>Не удалось прочитать сохранённые данные входа.</source>
+        <translation>Could not read the saved sign-in data.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/CliApp.cpp" line="114"/>
+        <source>Доступ к сохранённым данным входа отменён.</source>
+        <translation>Access to the saved sign-in data was canceled.</translation>
+    </message>
+</context>
+<context>
+    <name>CliArguments</name>
+    <message>
+        <location filename="../src/cli/CliArguments.cpp" line="8"/>
+        <location filename="../src/cli/CliArguments.cpp" line="13"/>
+        <source>Укажите ровно один непустой --id или --name.</source>
+        <translation>Specify exactly one nonempty --id or --name.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/CliArguments.cpp" line="17"/>
+        <location filename="../src/cli/commands/DeviceCommands.cpp" line="31"/>
+        <source>ID дома не должен быть пустым.</source>
+        <translation>The household ID must not be empty.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/CliArguments.cpp" line="20"/>
+        <source>--household применяется к списку или поиску по имени, а не к --id.</source>
+        <translation>--household applies to lists or name lookup; it cannot be combined with --id.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/CliArguments.cpp" line="26"/>
+        <source>Точный ID устройства или сценария.</source>
+        <translation>Exact device or scenario ID.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/CliArguments.cpp" line="27"/>
+        <source>Точное имя; неоднозначные имена отклоняются.</source>
+        <translation>Exact name; ambiguous names are rejected.</translation>
+    </message>
+</context>
+<context>
+    <name>CliCommand</name>
+    <message>
+        <location filename="../src/cli/CliCommand.cpp" line="12"/>
+        <source>Повторяющийся параметр: --%1.</source>
+        <translation>Repeated option: --%1.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/CliCommand.cpp" line="25"/>
+        <source>--timeout должен быть от 1 до 3600000 миллисекунд.</source>
+        <translation>--timeout must be between 1 and 3600000 milliseconds.</translation>
+    </message>
+</context>
+<context>
+    <name>CliRunner</name>
+    <message>
+        <location filename="../src/cli/CliRunner.cpp" line="35"/>
+        <source>Ошибка [%1]: %2
+</source>
+        <translation>Error [%1]: %2
+</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/CliRunner.cpp" line="68"/>
+        <source>Время выполнения команды истекло.</source>
+        <translation>The command timed out.</translation>
+    </message>
+</context>
+<context>
+    <name>CliValueParsers</name>
+    <message>
+        <location filename="../src/cli/capabilities/ValueParsers.cpp" line="12"/>
+        <source>Логическое значение должно быть on/off или true/false.</source>
+        <translation>A boolean value must be on/off or true/false.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/capabilities/ValueParsers.cpp" line="20"/>
+        <source>Значение должно быть конечным числом.</source>
+        <translation>The value must be a finite number.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/capabilities/ValueParsers.cpp" line="36"/>
+        <source>HSV должен быть JSON-объектом с h, s и v.</source>
+        <translation>HSV must be a JSON object with h, s, and v.</translation>
     </message>
 </context>
 <context>
@@ -64,6 +294,54 @@ your devices</translation>
         <location filename="../src/qml/controls/ColorSetting.qml" line="35"/>
         <source>Режимы</source>
         <translation>Modes</translation>
+    </message>
+</context>
+<context>
+    <name>CommandRegistry</name>
+    <message>
+        <location filename="../src/cli/CommandRegistry.cpp" line="25"/>
+        <source>Управление устройствами и сценариями Яндекс Дома.</source>
+        <translation>Control Yandex Home devices and scenarios.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/CommandRegistry.cpp" line="27"/>
+        <source>Команда из списка ниже.</source>
+        <translation>A command from the list below.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/CommandRegistry.cpp" line="28"/>
+        <source>JSON в stdout; ошибки JSON в stderr.</source>
+        <translation>JSON to stdout; JSON errors to stderr.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/CommandRegistry.cpp" line="29"/>
+        <source>Общий таймаут в миллисекундах (по умолчанию 30000).</source>
+        <translation>Total timeout in milliseconds (default: 30000).</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/CommandRegistry.cpp" line="33"/>
+        <source>Команды:</source>
+        <translation>Commands:</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/CommandRegistry.cpp" line="51"/>
+        <source>Укажите только одну команду.</source>
+        <translation>Specify only one command.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/CommandRegistry.cpp" line="59"/>
+        <source>Параметр --%1 несовместим со старой командой.</source>
+        <translation>Option --%1 conflicts with the legacy command.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/CommandRegistry.cpp" line="96"/>
+        <source>Неизвестная команда. Используйте --help.</source>
+        <translation>Unknown command. Use --help.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/CommandRegistry.cpp" line="82"/>
+        <source>Недопустимый параметр для команды: --%1.</source>
+        <translation>Invalid option for this command: --%1.</translation>
     </message>
 </context>
 <context>
@@ -1318,6 +1596,108 @@ your devices</translation>
     </message>
 </context>
 <context>
+    <name>DeviceCommands</name>
+    <message>
+        <location filename="../src/cli/commands/DeviceCommands.cpp" line="15"/>
+        <source>Дом с таким ID не найден.</source>
+        <translation>No household with this ID was found.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/commands/DeviceCommands.cpp" line="41"/>
+        <source>ID	Имя	Тип	Дом
+</source>
+        <translation>ID	Name	Type	Household
+</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/commands/DeviceCommands.cpp" line="69"/>
+        <source>Устройство с таким именем не найдено.</source>
+        <translation>No device with this name was found.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/commands/DeviceCommands.cpp" line="71"/>
+        <source>Найдено несколько устройств. Укажите --id или --household.</source>
+        <translation>Several devices matched. Specify --id or --household.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/commands/DeviceCommands.cpp" line="81"/>
+        <source>Ответ содержит другое устройство.</source>
+        <translation>The response contains a different device.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/commands/DeviceCommands.cpp" line="122"/>
+        <source>Устройство не поддерживает это умение и экземпляр.</source>
+        <translation>The device does not support this capability and instance.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/commands/DeviceCommands.cpp" line="126"/>
+        <source>Устройство содержит несколько одинаковых умений.</source>
+        <translation>The device contains several matching capabilities.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/commands/DeviceCommands.cpp" line="135"/>
+        <source>Команда для устройства %1 выполнена.
+</source>
+        <translation>Command for device %1 completed.
+</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/commands/DeviceCommands.cpp" line="144"/>
+        <source>ID дома для списка или поиска устройства по имени.</source>
+        <translation>Household ID for listing or device name lookup.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/commands/DeviceCommands.cpp" line="145"/>
+        <source>on_off, range, mode, toggle или color_setting.</source>
+        <translation>on_off, range, mode, toggle, or color_setting.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/commands/DeviceCommands.cpp" line="146"/>
+        <source>Экземпляр умения: brightness, mute, rgb и т. п.</source>
+        <translation>Capability instance: brightness, mute, rgb, etc.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/commands/DeviceCommands.cpp" line="147"/>
+        <source>Значение: on/off, число, режим, цвет или JSON HSV.</source>
+        <translation>Value: on/off, a number, mode, color, or HSV JSON.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/commands/DeviceCommands.cpp" line="148"/>
+        <source>Относительное изменение range вместо абсолютного значения.</source>
+        <translation>Apply a relative range change instead of an absolute value.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/commands/DeviceCommands.cpp" line="149"/>
+        <source>Совместимость: devices list.</source>
+        <translation>Compatibility: devices list.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/commands/DeviceCommands.cpp" line="150"/>
+        <source>Совместимость: on/off по имени устройства.</source>
+        <translation>Compatibility: on/off by device name.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/commands/DeviceCommands.cpp" line="151"/>
+        <source>Справка для старого --on_off.</source>
+        <translation>Help for the legacy --on_off option.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/commands/DeviceCommands.cpp" line="152"/>
+        <source>Список устройств с ID.</source>
+        <translation>List devices with their IDs.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/commands/DeviceCommands.cpp" line="154"/>
+        <source>Состояние, умения и свойства устройства.</source>
+        <translation>Show device state, capabilities, and properties.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/commands/DeviceCommands.cpp" line="156"/>
+        <source>Отправить действие устройству.</source>
+        <translation>Send an action to a device.</translation>
+    </message>
+</context>
+<context>
     <name>DeviceHeader</name>
     <message>
         <location filename="../src/qml/components/DeviceHeader.qml" line="70"/>
@@ -1328,32 +1708,32 @@ your devices</translation>
 <context>
     <name>DevicePage</name>
     <message>
-        <location filename="../src/qml/pages/DevicePage.qml" line="11"/>
+        <location filename="../src/qml/pages/DevicePage.qml" line="13"/>
         <source>Ошибка</source>
         <translation>Error</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/DevicePage.qml" line="22"/>
+        <location filename="../src/qml/pages/DevicePage.qml" line="24"/>
         <source>Произошла ошибка!</source>
         <translation>An error occurred!</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/DevicePage.qml" line="109"/>
+        <location filename="../src/qml/pages/DevicePage.qml" line="62"/>
         <source>Нет связи с устройством</source>
         <translation>No connection to the device</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/DevicePage.qml" line="110"/>
+        <location filename="../src/qml/pages/DevicePage.qml" line="63"/>
         <source>Попробовать снова</source>
         <translation>Try again</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/DevicePage.qml" line="121"/>
+        <location filename="../src/qml/pages/DevicePage.qml" line="72"/>
         <source>Умения</source>
         <translation>Capabilities</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/DevicePage.qml" line="122"/>
+        <location filename="../src/qml/pages/DevicePage.qml" line="73"/>
         <source>Свойства</source>
         <translation>Properties</translation>
     </message>
@@ -1374,7 +1754,7 @@ your devices</translation>
 <context>
     <name>ErrorDialog</name>
     <message>
-        <location filename="../src/qml/ui/ErrorDialog.qml" line="72"/>
+        <location filename="../src/qml/ui/ErrorDialog.qml" line="73"/>
         <source>Ок</source>
         <translation>OK</translation>
     </message>
@@ -1403,6 +1783,55 @@ your devices</translation>
         <location filename="../src/qml/pages/LoadingPage.qml" line="10"/>
         <source>Загрузка...</source>
         <translation>Loading...</translation>
+    </message>
+</context>
+<context>
+    <name>LocalCommands</name>
+    <message>
+        <location filename="../src/cli/commands/LocalCommands.cpp" line="11"/>
+        <source>Имя: %1
+Email: %2
+</source>
+        <translation>Name: %1
+Email: %2
+</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/commands/LocalCommands.cpp" line="27"/>
+        <source>Настройки сброшены; выход из аккаунта выполнен.
+</source>
+        <translation>Settings reset; signed out.
+</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/commands/LocalCommands.cpp" line="36"/>
+        <source>Подтверждение сброса настроек и выхода из аккаунта.</source>
+        <translation>Confirm resetting settings and signing out.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/commands/LocalCommands.cpp" line="37"/>
+        <source>Совместимость: account show.</source>
+        <translation>Compatibility: account show.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/commands/LocalCommands.cpp" line="38"/>
+        <source>Совместимость: reset.</source>
+        <translation>Compatibility: reset.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/commands/LocalCommands.cpp" line="39"/>
+        <source>Имя и email аккаунта.</source>
+        <translation>Show the account name and email.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/commands/LocalCommands.cpp" line="41"/>
+        <source>Сбросить настройки и выйти из аккаунта.</source>
+        <translation>Reset settings and sign out.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/commands/LocalCommands.cpp" line="19"/>
+        <source>Для сброса укажите --i-know-what-i-am-doing.</source>
+        <translation>To reset, specify --i-know-what-i-am-doing.</translation>
     </message>
 </context>
 <context>
@@ -1436,12 +1865,12 @@ your devices</translation>
 <context>
     <name>OnOff</name>
     <message>
-        <location filename="../src/qml/controls/OnOff.qml" line="64"/>
+        <location filename="../src/qml/controls/OnOff.qml" line="65"/>
         <source>Вкл</source>
         <translation>On</translation>
     </message>
     <message>
-        <location filename="../src/qml/controls/OnOff.qml" line="108"/>
+        <location filename="../src/qml/controls/OnOff.qml" line="110"/>
         <source>Выкл</source>
         <translation>Off</translation>
     </message>
@@ -1449,7 +1878,7 @@ your devices</translation>
 <context>
     <name>PropertiesModel</name>
     <message>
-        <location filename="../src/models/DeviceModel/PropertiesModel.cpp" line="59"/>
+        <location filename="../src/models/DeviceModel/PropertiesModel.cpp" line="62"/>
         <source>Неизвестный тип свойства</source>
         <translation>Unknown property type</translation>
     </message>
@@ -1460,6 +1889,48 @@ your devices</translation>
         <location filename="../src/qml/components/RoomDevicesList.qml" line="31"/>
         <source>В этой комнате нет устройств!</source>
         <translation>No devices in this room!</translation>
+    </message>
+</context>
+<context>
+    <name>ScenarioCommands</name>
+    <message>
+        <location filename="../src/cli/commands/ScenarioCommands.cpp" line="13"/>
+        <source>ID	Имя	Активен
+</source>
+        <translation>ID	Name	Active
+</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/commands/ScenarioCommands.cpp" line="39"/>
+        <source>Сценарий не найден.</source>
+        <translation>Scenario not found.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/commands/ScenarioCommands.cpp" line="40"/>
+        <source>Найдено несколько сценариев. Укажите --id.</source>
+        <translation>Several scenarios matched. Specify --id.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/commands/ScenarioCommands.cpp" line="42"/>
+        <source>Сценарий неактивен.</source>
+        <translation>The scenario is inactive.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/commands/ScenarioCommands.cpp" line="46"/>
+        <source>Сценарий %1 выполнен.
+</source>
+        <translation>Scenario %1 completed.
+</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/commands/ScenarioCommands.cpp" line="56"/>
+        <source>Список сценариев с ID.</source>
+        <translation>List scenarios with their IDs.</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/commands/ScenarioCommands.cpp" line="58"/>
+        <source>Выполнить активный сценарий.</source>
+        <translation>Run an active scenario.</translation>
     </message>
 </context>
 <context>

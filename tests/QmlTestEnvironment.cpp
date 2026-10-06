@@ -8,6 +8,8 @@
 #include "models/RoomsModel/RoomsFilterModel.h"
 #include "models/ScenariosModel/ScenariosViewModel.h"
 #include "models/HomeViewModel.h"
+#include "models/DeviceModel/DeviceViewModel.h"
+#include "iot/capabilities/OnOffCapability.h"
 #include "utils/Themes.h"
 #include "utils/IconsProvider.h"
 
@@ -31,6 +33,7 @@ public:
 
 void initializeQmlTestEnvironment(QQmlEngine* engine) {
   static const bool registered = [] {
+    qmlRegisterType<OnOffCapability>("YandexHomeDesktop.Capabilities", 1, 0, "OnOff");
     qmlRegisterType<DevicesFilterModel>("YandexHomeDesktop.Models", 1, 0, "DevicesFilterModel");
     qmlRegisterType<RoomsFilterModel>("YandexHomeDesktop.Models", 1, 0, "RoomsFilterModel");
     qmlRegisterUncreatableType<HomeViewModel>("YandexHomeDesktop.ViewModels", 1, 0,
@@ -45,6 +48,14 @@ void initializeQmlTestEnvironment(QQmlEngine* engine) {
       "ScenariosViewModel", "Supplied by the application");
     qmlRegisterUncreatableType<ScenariosModel>("YandexHomeDesktop.ViewModels", 1, 0,
       "ScenariosModel", "Supplied by the view model");
+    qmlRegisterUncreatableType<DeviceViewModel>("YandexHomeDesktop.ViewModels", 1, 0,
+      "DeviceViewModel", "Supplied by the application");
+    qmlRegisterUncreatableType<CapabilitiesModel>("YandexHomeDesktop.ViewModels", 1, 0,
+      "CapabilitiesModel", "Supplied by the view model");
+    qmlRegisterUncreatableType<PropertiesModel>("YandexHomeDesktop.ViewModels", 1, 0,
+      "PropertiesModel", "Supplied by the view model");
+    qmlRegisterUncreatableType<DeviceDataModel>("YandexHomeDesktop.ViewModels", 1, 0,
+      "DeviceDataModel", "Supplied by the view model");
     return true;
   }();
   Q_UNUSED(registered);
@@ -60,6 +71,7 @@ void initializeQmlTestEnvironment(QQmlEngine* engine) {
   themes->SetTheme(0);
   engine->rootContext()->setContextProperty("themes", themes);
   engine->rootContext()->setContextProperty("deviceIcons", new IconsProvider(":/data/deviceIcons.json", "devices", engine));
+  engine->rootContext()->setContextProperty("iotTitles", new TitlesProvider(":/data/instances.json", "DataInstances", engine));
 
   auto* api = new QmlTestHomeApi(engine);
   auto* home = new HomeService(api, engine);
@@ -67,8 +79,17 @@ void initializeQmlTestEnvironment(QQmlEngine* engine) {
   auto* scenarios = new ScenarioService(api, engine);
   engine->rootContext()->setContextProperty("scenariosViewModel", new ScenariosViewModel(scenarios, engine));
 
+  auto* device_api = new QmlTestDeviceApi(engine);
+  auto* device_service = new DeviceService(device_api, engine);
+  auto* device = new DeviceViewModel(device_service, engine);
+  engine->rootContext()->setContextProperty("deviceTestApi", device_api);
+  engine->rootContext()->setContextProperty("deviceViewModel", device);
+  engine->rootContext()->setContextProperty("deviceController", device);
+  engine->rootContext()->setContextProperty("deviceDataModel", device->GetDeviceData());
+  engine->rootContext()->setContextProperty("capabilitiesModel", device->GetCapabilities());
+  engine->rootContext()->setContextProperty("propertiesModel", device->GetProperties());
+
   const QStringList names = {
-    "capabilitiesModel", "propertiesModel", "deviceDataModel", "deviceController",
     "authorizationService", "yandexAccount", "settings", "platformService",
     "router", "errorCodes",
   };

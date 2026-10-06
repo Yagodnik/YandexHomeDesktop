@@ -24,6 +24,11 @@ target_link_libraries(DeviceControlTests PRIVATE Qt6::Test Models)
 add_test(NAME DeviceControl COMMAND DeviceControlTests)
 set_tests_properties(DeviceControl PROPERTIES TIMEOUT 30)
 
+add_executable(DeviceServiceTests DeviceServiceTests.cpp)
+target_link_libraries(DeviceServiceTests PRIVATE Qt6::Test AppServices)
+add_test(NAME DeviceService COMMAND DeviceServiceTests)
+set_tests_properties(DeviceService PROPERTIES TIMEOUT 30)
+
 add_executable(HomeTests HomeTests.cpp)
 target_link_libraries(HomeTests PRIVATE Qt6::Test Models)
 add_test(NAME Home COMMAND HomeTests)
@@ -43,3 +48,13 @@ if(BUILD_DESKTOP_APP)
   set_tests_properties(Scenarios Home PROPERTIES
     ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software;QT_QUICK_CONTROLS_STYLE=Basic")
 endif()
+
+add_executable(CliTests CliTests.cpp)
+target_link_libraries(CliTests PRIVATE Qt6::Test AppCli)
+add_test(NAME Cli COMMAND CliTests)
+set_tests_properties(Cli PROPERTIES TIMEOUT 30)
+
+add_executable(CapabilityRulesTests CapabilityRulesTests.cpp)
+target_link_libraries(CapabilityRulesTests PRIVATE Qt6::Test IotCore)
+add_test(NAME CapabilityRules COMMAND CapabilityRulesTests)
+set_tests_properties(CapabilityRules PROPERTIES TIMEOUT 30)

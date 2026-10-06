@@ -22,6 +22,8 @@ public:
   void Refresh();
   void ExecuteScenario(const QString& scenario_id);
   void Reset();
+  void ListScenarios(QObject* context, ApiResultHandler<QList<ScenarioObject>> handler);
+  void RunScenario(const QString& id, QObject* context, ApiResultHandler<void> handler);
 
 signals:
   void loadStateChanged();

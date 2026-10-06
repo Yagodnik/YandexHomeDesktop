@@ -19,7 +19,7 @@ namespace {
   );
 }
 
-AuthorizationService::AuthorizationService(QObject *parent, bool use_fake_api) :
+AuthorizationService::AuthorizationService(QObject *parent, bool use_fake_api, bool interactive) :
   QObject{parent},
   use_fake_api_(use_fake_api)
 {
@@ -30,6 +30,9 @@ AuthorizationService::AuthorizationService(QObject *parent, bool use_fake_api) :
     throw std::runtime_error("The fake API is available only in Debug builds");
 #endif
   }
+  // Headless consumers only read/delete the saved token. They must not bind the
+  // desktop OAuth callback port or construct browser sign-in configuration.
+  if (!interactive) { return; }
   reply_handler_ = std::make_unique<QOAuthHttpServerReplyHandler>(kDefaultPort);
   const auto auth_secrets_object = GetAuthSecrets();
 
@@ -123,11 +126,11 @@ std::optional<QString> AuthorizationService::GetToken() const {
 }
 
 void AuthorizationService::TryWrite(const QString& key) {
-  auto *job = new QKeychain::WritePasswordJob(kAppName);
+  auto *job = new QKeychain::WritePasswordJob(kAppName, this);
   job->setKey(kSecureKey);
   job->setTextData(key);
 
-  connect(job, &QKeychain::Job::finished, [job, this]() {
+  connect(job, &QKeychain::Job::finished, this, [job, this]() {
     WriteTokenHandler(job);
 
     job->deleteLater();
@@ -137,10 +140,10 @@ void AuthorizationService::TryWrite(const QString& key) {
 }
 
 void AuthorizationService::TryRead() {
-  auto *job = new QKeychain::ReadPasswordJob(kAppName);
+  auto *job = new QKeychain::ReadPasswordJob(kAppName, this);
   job->setKey(kSecureKey);
 
-  connect(job, &QKeychain::Job::finished, [job, this]() {
+  connect(job, &QKeychain::Job::finished, this, [job, this]() {
     ReadTokenHandler(job);
 
     job->deleteLater();
@@ -150,10 +153,10 @@ void AuthorizationService::TryRead() {
 }
 
 void AuthorizationService::TryDelete() {
-  auto *job = new QKeychain::DeletePasswordJob(kAppName);
+  auto *job = new QKeychain::DeletePasswordJob(kAppName, this);
   job->setKey(kSecureKey);
 
-  connect(job, &QKeychain::Job::finished, [job, this]() {
+  connect(job, &QKeychain::Job::finished, this, [job, this]() {
     DeleteTokenHandler(job);
 
     job->deleteLater();

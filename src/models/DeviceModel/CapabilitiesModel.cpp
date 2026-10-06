@@ -1,20 +1,14 @@
 #include "CapabilitiesModel.h"
+#include "DeviceController.h"
 #include <ranges>
 
-CapabilitiesModel::CapabilitiesModel(DeviceController *controller, QObject *parent)
-  : QAbstractListModel(parent), controller_(controller)
-{
-  connect(controller_,
-    &DeviceController::loadRequestMade,
-    this,
-    &CapabilitiesModel::ResetModel
-  );
+CapabilitiesModel::CapabilitiesModel(QObject* parent) : QAbstractListModel(parent) {}
 
-  connect(controller_,
-    &DeviceController::capabilitiesUpdateReady,
-    this,
-    &CapabilitiesModel::OnCapabilitiesUpdated
-  );
+CapabilitiesModel::CapabilitiesModel(DeviceController* controller, QObject* parent)
+  : CapabilitiesModel(parent) {
+  connect(controller, &DeviceController::loadRequestMade, this, &CapabilitiesModel::ResetModel);
+  connect(controller, &DeviceController::capabilitiesUpdateReady, this, &CapabilitiesModel::OnCapabilitiesUpdated);
+  connect(this, &CapabilitiesModel::capabilityRequested, controller, &DeviceController::UseCapability);
 }
 
 int CapabilitiesModel::rowCount(const QModelIndex &parent) const {
@@ -100,10 +94,10 @@ void CapabilitiesModel::UseCapability(const int index, const QVariantMap &state)
   const auto model_index = createIndex(index, 0);
   emit dataChanged(model_index, model_index);
 
-  controller_->UseCapability(index, capability, state);
+  emit capabilityRequested(index, capability, state);
 }
 
-void CapabilitiesModel::OnCapabilitiesUpdated(const DeviceController::CapabilitiesList& capabilities) {
+void CapabilitiesModel::OnCapabilitiesUpdated(const DeviceSession::CapabilitiesList& capabilities) {
   qInfo() << "Capabilities Model: Updates received from controller";
   qInfo() << "Capabilities count:" << capabilities.size();
 

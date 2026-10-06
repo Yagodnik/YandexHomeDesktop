@@ -3,7 +3,7 @@
 #include <QTest>
 
 #include "api/IHomeApi.h"
-#include "models/DeviceModel/CapabilitiesModel.h"
+#include "models/DeviceModel/DeviceViewModel.h"
 #include "models/DeviceModel/DeviceDataModel.h"
 #include "models/DeviceModel/PropertiesModel.h"
 
@@ -91,24 +91,25 @@ DeviceInfo InitialDevice() {
   return device;
 }
 
-// Exercise the production controller and the actual QML-facing models. Invoke
-// the timer slot explicitly: real timers are stopped after every delivered read,
-// and the injected clock advances without sleeps or access to private fields.
+// Exercise the production view model and its owned QML-facing models. Request
+// polling explicitly and stop real timers after every delivered read; the clock
+// advances without sleeps or access to private fields.
 struct DeviceFixture {
   double now = 100;
   ScriptedHomeApi api;
-  DeviceController controller{&api, nullptr, [this] { return now; }};
-  CapabilitiesModel capabilities{&controller};
-  PropertiesModel properties{&controller};
-  DeviceDataModel data{&controller};
-  QList<DeviceController::CapabilitiesList> updates;
+  DeviceService service{&api};
+  DeviceViewModel controller{&service, nullptr, [this] { return now; }};
+  CapabilitiesModel& capabilities = *controller.GetCapabilities();
+  PropertiesModel& properties = *controller.GetProperties();
+  DeviceDataModel& data = *controller.GetDeviceData();
+  QList<DeviceViewModel::CapabilitiesList> updates;
   QList<DeviceInfo> raw_snapshots;
 
   explicit DeviceFixture(DeviceInfo device = InitialDevice()) {
     api.remote = std::move(device);
-    QObject::connect(&controller, &DeviceController::capabilitiesUpdateReady,
+    QObject::connect(&controller, &DeviceViewModel::capabilitiesUpdateReady,
       &controller, [this](const auto& update) { updates.append(update); });
-    QObject::connect(&controller, &DeviceController::deviceDataReady,
+    QObject::connect(&controller, &DeviceViewModel::deviceDataReady,
       &controller, [this](const auto& snapshot) { raw_snapshots.append(snapshot); });
   }
 
@@ -121,9 +122,9 @@ struct DeviceFixture {
   int Poll(double time) {
     now = time;
     const int request = api.device_requests.size();
-    const bool invoked = QMetaObject::invokeMethod(&controller, "OnTimerTimeout", Qt::DirectConnection);
+    controller.Refresh();
     controller.StopPolling();
-    return invoked && api.device_requests.size() == request + 1 ? request : -1;
+    return api.device_requests.size() == request + 1 ? request : -1;
   }
 
   bool ReplyDevice(int request, double time) {
@@ -255,6 +256,43 @@ void CapabilityCases(bool mobile_only = false) {
 class DeviceControlTests final : public QObject {
   Q_OBJECT
 private slots:
+  void ViewModelReadinessSurvivesRefreshFailureAndResetsForRetry() {
+    DeviceFixture fixture;
+    QCOMPARE(fixture.controller.GetState(), DeviceViewModel::Loading);
+    QVERIFY(fixture.Load());
+    QCOMPARE(fixture.controller.GetState(), DeviceViewModel::Ready);
+    const int request = fixture.Poll(110);
+    QVERIFY(fixture.api.device_requests[request].Reply(
+      std::unexpected(ApiError{ApiErrorKind::Timeout, "POLL_TIMEOUT"})));
+    // Existing initialized models stay displayed after a background failure.
+    QCOMPARE(fixture.controller.GetState(), DeviceViewModel::Ready);
+    fixture.controller.TryReloadDevice();
+    QCOMPARE(fixture.controller.GetState(), DeviceViewModel::Loading);
+    QCOMPARE(fixture.capabilities.rowCount(), 0);
+    QCOMPARE(fixture.properties.rowCount(), 0);
+    QCOMPARE(fixture.data.GetDeviceName(), QString{});
+    const int retry = fixture.api.device_requests.size() - 1;
+    QVERIFY(fixture.api.device_requests[retry].Reply(
+      std::unexpected(ApiError{ApiErrorKind::Timeout, "LOAD_TIMEOUT"})));
+    QCOMPARE(fixture.controller.GetState(), DeviceViewModel::Error);
+    fixture.controller.TryReloadDevice();
+    QCOMPARE(fixture.controller.GetState(), DeviceViewModel::Loading);
+    QVERIFY(fixture.ReplyDevice(fixture.api.device_requests.size() - 1, 111));
+    QCOMPARE(fixture.controller.GetState(), DeviceViewModel::Ready);
+    QCOMPARE(fixture.capabilities.rowCount(), 2);
+    QCOMPARE(fixture.properties.rowCount(), 1);
+  }
+
+  void EmptyAttributesStillInitializeViewModel() {
+    auto device = InitialDevice();
+    device.capabilities.clear();
+    device.properties.clear();
+    DeviceFixture fixture(device);
+    QVERIFY(fixture.Load());
+    QCOMPARE(fixture.controller.GetState(), DeviceViewModel::Ready);
+    QVERIFY(!fixture.controller.IsLoading());
+  }
+
   void MobileChangesAppearOnNextPoll_data() { CapabilityCases(true); }
   void MobileChangesAppearOnNextPoll() {
     QFETCH(int, type);
@@ -428,7 +466,7 @@ private slots:
   void FailedDesktopActionKeepsOptimisticValueUntilFreshPoll() {
     DeviceFixture fixture;
     QVERIFY(fixture.Load());
-    QSignalSpy errors(&fixture.controller, &DeviceController::errorOccurred);
+    QSignalSpy errors(&fixture.controller, &DeviceViewModel::errorOccurred);
     QSignalSpy online_changes(&fixture.data, &DeviceDataModel::deviceStateChanged);
     QVERIFY(fixture.DesktopValue(0, 80, 110));
     fixture.RemoteValue(0, 35, 110.5);
@@ -453,7 +491,7 @@ private slots:
     QVERIFY(fixture.DesktopValue(0, 80, 110));
     const int request = fixture.Poll(111);
     QVERIFY(request >= 0);
-    QSignalSpy errors(&fixture.controller, &DeviceController::errorOccurred);
+    QSignalSpy errors(&fixture.controller, &DeviceViewModel::errorOccurred);
     QVERIFY(fixture.api.device_requests[request].Reply(
       std::unexpected(ApiError{ApiErrorKind::Timeout, "POLL_TIMEOUT"})));
     QCOMPARE(errors.size(), 1);
@@ -482,7 +520,7 @@ private slots:
     QFETCH(bool, success);
     DeviceFixture fixture;
     QVERIFY(fixture.Load());
-    QSignalSpy errors(&fixture.controller, &DeviceController::errorOccurred);
+    QSignalSpy errors(&fixture.controller, &DeviceViewModel::errorOccurred);
     QVERIFY(fixture.DesktopValue(0, 80, 110));
     QVERIFY(fixture.DesktopValue(0, 90, 110.2));
     QCOMPARE(fixture.Value().toInt(), 90);

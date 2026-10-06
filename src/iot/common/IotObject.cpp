@@ -1,4 +1,5 @@
 #include "IotObject.h"
+#include "iot/core/CapabilityParameters.h"
 
 IotObject::IotObject(const QString& name, QObject *parent)
   : QObject(parent), name_(name) {}
@@ -21,7 +22,7 @@ QString IotObject::GetTitle() const {
 }
 
 QString IotObject::GetInstance() const {
-  return parameters_.value("instance", "").toString();
+  return Iot::Instance(parameters_);
 }
 
 TitlesProvider * IotObject::GetTitlesProvider() const {

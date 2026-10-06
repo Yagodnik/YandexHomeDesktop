@@ -32,8 +32,13 @@ void Settings::Reset() {
     SetTrayModeEnabled(false);
     return;
   }
-  settings_.remove("trayModeEnabled");
-  settings_.remove("currentTheme");
+  ResetStoredSettings();
+}
+
+void Settings::ResetStoredSettings() {
+  QSettings settings("ArtemYagodnik", "YandexHomeDesktop");
+  settings.remove("trayModeEnabled");
+  settings.remove("currentTheme");
 }
 
 void Settings::SetCurrentTheme(const int theme) {
@@ -56,4 +61,3 @@ void Settings::SetTrayModeEnabled(bool enabled) {
   if (temporary_) { temporary_tray_ = enabled; } else { settings_.setValue("trayModeEnabled", enabled); }
   emit trayModeEnabledChanged();
 }
-

@@ -2,6 +2,94 @@
 
 #include <QQmlEngine>
 #include <QStandardItemModel>
+#include <QPointer>
+#include <QTest>
+#include "api/IHomeApi.h"
+
+// Real device view-model wiring with responses controlled by QML tests.
+class QmlTestDeviceApi final : public QObject, public IHomeApi {
+  Q_OBJECT
+  Q_PROPERTY(int requestCount MEMBER request_count_ NOTIFY requested)
+  Q_PROPERTY(QString deviceId MEMBER device_id_ NOTIFY requested)
+  Q_PROPERTY(bool withCapability MEMBER with_capability_)
+  Q_PROPERTY(int actionCount MEMBER action_count_ NOTIFY actionSent)
+  Q_PROPERTY(QString actionDeviceId MEMBER action_device_id_ NOTIFY actionSent)
+  Q_PROPERTY(QVariantMap actionState MEMBER action_state_ NOTIFY actionSent)
+public:
+  using QObject::QObject;
+  void GetDeviceInfo(const QString& id, QObject* context, ApiResultHandler<DeviceInfo> handler) override {
+    device_id_ = id;
+    context_ = context;
+    handler_ = std::move(handler);
+    ++request_count_;
+    emit requested();
+  }
+  void PerformActions(const QList<DeviceActionsObject>& actions, QObject*, ApiResultHandler<void> handler) override {
+    if (actions.size() != 1 || actions[0].actions.size() != 1) {
+      qFatal("Unexpected action payload");
+    }
+    action_device_id_ = actions[0].id;
+    action_state_ = actions[0].actions[0].state;
+    ++action_count_;
+    emit actionSent();
+    handler(ApiResult<void>{});
+  }
+  void GetUserInfo(QObject*, ApiResultHandler<UserInfo>) override { qFatal("Unexpected user request"); }
+  void GetScenarios(QObject*, ApiResultHandler<QList<ScenarioObject>>) override { qFatal("Unexpected scenarios request"); }
+  void ExecuteScenario(const QString&, QObject*, ApiResultHandler<void>) override { qFatal("Unexpected scenario action"); }
+
+  Q_INVOKABLE void ReplyDevice(bool success) {
+    if (!context_ || !handler_) {
+      qFatal("No pending device request");
+    }
+    auto handler = std::move(handler_);
+    if (!success) {
+      // Expected application diagnostics; QML warnings still fail the test.
+      QTest::ignoreMessage(QtWarningMsg, "PropertiesModel: Failed to update properties. Error: \"TEST_ERROR\"");
+      QTest::ignoreMessage(QtCriticalMsg, "DeviceDataModel: Cant receive device info due to:");
+      QTest::ignoreMessage(QtCriticalMsg, "\"TEST_ERROR\"");
+      handler(std::unexpected(ApiError{ApiErrorKind::Timeout, "TEST_ERROR"}));
+      return;
+    }
+    DeviceInfo info{};
+    info.id = device_id_;
+    info.name = "Test device";
+    info.status = Status::Ok;
+    info.state = DeviceState::Online;
+    if (with_capability_) {
+      CapabilityObject capability{};
+      capability.type = CapabilityType::OnOff;
+      capability.state = {{"instance", "on"}, {"value", false}};
+      capability.parameters = {{"instance", "on"}};
+      info.capabilities = {capability};
+    }
+    handler(info);
+  }
+  Q_INVOKABLE void reset() {
+    handler_ = {};
+    context_.clear();
+    request_count_ = 0;
+    device_id_.clear();
+    with_capability_ = false;
+    action_count_ = 0;
+    action_device_id_.clear();
+    action_state_.clear();
+    emit requested();
+    emit actionSent();
+  }
+signals:
+  void requested();
+  void actionSent();
+private:
+  int request_count_ = 0;
+  QString device_id_;
+  bool with_capability_ = false;
+  int action_count_ = 0;
+  QString action_device_id_;
+  QVariantMap action_state_;
+  QPointer<QObject> context_;
+  ApiResultHandler<DeviceInfo> handler_;
+};
 
 // Page tests use empty local models and record service calls without any I/O.
 class QmlTestModel : public QStandardItemModel {

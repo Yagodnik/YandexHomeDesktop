@@ -1,4 +1,5 @@
 #include "ToggleCapability.h"
+#include "iot/core/CapabilityState.h"
 
 #include <QVariant>
 
@@ -21,10 +22,5 @@ QVariant ToggleCapability::GetValue() const {
 }
 
 QVariantMap ToggleCapability::Create(const bool value) {
-  const auto instance = GetInstance();
-
-  return {
-    { "instance", instance },
-    { "value", value }
-  };
+  return Iot::State::Toggle(GetInstance(), value);
 }

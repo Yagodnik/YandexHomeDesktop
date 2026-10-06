@@ -31,23 +31,21 @@ ctest --test-dir build --output-on-failure
 
 CI собирает и тестирует приложение на macOS и Windows, а на Linux запускает переносимые тесты. Сборки CI используют тестовую OAuth-конфигурацию. Для релизов используется тег `vMAJOR.MINOR.PATCH`; шаги описаны в [release workflow](.github/workflows/release.yml).
 
-# Аргументы CLI
+# CLI
 
-В этой версии я реализовал способ работы с приложением через командную строку.
-Например, если у вас что-то *багнулось* с аккаунтом (а такое может быть вполне), вы можете сбросить его через CLI. 
-Для этого открываете путь, куда вы установили приложение и выполняете его с аргументами: --reset --i-know-what-i-am-doing.
+Для Windows и macOS собирается отдельный консольный `YandexHomeCli`. Сначала войдите в аккаунт через desktop-приложение; CLI использует сохранённый вход. На macOS установленный CLI находится в `YandexHomeDesktop.app/Contents/MacOS/YandexHomeCli`, на Windows — рядом с `YandexHomeDesktop.exe`.
 
-Примерно так: ```YandexHomeDesktop.exe --reset --i-know-what-i-am-doing``` (Для Windows)
+```sh
+YandexHomeCli devices list --json
+YandexHomeCli devices show --id lamp
+YandexHomeCli devices set --id lamp --capability on_off --value on
+YandexHomeCli scenarios run --id evening
+YandexHomeCli --help
+```
 
-Для MacOS ```./Applications/YandexHomeDesktop.app/Contents/MacOS/YandexHomeDesktop --reset --i-know-what-i-am-doing```
+Поддерживаются range, mode, toggle и color_setting, поиск по ID или точному имени, фильтр дома, JSON и коды завершения для автоматизации. Старые аргументы (`--list-devices`, `--on_off`, `--account-info`, `--reset`) и запуск CLI через desktop-executable сохранены. Сброс требует `reset --i-know-what-i-am-doing`.
 
-Примечание: Если вы увидите в консоли что-то такое ```Mon Sep 1 16:01:15 2025 GMT [DEBUG] AuthorizationService: Token: тут будет ваш токен```
-то вы ошиблись в наборе команды и ПОЖАЛУЙСТА не присылайте мне ваш токен в комменты, если хотите что-то спросить. 
-По этому токену можно управлять вашим умным домом.
-
-Список аргументов можно посмотреть прописав ```--help```
-
-Пример как включить устройство из CLI: ``` --on_off "имя в ковычках" --value on ```
+Примеры всех команд, формат ошибок и устройство расширяемых команд описаны в [docs/cli.md](docs/cli.md).
 
 # Credits
 Список изображений, которые я использовал: 

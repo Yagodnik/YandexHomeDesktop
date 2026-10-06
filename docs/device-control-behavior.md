@@ -1,8 +1,11 @@
 # Device control: desktop and external changes
 
-This records the existing behavior before extracting a device service. The
-characterization tests in `tests/DeviceControlTests.cpp` exercise the production
-`DeviceController`, `CapabilitiesModel`, `PropertiesModel`, and `DeviceDataModel`.
+This records the existing behavior captured before extracting a device service.
+The characterization tests in `tests/DeviceControlTests.cpp` now exercise the
+production `DeviceViewModel`, `DeviceSession`, and its QML-facing
+`CapabilitiesModel`, `PropertiesModel`, and `DeviceDataModel`. Their original
+expected outcomes are unchanged. See [device-control-architecture.md](device-control-architecture.md)
+for the extraction and compatibility adapters.
 Surprising expectations are intentional compatibility observations, not proposed
 fixes. Changing them should be a separate behavior decision.
 
@@ -74,11 +77,11 @@ successful read restores the online state.
 The fake API captures a snapshot when a read is requested, records outgoing action
 payloads, and delivers each callback only when the test chooses. Server writes and
 action acknowledgements are separate events, so a late acknowledgement cannot
-implicitly undo a simulated mobile action. The controller accepts an optional
+implicitly undo a simulated mobile action. The session accepts an optional
 time provider; its default is still `QDateTime::currentMSecsSinceEpoch() / 1000`.
 Action start, finish, and read timestamps use this same provider.
 
-Tests invoke the existing timer slot directly and stop the real timer after every
+Tests request a poll explicitly and stop the real timer after every
 delivered read. They use no sleeps, live API, authentication, or hardware. They
 assert the actual QML-facing state maps and model notifications, but do not drive
 mouse clicks through the QML controls.

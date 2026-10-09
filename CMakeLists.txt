@@ -6,11 +6,23 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(YH_ENABLE_PCH "Use precompiled headers for C++ targets" ON)
 
 include(CTest)
 include(FetchContent)
+include(cmake/YandexHomeLibraries.cmake)
+
+# DLLs and executables share a directory on Windows, including test programs.
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+if(APPLE)
+  set(CMAKE_INSTALL_RPATH "@loader_path;@loader_path/../${CMAKE_INSTALL_LIBDIR}")
+elseif(UNIX)
+  set(CMAKE_INSTALL_RPATH "$ORIGIN;$ORIGIN/../${CMAKE_INSTALL_LIBDIR}")
+endif()
 
 set(_desktop_default OFF)
 if(APPLE OR WIN32)
@@ -18,11 +30,24 @@ if(APPLE OR WIN32)
 endif()
 option(BUILD_DESKTOP_APP "Build the Windows or macOS desktop application" ${_desktop_default})
 
+option(BUILD_CLI_APP "Build the console CLI" ON)
+option(BUILD_REST_APP "Build the headless REST worker" ON)
+option(YH_BUILD_REST_ADAPTER "Build the reusable REST adapter" ${BUILD_REST_APP})
+if(BUILD_REST_APP AND NOT YH_BUILD_REST_ADAPTER)
+  message(FATAL_ERROR "BUILD_REST_APP requires YH_BUILD_REST_ADAPTER")
+endif()
+
 if(BUILD_DESKTOP_APP AND NOT (APPLE OR WIN32))
   message(FATAL_ERROR "The desktop application is supported on Windows and macOS only")
 endif()
 
-find_package(Qt6 6.9 REQUIRED COMPONENTS Core Gui Network)
+find_package(Qt6 6.9 REQUIRED COMPONENTS Core Network)
+if(YH_BUILD_REST_ADAPTER)
+  find_package(Qt6 6.9 REQUIRED COMPONENTS HttpServer)
+endif()
+if(BUILD_DESKTOP_APP OR BUILD_TESTING)
+  find_package(Qt6 6.9 REQUIRED COMPONENTS Gui)
+endif()
 if(BUILD_TESTING)
   find_package(Qt6 6.9 REQUIRED COMPONENTS Test)
 endif()
@@ -45,18 +70,79 @@ FetchContent_MakeAvailable(hana)
 
 include_directories(${hana_SOURCE_DIR}/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/app)
 
-add_library(AppStartup STATIC src/app/StartupOptions.cpp src/app/StartupOptions.h src/app/CliApplication.h)
+add_library(AppStartup STATIC
+  src/app/common/StartupOptions.cpp src/app/common/StartupOptions.h
+  src/app/common/AppTranslations.h)
 target_link_libraries(AppStartup PUBLIC Qt6::Core)
+
+# Keep QtKeychain's install rules and tests out of this application's package.
+FetchContent_Declare(qtkeychain
+  GIT_REPOSITORY https://github.com/frankosterfeld/qtkeychain.git
+  GIT_TAG 0.15.0
+  GIT_SHALLOW TRUE
+  EXCLUDE_FROM_ALL
+)
+set(BUILD_WITH_QT6 ON)
+set(_project_shared_libs ${BUILD_SHARED_LIBS})
+set(BUILD_SHARED_LIBS OFF)
+set(BUILD_TRANSLATIONS OFF)
+set(BUILD_TEST_APPLICATION OFF)
+set(_project_build_testing ${BUILD_TESTING})
+set(BUILD_TESTING OFF)
+FetchContent_MakeAvailable(qtkeychain)
+set(BUILD_TESTING ${_project_build_testing})
+unset(_project_build_testing)
+unset(BUILD_WITH_QT6)
+set(BUILD_SHARED_LIBS ${_project_shared_libs})
+unset(_project_shared_libs)
+unset(BUILD_TRANSLATIONS)
+unset(BUILD_TEST_APPLICATION)
 
 add_subdirectory(src/api)
 add_subdirectory(src/iot)
 add_subdirectory(src/services)
+if(YH_BUILD_REST_ADAPTER)
+  add_subdirectory(src/rest)
+endif()
 add_subdirectory(src/cli)
 add_subdirectory(src/auth)
-add_subdirectory(src/models)
 add_subdirectory(src/utils)
+if(BUILD_DESKTOP_APP OR BUILD_TESTING)
+  add_subdirectory(src/models)
+endif()
+
+qt_add_resources(DEBUG_FIXTURE_RESOURCES resources/debug/debug.qrc)
+add_library(RestControlBootstrap STATIC src/app/rest/RestConfiguration.cpp src/app/rest/RestConfiguration.h
+  src/app/rest/RestCommand.cpp src/app/rest/RestCommand.h)
+target_link_libraries(RestControlBootstrap PUBLIC AppStartup AppRestControl)
+
+if(BUILD_CLI_APP)
+  add_library(CliBootstrap STATIC src/app/cli/CliApp.cpp src/app/cli/CliApp.h
+    src/app/cli/CliApplication.h)
+  target_compile_definitions(CliBootstrap PRIVATE "$<$<CONFIG:Debug>:YH_DEBUG_FAKE_API>")
+  target_link_libraries(CliBootstrap PUBLIC AppCli AppStartup RestControlBootstrap YandexAuth YandexApiAdapter AppRuntime
+    "$<$<CONFIG:Debug>:FixtureApi>")
+  add_executable(YandexHomeCli src/app/cli/CliMain.cpp)
+  target_compile_definitions(YandexHomeCli PRIVATE "$<$<CONFIG:Debug>:YH_DEBUG_FAKE_API>")
+  target_link_libraries(YandexHomeCli PRIVATE CliBootstrap)
+  target_sources(YandexHomeCli PRIVATE "$<$<CONFIG:Debug>:${DEBUG_FIXTURE_RESOURCES}>")
+  install(TARGETS YandexHomeCli RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+endif()
+if(BUILD_REST_APP)
+  add_library(RestBootstrap STATIC src/app/rest/RestApp.cpp src/app/rest/RestApp.h)
+  target_compile_definitions(RestBootstrap PRIVATE "$<$<CONFIG:Debug>:YH_DEBUG_FAKE_API>")
+  target_link_libraries(RestBootstrap PUBLIC AppRest AppStartup RestControlBootstrap YandexAuth YandexApiAdapter AppRuntime
+    "$<$<CONFIG:Debug>:FixtureApi>")
+  add_executable(YandexHomeRest src/app/rest/RestMain.cpp)
+  target_compile_definitions(YandexHomeRest PRIVATE "$<$<CONFIG:Debug>:YH_DEBUG_FAKE_API>")
+  target_link_libraries(YandexHomeRest PRIVATE RestBootstrap)
+  target_sources(YandexHomeRest PRIVATE "$<$<CONFIG:Debug>:${DEBUG_FIXTURE_RESOURCES}>")
+  install(TARGETS YandexHomeRest RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+  if(TARGET YandexHomeCli)
+    add_dependencies(YandexHomeCli YandexHomeRest)
+  endif()
+endif()
 
 if(BUILD_TESTING)
   add_subdirectory(tests)
@@ -71,27 +157,6 @@ if(BUILD_DESKTOP_APP)
   if(NOT EXISTS "${YH_AUTH_CONFIG_FILE}")
     message(FATAL_ERROR "OAuth configuration file does not exist: ${YH_AUTH_CONFIG_FILE}")
   endif()
-
-  # Keep QtKeychain's install rules and tests out of this application's package.
-  FetchContent_Declare(qtkeychain
-    GIT_REPOSITORY https://github.com/frankosterfeld/qtkeychain.git
-    GIT_TAG 0.15.0
-    GIT_SHALLOW TRUE
-    EXCLUDE_FROM_ALL
-  )
-  set(BUILD_WITH_QT6 ON)
-  set(BUILD_SHARED_LIBS OFF)
-  set(BUILD_TRANSLATIONS OFF)
-  set(BUILD_TEST_APPLICATION OFF)
-  set(_project_build_testing ${BUILD_TESTING})
-  set(BUILD_TESTING OFF)
-  FetchContent_MakeAvailable(qtkeychain)
-  set(BUILD_TESTING ${_project_build_testing})
-  unset(_project_build_testing)
-  unset(BUILD_WITH_QT6)
-  unset(BUILD_SHARED_LIBS)
-  unset(BUILD_TRANSLATIONS)
-  unset(BUILD_TEST_APPLICATION)
 
   add_subdirectory(src/platform)
   add_subdirectory(src/qml)
@@ -137,7 +202,6 @@ if(BUILD_DESKTOP_APP)
   endif()
 
   qt_add_resources(RESOURCES resources/resources.qrc)
-  qt_add_resources(DEBUG_FIXTURE_RESOURCES resources/debug/debug.qrc)
   if(BUILD_TESTING)
     target_sources(QmlPageLoadTest PRIVATE ${RESOURCES})
     target_sources(QmlLayoutTests PRIVATE ${RESOURCES})
@@ -145,25 +209,15 @@ if(BUILD_DESKTOP_APP)
     target_sources(HomeTests PRIVATE ${RESOURCES})
   endif()
   qt_add_executable(appYandexHomeDesktop
-    src/main.cpp
+    src/app/gui/GuiMain.cpp
     src/utils/Router.cpp
     src/utils/Router.h
     ${RESOURCES}
-    src/app/AppContext.cpp
-    src/app/AppContext.h
-    src/app/CliApp.h
-    src/app/GuiApp.cpp
-    src/app/GuiApp.h
+    src/app/gui/AppContext.cpp
+    src/app/gui/AppContext.h
+    src/app/gui/GuiApp.cpp
+    src/app/gui/GuiApp.h
   )
-  add_library(CliBootstrap STATIC src/app/CliApp.cpp src/app/CliApp.h)
-  target_compile_definitions(CliBootstrap PRIVATE "$<$<CONFIG:Debug>:YH_DEBUG_FAKE_API>")
-  target_link_libraries(CliBootstrap PUBLIC AppCli AppStartup YandexAuth YandexApiAdapter Utils
-    "$<$<CONFIG:Debug>:FixtureApi>")
-  add_executable(YandexHomeCli src/app/CliMain.cpp)
-  target_compile_definitions(YandexHomeCli PRIVATE "$<$<CONFIG:Debug>:YH_DEBUG_FAKE_API>")
-  target_link_libraries(YandexHomeCli PRIVATE CliBootstrap)
-  target_sources(YandexHomeCli PRIVATE "$<$<CONFIG:Debug>:${DEBUG_FIXTURE_RESOURCES}>")
-
   target_compile_definitions(appYandexHomeDesktop PRIVATE "$<$<CONFIG:Debug>:YH_DEBUG_FAKE_API>")
   target_sources(appYandexHomeDesktop PRIVATE "$<$<CONFIG:Debug>:${DEBUG_FIXTURE_RESOURCES}>")
 
@@ -185,24 +239,14 @@ if(BUILD_DESKTOP_APP)
     target_sources(appYandexHomeDesktop PRIVATE resources/YandexHomeDesktop.icns)
   endif()
 
+  if(TARGET YandexHomeRest)
+    add_dependencies(appYandexHomeDesktop YandexHomeRest)
+  endif()
+
   qt_add_qml_module(appYandexHomeDesktop
     URI YandexHomeDesktop
     VERSION 1.0
     QML_FILES src/qml/Main.qml
-  )
-
-  file(GLOB_RECURSE QML_TRANSLATION_SOURCES CONFIGURE_DEPENDS
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/qml/*.qml")
-  qt_add_translations(appYandexHomeDesktop TARGETS YandexHomeCli
-    TS_FILES "${CMAKE_CURRENT_SOURCE_DIR}/translations/YandexHomeDesktop_en.ts"
-    SOURCE_TARGETS appYandexHomeDesktop AppCli CliBootstrap IotCore YandexApiAdapter
-    SOURCES
-      ${QML_TRANSLATION_SOURCES}
-      translations/DataStrings.cpp
-      src/models/DeviceModel/CapabilitiesModel.cpp
-      src/models/DeviceModel/PropertiesModel.cpp
-      src/models/ScenariosModel/ScenariosViewModel.cpp
-    RESOURCE_PREFIX "/i18n"
   )
 
   set_target_properties(appYandexHomeDesktop PROPERTIES
@@ -217,39 +261,9 @@ if(BUILD_DESKTOP_APP)
     Qt6::Quick Qt6::Core Qt6::Gui Qt6::QuickControls2 Qt6::Widgets Qt6::Svg
     YandexHomeDesktopUi YandexHomeDesktopPages
     YandexHomeDesktopComponents
-    YandexApiAdapter YandexAuth Models PlatformService Utils Iot
-    AppStartup CliBootstrap "$<$<CONFIG:Debug>:FixtureApi>"
+    YandexApiAdapter YandexAuth YandexOAuth Models PlatformService Utils Iot
+    AppStartup RestControlBootstrap "$<$<CONFIG:Debug>:FixtureApi>"
   )
-
-  if(BUILD_TESTING)
-    foreach(_cli_target YandexHomeCli appYandexHomeDesktop)
-      add_test(NAME CliProcess_${_cli_target} COMMAND "${CMAKE_COMMAND}"
-        "-DAPP_PATH=$<TARGET_FILE:${_cli_target}>"
-        "-DCONFIGURATION=$<CONFIG>"
-        -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/CliSmoke.cmake")
-      set_tests_properties(CliProcess_${_cli_target} PROPERTIES TIMEOUT 30)
-    endforeach()
-    set(_fixture_debug_configs)
-    set(_fixture_release_configs)
-    if(CMAKE_CONFIGURATION_TYPES)
-      set(_fixture_debug_configs CONFIGURATIONS Debug)
-      set(_fixture_release_configs CONFIGURATIONS Release RelWithDebInfo MinSizeRel)
-    endif()
-    if(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE STREQUAL "Debug")
-      add_test(NAME DebugFixtureCli ${_fixture_debug_configs}
-        COMMAND appYandexHomeDesktop --fake-api --list-devices)
-      set_tests_properties(DebugFixtureCli PROPERTIES
-        TIMEOUT 15 PASS_REGULAR_EXPRESSION "Desk lamp"
-        ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
-    endif()
-    if(CMAKE_CONFIGURATION_TYPES OR NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
-      add_test(NAME ReleaseRejectsFixture ${_fixture_release_configs} COMMAND "${CMAKE_COMMAND}"
-        "-DAPP_PATH=$<TARGET_FILE:appYandexHomeDesktop>"
-        -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/RejectFakeApi.cmake")
-      set_tests_properties(ReleaseRejectsFixture PROPERTIES
-        TIMEOUT 15 ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
-    endif()
-  endif()
 
   include(GNUInstallDirs)
   install(TARGETS appYandexHomeDesktop
@@ -258,16 +272,27 @@ if(BUILD_DESKTOP_APP)
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
   )
   if(APPLE)
-    set_target_properties(YandexHomeCli PROPERTIES INSTALL_RPATH "@executable_path/../Frameworks")
-    install(TARGETS YandexHomeCli RUNTIME DESTINATION "YandexHomeDesktop.app/Contents/MacOS")
-  else()
-    install(TARGETS YandexHomeCli RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+    get_property(_bundle_libraries GLOBAL PROPERTY YH_SDK_TARGETS)
+    install(TARGETS ${_bundle_libraries}
+      LIBRARY DESTINATION "YandexHomeDesktop.app/Contents/Frameworks")
+    set_target_properties(appYandexHomeDesktop PROPERTIES
+      INSTALL_RPATH "@executable_path/../Frameworks")
+    set(_deploy_executables)
+    foreach(_console YandexHomeCli YandexHomeRest)
+      if(TARGET ${_console})
+        set_target_properties(${_console} PROPERTIES
+          INSTALL_RPATH "@executable_path/../Frameworks;@executable_path/../${CMAKE_INSTALL_LIBDIR}")
+        install(TARGETS ${_console} RUNTIME DESTINATION "YandexHomeDesktop.app/Contents/MacOS")
+        # Qt runs macdeployqt from the install prefix, also with --prefix.
+        list(APPEND _deploy_executables "-executable=YandexHomeDesktop.app/Contents/MacOS/${_console}")
+      endif()
+    endforeach()
   endif()
   if(APPLE)
     qt_generate_deploy_qml_app_script(
       TARGET appYandexHomeDesktop
       OUTPUT_SCRIPT deploy_script
-      DEPLOY_TOOL_OPTIONS "-codesign=-"
+      DEPLOY_TOOL_OPTIONS "-codesign=-" ${_deploy_executables}
     )
   else()
     qt_generate_deploy_qml_app_script(
@@ -276,6 +301,24 @@ if(BUILD_DESKTOP_APP)
     )
   endif()
   install(SCRIPT ${deploy_script})
+  # The deploy tool can print errors while returning success. Verify that all
+  # packaged entry points can actually load their dependencies.
+  set(YH_INSTALLED_CONSOLE_DIR "${CMAKE_INSTALL_BINDIR}")
+  if(APPLE)
+    set(YH_INSTALLED_CONSOLE_DIR "YandexHomeDesktop.app/Contents/MacOS")
+  endif()
+  set(YH_INSTALLED_CONSOLES)
+  foreach(_console YandexHomeCli YandexHomeRest)
+    if(TARGET ${_console})
+      list(APPEND YH_INSTALLED_CONSOLES "${_console}${CMAKE_EXECUTABLE_SUFFIX}")
+    endif()
+  endforeach()
+  configure_file(cmake/CheckConsoleInstall.cmake.in
+    "${CMAKE_CURRENT_BINARY_DIR}/CheckConsoleInstall.cmake" @ONLY)
+  # Windows console deployment runs below, after the GUI deployment.
+  if(APPLE)
+    install(SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/CheckConsoleInstall.cmake")
+  endif()
 
   if(WIN32)
     set(CPACK_GENERATOR NSIS)
@@ -291,6 +334,49 @@ if(BUILD_DESKTOP_APP)
     include(CPack)
   endif()
 endif()
+
+# Console-only Windows packages need their own Qt runtime deployment. REST's
+# HttpServer/WebSockets dependencies are absent from the GUI dependency graph.
+if(WIN32)
+  foreach(_console YandexHomeCli YandexHomeRest)
+    if(TARGET ${_console})
+      qt_generate_deploy_app_script(TARGET ${_console} OUTPUT_SCRIPT _console_deploy)
+      install(SCRIPT ${_console_deploy})
+    endif()
+  endforeach()
+  if(BUILD_DESKTOP_APP)
+    install(SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/CheckConsoleInstall.cmake")
+  endif()
+endif()
+
+# Translate each enabled entry point without linking the GUI.
+set(_translation_targets)
+foreach(_app appYandexHomeDesktop YandexHomeCli YandexHomeRest)
+  if(TARGET ${_app})
+    list(APPEND _translation_targets ${_app})
+  endif()
+endforeach()
+if(_translation_targets)
+  find_package(Qt6 6.9 REQUIRED COMPONENTS LinguistTools)
+  file(GLOB_RECURSE QML_TRANSLATION_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/qml/*.qml")
+  if(BUILD_DESKTOP_APP)
+    set(_gui_translation_sources appYandexHomeDesktop)
+  endif()
+  set(_translation_sources ${_gui_translation_sources} AppStartup AppCli AppServices AppRestControl IotCore YandexApiAdapter RestControlBootstrap)
+  foreach(_target CliBootstrap RestBootstrap AppRest)
+    if(TARGET ${_target})
+      list(APPEND _translation_sources ${_target})
+    endif()
+  endforeach()
+  qt_add_translations(TARGETS ${_translation_targets}
+    TS_FILES "${CMAKE_CURRENT_SOURCE_DIR}/translations/YandexHomeDesktop_en.ts"
+    SOURCES ${QML_TRANSLATION_SOURCES} translations/DataStrings.cpp
+      src/models/DeviceModel/CapabilitiesModel.cpp src/models/DeviceModel/PropertiesModel.cpp
+      src/models/ScenariosModel/ScenariosViewModel.cpp src/models/RestViewModel.cpp
+    SOURCE_TARGETS ${_translation_sources}
+    RESOURCE_PREFIX "/i18n")
+endif()
+yh_install_sdk()
 
 if(YH_ENABLE_PCH)
   foreach(_pch_target YandexApiAdapter Models Utils Iot AppTests appYandexHomeDesktop)

@@ -1,4 +1,4 @@
-#include "app/CliApplication.h"
+#include "app/cli/CliApplication.h"
 #include "cli/CliProgress.h"
 #include "cli/CliRunner.h"
 #include "cli/commands/DeviceCommands.h"

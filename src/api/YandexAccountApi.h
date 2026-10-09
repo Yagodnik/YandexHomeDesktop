@@ -1,11 +1,13 @@
 #pragma once
 
+#include "yh/yandexapiadapter_export.h"
+
 #include <functional>
 
 #include "IAccountApi.h"
 #include "IHttpTransport.h"
 
-class YandexAccountApi final : public QObject, public IAccountApi {
+class YANDEXAPIADAPTER_EXPORT YandexAccountApi final : public QObject, public IAccountApi {
   Q_OBJECT
 public:
   using TokenProvider = std::function<QString()>;

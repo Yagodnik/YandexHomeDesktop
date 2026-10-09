@@ -1,5 +1,7 @@
 #pragma once
 
+#include "yh/appservices_export.h"
+
 #include <QTimer>
 #include <functional>
 #include <optional>
@@ -7,7 +9,7 @@
 
 // One consumer's observation of a device. Separate sessions can share a service
 // without sharing their selection, timers, or capability suppression windows.
-class DeviceSession final : public QObject {
+class APPSERVICES_EXPORT DeviceSession final : public QObject {
   Q_OBJECT
 public:
   using CapabilitiesList = QList<std::optional<CapabilityObject>>;

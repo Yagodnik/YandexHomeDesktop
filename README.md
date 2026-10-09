@@ -27,6 +27,7 @@ ctest --test-dir build --output-on-failure
 just qt_prefix=/path/to/Qt/6.x/macos configure
 just demo
 just cli --fake-api devices list --json
+just rest --fake-api
 just config=Release qt_prefix=/path/to/Qt/6.x/macos build
 just test
 ```
@@ -45,7 +46,7 @@ CI собирает и тестирует приложение на macOS и Win
 
 # CLI
 
-Для Windows и macOS собирается отдельный консольный `YandexHomeCli`. Сначала войдите в аккаунт через desktop-приложение; CLI использует сохранённый вход. На macOS установленный CLI находится в `YandexHomeDesktop.app/Contents/MacOS/YandexHomeCli`, на Windows — рядом с `YandexHomeDesktop.exe`.
+Для Windows, macOS и Linux собирается отдельный консольный `YandexHomeCli`. Сначала войдите в аккаунт через desktop-приложение; CLI использует сохранённый вход. На macOS установленный CLI находится в `YandexHomeDesktop.app/Contents/MacOS/YandexHomeCli`, на Windows — рядом с `YandexHomeDesktop.exe`.
 
 ```sh
 YandexHomeCli devices list --json
@@ -55,9 +56,17 @@ YandexHomeCli scenarios run --id evening
 YandexHomeCli --help
 ```
 
-Поддерживаются range, mode, toggle и color_setting, поиск по ID или точному имени, фильтр дома, JSON и коды завершения для автоматизации. Старые аргументы (`--list-devices`, `--on_off`, `--account-info`, `--reset`) и запуск CLI через desktop-executable сохранены. Сброс требует `reset --i-know-what-i-am-doing`.
+Поддерживаются range, mode, toggle и color_setting, поиск по ID или точному имени, фильтр дома, JSON и коды завершения для автоматизации. Старые аргументы (`--list-devices`, `--on_off`, `--account-info`, `--reset`) сохранены в CLI; GUI запускается отдельно. Сброс требует `reset --i-know-what-i-am-doing`.
 
 Примеры всех команд, формат ошибок и устройство расширяемых команд описаны в [docs/cli.md](docs/cli.md).
+
+Локальный REST API включается командой `YandexHomeCli --enable-rest`, выключается
+через `--disable-rest`; состояние показывает `--status-rest`. Сервер работает
+в фоне и управляется также в разделе «Настройки → Дополнительно». В Debug можно
+добавить `--fake-api`. Отдельный процесс `YandexHomeRest` можно запустить через `just rest`; локальный API не требует токена. Маршруты и запуск Python-примера из
+`examples/rest_client.py` описаны в [docs/rest.md](docs/rest.md).
+
+GUI, CLI и REST используют общие динамические библиотеки. Пример внешнего CMake-проекта — [examples/sdk](examples/sdk); установка и публичные цели описаны в [docs/sdk.md](docs/sdk.md).
 
 # Credits
 Список изображений, которые я использовал: 

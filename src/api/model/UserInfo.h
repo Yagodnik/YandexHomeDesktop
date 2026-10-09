@@ -1,5 +1,7 @@
 #pragma once
 
+#include "yh/yandexapiadapter_export.h"
+
 #include "serialization/SerializationTypes.h"
 #include "Status.h"
 #include "Capabilites.h"
@@ -78,10 +80,10 @@ JSON_STRUCT(UserInfo,
 );
 
 // Shared codecs are instantiated once in Serialization.cpp.
-extern template RoomObject Serialization::From<RoomObject>(const QJsonObject&);
-extern template GroupObject Serialization::From<GroupObject>(const QJsonObject&);
-extern template DeviceObject Serialization::From<DeviceObject>(const QJsonObject&);
-extern template DeviceInfo Serialization::From<DeviceInfo>(const QJsonObject&);
-extern template ScenarioObject Serialization::From<ScenarioObject>(const QJsonObject&);
-extern template HouseholdObject Serialization::From<HouseholdObject>(const QJsonObject&);
-extern template UserInfo Serialization::From<UserInfo>(const QJsonObject&);
+extern template YANDEXAPIADAPTER_EXPORT RoomObject Serialization::From<RoomObject>(const QJsonObject&);
+extern template YANDEXAPIADAPTER_EXPORT GroupObject Serialization::From<GroupObject>(const QJsonObject&);
+extern template YANDEXAPIADAPTER_EXPORT DeviceObject Serialization::From<DeviceObject>(const QJsonObject&);
+extern template YANDEXAPIADAPTER_EXPORT DeviceInfo Serialization::From<DeviceInfo>(const QJsonObject&);
+extern template YANDEXAPIADAPTER_EXPORT ScenarioObject Serialization::From<ScenarioObject>(const QJsonObject&);
+extern template YANDEXAPIADAPTER_EXPORT HouseholdObject Serialization::From<HouseholdObject>(const QJsonObject&);
+extern template YANDEXAPIADAPTER_EXPORT UserInfo Serialization::From<UserInfo>(const QJsonObject&);

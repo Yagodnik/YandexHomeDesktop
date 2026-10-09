@@ -2,64 +2,37 @@ name: Linux build
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   build:
-    runs-on: ubuntu-latest
-
+    runs-on: ubuntu-24.04
     steps:
-      - name: Checkout source
-        uses: actions/checkout@v4
-
+      - uses: actions/checkout@v4
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
-          aqtversion: '==3.1.*'
           version: '6.9.1'
-          host: 'linux'
-          target: 'desktop'
-          arch: 'linux_gcc_64'
-          modules: 'qt5compat qtnetworkauth qtshadertools'
+          host: linux
+          target: desktop
+          arch: linux_gcc_64
+          modules: qttools qthttpserver qtwebsockets
           cache: true
-
-      - name: Install Boost.Hana
-        run: |
-          git clone --depth=1 https://github.com/boostorg/hana.git temp_hana
-          mkdir -p libs
-          cp -r temp_hana/include/boost libs/
-
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y libsecret-1-dev
-
-      - name: Clone and build QtKeychain with Qt6
+      - name: Configure
+        run: >-
+          cmake -S . -B build -G Ninja -DCMAKE_CXX_COMPILER=g++-13
+          -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR" -DCMAKE_BUILD_TYPE=Release
+          -DBUILD_DESKTOP_APP=OFF -DBUILD_TESTING=ON
+      - name: Build and test
         run: |
-          git clone --depth=1 https://github.com/frankosterfeld/qtkeychain.git qtkeychain
-          mkdir qtkeychain/build
-          cd qtkeychain/build
-          cmake .. -DBUILD_WITH_QT6=ON -DCMAKE_BUILD_TYPE=Release
-          cmake --build . 
-
-      - name: Copy QtKeychain headers and .so
-        run: |
-          mkdir -p libs/qtkeychain/include/qtkeychain
-          mkdir -p libs/qtkeychain/lib
-          cp qtkeychain/build/bin/libqt6keychain.so libs/qtkeychain/lib/
-          cp qtkeychain/build/qtkeychain/qkeychain_export.h libs/qtkeychain/include/qtkeychain/
-          cp qtkeychain/qtkeychain/keychain.h libs/qtkeychain/include/qtkeychain/
-
-      - name: Generate secrets.json
-        run: python3 scripts/generate-secrets.py
-        env:
-          YANDEX_CLIENT_ID: ${{ secrets.YANDEX_CLIENT_ID }}
-
-      - name: Building application
-        run: |
-          mkdir build
-          cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=$Qt6_DIR
-          cmake --build . --config Release
-
-      - name: Upload build folder as artifact
-        uses: actions/upload-artifact@v4
+          cmake --build build --parallel 4
+          ctest --test-dir build --output-on-failure
+      - name: Stage shared libraries, headers, and console applications
+        run: cmake --install build --prefix stage
+      - uses: actions/upload-artifact@v4
         with:
-          name: build-folder
-          path: build/
+          name: yandex-home-linux
+          path: stage/

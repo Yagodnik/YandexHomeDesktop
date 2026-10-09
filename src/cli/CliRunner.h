@@ -1,12 +1,14 @@
 #pragma once
 
+#include "yh/appcli_export.h"
+
 #include "CliCommand.h"
 #include "CliContext.h"
 #include <QTimer>
 #include <memory>
 
 // Execution mechanics only. ICommand implementations own business operations.
-class CliRunner final : public QObject, public CliContext {
+class APPCLI_EXPORT CliRunner final : public QObject, public CliContext {
   Q_OBJECT
 public:
   using Writer = std::function<void(const QByteArray& text, bool stderr_stream)>;

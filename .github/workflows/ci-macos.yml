@@ -35,7 +35,7 @@ jobs:
           host: mac
           target: desktop
           arch: clang_64
-          modules: qt5compat qtnetworkauth qtsvg qttools
+          modules: qt5compat qtnetworkauth qtsvg qttools qthttpserver qtwebsockets
           cache: true
 
       - name: Configure

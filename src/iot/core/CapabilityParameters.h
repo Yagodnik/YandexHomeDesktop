@@ -1,13 +1,15 @@
 #pragma once
 
+#include "yh/iotcore_export.h"
+
 #include "api/model/Capabilites.h"
 
 namespace Iot {
-QString Instance(const QVariantMap& parameters);
-bool MatchesInstance(const CapabilityObject& capability, const QVariantMap& state);
-bool Advertises(const QVariantList& values, const QString& key, const QVariant& value);
+IOTCORE_EXPORT QString Instance(const QVariantMap& parameters);
+IOTCORE_EXPORT bool MatchesInstance(const CapabilityObject& capability, const QVariantMap& state);
+IOTCORE_EXPORT bool Advertises(const QVariantList& values, const QString& key, const QVariant& value);
 
-class NumericLimits {
+class IOTCORE_EXPORT NumericLimits {
 public:
   explicit NumericLimits(QVariantMap values) : values_(std::move(values)) {}
   double Min() const;
@@ -20,7 +22,7 @@ private:
   QVariantMap values_;
 };
 
-class RangeParameters {
+class IOTCORE_EXPORT RangeParameters {
 public:
   explicit RangeParameters(QVariantMap values) : values_(std::move(values)) {}
   bool RandomAccess() const;
@@ -30,7 +32,7 @@ private:
   QVariantMap values_;
 };
 
-class ColorParameters {
+class IOTCORE_EXPORT ColorParameters {
 public:
   explicit ColorParameters(QVariantMap values) : values_(std::move(values)) {}
   QString Model() const;

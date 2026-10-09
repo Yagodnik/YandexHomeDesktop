@@ -31,6 +31,14 @@ jobs:
       - name: Check justfile formatting
         run: just --fmt --check
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install pinned C++ formatting and analysis tools
+        run: >-
+          python -m pip install --only-binary=:all: -r requirements-clang-tools.txt
+
       - name: Select Git Bash for recipes (Bash 3.2+)
         shell: pwsh
         run: |
@@ -41,6 +49,14 @@ jobs:
       - name: Check Bash for recipes
         run: bash --version
 
+      - name: Check C++ formatting and clang-tidy configuration
+        shell: pwsh
+        run: |
+          just format-check
+          if ($LASTEXITCODE -ne 0) { throw 'C++ formatting check failed' }
+          clang-tidy --verify-config
+          if ($LASTEXITCODE -ne 0) { throw 'Invalid clang-tidy configuration' }
+
       - name: Install Qt and matching MinGW
         uses: jurplel/install-qt-action@v4
         with:
@@ -48,7 +64,7 @@ jobs:
           host: windows
           target: desktop
           arch: win64_mingw
-          modules: qt5compat qtnetworkauth qtsvg qttools
+          modules: qt5compat qtnetworkauth qtsvg qttools qthttpserver qtwebsockets
           tools: tools_mingw1310,qt.tools.win64_mingw1310
           cache: true
 
@@ -63,20 +79,27 @@ jobs:
           pch=${{ matrix.pch }} configure
           -DCMAKE_CXX_COMPILER=g++.exe
 
-      - name: Build desktop, console CLI, and tests
+      - name: Build GUI, CLI, REST, shared libraries, and tests
         run: just build_dir=build config=${{ matrix.configuration }} build
 
-      - name: Run authorization, account preferences, room animations, C++, QML, and CLI process tests
+      - name: Analyze application startup code
+        if: matrix.pch == 'OFF' && matrix.configuration == 'Debug'
+        run: just build_dir=build config=Debug tidy
+
+      - name: Run C++, QML, CLI, REST process, and Python example tests
         run: just build_dir=build config=${{ matrix.configuration }} test
 
       - name: Exercise console CLI recipe
         run: just build_dir=build config=${{ matrix.configuration }} cli --help --json
 
+      - name: Exercise REST worker recipe
+        run: just build_dir=build config=${{ matrix.configuration }} rest --help --json
+
       - name: Check CLI arguments containing spaces
         if: matrix.configuration == 'Debug'
         run: just build_dir=build config=Debug cli --fake-api devices show --name "Desk lamp" --json
 
-      - name: Check installed console CLI
+      - name: Check installed console executables
         if: matrix.configuration == 'Release'
         shell: pwsh
         run: |
@@ -84,5 +107,34 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Deployment failed' }
           $cli = Get-ChildItem build/stage -Recurse -File -Filter YandexHomeCli.exe | Select-Object -First 1
           if (-not $cli) { throw 'Missing installed console CLI' }
+          $rest = Get-ChildItem build/stage -Recurse -File -Filter YandexHomeRest.exe | Select-Object -First 1
+          if (-not $rest) { throw 'Missing installed REST worker' }
+          & $rest.FullName --help --json
+          if ($LASTEXITCODE -ne 0) { throw 'Installed REST worker failed' }
           cmake "-DAPP_PATH=$($cli.FullName)" -DCONFIGURATION=Release -P tests/CliSmoke.cmake
           if ($LASTEXITCODE -ne 0) { throw 'Installed console CLI failed' }
+
+      - name: Build CLI independently of desktop and REST
+        run: >-
+          just build_dir=build-cli desktop=OFF rest_app=OFF
+          config=${{ matrix.configuration }} pch=${{ matrix.pch }} configure
+          -DCMAKE_CXX_COMPILER=g++.exe -DBUILD_TESTING=OFF
+          -DCMAKE_DISABLE_FIND_PACKAGE_Qt6Gui=TRUE
+          -DCMAKE_DISABLE_FIND_PACKAGE_Qt6Quick=TRUE
+          -DCMAKE_DISABLE_FIND_PACKAGE_Qt6NetworkAuth=TRUE
+          -DCMAKE_DISABLE_FIND_PACKAGE_Qt6HttpServer=TRUE
+
+      - name: Smoke-check standalone CLI
+        run: just build_dir=build-cli desktop=OFF rest_app=OFF config=${{ matrix.configuration }} cli --help --json
+
+      - name: Build REST independently of desktop and CLI
+        run: >-
+          just build_dir=build-rest desktop=OFF cli_app=OFF
+          config=${{ matrix.configuration }} pch=${{ matrix.pch }} configure
+          -DCMAKE_CXX_COMPILER=g++.exe -DBUILD_TESTING=OFF
+          -DCMAKE_DISABLE_FIND_PACKAGE_Qt6Gui=TRUE
+          -DCMAKE_DISABLE_FIND_PACKAGE_Qt6Quick=TRUE
+          -DCMAKE_DISABLE_FIND_PACKAGE_Qt6NetworkAuth=TRUE
+
+      - name: Smoke-check standalone REST
+        run: just build_dir=build-rest desktop=OFF cli_app=OFF config=${{ matrix.configuration }} rest --help --json

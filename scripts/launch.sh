@@ -11,5 +11,5 @@ for candidate in "$YH_JUST_BUILD_DIR/$YH_JUST_CONFIG/$executable" "$YH_JUST_BUIL
         exec "$(cd "$(dirname "$candidate")" && pwd)/$(basename "$candidate")" "$@"
     fi
 done
-echo 'Executable not found; configure with desktop=ON on Windows or macOS' >&2
+echo 'Executable not found; enable the corresponding desktop, cli_app, or rest_app build option' >&2
 exit 2

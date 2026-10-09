@@ -1,5 +1,7 @@
 #pragma once
 
+#include "yh/iotcore_export.h"
+
 #include <QCoreApplication>
 #include <expected>
 #include <memory>
@@ -25,12 +27,13 @@ protected:
   virtual bool Supports(const CapabilityObject& capability, const QVariantMap& state) const = 0;
 };
 
-ValidationResult ValidateInput(const ICapabilityRules& rules, const QVariantMap& state);
+IOTCORE_EXPORT ValidationResult ValidateInput(const ICapabilityRules& rules, const QVariantMap& state);
 namespace Rules {
-std::shared_ptr<const ICapabilityRules> OnOff();
-std::shared_ptr<const ICapabilityRules> Toggle();
-std::shared_ptr<const ICapabilityRules> Range();
-std::shared_ptr<const ICapabilityRules> Mode();
-std::shared_ptr<const ICapabilityRules> Color();
+IOTCORE_EXPORT std::shared_ptr<const ICapabilityRules> ForType(CapabilityType type);
+IOTCORE_EXPORT std::shared_ptr<const ICapabilityRules> OnOff();
+IOTCORE_EXPORT std::shared_ptr<const ICapabilityRules> Toggle();
+IOTCORE_EXPORT std::shared_ptr<const ICapabilityRules> Range();
+IOTCORE_EXPORT std::shared_ptr<const ICapabilityRules> Mode();
+IOTCORE_EXPORT std::shared_ptr<const ICapabilityRules> Color();
 }
 }

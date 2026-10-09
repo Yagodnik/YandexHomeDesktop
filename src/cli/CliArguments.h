@@ -1,5 +1,7 @@
 #pragma once
 
+#include "yh/appcli_export.h"
+
 #include <QCoreApplication>
 #include <QMap>
 #include <expected>
@@ -16,11 +18,11 @@ public:
   }
 };
 
-struct CliTarget {
+struct APPCLI_EXPORT CliTarget {
   QString id, name, household;
   static std::expected<CliTarget, QString> Parse(const CliArguments& arguments,
                                                  bool allow_household);
 };
 
 class CommandRegistry;
-void AddTargetOptions(CommandRegistry& registry);
+APPCLI_EXPORT void AddTargetOptions(CommandRegistry& registry);

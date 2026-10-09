@@ -2,9 +2,9 @@
 
 #include <algorithm>
 #include <QDebug>
+#include <QPointer>
 
-ScenarioService::ScenarioService(IHomeApi* api, QObject* parent)
-  : QObject(parent), api_(api) {}
+ScenarioService::ScenarioService(IHomeApi* api, QObject* parent) : QObject(parent), api_(api) {}
 
 ScenarioService::LoadState ScenarioService::GetLoadState() const {
   return load_state_;
@@ -54,8 +54,10 @@ void ScenarioService::ExecuteScenario(const QString& scenario_id) {
     return;
   }
 
-  const auto scenario = std::find_if(scenarios_.cbegin(), scenarios_.cend(),
-    [&scenario_id](const ScenarioObject& item) { return item.id == scenario_id; });
+  const auto scenario = std::find_if(
+    scenarios_.cbegin(), scenarios_.cend(), [&scenario_id](const ScenarioObject& item) {
+      return item.id == scenario_id;
+    });
   if (scenario == scenarios_.cend() || !scenario->is_active) {
     return;
   }
@@ -74,12 +76,48 @@ void ScenarioService::ExecuteScenario(const QString& scenario_id) {
   });
 }
 
-void ScenarioService::ListScenarios(QObject* context, ApiResultHandler<QList<ScenarioObject>> handler) {
+void ScenarioService::ListScenarios(
+  QObject* context, ApiResultHandler<QList<ScenarioObject>> handler) {
   api_->GetScenarios(context, std::move(handler));
 }
 
-void ScenarioService::RunScenario(const QString& id, QObject* context, ApiResultHandler<void> handler) {
+void ScenarioService::RunScenario(
+  const QString& id, QObject* context, ApiResultHandler<void> handler) {
   api_->ExecuteScenario(id, context, std::move(handler));
+}
+
+void ScenarioService::RunActiveScenario(
+  const QString& id, QObject* context, CommandResultHandler handler) {
+  const QPointer<ScenarioService> service(this);
+  ListScenarios(context, [service, id, context, handler = std::move(handler)](
+                           ApiResult<QList<ScenarioObject>> result) mutable {
+    if (!service) {
+      return;
+    }
+    if (!result) {
+      handler(std::unexpected(result.error()));
+      return;
+    }
+    const auto found =
+      std::find_if(result->cbegin(), result->cend(), [&id](const ScenarioObject& scenario) {
+        return scenario.id == id;
+      });
+    if (found == result->cend()) {
+      handler(std::unexpected(CommandRejection{CommandRejectionReason::ScenarioNotFound, {}}));
+      return;
+    }
+    if (!found->is_active) {
+      handler(std::unexpected(CommandRejection{CommandRejectionReason::InactiveScenario, {}}));
+      return;
+    }
+    service->RunScenario(id, context, [handler = std::move(handler)](ApiResult<void> result) {
+      if (!result) {
+        handler(std::unexpected(result.error()));
+        return;
+      }
+      handler(CommandResult{});
+    });
+  });
 }
 
 void ScenarioService::Reset() {

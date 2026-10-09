@@ -1,10 +1,12 @@
 #pragma once
 
+#include "yh/authcontracts_export.h"
+
 #include <QObject>
 #include <QString>
 #include <optional>
 
-class IAuthorizationService : public QObject {
+class AUTHCONTRACTS_EXPORT IAuthorizationService : public QObject {
   Q_OBJECT
 public:
   using QObject::QObject;

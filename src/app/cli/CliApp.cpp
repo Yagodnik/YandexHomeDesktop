@@ -1,4 +1,5 @@
 #include "CliApp.h"
+#include "app/rest/RestCommand.h"
 
 #include "api/QtHttpTransport.h"
 #include "api/YandexAccountApi.h"
@@ -37,6 +38,28 @@ void Write(const QByteArray& text, bool error) {
 } // namespace
 
 int RunCli(QCoreApplication& app, const StartupOptions& options) {
+  if (options.rest_command != StartupOptions::RestCommand::None) {
+    if (options.rest_command == StartupOptions::RestCommand::Serve) {
+      Write(CliRunner::FormatError(
+                options.cli_arguments.contains("--json"), "usage",
+                QCoreApplication::translate("StartupMessages",
+                                            "Use YandexHomeRest to run the REST server.")),
+            true);
+      return CliRunner::Usage;
+    }
+#ifdef YH_DEBUG_FAKE_API
+    if (options.use_fake_api && options.rest_command == StartupOptions::RestCommand::Enable) {
+      const auto valid = FixtureApi(options.fixture_path).Validate();
+      if (!valid) {
+        Write(CliRunner::FormatError(options.cli_arguments.contains("--json"), "fixture_error",
+                                     valid.error().message),
+              true);
+        return CliRunner::RequestFailed;
+      }
+    }
+#endif
+    return RunRestControl(app, options);
+  }
   const bool json =
       options.cli_arguments.contains("--json") || options.cli_arguments.contains("-j");
   const auto parsed = CliCommand::Parse(options.cli_arguments);
@@ -52,8 +75,9 @@ int RunCli(QCoreApplication& app, const StartupOptions& options) {
     return result;
   }
 
-  std::unique_ptr<IAuthorizationService> auth(CreateAuthorizationService(options.use_fake_api
-    ? AuthorizationMode::Fixture : AuthorizationMode::SavedTokenOnly, nullptr));
+  std::unique_ptr<IAuthorizationService> auth(CreateAuthorizationService(
+      options.use_fake_api ? AuthorizationMode::Fixture : AuthorizationMode::SavedTokenOnly,
+      nullptr));
   QtHttpTransport transport(&app, parsed->timeout_ms);
   const auto token_provider = [&auth] { return auth->GetToken().value_or(QString{}); };
   YandexHomeApi live_home(token_provider, &transport, &app);
@@ -85,12 +109,13 @@ int RunCli(QCoreApplication& app, const StartupOptions& options) {
   };
   const auto reset = [&auth, &options](QObject* context, ApiResultHandler<void> handler) {
     auto delivered = std::make_shared<bool>(false);
-    QObject::connect(auth.get(), &IAuthorizationService::logoutFinished, context, [handler, delivered] {
-      if (!*delivered) {
-        *delivered = true;
-        handler(ApiResult<void>{});
-      }
-    });
+    QObject::connect(auth.get(), &IAuthorizationService::logoutFinished, context,
+                     [handler, delivered] {
+                       if (!*delivered) {
+                         *delivered = true;
+                         handler(ApiResult<void>{});
+                       }
+                     });
     QObject::connect(auth.get(), &IAuthorizationService::logoutFailed, context,
                      [handler, delivered](const QString& error) {
                        if (!*delivered) {
@@ -98,10 +123,22 @@ int RunCli(QCoreApplication& app, const StartupOptions& options) {
                          handler(std::unexpected(ApiError{ApiErrorKind::Service, error}));
                        }
                      });
-    if (!options.use_fake_api) {
-      Settings::ResetStoredSettings();
-    }
-    auth->Logout();
+    auto* rest_settings = new Settings(context, options.use_fake_api);
+    auto* rest_control = new RestControlService(rest_settings, RestConfiguration(options), context);
+    QObject::connect(
+        rest_control, &RestControlService::finished, context,
+        [&auth, &options, handler, delivered](const QJsonObject& result) {
+          if (!result["ok"].toBool()) {
+            *delivered = true;
+            handler(std::unexpected(
+                ApiError{ApiErrorKind::Service, result["error"].toObject()["message"].toString()}));
+            return;
+          }
+          if (!options.use_fake_api)
+            Settings::ResetStoredSettings();
+          auth->Logout();
+        });
+    rest_control->Request(RestControlService::Command::Disable);
   };
   CliRunner runner({&home, &devices, &scenarios, &account, reset}, write_result);
   QObject::connect(&runner, &CliRunner::finished, &app, &QCoreApplication::exit);

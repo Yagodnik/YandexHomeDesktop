@@ -1,6 +1,4 @@
 #include "Settings.h"
-#include <QDir>
-#include <QCoreApplication>
 #include <QCryptographicHash>
 
 Settings::Settings(QObject *parent, bool temporary)
@@ -12,11 +10,6 @@ Settings::Settings(QObject *parent, bool temporary)
   qInfo() << "Settings: CurrentTheme = " << GetCurrentTheme();
   qInfo() << "Settings: Stored at" << settings_.fileName();
 
-  // Add to autostart
-#ifdef Q_OS_WIN32
-  settings_.setValue("YandexHomeDesktop", QDir::toNativeSeparators(QCoreApplication::applicationFilePath()));
-  settings_.sync();
-#endif
 }
 
 Settings::Settings(const QString& fileName, QObject* parent)
@@ -76,6 +69,29 @@ bool Settings::GetTrayModeEnabled() const {
 
 int Settings::GetCurrentTheme() const {
   return temporary_ ? temporary_theme_ : settings_.value("currentTheme", 0).toInt();
+}
+
+bool Settings::GetRestEnabled() const {
+  if (temporary_) return temporary_rest_;
+  settings_.sync();
+  return settings_.value("rest/enabled", false).toBool();
+}
+
+quint16 Settings::GetRestPort() const {
+  if (temporary_) return temporary_rest_port_;
+  settings_.sync();
+  const auto port = settings_.value("rest/port", 8765).toUInt();
+  return port > 0 && port <= 65535 ? static_cast<quint16>(port) : 8765;
+}
+
+void Settings::SetRestEnabled(bool enabled) {
+  if (temporary_) temporary_rest_ = enabled;
+  else { settings_.setValue("rest/enabled", enabled); settings_.sync(); }
+}
+
+void Settings::SetRestPort(quint16 port) {
+  if (temporary_) temporary_rest_port_ = port;
+  else { settings_.setValue("rest/port", port); settings_.sync(); }
 }
 
 void Settings::Reset() {

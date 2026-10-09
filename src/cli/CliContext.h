@@ -1,5 +1,7 @@
 #pragma once
 
+#include "yh/appcli_export.h"
+
 #include "services/AccountService.h"
 #include "services/DeviceService.h"
 #include "services/HomeService.h"

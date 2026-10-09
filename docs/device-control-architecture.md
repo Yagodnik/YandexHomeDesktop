@@ -16,7 +16,7 @@ flowchart TD
     VM --> Session[DeviceSession: polling and suppression]
     Session --> Service[DeviceService: explicit device ID operations]
     CLI[CLI command objects] --> Service
-    Protocol[Future REST / MCP adapters] -.-> Service
+    Protocol[REST / future MCP adapters] --> Service
     Protocol -.-> Core
     Observer[Other independent observers] -.-> Session
     Service --> API[IHomeApi]
@@ -85,8 +85,8 @@ implicit changes made while moving code.
    deliberate changes to the characterization expectations and behavior contract.
 
 The CLI now uses the explicit-ID service operations with a headless bootstrap and
-registered command/capability objects. See [cli.md](cli.md). REST/MCP adapters and
-conflict-policy changes remain future work.
+registered command/capability objects. See [cli.md](cli.md). The REST adapter now shares these operations; see [rest.md](rest.md).
+MCP adapters and conflict-policy changes remain future work.
 
 ## Verification
 

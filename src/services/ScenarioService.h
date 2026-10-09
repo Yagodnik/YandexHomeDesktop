@@ -1,13 +1,16 @@
 #pragma once
 
+#include "yh/appservices_export.h"
+
 #include <QHash>
 #include <optional>
 
 #include <QObject>
 #include <QUuid>
 #include "api/IHomeApi.h"
+#include "CommandResult.h"
 
-class ScenarioService : public QObject {
+class APPSERVICES_EXPORT ScenarioService : public QObject {
   Q_OBJECT
 public:
   enum class LoadState { NotLoaded, Loading, Ready, Error };
@@ -24,6 +27,7 @@ public:
   void Reset();
   void ListScenarios(QObject* context, ApiResultHandler<QList<ScenarioObject>> handler);
   void RunScenario(const QString& id, QObject* context, ApiResultHandler<void> handler);
+  void RunActiveScenario(const QString& id, QObject* context, CommandResultHandler handler);
 
 signals:
   void loadStateChanged();

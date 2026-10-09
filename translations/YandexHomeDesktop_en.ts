@@ -186,33 +186,33 @@ your devices</translation>
 <context>
     <name>CliApp</name>
     <message>
-        <location filename="../src/app/CliApp.cpp" line="129"/>
-        <location filename="../src/app/CliApp.cpp" line="155"/>
+        <location filename="../src/app/cli/CliApp.cpp" line="166"/>
+        <location filename="../src/app/cli/CliApp.cpp" line="192"/>
         <source>Время выполнения команды истекло.</source>
         <translation>The command timed out.</translation>
     </message>
     <message>
-        <location filename="../src/app/CliApp.cpp" line="136"/>
+        <location filename="../src/app/cli/CliApp.cpp" line="173"/>
         <source>Выполнение команды...</source>
         <translation>Executing command...</translation>
     </message>
     <message>
-        <location filename="../src/app/CliApp.cpp" line="142"/>
+        <location filename="../src/app/cli/CliApp.cpp" line="179"/>
         <source>Сначала войдите в аккаунт через приложение.</source>
         <translation>Sign in through the desktop application first.</translation>
     </message>
     <message>
-        <location filename="../src/app/CliApp.cpp" line="147"/>
+        <location filename="../src/app/cli/CliApp.cpp" line="184"/>
         <source>Не удалось прочитать сохранённые данные входа.</source>
         <translation>Could not read the saved sign-in data.</translation>
     </message>
     <message>
-        <location filename="../src/app/CliApp.cpp" line="151"/>
+        <location filename="../src/app/cli/CliApp.cpp" line="188"/>
         <source>Доступ к сохранённым данным входа отменён.</source>
         <translation>Access to the saved sign-in data was canceled.</translation>
     </message>
     <message>
-        <location filename="../src/app/CliApp.cpp" line="165"/>
+        <location filename="../src/app/cli/CliApp.cpp" line="202"/>
         <source>Чтение сохранённых данных входа; подтвердите запрос системы...</source>
         <translation>Reading saved sign-in; approve the system prompt...</translation>
     </message>
@@ -251,6 +251,7 @@ your devices</translation>
     <name>CliCommand</name>
     <message>
         <location filename="../src/cli/CliCommand.cpp" line="13"/>
+        <location filename="../src/app/rest/RestCommand.cpp" line="72"/>
         <source>Повторяющийся параметр: --%1.</source>
         <translation>Repeated option: --%1.</translation>
     </message>
@@ -352,22 +353,27 @@ your devices</translation>
         <translation>Commands:</translation>
     </message>
     <message>
-        <location filename="../src/cli/CommandRegistry.cpp" line="63"/>
+        <location filename="../src/cli/CommandRegistry.cpp" line="53"/>
+        <source>REST API:</source>
+        <translation>REST API:</translation>
+    </message>
+    <message>
+        <location filename="../src/cli/CommandRegistry.cpp" line="65"/>
         <source>Укажите только одну команду.</source>
         <translation>Specify only one command.</translation>
     </message>
     <message>
-        <location filename="../src/cli/CommandRegistry.cpp" line="73"/>
+        <location filename="../src/cli/CommandRegistry.cpp" line="75"/>
         <source>Параметр --%1 несовместим со старой командой.</source>
         <translation>Option --%1 conflicts with the legacy command.</translation>
     </message>
     <message>
-        <location filename="../src/cli/CommandRegistry.cpp" line="116"/>
+        <location filename="../src/cli/CommandRegistry.cpp" line="118"/>
         <source>Неизвестная команда. Используйте --help.</source>
         <translation>Unknown command. Use --help.</translation>
     </message>
     <message>
-        <location filename="../src/cli/CommandRegistry.cpp" line="98"/>
+        <location filename="../src/cli/CommandRegistry.cpp" line="100"/>
         <source>Недопустимый параметр для команды: --%1.</source>
         <translation>Invalid option for this command: --%1.</translation>
     </message>
@@ -1946,6 +1952,220 @@ Email: %2
     </message>
 </context>
 <context>
+    <name>RestAppMessages</name>
+    <message>
+        <location filename="../src/app/rest/RestCommand.cpp" line="41"/>
+        <source>REST API работает: %1
+</source>
+        <translation>REST API is running: %1
+</translation>
+    </message>
+    <message>
+        <location filename="../src/app/rest/RestCommand.cpp" line="42"/>
+        <source>REST API остановлен (включён: %1).
+</source>
+        <translation>REST API is stopped (enabled: %1).
+</translation>
+    </message>
+    <message>
+        <location filename="../src/app/rest/RestCommand.cpp" line="43"/>
+        <source>да</source>
+        <translation>yes</translation>
+    </message>
+    <message>
+        <location filename="../src/app/rest/RestCommand.cpp" line="44"/>
+        <source>нет</source>
+        <translation>no</translation>
+    </message>
+    <message>
+        <location filename="../src/app/rest/RestCommand.cpp" line="91"/>
+        <source>YandexHomeRest runs the server in the foreground by default.</source>
+        <translation>YandexHomeRest runs the server in the foreground by default.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/rest/RestApp.cpp" line="50"/>
+        <source>Сервер REST API уже запущен.</source>
+        <translation>The REST API server is already running.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/rest/RestApp.cpp" line="36"/>
+        <location filename="../src/app/rest/RestApp.cpp" line="59"/>
+        <source>Не удалось открыть канал управления REST API.</source>
+        <translation>Could not open the REST API control channel.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/rest/RestApp.cpp" line="143"/>
+        <source>REST API отключён.</source>
+        <translation>REST API is disabled.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/rest/RestApp.cpp" line="170"/>
+        <source>Не удалось открыть порт REST API: %1.</source>
+        <translation>Could not open the REST API port: %1.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/rest/RestApp.cpp" line="183"/>
+        <source>Сначала войдите в аккаунт через приложение.</source>
+        <translation>Sign in through the desktop app first.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/rest/RestApp.cpp" line="187"/>
+        <source>Не удалось прочитать сохранённые данные входа.</source>
+        <translation>Could not read the saved sign-in credentials.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/rest/RestApp.cpp" line="191"/>
+        <source>Доступ к сохранённым данным входа отменён.</source>
+        <translation>Access to the saved sign-in credentials was canceled.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/rest/RestApp.cpp" line="194"/>
+        <source>Время запуска REST API истекло.</source>
+        <translation>REST API startup timed out.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/rest/RestCommand.cpp" line="62"/>
+        <source>REST-команда не допускает других команд или параметров.</source>
+        <translation>A REST command cannot be combined with other commands or options.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/rest/RestCommand.cpp" line="82"/>
+        <source>--timeout должен быть от 1 до 3600000 миллисекунд.</source>
+        <translation>--timeout must be between 1 and 3600000 milliseconds.</translation>
+    </message>
+</context>
+<context>
+    <name>RestControlService</name>
+    <message>
+        <location filename="../src/services/RestControlService.cpp" line="21"/>
+        <source>Время управления REST API истекло.</source>
+        <translation>The REST API control command timed out.</translation>
+    </message>
+    <message>
+        <location filename="../src/services/RestControlService.cpp" line="78"/>
+        <source>Не удалось подключиться к серверу REST API.</source>
+        <translation>Could not connect to the REST API server.</translation>
+    </message>
+    <message>
+        <location filename="../src/services/RestControlService.cpp" line="94"/>
+        <source>Не удалось запустить сервер REST API.</source>
+        <translation>Could not start the REST API server.</translation>
+    </message>
+    <message>
+        <source>REST API отключён.</source>
+        <translation type="vanished">REST API is disabled.</translation>
+    </message>
+    <message>
+        <location filename="../src/services/RestControlService.cpp" line="111"/>
+        <location filename="../src/services/RestControlService.cpp" line="122"/>
+        <source>Некорректный ответ сервера REST API.</source>
+        <translation>Invalid response from the REST API server.</translation>
+    </message>
+    <message>
+        <location filename="../src/services/RestControlService.cpp" line="134"/>
+        <source>REST API уже работает на другом порту. Сначала отключите его.</source>
+        <translation>REST API is already running on another port. Disable it first.</translation>
+    </message>
+</context>
+<context>
+    <name>RestServer</name>
+    <message>
+        <location filename="../src/rest/RestReply.cpp" line="11"/>
+        <source>Время выполнения запроса истекло.</source>
+        <translation>The request timed out.</translation>
+    </message>
+    <message>
+        <location filename="../src/rest/RestServer.cpp" line="58"/>
+        <source>REST API отключён.</source>
+        <translation>REST API is disabled.</translation>
+    </message>
+    <message>
+        <location filename="../src/rest/RestServer.cpp" line="63"/>
+        <source>Запросы из браузера не разрешены.</source>
+        <translation>Browser requests are not allowed.</translation>
+    </message>
+    <message>
+        <location filename="../src/rest/RestServer.cpp" line="72"/>
+        <source>Invalid REST API host.</source>
+        <translation>Invalid REST API host.</translation>
+    </message>
+    <message>
+        <location filename="../src/rest/RestServer.cpp" line="78"/>
+        <source>Content-Type must be application/json.</source>
+        <translation>Content-Type must be application/json.</translation>
+    </message>
+    <message>
+        <source>Требуется токен доступа REST API.</source>
+        <translation type="vanished">A REST API access token is required.</translation>
+    </message>
+    <message>
+        <location filename="../src/rest/RestRouter.cpp" line="68"/>
+        <source>Маршрут не найден.</source>
+        <translation>Route not found.</translation>
+    </message>
+    <message>
+        <location filename="../src/rest/RestRouter.cpp" line="65"/>
+        <source>Метод не разрешён.</source>
+        <translation>Method not allowed.</translation>
+    </message>
+    <message>
+        <location filename="../src/rest/RestRouter.cpp" line="56"/>
+        <source>Тело запроса слишком большое.</source>
+        <translation>The request body is too large.</translation>
+    </message>
+    <message>
+        <location filename="../src/rest/RestAction.cpp" line="28"/>
+        <source>Требуется application/json.</source>
+        <translation>application/json is required.</translation>
+    </message>
+    <message>
+        <location filename="../src/rest/RestAction.cpp" line="35"/>
+        <source>Требуется JSON-объект.</source>
+        <translation>A JSON object is required.</translation>
+    </message>
+    <message>
+        <location filename="../src/rest/RestAction.cpp" line="45"/>
+        <source>Укажите capability и объект state.</source>
+        <translation>Provide capability and a state object.</translation>
+    </message>
+    <message>
+        <location filename="../src/rest/RestAction.cpp" line="55"/>
+        <source>Некорректные типы полей state.</source>
+        <translation>Invalid types in the state fields.</translation>
+    </message>
+    <message>
+        <location filename="../src/rest/RestAction.cpp" line="60"/>
+        <source>Неизвестное поле state.</source>
+        <translation>Unknown state field.</translation>
+    </message>
+    <message>
+        <location filename="../src/rest/RestEndpoints.cpp" line="52"/>
+        <location filename="../src/rest/RestErrors.cpp" line="35"/>
+        <source>Некорректный ответ устройства.</source>
+        <translation>Invalid device response.</translation>
+    </message>
+    <message>
+        <location filename="../src/rest/RestErrors.cpp" line="39"/>
+        <source>Умение не поддерживается устройством.</source>
+        <translation>The device does not support this capability.</translation>
+    </message>
+    <message>
+        <location filename="../src/rest/RestErrors.cpp" line="43"/>
+        <source>Найдено несколько одинаковых умений.</source>
+        <translation>Multiple identical capabilities were found.</translation>
+    </message>
+    <message>
+        <location filename="../src/rest/RestErrors.cpp" line="47"/>
+        <source>Сценарий не найден.</source>
+        <translation>Scenario not found.</translation>
+    </message>
+    <message>
+        <location filename="../src/rest/RestErrors.cpp" line="51"/>
+        <source>Сценарий отключён.</source>
+        <translation>The scenario is inactive.</translation>
+    </message>
+</context>
+<context>
     <name>RoomDevicesList</name>
     <message>
         <location filename="../src/qml/components/RoomDevicesList.qml" line="18"/>
@@ -2034,41 +2254,99 @@ Email: %2
 <context>
     <name>SettingsPage</name>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="12"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="15"/>
         <source>Настройки</source>
         <translation>Settings</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="21"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="24"/>
         <source>Tray-режим</source>
         <translation>Tray mode</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="22"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="25"/>
         <source>Приложение будет отображаться
 как иконка на панели задач</source>
         <translation>The app will appear as an icon
 in the system tray</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="24"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="27"/>
         <source>Тема</source>
         <translation>Theme</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="25"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="28"/>
         <source>Светлая</source>
         <translation>Light</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="25"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="28"/>
         <source>Тёмная</source>
         <translation>Dark</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="27"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="30"/>
         <source>GitHub</source>
         <translation>GitHub</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="50"/>
+        <source>Дополнительно</source>
+        <translation>Advanced</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="57"/>
+        <source>REST API</source>
+        <translation>REST API</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="58"/>
+        <source>Локальный доступ для скриптов</source>
+        <translation>Local access for scripts</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="61"/>
+        <source>Подождите…</source>
+        <translation>Please wait…</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="63"/>
+        <source>Сервер остановлен</source>
+        <translation>Server stopped</translation>
+    </message>
+</context>
+<context>
+    <name>StartupMessages</name>
+    <message>
+        <location filename="../src/app/common/StartupOptions.cpp" line="25"/>
+        <source>Укажите только одну REST-команду.</source>
+        <translation>Specify only one REST command.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/common/StartupOptions.cpp" line="37"/>
+        <source>Повторяющийся параметр: --rest-port.</source>
+        <translation>Repeated option: --rest-port.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/common/StartupOptions.cpp" line="44"/>
+        <source>--rest-port должен быть от 1 до 65535.</source>
+        <translation>--rest-port must be between 1 and 65535.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/common/StartupOptions.cpp" line="74"/>
+        <source>--rest-port требует --enable-rest или --serve-rest.</source>
+        <translation>--rest-port requires --enable-rest or --serve-rest.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/gui/GuiMain.cpp" line="26"/>
+        <source>Use YandexHomeCli for commands and YandexHomeRest for the REST server.</source>
+        <translation>Use YandexHomeCli for commands and YandexHomeRest for the REST server.</translation>
+    </message>
+    <message>
+        <location filename="../src/app/cli/CliApp.cpp" line="45"/>
+        <source>Use YandexHomeRest to run the REST server.</source>
+        <translation>Use YandexHomeRest to run the REST server.</translation>
     </message>
 </context>
 <context>

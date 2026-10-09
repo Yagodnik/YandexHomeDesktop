@@ -1,10 +1,12 @@
 #pragma once
 
+#include "yh/yandexoauth_export.h"
+
 #include <QSet>
 #include <QUrl>
 #include "AuthResult.h"
 
-struct OAuthConfiguration {
+struct YANDEXOAUTH_EXPORT OAuthConfiguration {
   QUrl authorization_url;
   QUrl token_url;
   QString client_id;

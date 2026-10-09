@@ -6,6 +6,8 @@ set positional-arguments
 set quiet
 
 config := env('YH_JUST_CONFIG', 'Debug')
+cli_app := env('YH_JUST_CLI_APP', 'ON')
+rest_app := env('YH_JUST_REST_APP', 'ON')
 desktop := env('YH_JUST_DESKTOP', if os() == 'linux' { 'OFF' } else { 'ON' })
 build_dir := env('YH_JUST_BUILD_DIR', 'build-just' / if desktop == 'OFF' { 'portable' / lowercase(config) } else { lowercase(config) })
 qt_prefix := env('YH_JUST_QT_PREFIX', env('CMAKE_PREFIX_PATH', env('QT_ROOT_DIR', '')))
@@ -17,6 +19,8 @@ generator := env('YH_JUST_GENERATOR', 'Ninja')
 # Propagate overrides when a recipe invokes another recipe through just.
 export YH_JUST_CONFIG := config
 export YH_JUST_DESKTOP := desktop
+export YH_JUST_CLI_APP := cli_app
+export YH_JUST_REST_APP := rest_app
 export YH_JUST_BUILD_DIR := build_dir
 export YH_JUST_QT_PREFIX := qt_prefix
 export YH_JUST_AUTH_CONFIG := auth_config
@@ -35,15 +39,17 @@ configure *args:
         Debug|Release|RelWithDebInfo|MinSizeRel) ;;
         *) echo 'config must be Debug, Release, RelWithDebInfo, or MinSizeRel' >&2; exit 2 ;;
     esac
-    for value in "$YH_JUST_DESKTOP" "$YH_JUST_PCH"; do
+    for value in "$YH_JUST_DESKTOP" "$YH_JUST_CLI_APP" "$YH_JUST_REST_APP" "$YH_JUST_PCH"; do
         case "$value" in
             ON|OFF) ;;
-            *) echo 'desktop and pch must be ON or OFF' >&2; exit 2 ;;
+            *) echo 'desktop, cli_app, rest_app, and pch must be ON or OFF' >&2; exit 2 ;;
         esac
     done
     options=(-S . -B "$YH_JUST_BUILD_DIR" -G "$YH_JUST_GENERATOR"
         "-DCMAKE_BUILD_TYPE=$YH_JUST_CONFIG" -DBUILD_TESTING=ON
-        "-DBUILD_DESKTOP_APP=$YH_JUST_DESKTOP" "-DYH_ENABLE_PCH=$YH_JUST_PCH")
+        "-DBUILD_DESKTOP_APP=$YH_JUST_DESKTOP"
+        "-DBUILD_CLI_APP=$YH_JUST_CLI_APP" "-DBUILD_REST_APP=$YH_JUST_REST_APP"
+        "-DYH_BUILD_REST_ADAPTER=$YH_JUST_REST_APP" "-DYH_ENABLE_PCH=$YH_JUST_PCH")
     if [[ -n "$YH_JUST_QT_PREFIX" ]]; then
         options+=("-DCMAKE_PREFIX_PATH=$YH_JUST_QT_PREFIX")
     fi
@@ -65,7 +71,7 @@ test *args: build
     ctest --test-dir "$YH_JUST_BUILD_DIR" -C "$YH_JUST_CONFIG" --output-on-failure --parallel "$YH_JUST_JOBS" "$@"
 
 # Build and launch the desktop executable with extra app arguments.
-run *args: build
+run *args: build-gui
     bash scripts/launch.sh '{{ if os() == "macos" { "YandexHomeDesktop.app/Contents/MacOS/YandexHomeDesktop" } else { "YandexHomeDesktop.exe" } }}' "$@"
 
 # Launch the Debug GUI with local fixture data; accepts --fake-api-data.
@@ -75,12 +81,28 @@ demo *args:
         echo 'Fixture mode requires config=Debug and desktop=ON' >&2
         exit 2
     fi
-    just build
+    just build-gui
     exec bash scripts/launch.sh '{{ if os() == "macos" { "YandexHomeDesktop.app/Contents/MacOS/YandexHomeDesktop" } else { "YandexHomeDesktop.exe" } }}' --fake-api "$@"
 
 # Build and run the console CLI, e.g. cli --fake-api devices list --json.
-cli *args: build
+cli *args: build-cli
     bash scripts/launch.sh '{{ if os() == "windows" { "YandexHomeCli.exe" } else { "YandexHomeCli" } }}' "$@"
+
+# Build and run the foreground REST worker, e.g. rest --fake-api --rest-port 9000.
+rest *args: build-rest
+    bash scripts/launch.sh '{{ if os() == "windows" { "YandexHomeRest.exe" } else { "YandexHomeRest" } }}' "$@"
+
+# Build only the GUI and its background REST worker when enabled.
+build-gui: _configure-if-needed
+    cmake --build "$YH_JUST_BUILD_DIR" --config "$YH_JUST_CONFIG" --parallel "$YH_JUST_JOBS" --target appYandexHomeDesktop
+
+# Build only the CLI and its background REST worker when enabled.
+build-cli: _configure-if-needed
+    cmake --build "$YH_JUST_BUILD_DIR" --config "$YH_JUST_CONFIG" --parallel "$YH_JUST_JOBS" --target YandexHomeCli
+
+# Build only the headless REST worker.
+build-rest: _configure-if-needed
+    cmake --build "$YH_JUST_BUILD_DIR" --config "$YH_JUST_CONFIG" --parallel "$YH_JUST_JOBS" --target YandexHomeRest
 
 # Build and install under the build directory; accepts --prefix and other flags.
 install *args: build
@@ -89,6 +111,18 @@ install *args: build
 # Remove compiled outputs with CMake's clean target, retaining configuration.
 clean:
     cmake --build "$YH_JUST_BUILD_DIR" --config "$YH_JUST_CONFIG" --target clean
+
+# Format C++ startup code; pass files or folders to select a different scope.
+format *paths:
+    {{ if os() == "windows" { "python" } else { "python3" } }} scripts/clang-tools.py format "$@"
+
+# Check C++ formatting without editing files.
+format-check *paths:
+    {{ if os() == "windows" { "python" } else { "python3" } }} scripts/clang-tools.py check "$@"
+
+# Analyze startup code using this profile's compilation database (PCH must be OFF).
+tidy *paths: build
+    {{ if os() == "windows" { "python" } else { "python3" } }} scripts/clang-tools.py tidy --build-dir "$YH_JUST_BUILD_DIR" "$@"
 
 # Check the committed data markers and English translation catalog.
 translations-check:
@@ -106,8 +140,8 @@ translations-update:
     just _configure-if-needed
     exec cmake --build "$YH_JUST_BUILD_DIR" --config "$YH_JUST_CONFIG" --target update_translations
 
-# Check translations, build, and run the tests for the selected profile.
-check: translations-check test
+# Check formatting, translations, build, and run the tests for the selected profile.
+check: format-check translations-check test
 
 _configure-if-needed:
     if [[ ! -f "$YH_JUST_BUILD_DIR/CMakeCache.txt" ]]; then just configure; fi

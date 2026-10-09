@@ -77,6 +77,7 @@ qt_add_qml_module(YandexHomeDesktopComponents
         components/HouseholdDelegate.qml
         components/HouseholdPicker.qml
         components/BasicSettingsCard.qml
+        components/AdvancedSettingsCard.qml
         components/RoomsPane.qml
         components/ScenariosPane.qml
 )

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "yh/appcli_export.h"
+
 #include "CliArguments.h"
 #include "iot/core/CapabilityRules.h"
 
@@ -16,7 +18,7 @@ struct CapabilityAction {
   QVariantMap state;
 };
 
-class CapabilityCommands {
+class APPCLI_EXPORT CapabilityCommands {
   Q_DECLARE_TR_FUNCTIONS(CapabilityCommands)
 public:
   void Register(const QString& name, std::shared_ptr<const ICapabilityInput> input);

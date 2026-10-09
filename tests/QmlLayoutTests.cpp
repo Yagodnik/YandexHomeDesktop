@@ -1,5 +1,6 @@
 #include "QmlTestEnvironment.h"
 #include <QtQuickTest/quicktest.h>
+#include <QQmlContext>
 
 class QmlLayoutTestSetup : public QObject {
   Q_OBJECT
@@ -7,6 +8,8 @@ class QmlLayoutTestSetup : public QObject {
 public slots:
   void qmlEngineAvailable(QQmlEngine* engine) {
     initializeQmlTestEnvironment(engine);
+    engine->rootContext()->setContextProperty("settingsPreviewPath",
+      QCoreApplication::applicationDirPath() + "/settings-preview");
   }
 };
 

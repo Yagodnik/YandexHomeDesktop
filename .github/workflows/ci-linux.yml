@@ -20,6 +20,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install pinned C++ formatting and analysis tools
+        run: >-
+          python -m pip install --only-binary=:all: -r requirements-clang-tools.txt
+
+      - name: Check C++ formatting
+        run: python scripts/clang-tools.py check
+
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
@@ -27,9 +38,13 @@ jobs:
           host: linux
           target: desktop
           arch: linux_gcc_64
+          modules: qttools qthttpserver qtwebsockets
           cache: true
 
-      - name: Configure portable tests
+      - name: Install credential-store development dependency
+        run: sudo apt-get update && sudo apt-get install -y libsecret-1-dev
+
+      - name: Configure headless applications and portable tests
         run: >-
           cmake -S . -B build -G Ninja
           -DCMAKE_CXX_COMPILER=g++-13
@@ -37,9 +52,13 @@ jobs:
           -DCMAKE_BUILD_TYPE=Release
           -DBUILD_DESKTOP_APP=OFF
           -DBUILD_TESTING=ON
+          -DYH_ENABLE_PCH=OFF
 
-      - name: Build tests
+      - name: Build shared libraries, CLI, REST, and tests
         run: cmake --build build --parallel 4
+
+      - name: Analyze application startup code
+        run: python scripts/clang-tools.py tidy --build-dir build
 
       - name: Run tests
         run: ctest --test-dir build --output-on-failure

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "yh/yandexapiadapter_export.h"
+
 #include "serialization/SerializationTypes.h"
 
 JSON_ENUMERATION(CapabilityType,
@@ -20,5 +22,5 @@ JSON_STRUCT(CapabilityObject,
 );
 
 // Shared codecs are instantiated once in Serialization.cpp.
-extern template CapabilityObject Serialization::From<CapabilityObject>(const QJsonObject&);
-extern template QJsonObject Serialization::To<CapabilityObject>(const CapabilityObject&);
+extern template YANDEXAPIADAPTER_EXPORT CapabilityObject Serialization::From<CapabilityObject>(const QJsonObject&);
+extern template YANDEXAPIADAPTER_EXPORT QJsonObject Serialization::To<CapabilityObject>(const CapabilityObject&);

@@ -1,12 +1,14 @@
 #pragma once
 
+#include "yh/yandexapiadapter_export.h"
+
 #include <QNetworkAccessManager>
 
 #include "IHttpTransport.h"
 
 class QNetworkReply;
 
-class QtHttpTransport final : public QObject, public IHttpTransport {
+class YANDEXAPIADAPTER_EXPORT QtHttpTransport final : public QObject, public IHttpTransport {
   Q_OBJECT
 public:
   // An injected manager must outlive the transport.

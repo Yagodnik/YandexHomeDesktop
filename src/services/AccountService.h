@@ -1,5 +1,7 @@
 #pragma once
 
+#include "yh/appservices_export.h"
+
 #include "api/IAccountApi.h"
 
 class AccountService final {

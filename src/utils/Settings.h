@@ -1,9 +1,11 @@
 #pragma once
 
+#include "yh/appruntime_export.h"
+
 #include <QSettings>
 #include <QHash>
 
-class Settings : public QObject {
+class APPRUNTIME_EXPORT Settings : public QObject {
   Q_OBJECT
   Q_PROPERTY(int currentTheme READ GetCurrentTheme WRITE SetCurrentTheme NOTIFY currentThemeChanged)
   Q_PROPERTY(bool trayModeEnabled READ GetTrayModeEnabled WRITE SetTrayModeEnabled NOTIFY trayModeEnabledChanged)
@@ -13,6 +15,10 @@ public:
 
   [[nodiscard]] bool GetTrayModeEnabled() const;
   [[nodiscard]] int GetCurrentTheme() const;
+  [[nodiscard]] bool GetRestEnabled() const;
+  [[nodiscard]] quint16 GetRestPort() const;
+  void SetRestEnabled(bool enabled);
+  void SetRestPort(quint16 port);
   void Reset();
   static void ResetStoredSettings();
   [[nodiscard]] QStringList GetFavoriteDevices(const QString& accountId) const;
@@ -33,9 +39,11 @@ public slots:
 private:
   [[nodiscard]] QVariant ReadAccountValue(const QString& accountId, const QString& name) const;
   void WriteAccountValue(const QString& accountId, const QString& name, const QVariant& value);
-  QSettings settings_;
+  mutable QSettings settings_;
   QHash<QString, QVariant> temporary_account_values_;
   bool temporary_ = false;
   int temporary_theme_ = 0;
   bool temporary_tray_ = false;
+  bool temporary_rest_ = false;
+  quint16 temporary_rest_port_ = 8766;
 };

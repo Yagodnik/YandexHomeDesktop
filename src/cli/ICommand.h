@@ -1,5 +1,7 @@
 #pragma once
 
+#include "yh/appcli_export.h"
+
 class CliContext;
 
 // A parsed command owns its arguments and executes against a shared context.

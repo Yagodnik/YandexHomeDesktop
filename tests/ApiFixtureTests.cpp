@@ -4,9 +4,10 @@
 #include <QSignalSpy>
 #include <QTemporaryDir>
 #include <QTest>
+#include <QScopeGuard>
 #include <optional>
 #include "api/debug/FixtureApi.h"
-#include "app/StartupOptions.h"
+#include "app/common/StartupOptions.h"
 #include "utils/Settings.h"
 #ifdef YH_DEBUG_FAKE_API
 #include "auth/AuthorizationFactory.h"
@@ -29,6 +30,24 @@ private:
       file.write(QJsonDocument(fixture).toJson()) != -1;
   }
 private slots:
+  void SharedSettingsPreserveTheGuiExecutable() {
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    const auto previous_format = QSettings::defaultFormat();
+    const auto restore_format = qScopeGuard([previous_format] {
+      QSettings::setDefaultFormat(previous_format);
+    });
+    QSettings::setDefaultFormat(QSettings::IniFormat);
+    QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, directory.path());
+    QSettings preferences("ArtemYagodnik", "YandexHomeDesktop");
+    preferences.setValue("YandexHomeDesktop", "saved-gui-path");
+    preferences.sync();
+    Settings headless_settings;
+    headless_settings.SetRestEnabled(true);
+    preferences.sync();
+    QCOMPARE(preferences.value("YandexHomeDesktop").toString(), QString("saved-gui-path"));
+  }
+
   void StartupFlagsChooseGuiOrPreserveCliArguments() {
     auto options = ParseStartupOptions({"app", "--fake-api"}, true);
     QVERIFY(options); QVERIFY(options->use_fake_api);

@@ -1,9 +1,11 @@
 #pragma once
 
+#include "yh/appcli_export.h"
+
 #include "CommandRegistry.h"
 
 // Common invocation settings; command-specific arguments belong to ICommand.
-struct CliCommand {
+struct APPCLI_EXPORT CliCommand {
   Q_DECLARE_TR_FUNCTIONS(CliCommand)
 public:
   std::shared_ptr<const ICommand> operation;

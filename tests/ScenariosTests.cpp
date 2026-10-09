@@ -11,6 +11,7 @@
 #include <QPointer>
 #include <QSignalSpy>
 #include <QTest>
+#include <memory>
 
 #include "api/IHomeApi.h"
 #include "models/ScenariosModel/ScenariosViewModel.h"
@@ -55,6 +56,65 @@ static ScenarioObject Scenario(const QString& id, bool active = true) {
 class ScenariosTests : public QObject {
   Q_OBJECT
 private slots:
+  void OneShotRunsValidateFreshDataWithoutLoadingGuiState() {
+    FakeHomeApi api;
+    ScenarioService service(&api);
+    QObject caller;
+    std::optional<CommandResult> result;
+    const auto complete = [&result](CommandResult value) { result = std::move(value); };
+
+    service.RunActiveScenario("evening", &caller, complete);
+    api.loads.last().Send(QList<ScenarioObject>{Scenario("other")});
+    QVERIFY(result && !*result);
+    QCOMPARE(std::get<CommandRejection>(result->error()).reason, CommandRejectionReason::ScenarioNotFound);
+    QVERIFY(api.executions.isEmpty());
+
+    service.RunActiveScenario("evening", &caller, complete);
+    api.loads.last().Send(QList<ScenarioObject>{Scenario("evening", false)});
+    QVERIFY(result && !*result);
+    QCOMPARE(std::get<CommandRejection>(result->error()).reason, CommandRejectionReason::InactiveScenario);
+    QVERIFY(api.executions.isEmpty());
+
+    result.reset();
+    service.RunActiveScenario("evening", &caller, complete);
+    api.loads.last().Send(QList<ScenarioObject>{Scenario("evening")});
+    QVERIFY(!result);
+    QCOMPARE(api.executions.last().scenario_id, QString("evening"));
+    api.executions.last().Send(std::unexpected(ApiError{ApiErrorKind::Http, "expired", 401}));
+    QVERIFY(result && !*result);
+    QCOMPARE(std::get<ApiError>(result->error()).http_status, 401);
+    QCOMPARE(service.GetLoadState(), ScenarioService::LoadState::NotLoaded);
+    QVERIFY(service.GetScenarios().isEmpty());
+    QVERIFY(!service.IsExecuting("evening"));
+  }
+
+  void OneShotRunsCancelWithTheirCallerOrService() {
+    FakeHomeApi api;
+    ScenarioService service(&api);
+    int deliveries = 0;
+    const auto complete = [&deliveries](CommandResult) { ++deliveries; };
+    auto caller = std::make_unique<QObject>();
+    service.RunActiveScenario("evening", caller.get(), complete);
+    caller.reset();
+    api.loads.last().Send(QList<ScenarioObject>{Scenario("evening")});
+    QVERIFY(api.executions.isEmpty());
+
+    caller = std::make_unique<QObject>();
+    service.RunActiveScenario("evening", caller.get(), complete);
+    api.loads.last().Send(QList<ScenarioObject>{Scenario("evening")});
+    caller.reset();
+    api.executions.last().Send(ApiResult<void>{});
+    QCOMPARE(deliveries, 0);
+
+    caller = std::make_unique<QObject>();
+    auto transient = std::make_unique<ScenarioService>(&api);
+    transient->RunActiveScenario("evening", caller.get(), complete);
+    transient.reset();
+    api.loads.last().Send(QList<ScenarioObject>{Scenario("evening")});
+    QCOMPARE(api.executions.size(), 1);
+    QCOMPARE(deliveries, 0);
+  }
+
   void initTestCase() {
 #ifdef SCENARIOS_QML_TESTS
     QQuickStyle::setStyle("Basic");

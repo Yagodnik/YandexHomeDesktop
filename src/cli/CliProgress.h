@@ -1,11 +1,13 @@
 #pragma once
 
+#include "yh/appcli_export.h"
+
 #include "CliCommand.h"
 #include <QTimer>
 #include <functional>
 
 // Transient terminal feedback, cleared before printing command results.
-class CliProgress final : public QObject {
+class APPCLI_EXPORT CliProgress final : public QObject {
   Q_OBJECT
 public:
   using Writer = std::function<void(const QByteArray&)>;

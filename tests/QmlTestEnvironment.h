@@ -4,6 +4,8 @@
 #include <QStandardItemModel>
 #include <QPointer>
 #include <QTest>
+#include <QLocalServer>
+#include "models/RestViewModel.h"
 #include "api/IHomeApi.h"
 
 // Real device view-model wiring with responses controlled by QML tests.
@@ -166,3 +168,18 @@ private:
 };
 
 void initializeQmlTestEnvironment(QQmlEngine* engine);
+
+class QmlTestRestServer final : public QObject {
+  Q_OBJECT
+  Q_PROPERTY(int disableCount MEMBER disable_count_ NOTIFY changed)
+public:
+  explicit QmlTestRestServer(QObject* parent = nullptr);
+  Q_INVOKABLE void SetRunning(bool running) { running_ = running; }
+  QString ControlName() const { return server_.serverName(); }
+signals:
+  void changed();
+private:
+  QLocalServer server_;
+  bool running_ = false;
+  int disable_count_ = 0;
+};

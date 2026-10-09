@@ -1,10 +1,12 @@
 #pragma once
 
+#include "yh/yandexoauth_export.h"
+
 #include <QObject>
 #include <QUrl>
 #include "IAuthorizationFlow.h"
 
-class QtOAuthAuthorizationFlow final : public QObject, public IAuthorizationFlow {
+class YANDEXOAUTH_EXPORT QtOAuthAuthorizationFlow final : public QObject, public IAuthorizationFlow {
 public:
   using BrowserOpener = std::function<bool(const QUrl&)>;
   explicit QtOAuthAuthorizationFlow(QObject* parent = nullptr,

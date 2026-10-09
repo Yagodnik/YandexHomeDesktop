@@ -1,9 +1,8 @@
 # CLI
 
-`YandexHomeCli` is the console executable on Windows and macOS. It runs with a
+`YandexHomeCli` is the console executable on Windows, macOS, and Linux. It runs with a
 `QCoreApplication`: it creates no QML engine, device view model, polling session,
-tray, or desktop platform service. The desktop executable accepts the same
-arguments for compatibility. Sign in through the desktop app first; CLI commands
+tray, or desktop platform service. The GUI has its own entry point; pass commands to `YandexHomeCli`. Sign in through the desktop app first; CLI commands
 read the same saved keychain token. `--help` and argument validation run before
 authentication. Confirmed reset does not require reading a saved login. The CLI
 does not open a browser to sign in.
@@ -13,13 +12,18 @@ before constructing the application. QtKeychain delivers completion callbacks
 through the native main queue; the default console dispatcher would leave these
 callbacks pending after the password prompt.
 
-The build produces `<build-dir>/YandexHomeCli` on macOS and
+The build produces `<build-dir>/YandexHomeCli` on macOS/Linux and
 `<build-dir>/YandexHomeCli.exe` on Windows. Installation places it alongside the
 Windows desktop executable, or inside
 `YandexHomeDesktop.app/Contents/MacOS/YandexHomeCli` on macOS. The macOS binary
-shares the bundle's deployed Qt frameworks.
+shares the bundle's deployed Qt frameworks. CLI/REST-only installs use `bin/` with shared libraries in `lib/`; see [build.md](build.md).
 
 ## Commands
+
+Local REST controls are `--enable-rest`, `--disable-rest`, and `--status-rest`,
+and are available even with the desktop disabled. Run `YandexHomeRest` for the foreground server. They support `--fake-api` in Debug builds.
+See [rest.md](rest.md) for endpoints, background operation, authentication,
+GUI settings, and the Python example.
 
 ```sh
 YandexHomeCli --help
@@ -177,7 +181,7 @@ argument parsing. It does not dispatch operations or interpret device metadata.
 
 The `Cli` unit suite checks the extension points, value handling, target lookup,
 API errors, synchronous callbacks, timeout cancellation, and caller destruction
-without GUI or network access. `CliProcess_*` checks both executable entry points;
+without GUI or network access. `CliProcess_YandexHomeCli` checks the CLI entry point;
 Debug builds use the committed fixture. Windows CI builds and runs the same tests
 in Debug/Release with PCH on/off. To try a credential-free Debug command:
 

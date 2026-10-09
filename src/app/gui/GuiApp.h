@@ -6,7 +6,7 @@
 
 class GuiApp : public QObject {
 public:
-  explicit GuiApp(AppContext& app_context, QObject *parent = nullptr);
+  explicit GuiApp(AppContext& app_context, QObject* parent = nullptr);
 
   int Start();
 

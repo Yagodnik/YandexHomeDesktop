@@ -61,6 +61,84 @@ DeviceInfo Device(const QString& id, int brightness) {
 class DeviceServiceTests final : public QObject {
   Q_OBJECT
 private slots:
+  void ValidatedCommandsRejectBeforeDispatchAndCheckFreshMetadata() {
+    FakeHomeApi api;
+    DeviceService service(&api);
+    QObject caller;
+    std::optional<CommandResult> result;
+    const auto complete = [&result](CommandResult value) { result = std::move(value); };
+
+    service.ApplyCapability("lamp", CapabilityType::Range,
+                            {{"instance", "brightness"}, {"value", "bad"}}, &caller, complete);
+    QVERIFY(result && !*result);
+    QCOMPARE(std::get<CommandRejection>(result->error()).reason, CommandRejectionReason::InvalidValue);
+    QVERIFY(api.reads.isEmpty());
+
+    auto device = Device("lamp", 20);
+    device.capabilities[0].parameters = {
+      {"instance", "brightness"}, {"range", QVariantMap{{"min", 0}, {"max", 100}}}
+    };
+    const QList<QPair<DeviceInfo, CommandRejectionReason>> cases{
+      {Device("other", 20), CommandRejectionReason::InvalidDeviceResponse},
+      {DeviceInfo{.status = Status::Ok, .id = "lamp"}, CommandRejectionReason::CapabilityNotFound},
+      {[&device] {
+        auto duplicate = device;
+        duplicate.capabilities.append(device.capabilities[0]);
+        return duplicate;
+      }(), CommandRejectionReason::AmbiguousCapability},
+      {device, CommandRejectionReason::InvalidValue}
+    };
+    for (const auto& [snapshot, reason] : cases) {
+      result.reset();
+      service.ApplyCapability("lamp", CapabilityType::Range,
+                              {{"instance", "brightness"}, {"value", 101}}, &caller, complete);
+      QVERIFY(!result);
+      QVERIFY(api.reads.last().Send(snapshot));
+      QVERIFY(result && !*result);
+      QCOMPARE(std::get<CommandRejection>(result->error()).reason, reason);
+      QVERIFY(api.commands.isEmpty());
+    }
+  }
+
+  void ValidatedCommandsPreserveInlineReadsErrorsAndCallerLifetime() {
+    FakeHomeApi api;
+    api.immediate = Device("lamp", 20);
+    DeviceService service(&api);
+    auto caller = std::make_unique<QObject>();
+    std::optional<CommandResult> result;
+    const auto complete = [&result](CommandResult value) { result = std::move(value); };
+    const QVariantMap state{{"instance", "brightness"}, {"value", -5}, {"relative", true}};
+
+    service.ApplyCapability("lamp", CapabilityType::Range, state, caller.get(), complete);
+    QVERIFY(!result);
+    QCOMPARE(api.commands.size(), 1);
+    QCOMPARE(api.commands.last().actions[0].actions[0].state, state);
+    QVERIFY(api.commands.last().Send(std::unexpected(ApiError{ApiErrorKind::Http, "expired", 401})));
+    QVERIFY(result && !*result);
+    QCOMPARE(std::get<ApiError>(result->error()).http_status, 401);
+
+    result.reset();
+    service.ApplyCapability("lamp", CapabilityType::Range, state, caller.get(), complete);
+    caller.reset();
+    QVERIFY(!api.commands.last().Send(ApiResult<void>{}));
+    QVERIFY(!result);
+
+    api.immediate.reset();
+    caller = std::make_unique<QObject>();
+    service.ApplyCapability("lamp", CapabilityType::Range, state, caller.get(), complete);
+    caller.reset();
+    QVERIFY(!api.reads.last().Send(Device("lamp", 20)));
+    QCOMPARE(api.commands.size(), 2);
+
+    caller = std::make_unique<QObject>();
+    auto transient = std::make_unique<DeviceService>(&api);
+    transient->ApplyCapability("lamp", CapabilityType::Range, state, caller.get(), complete);
+    transient.reset();
+    QVERIFY(api.reads.last().Send(Device("lamp", 20)));
+    QVERIFY(!result);
+    QCOMPARE(api.commands.size(), 2);
+  }
+
   void CommandsUseExplicitIdsWithoutSelectingOrLoading() {
     FakeHomeApi api;
     DeviceService service(&api);

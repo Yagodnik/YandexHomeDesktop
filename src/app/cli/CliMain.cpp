@@ -1,4 +1,4 @@
-#include "AppTranslations.h"
+#include "app/common/AppTranslations.h"
 #include "CliApp.h"
 #include "CliApplication.h"
 #include "cli/CliRunner.h"

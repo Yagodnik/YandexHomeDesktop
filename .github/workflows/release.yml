@@ -36,7 +36,7 @@ jobs:
           host: windows
           target: desktop
           arch: win64_mingw
-          modules: qt5compat qtnetworkauth qtsvg qttools
+          modules: qt5compat qtnetworkauth qtsvg qttools qthttpserver qtwebsockets
           tools: tools_mingw1310,qt.tools.win64_mingw1310
           cache: true
 
@@ -74,7 +74,7 @@ jobs:
           $stage = Join-Path $env:RUNNER_TEMP 'stage'
           cmake --install build --prefix "$stage"
           if ($LASTEXITCODE -ne 0) { throw 'Windows deployment failed' }
-          foreach ($file in @('YandexHomeDesktop.exe', 'Qt6Core.dll', 'qwindows.dll', 'libstdc++-6.dll', 'libgcc_s_seh-1.dll', 'libwinpthread-1.dll')) {
+          foreach ($file in @('YandexHomeDesktop.exe', 'YandexHomeCli.exe', 'YandexHomeRest.exe', 'Qt6Core.dll', 'qwindows.dll', 'libstdc++-6.dll', 'libgcc_s_seh-1.dll', 'libwinpthread-1.dll')) {
             if (-not (Get-ChildItem $stage -Recurse -File -Filter $file)) {
               throw "Missing deployed file: $file"
             }
@@ -92,7 +92,7 @@ jobs:
           $installed = Join-Path $env:RUNNER_TEMP 'installed'
           $installer = Start-Process -FilePath $installers[0].FullName -ArgumentList '/S', "/D=$installed" -Wait -PassThru
           if ($installer.ExitCode -ne 0) { throw 'Silent installer smoke test failed' }
-          foreach ($file in @('YandexHomeDesktop.exe', 'Qt6Core.dll', 'qwindows.dll', 'libstdc++-6.dll', 'libgcc_s_seh-1.dll', 'libwinpthread-1.dll')) {
+          foreach ($file in @('YandexHomeDesktop.exe', 'YandexHomeCli.exe', 'YandexHomeRest.exe', 'Qt6Core.dll', 'qwindows.dll', 'libstdc++-6.dll', 'libgcc_s_seh-1.dll', 'libwinpthread-1.dll')) {
             if (-not (Get-ChildItem $installed -Recurse -File -Filter $file)) {
               throw "Missing packaged file: $file"
             }
@@ -120,7 +120,7 @@ jobs:
           host: mac
           target: desktop
           arch: clang_64
-          modules: qt5compat qtnetworkauth qtsvg qttools
+          modules: qt5compat qtnetworkauth qtsvg qttools qthttpserver qtwebsockets
           cache: true
 
       - name: Create release OAuth config
@@ -149,8 +149,12 @@ jobs:
           app="$RUNNER_TEMP/stage/YandexHomeDesktop.app"
           test -f "$app/Contents/MacOS/YandexHomeDesktop"
           test -d "$app/Contents/PlugIns"
+          "$app/Contents/MacOS/YandexHomeCli" --help --json
+          "$app/Contents/MacOS/YandexHomeRest" --help --json
           for arch in arm64 x86_64; do
-            lipo -verify_arch "$arch" "$app/Contents/MacOS/YandexHomeDesktop"
+            for binary in YandexHomeDesktop YandexHomeCli YandexHomeRest; do
+              lipo -verify_arch "$arch" "$app/Contents/MacOS/$binary"
+            done
             lipo -verify_arch "$arch" "$app/Contents/Frameworks/QtCore.framework/QtCore"
           done
 
@@ -166,8 +170,12 @@ jobs:
           packaged="$RUNNER_TEMP/dmg-mount/YandexHomeDesktop.app/Contents"
           test -f "$packaged/MacOS/YandexHomeDesktop"
           test -d "$packaged/PlugIns"
+          "$packaged/MacOS/YandexHomeCli" --help --json
+          "$packaged/MacOS/YandexHomeRest" --help --json
           for arch in arm64 x86_64; do
-            lipo -verify_arch "$arch" "$packaged/MacOS/YandexHomeDesktop"
+            for binary in YandexHomeDesktop YandexHomeCli YandexHomeRest; do
+              lipo -verify_arch "$arch" "$packaged/MacOS/$binary"
+            done
             lipo -verify_arch "$arch" "$packaged/Frameworks/QtCore.framework/QtCore"
           done
           hdiutil detach "$RUNNER_TEMP/dmg-mount"

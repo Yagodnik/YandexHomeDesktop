@@ -1,5 +1,7 @@
 #pragma once
 
+#include "yh/appcli_export.h"
+
 #include <QCoreApplication>
 #include <QVariant>
 #include <expected>
@@ -10,9 +12,9 @@ class CliValueParsers {
 namespace CliCapability {
 using ValueResult = std::expected<QVariant, QString>;
 using ValueParser = ValueResult (*)(const QString&);
-ValueResult BooleanValue(const QString& text);
-ValueResult NumberValue(const QString& text);
-ValueResult RgbValue(const QString& text);
-ValueResult HsvValue(const QString& text);
-ValueResult TextValue(const QString& text);
+APPCLI_EXPORT ValueResult BooleanValue(const QString& text);
+APPCLI_EXPORT ValueResult NumberValue(const QString& text);
+APPCLI_EXPORT ValueResult RgbValue(const QString& text);
+APPCLI_EXPORT ValueResult HsvValue(const QString& text);
+APPCLI_EXPORT ValueResult TextValue(const QString& text);
 } // namespace CliCapability

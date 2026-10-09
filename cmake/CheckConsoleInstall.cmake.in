@@ -1,0 +1,12 @@
+foreach(binary IN ITEMS @YH_INSTALLED_CONSOLES@)
+  execute_process(COMMAND
+    "${CMAKE_INSTALL_PREFIX}/@YH_INSTALLED_CONSOLE_DIR@/${binary}" --help --json
+    RESULT_VARIABLE result OUTPUT_VARIABLE output ERROR_VARIABLE error TIMEOUT 10)
+  if(NOT "${result}" STREQUAL "0")
+    message(FATAL_ERROR "Installed ${binary} failed to start: ${result}\n${output}${error}")
+  endif()
+  string(JSON ok ERROR_VARIABLE json_error GET "${output}" ok)
+  if(json_error OR NOT ok)
+    message(FATAL_ERROR "Installed ${binary} returned invalid help: ${output}${error}")
+  endif()
+endforeach()

@@ -1,11 +1,13 @@
 #pragma once
 
+#include "yh/appservices_export.h"
+
 #include <QObject>
 #include <QUuid>
 #include <optional>
 #include "api/IHomeApi.h"
 
-class HomeService final : public QObject {
+class APPSERVICES_EXPORT HomeService final : public QObject {
   Q_OBJECT
 public:
   enum class LoadState { NotLoaded, Loading, Ready, Error };

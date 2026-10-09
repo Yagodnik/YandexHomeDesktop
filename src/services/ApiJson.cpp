@@ -1,4 +1,4 @@
-#include "CliOutput.h"
+#include "ApiJson.h"
 #include <QJsonArray>
 
 QJsonObject CapabilityJson(const CapabilityObject& capability) {
@@ -11,9 +11,7 @@ QJsonObject CapabilityJson(const CapabilityObject& capability) {
 
 QJsonObject DeviceJson(const DeviceInfo& device) {
   QJsonArray capabilities, properties;
-  for (const auto& capability : device.capabilities) {
-    capabilities.append(CapabilityJson(capability));
-  }
+  for (const auto& capability : device.capabilities) capabilities.append(CapabilityJson(capability));
   for (const auto& property : device.properties) {
     properties.append(QJsonObject{{"type", PropertyType::AsString(property.type)},
                                   {"retrievable", property.retrievable},
@@ -21,10 +19,7 @@ QJsonObject DeviceJson(const DeviceInfo& device) {
                                   {"parameters", QJsonObject::fromVariantMap(property.parameters)},
                                   {"last_updated", property.last_updated}});
   }
-  return {{"id", device.id},
-          {"name", device.name},
-          {"type", device.type},
+  return {{"id", device.id}, {"name", device.name}, {"type", device.type},
           {"state", DeviceState::AsString(device.state)},
-          {"capabilities", capabilities},
-          {"properties", properties}};
+          {"capabilities", capabilities}, {"properties", properties}};
 }

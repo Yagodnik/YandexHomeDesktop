@@ -1,0 +1,8 @@
+Checks: >-
+  -*,
+  clang-analyzer-*,
+  bugprone-use-after-move,
+  bugprone-sizeof-expression
+WarningsAsErrors: '*'
+HeaderFilterRegex: '(^|[/\\])src[/\\]'
+FormatStyle: file

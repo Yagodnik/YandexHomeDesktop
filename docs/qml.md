@@ -1,6 +1,6 @@
 # QML UI guide
 
-This describes the UI as it is wired in the current source tree. The QML lives in `src/qml/`; `src/app/GuiApp.cpp` creates its models and exposes the shared services from `AppContext`.
+This describes the UI as it is wired in the current source tree. The QML lives in `src/qml/`; `src/app/gui/GuiApp.cpp` creates its models and exposes the shared services from `AppContext`.
 
 ## Entry point and file layout
 
@@ -42,7 +42,7 @@ The extracted visual components receive titles, models, and state through proper
 
 ## C++ to QML data flow
 
-`src/app/GuiApp.cpp` sets QML context properties for the shared objects. The ones most relevant to UI work are:
+`src/app/gui/GuiApp.cpp` sets QML context properties for the shared objects. The ones most relevant to UI work are:
 
 | Context property | Used for |
 | --- | --- |
@@ -68,6 +68,12 @@ These components emit collapse, favorite, and device-selection signals. `Devices
 For a selected device, `DeviceViewModel` projects updates from its `DeviceSession` into `capabilitiesModel` and `propertiesModel`. Both models expose a `delegateSource` role. `DeviceAttributeSection.qml` uses that role as each `Loader.source`, so the model's URL map determines which QML control appears. Capability controls create an action with their C++ helper, then call `capabilitiesModel.UseCapability(model.index, action)`. The model updates the displayed state and emits a request that the view model routes through the session and `DeviceService`. Property controls display values from `Properties.Event` or `Properties.Float`. The window pauses and resumes device polling as it loses or gains activity. See [device-control-architecture.md](device-control-architecture.md) for service boundaries and the preserved conflict behavior.
 
 ## Where to make changes
+
+`SettingsPage.qml` receives a required `RestViewModel` from `MainPage.qml` and
+composes `AdvancedSettingsCard`. Its toggle emits intent to the view model;
+`RestControlService` owns process startup, shutdown, and status. The same service
+handles CLI controls. See [rest.md](rest.md). QML tests save enabled/disabled
+settings previews in the build directory for visual inspection.
 
 - For a new routed page, add the QML file to `resources/resources.qrc` under `/pages` and register its route in `Main.qml`. Add it to `YandexHomeDesktop.Pages` in `src/qml/CMakeLists.txt` if another QML file will import it as a module type.
 - For a new reusable component or visual primitive, add the QML file to the appropriate module in `src/qml/CMakeLists.txt` and import that module where needed.

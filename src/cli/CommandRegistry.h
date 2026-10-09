@@ -1,12 +1,14 @@
 #pragma once
 
+#include "yh/appcli_export.h"
+
 #include "CliArguments.h"
 #include "ICommand.h"
 #include <QCommandLineParser>
 #include <functional>
 #include <memory>
 
-class CommandRegistry {
+class APPCLI_EXPORT CommandRegistry {
   Q_DECLARE_TR_FUNCTIONS(CommandRegistry)
 public:
   using Result = std::expected<std::shared_ptr<const ICommand>, QString>;

@@ -1,9 +1,11 @@
 #pragma once
 
+#include "yh/yandexauth_export.h"
+
 #include <QObject>
 #include "ITokenStore.h"
 
-class KeychainTokenStore final : public QObject, public ITokenStore {
+class YANDEXAUTH_EXPORT KeychainTokenStore final : public QObject, public ITokenStore {
 public:
   using QObject::QObject;
   void Read(QObject* context, AuthResultHandler<QString> handler) override;

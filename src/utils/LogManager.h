@@ -1,5 +1,7 @@
 #pragma once
 
+#include "yh/appruntime_export.h"
+
 #include <QFile>
 #include <QTextStream>
 
@@ -13,7 +15,7 @@ inline bool UsesFile(LoggingMode mode) {
   return mode == LoggingMode::File || mode == LoggingMode::Both;
 }
 
-class LogManager : public QObject {
+class APPRUNTIME_EXPORT LogManager : public QObject {
   Q_OBJECT
 public:
   explicit LogManager(LoggingMode mode, QObject *parent = nullptr);

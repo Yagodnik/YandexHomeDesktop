@@ -22,7 +22,7 @@ UI.PageSurface {
 
       Pages.DevicesPage { viewModel: homeViewModel }
       Pages.ScenariosPage { viewModel: scenariosViewModel }
-      Pages.SettingsPage {}
+      Pages.SettingsPage { restModel: restViewModel }
     }
   }
 

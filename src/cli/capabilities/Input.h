@@ -1,4 +1,6 @@
 #pragma once
+
+#include "yh/appcli_export.h"
 #include "cli/CapabilityCommands.h"
 
 namespace CliCapability {

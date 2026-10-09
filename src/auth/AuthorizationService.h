@@ -1,12 +1,14 @@
 #pragma once
 
+#include "yh/authcore_export.h"
+
 #include "IAuthorizationService.h"
 #include "IAuthorizationFlow.h"
 #include "ITokenStore.h"
 
 // Dependencies outlive the service and deliver each result once, only while its
 // QObject context is alive. The service owns session and operation ordering.
-class AuthorizationService final : public IAuthorizationService {
+class AUTHCORE_EXPORT AuthorizationService final : public IAuthorizationService {
   Q_OBJECT
 public:
   explicit AuthorizationService(ITokenStore* store, IAuthorizationFlow* flow = nullptr,

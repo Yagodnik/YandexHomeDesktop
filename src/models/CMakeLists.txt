@@ -5,6 +5,7 @@ find_package(Qt6 COMPONENTS Core Network Gui REQUIRED)
 add_library(Models STATIC
         AuthorizationModel.cpp
         AuthorizationModel.h
+        RestViewModel.h RestViewModel.cpp
         AccountModel.cpp
         AccountModel.h
         HomeViewModel.cpp
@@ -47,4 +48,4 @@ add_library(Models STATIC
         DeviceModel/DeviceDataModel.h
 )
 
-target_link_libraries(Models PUBLIC ApiContracts AuthContracts PRIVATE Qt6::Core Qt6::Gui Utils AppServices)
+target_link_libraries(Models PUBLIC ApiContracts AuthContracts PRIVATE Qt6::Core Qt6::Gui Utils AppServices AppRestControl)

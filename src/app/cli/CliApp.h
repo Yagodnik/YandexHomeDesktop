@@ -1,6 +1,6 @@
 #pragma once
 
-#include "StartupOptions.h"
+#include "app/common/StartupOptions.h"
 #include <QCoreApplication>
 
 // Headless bootstrap. Help/validation run before auth; commands use services and

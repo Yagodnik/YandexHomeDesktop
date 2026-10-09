@@ -125,7 +125,7 @@ private slots:
 
   void CompositionDoesNotInitializeBrowserOrReadKeychain() {
     std::unique_ptr<IAuthorizationService> saved(CreateAuthorizationService(AuthorizationMode::SavedTokenOnly, nullptr));
-    std::unique_ptr<IAuthorizationService> interactive(CreateAuthorizationService(AuthorizationMode::Interactive, nullptr));
+    std::unique_ptr<IAuthorizationService> interactive(CreateAuthorizationService(AuthorizationMode::Interactive, nullptr, new QtOAuthAuthorizationFlow));
     QVERIFY(!saved->IsAuthorized());
     QVERIFY(!interactive->IsAuthorized());
     int saved_flows = 0;

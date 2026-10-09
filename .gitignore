@@ -10,7 +10,10 @@
 /dist/
 /deploy
 /libs
-/cmake
+/cmake/*
+!/cmake/YandexHomeLibraries.cmake
+!/cmake/YandexHomeConfig.cmake.in
+!/cmake/CheckConsoleInstall.cmake.in
 /.idea
 /scratches
 /resources/auth/secrets.json

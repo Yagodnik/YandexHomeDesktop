@@ -1,10 +1,12 @@
 #pragma once
+
+#include "yh/appcli_export.h"
 #include "cli/CommandRegistry.h"
 
 class LocalCommands {
   Q_DECLARE_TR_FUNCTIONS(LocalCommands)
 };
-class HelpCommand final : public ICommand {
+class APPCLI_EXPORT HelpCommand final : public ICommand {
 public:
   explicit HelpCommand(QString text) : text_(std::move(text)) {}
   bool RequiresAuthorization() const override {
@@ -18,4 +20,4 @@ public:
 private:
   QString text_;
 };
-void RegisterLocalCommands(CommandRegistry& registry);
+APPCLI_EXPORT void RegisterLocalCommands(CommandRegistry& registry);

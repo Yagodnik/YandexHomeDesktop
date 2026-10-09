@@ -15,7 +15,7 @@ TestCase {
   Component { id: authPage; Pages.AuthPage { width: 350; height: 460 } }
   Component { id: mainPage; Pages.MainPage { width: 350; height: 460 } }
   Component { id: devicePage; Pages.DevicePage { width: 350; height: 460 } }
-  Component { id: settingsPage; Pages.SettingsPage { width: 350; height: 460 } }
+  Component { id: settingsPage; Pages.SettingsPage { width: 350; height: 460; restModel: restViewModel } }
 
   ListModel { id: households }
   ListModel { id: scenarios }
@@ -158,7 +158,8 @@ TestCase {
     const card = findChild(page, "basicSettings");
     tryVerify(function() { return content.contentHeight > content.height; });
     content.contentY = content.contentHeight - content.height;
-    fuzzyCompare(card.mapToItem(content, 0, card.height).y, content.height, 0.1);
+    const advanced = findChild(page, "advancedSettings");
+    fuzzyCompare(advanced.mapToItem(content, 0, advanced.height).y, content.height, 0.1);
 
     // Enlarge the viewport so both settings controls are visible for interaction.
     page.height = 460;
@@ -177,6 +178,39 @@ TestCase {
     mouseClick(choice.popup.contentItem, 10, 48);
     compare(settings.currentTheme, 1);
     compare(page.color, themes.background);
+  }
+
+  function test_restToggleReachesService() {
+    restTestServer.SetRunning(false);
+    restViewModel.Refresh();
+    tryCompare(restViewModel, "busy", false);
+    tryCompare(restViewModel, "enabled", false);
+    const page = createTemporaryObject(settingsPage, testCase, { height: 600 });
+    verify(page !== null);
+    const content = findChild(page, "settingsContent");
+    content.contentY = content.contentHeight - content.height;
+    const row = findChild(page, "restSettingRow");
+    const toggle = findChild(row, "settingSwitch");
+    verify(toggle !== null);
+    // Supply an existing local daemon; enable reuses it through the real controller.
+    restTestServer.SetRunning(true);
+    mouseClick(toggle);
+    tryCompare(restViewModel, "enabled", true);
+    tryCompare(restViewModel, "busy", false);
+    const previous = restTestServer.disableCount;
+    if (settingsPreviewPath.length > 0) {
+      page.height = 460;
+      content.contentY = content.contentHeight - content.height;
+      wait(100);
+      grabImage(page).save(settingsPreviewPath + "-enabled.png");
+    }
+    mouseClick(toggle);
+    tryCompare(restTestServer, "disableCount", previous + 1);
+    tryCompare(restViewModel, "enabled", false);
+    if (settingsPreviewPath.length > 0) {
+      wait(100);
+      grabImage(page).save(settingsPreviewPath + "-disabled.png");
+    }
   }
 
   function test_scenariosScrollingAndAction() {

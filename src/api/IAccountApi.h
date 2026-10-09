@@ -8,6 +8,7 @@ struct AccountInfo {
   QString display_name;
   QString default_avatar_id;
   QString default_email;
+  QString id;
 };
 
 class IAccountApi {

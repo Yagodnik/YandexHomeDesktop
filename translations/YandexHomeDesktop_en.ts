@@ -294,6 +294,19 @@ your devices</translation>
     </message>
 </context>
 <context>
+    <name>CollapsibleSectionHeader</name>
+    <message>
+        <location filename="../src/qml/components/CollapsibleSectionHeader.qml" line="12"/>
+        <source>Развернуть %1</source>
+        <translation>Expand %1</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/components/CollapsibleSectionHeader.qml" line="12"/>
+        <source>Свернуть %1</source>
+        <translation>Collapse %1</translation>
+    </message>
+</context>
+<context>
     <name>ColorSetting</name>
     <message>
         <location filename="../src/qml/controls/ColorSetting.qml" line="34"/>
@@ -1765,6 +1778,11 @@ your devices</translation>
         <source>Что-то пошло не так!</source>
         <translation>Something went wrong!</translation>
     </message>
+    <message>
+        <location filename="../src/qml/pages/DevicesPage.qml" line="44"/>
+        <source>Избранное</source>
+        <translation>Favorites</translation>
+    </message>
 </context>
 <context>
     <name>ErrorDialog</name>
@@ -1790,6 +1808,27 @@ your devices</translation>
         <location filename="../src/qml/pages/ErrorPage.qml" line="9"/>
         <source>Выйти из аккаунта</source>
         <translation>Sign out</translation>
+    </message>
+</context>
+<context>
+    <name>FavoriteButton</name>
+    <message>
+        <location filename="../src/qml/ui/FavoriteButton.qml" line="9"/>
+        <source>Удалить из избранного</source>
+        <translation>Remove from favorites</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/ui/FavoriteButton.qml" line="9"/>
+        <source>Добавить в избранное</source>
+        <translation>Add to favorites</translation>
+    </message>
+</context>
+<context>
+    <name>FavoriteDevicesList</name>
+    <message>
+        <location filename="../src/qml/components/FavoriteDevicesList.qml" line="7"/>
+        <source>В избранном нет устройств!</source>
+        <translation>No favorite devices!</translation>
     </message>
 </context>
 <context>
@@ -1909,7 +1948,7 @@ Email: %2
 <context>
     <name>RoomDevicesList</name>
     <message>
-        <location filename="../src/qml/components/RoomDevicesList.qml" line="31"/>
+        <location filename="../src/qml/components/RoomDevicesList.qml" line="18"/>
         <source>В этой комнате нет устройств!</source>
         <translation>No devices in this room!</translation>
     </message>

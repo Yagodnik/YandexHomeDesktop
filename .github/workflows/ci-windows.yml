@@ -31,6 +31,16 @@ jobs:
       - name: Check justfile formatting
         run: just --fmt --check
 
+      - name: Select Git Bash for recipes (Bash 3.2+)
+        shell: pwsh
+        run: |
+          $bashDirectory = Join-Path $env:ProgramFiles 'Git\bin'
+          if (-not (Test-Path "$bashDirectory\bash.exe")) { throw 'Git Bash is required' }
+          $bashDirectory >> $env:GITHUB_PATH
+
+      - name: Check Bash for recipes
+        run: bash --version
+
       - name: Install Qt and matching MinGW
         uses: jurplel/install-qt-action@v4
         with:
@@ -56,11 +66,15 @@ jobs:
       - name: Build desktop, console CLI, and tests
         run: just build_dir=build config=${{ matrix.configuration }} build
 
-      - name: Run authorization, C++, QML, and CLI process tests
+      - name: Run authorization, account preferences, room animations, C++, QML, and CLI process tests
         run: just build_dir=build config=${{ matrix.configuration }} test
 
       - name: Exercise console CLI recipe
         run: just build_dir=build config=${{ matrix.configuration }} cli --help --json
+
+      - name: Check CLI arguments containing spaces
+        if: matrix.configuration == 'Debug'
+        run: just build_dir=build config=Debug cli --fake-api devices show --name "Desk lamp" --json
 
       - name: Check installed console CLI
         if: matrix.configuration == 'Release'

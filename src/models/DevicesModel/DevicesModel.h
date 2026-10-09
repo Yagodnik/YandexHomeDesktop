@@ -14,7 +14,8 @@ public:
     NameRole,
     RoomIdRole,
     HouseholdIdRole,
-    TypeRole
+    TypeRole,
+    FavoriteRole
   };
 
   [[nodiscard]] int rowCount(const QModelIndex& parent = {}) const override;
@@ -22,10 +23,12 @@ public:
   [[nodiscard]] QHash<int, QByteArray> roleNames() const override;
   [[nodiscard]] int GetCount() const;
   void SetDevices(const QList<DeviceObject>& items);
+  void SetFavoriteDevices(const QStringList& ids);
 
 signals:
   void countChanged();
 
 private:
   QList<DeviceObject> devices_;
+  QStringList favorite_ids_;
 };

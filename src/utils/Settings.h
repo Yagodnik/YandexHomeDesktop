@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QSettings>
+#include <QHash>
 
 class Settings : public QObject {
   Q_OBJECT
@@ -8,11 +9,18 @@ class Settings : public QObject {
   Q_PROPERTY(bool trayModeEnabled READ GetTrayModeEnabled WRITE SetTrayModeEnabled NOTIFY trayModeEnabledChanged)
 public:
   explicit Settings(QObject *parent = nullptr, bool temporary = false);
+  explicit Settings(const QString& fileName, QObject* parent = nullptr);
 
   [[nodiscard]] bool GetTrayModeEnabled() const;
   [[nodiscard]] int GetCurrentTheme() const;
   void Reset();
   static void ResetStoredSettings();
+  [[nodiscard]] QStringList GetFavoriteDevices(const QString& accountId) const;
+  [[nodiscard]] QStringList GetCollapsedRooms(const QString& accountId) const;
+  [[nodiscard]] bool GetFavoritesCollapsed(const QString& accountId) const;
+  void SetFavoriteDevices(const QString& accountId, const QStringList& devices);
+  void SetCollapsedRooms(const QString& accountId, const QStringList& rooms);
+  void SetFavoritesCollapsed(const QString& accountId, bool collapsed);
 
 signals:
   void trayModeEnabledChanged();
@@ -23,7 +31,10 @@ public slots:
   void SetTrayModeEnabled(bool enabled);
 
 private:
+  [[nodiscard]] QVariant ReadAccountValue(const QString& accountId, const QString& name) const;
+  void WriteAccountValue(const QString& accountId, const QString& name, const QVariant& value);
   QSettings settings_;
+  QHash<QString, QVariant> temporary_account_values_;
   bool temporary_ = false;
   int temporary_theme_ = 0;
   bool temporary_tray_ = false;

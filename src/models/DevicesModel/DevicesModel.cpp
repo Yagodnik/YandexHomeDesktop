@@ -18,6 +18,7 @@ QVariant DevicesModel::data(const QModelIndex& index, int role) const {
     case RoomIdRole: return device.room;
     case HouseholdIdRole: return device.household_id;
     case TypeRole: return device.type;
+    case FavoriteRole: return favorite_ids_.contains(device.id);
     default: return {};
   }
 }
@@ -28,8 +29,21 @@ QHash<int, QByteArray> DevicesModel::roleNames() const {
     {NameRole, "name"},
     {RoomIdRole, "deviceRoomId"},
     {HouseholdIdRole, "deviceHouseholdId"},
-    {TypeRole, "deviceType"}
+    {TypeRole, "deviceType"},
+    {FavoriteRole, "isFavorite"}
   };
+}
+
+void DevicesModel::SetFavoriteDevices(const QStringList& ids) {
+  if (favorite_ids_ == ids) { return; }
+  const auto previous = favorite_ids_;
+  favorite_ids_ = ids;
+  for (int row = 0; row < devices_.size(); ++row) {
+    const auto& id = devices_.at(row).id;
+    if (previous.contains(id) != favorite_ids_.contains(id)) {
+      emit dataChanged(index(row, 0), index(row, 0), {FavoriteRole});
+    }
+  }
 }
 
 int DevicesModel::GetCount() const {

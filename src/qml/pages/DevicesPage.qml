@@ -40,6 +40,17 @@ UI.PageSurface {
     Components.RoomsPane {
       sourceModel: root.viewModel.rooms
       devicesModel: root.viewModel.devices
+      favoritesModel: root.viewModel.favorites
+      favoritesTitle: qsTr("Избранное")
+      favoritesCollapsed: root.viewModel.favoritesCollapsed
+      preferencesAvailable: root.viewModel.preferencesAvailable
+      onCollapseRequested: function(id, collapsed) { root.viewModel.SetRoomCollapsed(id, collapsed); }
+      onFavoritesCollapseRequested: function(collapsed) { root.viewModel.favoritesCollapsed = collapsed; }
+      onFavoriteRequested: function(id, favorite) { root.viewModel.SetDeviceFavorite(id, favorite); }
+      onDeviceRequested: function(id) {
+        deviceViewModel.LoadDevice(id);
+        router.navigateTo("device");
+      }
     }
   }
 }

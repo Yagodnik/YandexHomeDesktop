@@ -7,6 +7,7 @@
 
 namespace {
 JSON_STRUCT(AccountResponse,
+  (QString, id),
   (QString, login),
   (QString, display_name),
   (QString, default_avatar_id),
@@ -38,6 +39,6 @@ void YandexAccountApi::LoadData(QObject* context, ApiResultHandler<AccountInfo> 
     }
 
     const auto data = Serialization::From<AccountResponse>(document.object());
-    handler(AccountInfo{data.display_name, data.default_avatar_id, data.default_email});
+    handler(AccountInfo{data.display_name, data.default_avatar_id, data.default_email, data.id});
   });
 }

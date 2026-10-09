@@ -1,6 +1,7 @@
 {
   "latency_ms": 150,
   "account_info": {
+    "id": "demo-user",
     "display_name": "Demo User",
     "default_email": "demo@example.invalid"
   },

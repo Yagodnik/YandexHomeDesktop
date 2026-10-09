@@ -51,7 +51,8 @@ GuiApp::GuiApp(AppContext& app_context, QObject *parent) :
   const auto themes = new Themes(app_context.app_);
   const auto router = new Router(app_context.app_);
   const auto scenarios_view_model = new ScenariosViewModel(app_context.scenario_service, app_context.app_);
-  const auto home_view_model = new HomeViewModel(app_context.home_service, app_context.app_);
+  const auto home_view_model = new HomeViewModel(app_context.home_service, app_context.settings,
+    app_context.yandex_account, app_context.app_);
   const auto authorization_model = new AuthorizationModel(app_context.authorization_service, app_context.app_);
   const auto device_view_model = new DeviceViewModel(app_context.device_service, app_context.app_);
   const auto error_codes = new ErrorCodes(app_context.app_);

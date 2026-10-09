@@ -18,6 +18,7 @@ signals:
 
 protected:
   [[nodiscard]] bool filterAcceptsRow(int row, const QModelIndex &parent) const override;
+  [[nodiscard]] bool lessThan(const QModelIndex& left, const QModelIndex& right) const override;
 
   QString household_id_;
 };

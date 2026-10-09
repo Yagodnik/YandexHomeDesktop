@@ -12,7 +12,8 @@ public:
   enum Roles {
     IdRole = Qt::UserRole + 1,
     NameRole,
-    HouseholdIdRole
+    HouseholdIdRole,
+    CollapsedRole
   };
 
   [[nodiscard]] int rowCount(const QModelIndex& parent = {}) const override;
@@ -20,10 +21,12 @@ public:
   [[nodiscard]] QHash<int, QByteArray> roleNames() const override;
   [[nodiscard]] int GetCount() const;
   void SetRooms(const QList<RoomObject>& items);
+  void SetCollapsedRooms(const QStringList& ids);
 
 signals:
   void countChanged();
 
 private:
   QList<RoomObject> rooms_;
+  QStringList collapsed_ids_;
 };

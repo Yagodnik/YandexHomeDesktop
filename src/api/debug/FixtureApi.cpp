@@ -179,7 +179,8 @@ void FixtureApi::LoadData(QObject* context, ApiResultHandler<AccountInfo> handle
   ApiResult<AccountInfo> result = std::unexpected(fixture ? Invalid("Missing account_info") : fixture.error());
   if (fixture && fixture->value("account_info").isObject()) {
     const auto account = fixture->value("account_info").toObject();
-    result = AccountInfo{account.value("display_name").toString(), {}, account.value("default_email").toString()};
+    result = AccountInfo{account.value("display_name").toString(), {},
+      account.value("default_email").toString(), account.value("id").toString()};
   }
   Deliver(context, std::move(handler), std::move(result), fixture);
 }

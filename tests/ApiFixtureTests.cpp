@@ -71,6 +71,7 @@ private slots:
     QVERIFY(scenarios->has_value()); QCOMPARE((*scenarios)->size(), 3);
     QVERIFY(account->has_value()); QCOMPARE((*account)->display_name, QString("Demo User"));
     QVERIFY((*account)->default_avatar_id.isEmpty());
+    QCOMPARE((*account)->id, QString("demo-user"));
     QVERIFY(device->has_value()); QCOMPARE((*device)->id, QString("lamp"));
     QCOMPARE((*device)->capabilities.size(), 1);
     QVERIFY(execution->has_value());

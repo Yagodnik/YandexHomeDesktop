@@ -216,10 +216,11 @@ void ApiBoundaryTests::AccountResults() {
     account = *result;
   });
   QCOMPARE(transport.pending[0].request.url().host(), QString("login.yandex.ru"));
-  transport.Reply(0, Json(R"({"display_name":"Ada","default_avatar_id":"avatar","default_email":"ada@example.com"})"));
+  transport.Reply(0, Json(R"({"id":"account-123","display_name":"Ada","default_avatar_id":"avatar","default_email":"ada@example.com"})"));
   QCOMPARE(account.display_name, QString("Ada"));
   QCOMPARE(account.default_avatar_id, QString("avatar"));
   QCOMPARE(account.default_email, QString("ada@example.com"));
+  QCOMPARE(account.id, QString("account-123"));
 }
 
 void ApiBoundaryTests::TimeoutReportsOnce() {

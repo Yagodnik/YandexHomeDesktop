@@ -208,11 +208,12 @@ void ModelBoundaryTests::AccountModelKeepsQmlContract() {
   QSignalSpy failed(&model, &AccountModel::dataLoadingFailed);
 
   model.LoadData();
-  api.request.Send(AccountInfo{"Ada", "avatar-1", "ada@example.com"});
+  api.request.Send(AccountInfo{"Ada", "avatar-1", "ada@example.com", "account-one"});
   QCOMPARE(loaded.size(), 1);
   QCOMPARE(model.GetName(), QString("Ada"));
   QCOMPARE(model.GetAvatarUrl(), QString("https://avatars.yandex.net/get-yapic/avatar-1/"));
   QCOMPARE(model.GetEmail(), QString("ada@example.com"));
+  QCOMPARE(model.GetAccountId(), QString("account-one"));
 
   model.LoadData();
   api.request.Send(std::unexpected(ApiError{ApiErrorKind::Network, "offline"}));
@@ -225,19 +226,21 @@ void ModelBoundaryTests::AccountResetRejectsOldSessionResults() {
   QSignalSpy loaded(&model, &AccountModel::dataLoaded);
   QSignalSpy failed(&model, &AccountModel::dataLoadingFailed);
   model.LoadData();
-  api.request.Send(AccountInfo{"Ada", "avatar", "ada@example.com"});
+  api.request.Send(AccountInfo{"Ada", "avatar", "ada@example.com", "account-one"});
   model.LoadData();
   auto stale = api.request;
   model.Reset();
   QVERIFY(model.GetName().isEmpty());
   QVERIFY(model.GetEmail().isEmpty());
+  QVERIFY(model.GetAccountId().isEmpty());
   QCOMPARE(model.GetAvatarUrl(), QString("qrc:/images/icon.png"));
   const auto notifications = loaded.size();
-  stale.Send(AccountInfo{"Old session", "old-avatar", "old@example.com"});
+  stale.Send(AccountInfo{"Old session", "old-avatar", "old@example.com", "account-one"});
   stale.Send(std::unexpected(ApiError{ApiErrorKind::Network, "late error"}));
   QCOMPARE(loaded.size(), notifications);
   QCOMPARE(failed.size(), 0);
   QVERIFY(model.GetName().isEmpty());
+  QVERIFY(model.GetAccountId().isEmpty());
   model.LoadData();
   api.request.Send(AccountInfo{"New session", "", "new@example.com"});
   QCOMPARE(model.GetName(), QString("New session"));

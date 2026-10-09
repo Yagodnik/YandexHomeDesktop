@@ -28,6 +28,9 @@ if(BUILD_TESTING)
 endif()
 if(BUILD_DESKTOP_APP)
   find_package(Qt6 6.9 REQUIRED COMPONENTS Quick NetworkAuth QuickControls2 Widgets Svg LinguistTools)
+  if(BUILD_TESTING)
+    find_package(Qt6 6.9 REQUIRED COMPONENTS QuickTest)
+  endif()
 endif()
 qt_standard_project_setup(REQUIRES 6.8)
 
@@ -94,13 +97,12 @@ if(BUILD_DESKTOP_APP)
   add_subdirectory(src/qml)
 
   if(BUILD_TESTING)
-    find_package(Qt6 6.9 REQUIRED COMPONENTS QuickTest)
     target_compile_definitions(ApiFixtureTests PRIVATE "$<$<CONFIG:Debug>:YH_DEBUG_FAKE_API>")
     target_link_libraries(ApiFixtureTests PRIVATE "$<$<CONFIG:Debug>:YandexAuth>")
     target_sources(HomeTests PRIVATE tests/QmlTestEnvironment.cpp tests/QmlTestEnvironment.h)
     target_compile_definitions(HomeTests PRIVATE
       HOME_QML_TESTS HOME_IMPORT_PATH="${CMAKE_CURRENT_BINARY_DIR}")
-    target_link_libraries(HomeTests PRIVATE Qt6::Quick Qt6::QuickControls2 Iot)
+    target_link_libraries(HomeTests PRIVATE Qt6::Quick Qt6::QuickControls2 Qt6::QuickTest Iot)
     add_dependencies(HomeTests YandexHomeDesktopComponentsplugin
       YandexHomeDesktopUiplugin YandexHomeDesktopPagesplugin)
     target_compile_definitions(ScenariosTests PRIVATE

@@ -7,18 +7,44 @@ Item {
   id: root
   property var sourceModel: null
   property var devicesModel: null
+  property var favoritesModel: null
+  property string favoritesTitle
+  property bool favoritesCollapsed: false
+  property bool preferencesAvailable: false
+  signal collapseRequested(string roomId, bool collapsed)
+  signal favoritesCollapseRequested(bool collapsed)
+  signal deviceRequested(string deviceId)
+  signal favoriteRequested(string deviceId, bool favorite)
 
-  ListView {
+  UI.ScrollColumn {
     id: roomsList
+    objectName: "roomsList"
     anchors.fill: parent
-    clip: true
     spacing: 8
-    model: root.sourceModel
     ScrollBar.vertical: scrollBar
 
-    delegate: Components.RoomDevicesList {
+    Components.FavoriteDevicesList {
+      objectName: "favoritesSection"
       width: roomsList.width
-      devicesModel: root.devicesModel
+      sourceModel: root.favoritesModel
+      title: root.favoritesTitle
+      collapsed: root.favoritesCollapsed
+      preferencesAvailable: root.preferencesAvailable
+      onCollapseToggled: function(collapsed) { root.favoritesCollapseRequested(collapsed); }
+      onDeviceRequested: function(id) { root.deviceRequested(id); }
+      onFavoriteRequested: function(id, favorite) { root.favoriteRequested(id, favorite); }
+    }
+
+    Repeater {
+      model: root.sourceModel
+      delegate: Components.RoomDevicesList {
+        width: roomsList.width
+        devicesModel: root.devicesModel
+        preferencesAvailable: root.preferencesAvailable
+        onCollapseRequested: function(id, collapsed) { root.collapseRequested(id, collapsed); }
+        onDeviceRequested: function(id) { root.deviceRequested(id); }
+        onFavoriteRequested: function(id, favorite) { root.favoriteRequested(id, favorite); }
+      }
     }
   }
 

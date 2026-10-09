@@ -16,6 +16,7 @@ qt_add_qml_module(YandexHomeDesktopUi
         ui/MyComboBox.qml
         ui/MySlider.qml
         ui/ImageButton.qml
+        ui/FavoriteButton.qml
         ui/ErrorDialog.qml
         ui/Skeleton.qml
         ui/CardSurface.qml
@@ -63,7 +64,10 @@ qt_add_qml_module(YandexHomeDesktopComponents
         components/ScenariosList.qml
         components/AccountDetails.qml
         components/DeviceDelegate.qml
+        components/DeviceListSection.qml
         components/RoomDevicesList.qml
+        components/CollapsibleSectionHeader.qml
+        components/FavoriteDevicesList.qml
         components/AdaptiveGrid.qml
         components/DeviceHeader.qml
         components/DeviceAttributeSection.qml

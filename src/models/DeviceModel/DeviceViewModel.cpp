@@ -55,6 +55,7 @@ void DeviceViewModel::TryReloadDevice() { session_.TryReloadDevice(); }
 void DeviceViewModel::ContinuePollingIfNeeded() { session_.ContinuePollingIfNeeded(); }
 void DeviceViewModel::StopPolling() { session_.StopPolling(); }
 void DeviceViewModel::ForgetDevice() { session_.ForgetDevice(); }
+void DeviceViewModel::ResetSession() { session_.ResetSession(); }
 void DeviceViewModel::Refresh() { session_.Refresh(); }
 
 void DeviceViewModel::Reset() {

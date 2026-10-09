@@ -9,6 +9,7 @@
 #include "models/AccountModel.h"
 #include "models/DeviceModel/DeviceController.h"
 #include "models/DeviceModel/DeviceDataModel.h"
+#include "models/DeviceModel/DeviceViewModel.h"
 #include "models/DevicesModel/DevicesModel.h"
 #include "models/HomeViewModel.h"
 #include "models/HouseholdsModel/HouseholdsModel.h"
@@ -216,4 +217,60 @@ void ModelBoundaryTests::AccountModelKeepsQmlContract() {
   model.LoadData();
   api.request.Send(std::unexpected(ApiError{ApiErrorKind::Network, "offline"}));
   QCOMPARE(failed.size(), 1);
+}
+
+void ModelBoundaryTests::AccountResetRejectsOldSessionResults() {
+  FakeAccountApi api;
+  AccountModel model(&api);
+  QSignalSpy loaded(&model, &AccountModel::dataLoaded);
+  QSignalSpy failed(&model, &AccountModel::dataLoadingFailed);
+  model.LoadData();
+  api.request.Send(AccountInfo{"Ada", "avatar", "ada@example.com"});
+  model.LoadData();
+  auto stale = api.request;
+  model.Reset();
+  QVERIFY(model.GetName().isEmpty());
+  QVERIFY(model.GetEmail().isEmpty());
+  QCOMPARE(model.GetAvatarUrl(), QString("qrc:/images/icon.png"));
+  const auto notifications = loaded.size();
+  stale.Send(AccountInfo{"Old session", "old-avatar", "old@example.com"});
+  stale.Send(std::unexpected(ApiError{ApiErrorKind::Network, "late error"}));
+  QCOMPARE(loaded.size(), notifications);
+  QCOMPARE(failed.size(), 0);
+  QVERIFY(model.GetName().isEmpty());
+  model.LoadData();
+  api.request.Send(AccountInfo{"New session", "", "new@example.com"});
+  QCOMPARE(model.GetName(), QString("New session"));
+}
+
+void ModelBoundaryTests::DeviceResetRejectsOldSessionResults() {
+  FakeHomeApi api;
+  DeviceService service(&api);
+  DeviceViewModel model(&service, nullptr, [] { return 100.; });
+  QSignalSpy received(&model, &DeviceViewModel::deviceInfoReceived);
+  QSignalSpy errors(&model, &DeviceViewModel::errorOccurred);
+  model.LoadDevice("device");
+  DeviceInfo info;
+  info.status = Status::Ok;
+  info.id = "device";
+  info.name = "Old session";
+  api.device_requests.first().Send(info);
+  QCOMPARE(model.GetState(), DeviceViewModel::Ready);
+  model.Refresh();
+  auto stale_read = api.device_requests.last();
+  model.ResetSession();
+  QCOMPARE(model.GetState(), DeviceViewModel::Loading);
+  QCOMPARE(model.GetCapabilities()->rowCount(), 0);
+  QCOMPARE(model.GetProperties()->rowCount(), 0);
+  const auto notifications = received.size();
+  model.LoadDevice("device");
+  stale_read.Send(info);
+  stale_read.Send(std::unexpected(ApiError{ApiErrorKind::Network, "old session error"}));
+  QCOMPARE(received.size(), notifications);
+  QCOMPARE(errors.size(), 0);
+  QCOMPARE(model.GetState(), DeviceViewModel::Loading);
+  info.name = "New session";
+  api.device_requests.last().Send(info);
+  QCOMPARE(model.GetState(), DeviceViewModel::Ready);
+  model.StopPolling();
 }

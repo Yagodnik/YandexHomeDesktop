@@ -11,4 +11,5 @@ private slots:
   void AccountResults();
   void TimeoutReportsOnce();
   void DestroyedContextSuppressesEvents();
+  void MissingCredentialsSkipTransport();
 };

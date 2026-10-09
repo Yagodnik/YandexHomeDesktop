@@ -1,4 +1,5 @@
 #include "AppContext.h"
+#include "auth/AuthorizationFactory.h"
 #include <stdexcept>
 #ifdef YH_DEBUG_FAKE_API
 #include "api/debug/FixtureApi.h"
@@ -6,18 +7,12 @@
 
 AppContext::AppContext(QGuiApplication *app, const StartupOptions& options)
   : app_(app), cli_arguments(options.cli_arguments.isEmpty() ? app->arguments() : options.cli_arguments) {
-  authorization_service = new AuthorizationService(app_, options.use_fake_api);
+  authorization_service = CreateAuthorizationService(options.use_fake_api
+    ? AuthorizationMode::Fixture : AuthorizationMode::Interactive, app_);
   platform_service = new PlatformService(app_);
 
-  token_provider = [this] -> QString {
-    const auto token = authorization_service->GetToken();
-    if (!token.has_value()) {
-      qWarning() << "AuthorizationService::GetToken: no token provided";
-      QGuiApplication::exit(0);
-      return "";
-    }
-
-    return token.value();
+  token_provider = [service = authorization_service] {
+    return service->GetToken().value_or(QString{});
   };
 
   if (options.use_fake_api) {
@@ -39,12 +34,14 @@ AppContext::AppContext(QGuiApplication *app, const StartupOptions& options)
   }
   yandex_account = new AccountModel(account_api, app_);
   home_service = new HomeService(yandex_api, app_);
-  QObject::connect(authorization_service, &AuthorizationService::logout,
+  QObject::connect(authorization_service, &IAuthorizationService::logout,
     home_service, &HomeService::Reset);
   scenario_service = new ScenarioService(yandex_api, app_);
   device_service = new DeviceService(yandex_api, app_);
-  QObject::connect(authorization_service, &AuthorizationService::logout,
+  QObject::connect(authorization_service, &IAuthorizationService::logout,
     scenario_service, &ScenarioService::Reset);
+  QObject::connect(authorization_service, &IAuthorizationService::logout,
+    yandex_account, &AccountModel::Reset);
 
   settings = new Settings(app_, options.use_fake_api);
 }

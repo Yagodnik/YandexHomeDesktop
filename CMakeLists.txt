@@ -51,6 +51,7 @@ add_subdirectory(src/api)
 add_subdirectory(src/iot)
 add_subdirectory(src/services)
 add_subdirectory(src/cli)
+add_subdirectory(src/auth)
 add_subdirectory(src/models)
 add_subdirectory(src/utils)
 
@@ -89,8 +90,6 @@ if(BUILD_DESKTOP_APP)
   unset(BUILD_TRANSLATIONS)
   unset(BUILD_TEST_APPLICATION)
 
-  add_subdirectory(src/auth)
-  target_compile_definitions(YandexAuth PRIVATE "$<$<CONFIG:Debug>:YH_DEBUG_FAKE_API>")
   add_subdirectory(src/platform)
   add_subdirectory(src/qml)
 
@@ -194,7 +193,7 @@ if(BUILD_DESKTOP_APP)
     "${CMAKE_CURRENT_SOURCE_DIR}/src/qml/*.qml")
   qt_add_translations(appYandexHomeDesktop TARGETS YandexHomeCli
     TS_FILES "${CMAKE_CURRENT_SOURCE_DIR}/translations/YandexHomeDesktop_en.ts"
-    SOURCE_TARGETS appYandexHomeDesktop AppCli CliBootstrap IotCore
+    SOURCE_TARGETS appYandexHomeDesktop AppCli CliBootstrap IotCore YandexApiAdapter
     SOURCES
       ${QML_TRANSLATION_SOURCES}
       translations/DataStrings.cpp
@@ -213,7 +212,7 @@ if(BUILD_DESKTOP_APP)
   )
 
   target_link_libraries(appYandexHomeDesktop PRIVATE
-    Qt6::Quick Qt6::Core Qt6::NetworkAuth Qt6::Gui Qt6::QuickControls2 Qt6::Widgets Qt6::Svg
+    Qt6::Quick Qt6::Core Qt6::Gui Qt6::QuickControls2 Qt6::Widgets Qt6::Svg
     YandexHomeDesktopUi YandexHomeDesktopPages
     YandexHomeDesktopComponents
     YandexApiAdapter YandexAuth Models PlatformService Utils Iot

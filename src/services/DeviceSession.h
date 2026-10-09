@@ -22,6 +22,7 @@ public:
   void ContinuePollingIfNeeded();
   void StopPolling();
   void ForgetDevice();
+  void ResetSession();
   [[nodiscard]] bool IsPolling() const;
   void Refresh();
   void UseCapability(int index, CapabilityType type, const QVariantMap& state);
@@ -52,6 +53,7 @@ private:
   QTimer polling_timer_;
   QString device_id_;
   bool is_in_use_ = false;
+  quint64 session_generation_ = 0;
   QList<CapabilityUpdate> capabilities_updates_;
   // Intentionally shared across reads, matching the characterized controller.
   double last_update_start_time_ = 0;

@@ -102,6 +102,38 @@ void ApiBoundaryTests::HomeRequestsAreScoped() {
   QCOMPARE(first_id, QString("first"));
 }
 
+void ApiBoundaryTests::MissingCredentialsSkipTransport() {
+  FakeTransport transport;
+  QString token;
+  const auto provider = [&token] { return token; };
+  YandexHomeApi home(provider, &transport);
+  YandexAccountApi account(provider, &transport);
+  QObject context;
+  int rejected = 0;
+  const auto reject = [&rejected](auto result) {
+    QVERIFY(!result);
+    QCOMPARE(result.error().kind, ApiErrorKind::Http);
+    QCOMPARE(result.error().http_status, 401);
+    ++rejected;
+  };
+  home.GetUserInfo(&context, reject);
+  home.GetScenarios(&context, reject);
+  home.GetDeviceInfo("device", &context, reject);
+  home.ExecuteScenario("scenario", &context, reject);
+  home.PerformActions({}, &context, reject);
+  account.LoadData(&context, reject);
+  QCOMPARE(rejected, 6);
+  QVERIFY(transport.pending.isEmpty());
+
+  token = "synthetic-session";
+  home.GetUserInfo(&context, [](auto) {});
+  QCOMPARE(transport.pending.size(), 1);
+  token.clear();
+  home.GetUserInfo(&context, reject);
+  QCOMPARE(rejected, 7);
+  QCOMPARE(transport.pending.size(), 1);
+}
+
 void ApiBoundaryTests::ParsingAndScenarioResults() {
   FakeTransport transport;
   YandexHomeApi api([] { return QString("token"); }, &transport);

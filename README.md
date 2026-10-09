@@ -21,6 +21,18 @@ cmake --build build --parallel 4
 ctest --test-dir build --output-on-failure
 ```
 
+В корне проекта есть `justfile` с командами для сборки, запуска GUI и CLI, тестов и переводов. Нужны just 1.51.0 и Python 3.9+; список команд покажет `just`. Например:
+
+```sh
+just qt_prefix=/path/to/Qt/6.x/macos configure
+just demo
+just cli --fake-api devices list --json
+just config=Release qt_prefix=/path/to/Qt/6.x/macos build
+just test
+```
+
+Профили Debug, Release и переносимые тесты используют отдельные каталоги сборки. Параметры и дополнительные флаги описаны в [docs/build.md](docs/build.md#just-commands).
+
 Для ускорения сборки по умолчанию включены предкомпилированные заголовки (PCH).
 Их можно отключить при конфигурации CMake с помощью `-DYH_ENABLE_PCH=OFF`.
 Объявления сериализуемых типов находятся в `serialization/SerializationTypes.h`;

@@ -3,7 +3,9 @@
 AccountModel::AccountModel(IAccountApi* api, QObject* parent) : QObject(parent), api_(api) {}
 
 void AccountModel::LoadData() {
-  api_->LoadData(this, [this](ApiResult<AccountInfo> result) {
+  const auto generation = ++generation_;
+  api_->LoadData(this, [this, generation](ApiResult<AccountInfo> result) {
+    if (generation != generation_) { return; }
     if (!result) {
       emit dataLoadingFailed();
       return;
@@ -14,6 +16,14 @@ void AccountModel::LoadData() {
     email_ = result->default_email;
     emit dataLoaded();
   });
+}
+
+void AccountModel::Reset() {
+  ++generation_;
+  name_.clear();
+  avatar_id_.clear();
+  email_.clear();
+  emit dataLoaded();
 }
 
 QString AccountModel::GetName() const {

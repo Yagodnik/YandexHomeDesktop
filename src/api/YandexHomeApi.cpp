@@ -39,7 +39,9 @@ YandexHomeApi::YandexHomeApi(TokenProvider token_provider, IHttpTransport* trans
   : QObject(parent), token_provider_(std::move(token_provider)), transport_(transport) {}
 
 void YandexHomeApi::GetUserInfo(QObject* context, ApiResultHandler<UserInfo> handler) {
-  transport_->Get(RequestFactory::CreateBearer(kInfoEndpoint, token_provider_()), context,
+  const auto request = RequestFactory::CreateAuthorizedBearer(kInfoEndpoint, token_provider_());
+  if (!request) { handler(std::unexpected(request.error())); return; }
+  transport_->Get(*request, context,
                   [handler = std::move(handler)](ApiResult<HttpResponse> response) {
     handler(DecodeResult<UserInfo>(std::move(response)));
   });
@@ -47,7 +49,9 @@ void YandexHomeApi::GetUserInfo(QObject* context, ApiResultHandler<UserInfo> han
 
 void YandexHomeApi::GetScenarios(QObject* context,
                                   ApiResultHandler<QList<ScenarioObject>> handler) {
-  transport_->Get(RequestFactory::CreateBearer(kInfoEndpoint, token_provider_()), context,
+  const auto request = RequestFactory::CreateAuthorizedBearer(kInfoEndpoint, token_provider_());
+  if (!request) { handler(std::unexpected(request.error())); return; }
+  transport_->Get(*request, context,
                   [handler = std::move(handler)](ApiResult<HttpResponse> response) {
     auto result = DecodeResult<UserInfo>(std::move(response));
     if (!result) {
@@ -60,7 +64,9 @@ void YandexHomeApi::GetScenarios(QObject* context,
 
 void YandexHomeApi::GetDeviceInfo(const QString& id, QObject* context,
                                    ApiResultHandler<DeviceInfo> handler) {
-  transport_->Get(RequestFactory::CreateBearer(kDeviceInfoEndpoint.arg(id), token_provider_()),
+  const auto request = RequestFactory::CreateAuthorizedBearer(kDeviceInfoEndpoint.arg(id), token_provider_());
+  if (!request) { handler(std::unexpected(request.error())); return; }
+  transport_->Get(*request,
                   context, [handler = std::move(handler)](ApiResult<HttpResponse> response) {
     handler(DecodeResult<DeviceInfo>(std::move(response)));
   });
@@ -68,7 +74,9 @@ void YandexHomeApi::GetDeviceInfo(const QString& id, QObject* context,
 
 void YandexHomeApi::ExecuteScenario(const QString& id, QObject* context,
                                      ApiResultHandler<void> handler) {
-  transport_->Post(RequestFactory::CreateBearer(kExecuteScenarioEndpoint.arg(id), token_provider_()),
+  const auto request = RequestFactory::CreateAuthorizedBearer(kExecuteScenarioEndpoint.arg(id), token_provider_());
+  if (!request) { handler(std::unexpected(request.error())); return; }
+  transport_->Post(*request,
                    {}, context, [handler = std::move(handler)](ApiResult<HttpResponse> response) {
     auto result = DecodeResult<Response>(std::move(response));
     if (!result) {
@@ -81,6 +89,8 @@ void YandexHomeApi::ExecuteScenario(const QString& id, QObject* context,
 
 void YandexHomeApi::PerformActions(const QList<DeviceActionsObject>& actions, QObject* context,
                                     ApiResultHandler<void> handler) {
+  const auto request = RequestFactory::CreateAuthorizedBearer(kDevicesActionsEndpoint, token_provider_());
+  if (!request) { handler(std::unexpected(request.error())); return; }
   QJsonArray json_actions;
   for (const auto& action : actions) {
     json_actions.push_back(Serialization::To(action));
@@ -88,7 +98,7 @@ void YandexHomeApi::PerformActions(const QList<DeviceActionsObject>& actions, QO
   QJsonObject payload;
   payload["devices"] = json_actions;
 
-  transport_->Post(RequestFactory::CreateBearer(kDevicesActionsEndpoint, token_provider_()),
+  transport_->Post(*request,
                    QJsonDocument(payload).toJson(), context,
                    [handler = std::move(handler)](ApiResult<HttpResponse> response) {
     auto result = DecodeResult<DeviceActionResponse>(std::move(response));

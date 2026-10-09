@@ -1,284 +1,113 @@
 #include "AuthorizationService.h"
-#include "serialization/Serialization.h"
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QUrlQuery>
-#include <QFile>
-#include <QDesktopServices>
-#include <QTimer>
-#include <stdexcept>
 
-namespace {
-  JSON_STRUCT(AuthSecrets,
-    (QString, auth_url),
-    (QString, access_token_url),
-    (QString, client_id),
-    (QString, redirect_base),
-    (int, redirect_port),
-    (QStringList, scopes)
-  );
-}
+#include <QDebug>
 
-AuthorizationService::AuthorizationService(QObject *parent, bool use_fake_api, bool interactive) :
-  QObject{parent},
-  use_fake_api_(use_fake_api)
-{
-  if (use_fake_api_) {
-#ifdef YH_DEBUG_FAKE_API
-    return;
-#else
-    throw std::runtime_error("The fake API is available only in Debug builds");
-#endif
-  }
-  // Headless consumers only read/delete the saved token. They must not bind the
-  // desktop OAuth callback port or construct browser sign-in configuration.
-  if (!interactive) { return; }
-  reply_handler_ = std::make_unique<QOAuthHttpServerReplyHandler>(kDefaultPort);
-  const auto auth_secrets_object = GetAuthSecrets();
-
-  if (!auth_secrets_object.has_value() || !PrepareCallbackPage()) {
-    qCritical() << "AuthorizationService: Initialization failed";
-    emit initializationFailed();
-    return;
-  }
-
-  auto auth_secrets = Serialization::From<AuthSecrets>(
-    auth_secrets_object.value());
-
-  oauth2_.setReplyHandler(reply_handler_.get());
-  oauth2_.setAuthorizationUrl({auth_secrets.auth_url});
-  oauth2_.setTokenUrl({auth_secrets.access_token_url});
-  oauth2_.setClientIdentifier(auth_secrets.client_id);
-  oauth2_.setRequestedScopeTokens(GetScopes(auth_secrets.scopes));
-
-  connect(&oauth2_,
-    &QOAuth2AuthorizationCodeFlow::statusChanged,
-    this,
-    &AuthorizationService::HandleAuthorizationStatus);
-
-  connect(&oauth2_,
-    &QOAuth2AuthorizationCodeFlow::authorizeWithBrowser,
-    this,
-    &AuthorizationService::AuthorizeWithBrowser);
+AuthorizationService::AuthorizationService(ITokenStore* store, IAuthorizationFlow* flow,
+                                           QObject* parent)
+  : IAuthorizationService(parent), store_(store), flow_(flow) {
+  Q_ASSERT(store_);
 }
 
 void AuthorizationService::AttemptLocalAuthorization() {
-#ifdef YH_DEBUG_FAKE_API
-  if (use_fake_api_) {
-    QTimer::singleShot(0, this, [this] {
-      if (fixture_authorized_) { emit authorized(); } else { emit unauthorized(); }
-    });
-    return;
-  }
-#endif
-  TryRead();
-}
-
-bool AuthorizationService::IsAuthorized() const {
-#ifdef YH_DEBUG_FAKE_API
-  if (use_fake_api_) { return fixture_authorized_; }
-#endif
-  return token_.has_value();
+  if (operation_ != Operation::Idle || logout_requested_) { return; }
+  const auto generation = ++generation_;
+  token_.reset();
+  last_error_code_ = 0;
+  operation_ = Operation::Reading;
+  store_->Read(this, [this, generation](AuthResult<QString> result) {
+    if (generation != generation_ || operation_ != Operation::Reading) { return; }
+    operation_ = Operation::Idle;
+    if (!result) {
+      Fail(result.error());
+    } else if (result->isEmpty()) {
+      emit unauthorized();
+    } else {
+      token_ = std::move(*result);
+      emit authorized();
+    }
+  });
 }
 
 void AuthorizationService::AttemptAuthorization() {
-#ifdef YH_DEBUG_FAKE_API
-  if (use_fake_api_) {
-    fixture_authorized_ = true;
-    QTimer::singleShot(0, this, [this] { if (fixture_authorized_) { emit authorized(); } });
+  if (logout_requested_ || operation_ == Operation::Authorizing ||
+      operation_ == Operation::Writing) { return; }
+  const auto generation = ++generation_;
+  token_.reset();
+  last_error_code_ = 0;
+  operation_ = Operation::Authorizing;
+  if (!flow_) {
+    operation_ = Operation::Idle;
+    Fail({AuthErrorKind::Authorization, 0x80000002u, {}});
     return;
   }
-#endif
-  oauth2_.grant();
+  flow_->Start(this, [this, generation](AuthResult<QString> result) {
+    if (generation != generation_ || operation_ != Operation::Authorizing) { return; }
+    operation_ = Operation::Idle;
+    if (!result) {
+      Fail(result.error());
+      return;
+    }
+    if (result->isEmpty()) {
+      Fail({AuthErrorKind::Authorization, 0x80000003u, {}});
+      return;
+    }
+    token_ = std::move(*result);
+    operation_ = Operation::Writing;
+    store_->Write(*token_, this, [this](AuthResult<void> saved) {
+      if (operation_ != Operation::Writing) { return; }
+      operation_ = Operation::Idle;
+      if (logout_requested_) {
+        // Delete after the pending write so it cannot recreate credentials.
+        DeleteToken();
+      } else if (!saved) {
+        last_error_code_ = saved.error().code;
+        qWarning() << "AuthorizationService: Could not persist the session";
+      }
+    });
+    if (generation == generation_ && !logout_requested_) { emit authorized(); }
+  });
 }
 
 void AuthorizationService::Logout() {
-#ifdef YH_DEBUG_FAKE_API
-  if (use_fake_api_) {
-    fixture_authorized_ = false;
-    emit logout();
-    QTimer::singleShot(0, this, [this] { emit logoutFinished(); });
-    return;
-  }
-#endif
+  if (logout_requested_) { return; }
+  ++generation_;
   token_.reset();
-  TryDelete();
-
+  last_error_code_ = 0;
+  logout_requested_ = true;
+  if (flow_) { flow_->Cancel(); }
   emit logout();
+  if (logout_requested_ && operation_ != Operation::Writing && operation_ != Operation::Deleting) {
+    DeleteToken();
+  }
 }
 
+void AuthorizationService::DeleteToken() {
+  operation_ = Operation::Deleting;
+  store_->Delete(this, [this](AuthResult<void> result) {
+    if (operation_ != Operation::Deleting) { return; }
+    operation_ = Operation::Idle;
+    logout_requested_ = false;
+    if (!result && result.error().kind != AuthErrorKind::NotFound) {
+      last_error_code_ = result.error().code;
+      emit logoutFailed(result.error().message);
+    } else {
+      emit logoutFinished();
+    }
+  });
+}
+
+bool AuthorizationService::IsAuthorized() const { return token_.has_value(); }
+std::optional<QString> AuthorizationService::GetToken() const { return token_; }
 QString AuthorizationService::GetLastErrorCode() const {
-  QString number;
-  number.setNum(last_error_code_, 16);
-  return number;
+  return QString::number(last_error_code_, 16);
 }
 
-std::optional<QString> AuthorizationService::GetToken() const {
-#ifdef YH_DEBUG_FAKE_API
-  if (use_fake_api_) { return std::nullopt; }
-#endif
-  if (!token_.has_value()) {
-    qCritical() << "AuthorizationService::GetToken: no token provided";
-    return std::nullopt;
-  }
-
-  return token_.value();
-}
-
-void AuthorizationService::TryWrite(const QString& key) {
-  auto *job = new QKeychain::WritePasswordJob(kAppName, this);
-  job->setKey(kSecureKey);
-  job->setTextData(key);
-
-  connect(job, &QKeychain::Job::finished, this, [job, this]() {
-    WriteTokenHandler(job);
-
-    job->deleteLater();
-  });
-
-  job->start();
-}
-
-void AuthorizationService::TryRead() {
-  auto *job = new QKeychain::ReadPasswordJob(kAppName, this);
-  job->setKey(kSecureKey);
-
-  connect(job, &QKeychain::Job::finished, this, [job, this]() {
-    ReadTokenHandler(job);
-
-    job->deleteLater();
-  });
-
-  job->start();
-}
-
-void AuthorizationService::TryDelete() {
-  auto *job = new QKeychain::DeletePasswordJob(kAppName, this);
-  job->setKey(kSecureKey);
-
-  connect(job, &QKeychain::Job::finished, this, [job, this]() {
-    DeleteTokenHandler(job);
-
-    job->deleteLater();
-  });
-
-  job->start();
-}
-
-std::optional<QJsonObject> AuthorizationService::GetAuthSecrets() const {
-  QFile auth_secrets_file(kAuthSecretsPath);
-  if (!auth_secrets_file.open(QIODevice::ReadOnly)) {
-    return std::nullopt;
-  }
-
-  const QByteArray data = auth_secrets_file.readAll();
-  auth_secrets_file.close();
-
-  QJsonDocument document = QJsonDocument::fromJson(data);
-  return document.object();
-}
-
-QSet<QByteArray> AuthorizationService::GetScopes(const QStringList &list) {
-  QSet<QByteArray> result;
-
-  for (const QString &scope : list) {
-    result.insert(scope.toUtf8());
-  }
-
-  return result;
-}
-
-bool AuthorizationService::PrepareCallbackPage() {
-  QFile callback_index(kCallbackPath);
-  if (!callback_index.open(QIODevice::ReadOnly)) {
-    return false;
-  }
-
-  reply_handler_->setCallbackText(callback_index.readAll());
-  callback_index.close();
-
-  return true;
-}
-
-void AuthorizationService::HandleAuthorizationStatus(const QAbstractOAuth::Status status) {
-  last_error_code_ = (1 << 31) | static_cast<int>(status);
-
-  switch (status) {
-    case QAbstractOAuth::Status::Granted:
-      qInfo() << "AuthorizationService: Access granted!";
-      token_ = oauth2_.token();
-
-      TryWrite(oauth2_.token());
-
-      emit authorized();
-      break;
-    case QAbstractOAuth::Status::NotAuthenticated:
-      qInfo() << "AuthorizationService: NotAuthenticated";
-      emit authorizationFailed();
-      break;
-    case QAbstractOAuth::Status::RefreshingToken:
-      qInfo() << "AuthorizationService: Refreshing token";
-      break;
-    case QAbstractOAuth::Status::TemporaryCredentialsReceived:
-      qInfo() << "AuthorizationService: TemporaryCredentialsReceived";
-      break;
-    default:
-      qWarning() << "AuthorizationService: Unknown status!";
-      emit authorizationFailed();
-      break;
-  }
-}
-
-void AuthorizationService::AuthorizeWithBrowser(QUrl url) {
-  QUrlQuery query(url);
-  query.addQueryItem("response_type", "code");
-  url.setQuery(query);
-
-  QDesktopServices::openUrl(url);
-}
-
-void AuthorizationService::ReadTokenHandler(QKeychain::ReadPasswordJob *job) {
-  last_error_code_ = static_cast<int>(job->error());
-
-  switch (job->error()) {
-    case QKeychain::NoError:
-      break;
-    case QKeychain::EntryNotFound:
-      qCritical() << "AuthorizationService: Key does NOT exist.";
-
-      emit unauthorized();
-      return;
-    case QKeychain::AccessDeniedByUser:
-      qWarning() << "AuthorizationService: User canceled operation";
-
-      emit authorizationCanceled();
-      return;
-    default:
-      qCritical() << "AuthorizationService: Token read error -" << job->errorString();
-
-      emit authorizationFailed();
-      return;
-  }
-
-  token_ = job->textData();
-
-  emit authorized();
-}
-
-void AuthorizationService::WriteTokenHandler(QKeychain::WritePasswordJob *job) {
-  if (job->error()) {
-    qWarning() << "AuthorizationService: Token write error -" << job->errorString();
-  } else {
-    qInfo() << "AuthorizationService: Token stored successfully!";
-  }
-}
-
-void AuthorizationService::DeleteTokenHandler(QKeychain::DeletePasswordJob *job) {
-  if (job->error()) {
-    qWarning() << "AuthorizationService: Token delete error -" << job->errorString();
-    emit logoutFailed(job->errorString());
-  } else {
-    qInfo() << "AuthorizationService: Token deleted successfully!";
-    emit logoutFinished();
+void AuthorizationService::Fail(const AuthError& error) {
+  last_error_code_ = error.code;
+  switch (error.kind) {
+    case AuthErrorKind::NotFound: emit unauthorized(); break;
+    case AuthErrorKind::Canceled: emit authorizationCanceled(); break;
+    case AuthErrorKind::Initialization: emit initializationFailed(); break;
+    default: emit authorizationFailed(); break;
   }
 }

@@ -198,6 +198,30 @@ private slots:
     QVERIFY(delivered);
   }
 
+  void SessionResetRejectsOldReadsAndCommandsForTheSameDevice() {
+    FakeHomeApi api;
+    DeviceService service(&api);
+    DeviceSession session(&service, nullptr, [] { return 100.; });
+    int errors = 0;
+    connect(&session, &DeviceSession::errorOccurred, this, [&errors] { ++errors; });
+    session.LoadDevice("lamp");
+    QVERIFY(api.reads[0].Send(Device("lamp", 20)));
+    session.UseCapability(0, CapabilityType::Range, {{"instance", "brightness"}, {"value", 80}});
+    session.Refresh();
+    session.ResetSession();
+    QVERIFY(!session.IsPolling());
+    session.ContinuePollingIfNeeded();
+    QVERIFY(!session.IsPolling());
+    session.LoadDevice("lamp");
+    QVERIFY(api.reads[1].Send(Device("lamp", 35)));
+    QVERIFY(api.commands[0].Send(std::unexpected(ApiError{ApiErrorKind::Service, "old error"})));
+    QCOMPARE(errors, 0);
+    QVERIFY(!session.IsPolling());
+    QVERIFY(api.reads[2].Send(Device("lamp", 50)));
+    QVERIFY(session.IsPolling());
+    session.StopPolling();
+  }
+
   void SynchronousResponsePreservesResetAndUpdateOrder() {
     FakeHomeApi api;
     api.immediate = Device("lamp-a", 20);

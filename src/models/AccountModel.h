@@ -13,6 +13,7 @@ public:
   Q_INVOKABLE [[nodiscard]] QString GetName() const;
   Q_INVOKABLE [[nodiscard]] QString GetAvatarUrl() const;
   Q_INVOKABLE [[nodiscard]] QString GetEmail() const;
+  void Reset();
 
 signals:
   void dataLoaded();
@@ -23,5 +24,6 @@ private:
   QString name_;
   QString avatar_id_;
   QString email_;
+  quint64 generation_ = 0;
   const QString kAvatarUrl = "https://avatars.yandex.net/get-yapic/%1/";
 };

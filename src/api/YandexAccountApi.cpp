@@ -19,7 +19,9 @@ YandexAccountApi::YandexAccountApi(TokenProvider token_provider, IHttpTransport*
   : QObject(parent), token_provider_(std::move(token_provider)), transport_(transport) {}
 
 void YandexAccountApi::LoadData(QObject* context, ApiResultHandler<AccountInfo> handler) {
-  transport_->Get(RequestFactory::CreateBearer(kAccountInfoEndpoint, token_provider_()), context,
+  const auto request = RequestFactory::CreateAuthorizedBearer(kAccountInfoEndpoint, token_provider_());
+  if (!request) { handler(std::unexpected(request.error())); return; }
+  transport_->Get(*request, context,
                   [handler = std::move(handler)](ApiResult<HttpResponse> response) {
     if (!response) {
       handler(std::unexpected(response.error()));

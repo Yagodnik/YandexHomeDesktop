@@ -22,12 +22,12 @@
 <context>
     <name>AuthPage</name>
     <message>
-        <location filename="../src/qml/pages/AuthPage.qml" line="16"/>
+        <location filename="../src/qml/pages/AuthPage.qml" line="8"/>
         <source>Yandex Home Desktop</source>
         <translation>Yandex Home Desktop</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/AuthPage.qml" line="17"/>
+        <location filename="../src/qml/pages/AuthPage.qml" line="9"/>
         <source>Необходимо войти в аккаунт, чтобы
 приложение могло получить доступ
 к вашим устройствам</source>
@@ -35,12 +35,12 @@
 your devices</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/AuthPage.qml" line="18"/>
+        <location filename="../src/qml/pages/AuthPage.qml" line="10"/>
         <source>Авторизоваться</source>
         <translation>Sign in</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/AuthPage.qml" line="26"/>
+        <location filename="../src/qml/pages/AuthPage.qml" line="18"/>
         <source>GitHub</source>
         <translation>GitHub</translation>
     </message>
@@ -186,33 +186,33 @@ your devices</translation>
 <context>
     <name>CliApp</name>
     <message>
-        <location filename="../src/app/CliApp.cpp" line="128"/>
-        <location filename="../src/app/CliApp.cpp" line="154"/>
+        <location filename="../src/app/CliApp.cpp" line="129"/>
+        <location filename="../src/app/CliApp.cpp" line="155"/>
         <source>Время выполнения команды истекло.</source>
         <translation>The command timed out.</translation>
     </message>
     <message>
-        <location filename="../src/app/CliApp.cpp" line="135"/>
+        <location filename="../src/app/CliApp.cpp" line="136"/>
         <source>Выполнение команды...</source>
         <translation>Executing command...</translation>
     </message>
     <message>
-        <location filename="../src/app/CliApp.cpp" line="141"/>
+        <location filename="../src/app/CliApp.cpp" line="142"/>
         <source>Сначала войдите в аккаунт через приложение.</source>
         <translation>Sign in through the desktop application first.</translation>
     </message>
     <message>
-        <location filename="../src/app/CliApp.cpp" line="146"/>
+        <location filename="../src/app/CliApp.cpp" line="147"/>
         <source>Не удалось прочитать сохранённые данные входа.</source>
         <translation>Could not read the saved sign-in data.</translation>
     </message>
     <message>
-        <location filename="../src/app/CliApp.cpp" line="150"/>
+        <location filename="../src/app/CliApp.cpp" line="151"/>
         <source>Доступ к сохранённым данным входа отменён.</source>
         <translation>Access to the saved sign-in data was canceled.</translation>
     </message>
     <message>
-        <location filename="../src/app/CliApp.cpp" line="164"/>
+        <location filename="../src/app/CliApp.cpp" line="165"/>
         <source>Чтение сохранённых данных входа; подтвердите запрос системы...</source>
         <translation>Reading saved sign-in; approve the system prompt...</translation>
     </message>
@@ -1896,6 +1896,14 @@ Email: %2
         <location filename="../src/models/DeviceModel/PropertiesModel.cpp" line="62"/>
         <source>Неизвестный тип свойства</source>
         <translation>Unknown property type</translation>
+    </message>
+</context>
+<context>
+    <name>RequestFactory</name>
+    <message>
+        <location filename="../src/api/RequestFactory.cpp" line="8"/>
+        <source>Сначала войдите в аккаунт через приложение.</source>
+        <translation>Sign in through the app first.</translation>
     </message>
 </context>
 <context>

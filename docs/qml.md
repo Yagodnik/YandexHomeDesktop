@@ -46,7 +46,7 @@ The extracted visual components receive titles, models, and state through proper
 
 | Context property | Used for |
 | --- | --- |
-| `authorizationService`, `router`, `platformService` | Sign-in, page navigation, window and tray behavior |
+| `authorizationService`, `router`, `platformService` | `AuthorizationModel` sign-in commands/signals, page navigation, window and tray behavior |
 | `homeViewModel`, `scenariosViewModel`, `yandexAccount` | Home lists and household selection, scenario operations, account details |
 | `deviceViewModel` | Selected-device loading, page state, actions, and owned display models |
 | `deviceController`, `deviceDataModel`, `capabilitiesModel`, `propertiesModel` | Compatibility aliases for the device view model and its models |

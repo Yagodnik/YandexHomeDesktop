@@ -23,6 +23,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install just
+        uses: extractions/setup-just@v4
+        with:
+          just-version: '1.51.0'
+
+      - name: Check justfile formatting
+        run: just --fmt --check
+
       - name: Install Qt and matching MinGW
         uses: jurplel/install-qt-action@v4
         with:
@@ -34,38 +42,31 @@ jobs:
           tools: tools_mingw1310,qt.tools.win64_mingw1310
           cache: true
 
-      - name: Create build-only OAuth config
-        shell: pwsh
-        run: python scripts/write-oauth-config.py --dummy --output "$env:RUNNER_TEMP\oauth.json"
-
       - name: Check committed translations
-        run: |
-          python scripts/update-data-translation-markers.py --check
-          python scripts/check-translations.py
+        run: just translations-check
 
       - name: Configure
         shell: pwsh
         run: >-
-          cmake -S . -B build -G Ninja
+          just build_dir=build
+          config=${{ matrix.configuration }}
+          pch=${{ matrix.pch }} configure
           -DCMAKE_CXX_COMPILER=g++.exe
-          -DCMAKE_PREFIX_PATH="$env:QT_ROOT_DIR"
-          -DCMAKE_BUILD_TYPE=${{ matrix.configuration }}
-          -DBUILD_DESKTOP_APP=ON
-          -DBUILD_TESTING=ON
-          -DYH_ENABLE_PCH=${{ matrix.pch }}
-          -DAUTH_CONFIG_FILE="$env:RUNNER_TEMP\oauth.json"
 
       - name: Build desktop, console CLI, and tests
-        run: cmake --build build --parallel 4
+        run: just build_dir=build config=${{ matrix.configuration }} build
 
-      - name: Run C++, QML, and CLI process tests
-        run: ctest --test-dir build -C ${{ matrix.configuration }} --output-on-failure
+      - name: Run authorization, C++, QML, and CLI process tests
+        run: just build_dir=build config=${{ matrix.configuration }} test
+
+      - name: Exercise console CLI recipe
+        run: just build_dir=build config=${{ matrix.configuration }} cli --help --json
 
       - name: Check installed console CLI
         if: matrix.configuration == 'Release'
         shell: pwsh
         run: |
-          cmake --install build --prefix build/stage
+          just build_dir=build config=Release install
           if ($LASTEXITCODE -ne 0) { throw 'Deployment failed' }
           $cli = Get-ChildItem build/stage -Recurse -File -Filter YandexHomeCli.exe | Select-Object -First 1
           if (-not $cli) { throw 'Missing installed console CLI' }

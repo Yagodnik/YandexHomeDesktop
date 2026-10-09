@@ -9,6 +9,7 @@
 #include "iot/capabilities/ColorSettingCapability.h"
 #include "models/ScenariosModel/ScenariosViewModel.h"
 #include "models/HomeViewModel.h"
+#include "models/AuthorizationModel.h"
 #include "models/DevicesModel//DevicesModel.h"
 #include "models/DevicesModel/DevicesFilterModel.h"
 #include "models/RoomsModel/RoomsModel.h"
@@ -51,6 +52,7 @@ GuiApp::GuiApp(AppContext& app_context, QObject *parent) :
   const auto router = new Router(app_context.app_);
   const auto scenarios_view_model = new ScenariosViewModel(app_context.scenario_service, app_context.app_);
   const auto home_view_model = new HomeViewModel(app_context.home_service, app_context.app_);
+  const auto authorization_model = new AuthorizationModel(app_context.authorization_service, app_context.app_);
   const auto device_view_model = new DeviceViewModel(app_context.device_service, app_context.app_);
   const auto error_codes = new ErrorCodes(app_context.app_);
   const auto color_model = new ColorsModel(app_context.app_);
@@ -66,7 +68,7 @@ GuiApp::GuiApp(AppContext& app_context, QObject *parent) :
   const auto properties_model = device_view_model->GetProperties();
 
   root_context->setContextProperty("platformService", app_context.platform_service);
-  root_context->setContextProperty("authorizationService", app_context.authorization_service);
+  root_context->setContextProperty("authorizationService", authorization_model);
   root_context->setContextProperty("router", router);
   root_context->setContextProperty("scenariosViewModel", scenarios_view_model);
   root_context->setContextProperty("homeViewModel", home_view_model);
@@ -86,6 +88,8 @@ GuiApp::GuiApp(AppContext& app_context, QObject *parent) :
   root_context->setContextProperty("unitsList", units_list);
   root_context->setContextProperty("deviceDataModel", device_data_model);
   root_context->setContextProperty("deviceIcons", device_icons);
+  QObject::connect(app_context.authorization_service, &IAuthorizationService::logout,
+    device_view_model, &DeviceViewModel::ResetSession);
   root_context->setContextProperty("propertiesIcons", properties_icons);
 
   RegisterFonts();

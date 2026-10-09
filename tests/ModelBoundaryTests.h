@@ -11,4 +11,6 @@ private slots:
   void ImmediateDeviceResultSurvivesReset();
   void ActionEventsReachController();
   void AccountModelKeepsQmlContract();
+  void AccountResetRejectsOldSessionResults();
+  void DeviceResetRejectsOldSessionResults();
 };

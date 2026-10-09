@@ -2,7 +2,7 @@
 
 #include <QObject>
 
-#include "../auth/AuthorizationService.h"
+#include "auth/IAuthorizationService.h"
 #include "../platform/PlatformService.h"
 #include "../utils/Settings.h"
 #include "../api/QtHttpTransport.h"
@@ -18,7 +18,7 @@ struct AppContext {
   explicit AppContext(QGuiApplication *app, const StartupOptions& options = {});
 
   QGuiApplication *app_;
-  AuthorizationService *authorization_service;
+  IAuthorizationService *authorization_service;
   PlatformService *platform_service;
   QtHttpTransport *http_transport = nullptr;
   IHomeApi *yandex_api;

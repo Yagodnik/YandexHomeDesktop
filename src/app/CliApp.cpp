@@ -3,7 +3,7 @@
 #include "api/QtHttpTransport.h"
 #include "api/YandexAccountApi.h"
 #include "api/YandexHomeApi.h"
-#include "auth/AuthorizationService.h"
+#include "auth/AuthorizationFactory.h"
 #include "cli/CliProgress.h"
 #include "cli/CliRunner.h"
 #include "utils/Settings.h"
@@ -52,9 +52,10 @@ int RunCli(QCoreApplication& app, const StartupOptions& options) {
     return result;
   }
 
-  AuthorizationService auth(&app, options.use_fake_api, false);
+  std::unique_ptr<IAuthorizationService> auth(CreateAuthorizationService(options.use_fake_api
+    ? AuthorizationMode::Fixture : AuthorizationMode::SavedTokenOnly, nullptr));
   QtHttpTransport transport(&app, parsed->timeout_ms);
-  const auto token_provider = [&auth] { return auth.GetToken().value_or(QString{}); };
+  const auto token_provider = [&auth] { return auth->GetToken().value_or(QString{}); };
   YandexHomeApi live_home(token_provider, &transport, &app);
   YandexAccountApi live_account(token_provider, &transport, &app);
   IHomeApi* home_api = &live_home;
@@ -84,13 +85,13 @@ int RunCli(QCoreApplication& app, const StartupOptions& options) {
   };
   const auto reset = [&auth, &options](QObject* context, ApiResultHandler<void> handler) {
     auto delivered = std::make_shared<bool>(false);
-    QObject::connect(&auth, &AuthorizationService::logoutFinished, context, [handler, delivered] {
+    QObject::connect(auth.get(), &IAuthorizationService::logoutFinished, context, [handler, delivered] {
       if (!*delivered) {
         *delivered = true;
         handler(ApiResult<void>{});
       }
     });
-    QObject::connect(&auth, &AuthorizationService::logoutFailed, context,
+    QObject::connect(auth.get(), &IAuthorizationService::logoutFailed, context,
                      [handler, delivered](const QString& error) {
                        if (!*delivered) {
                          *delivered = true;
@@ -100,7 +101,7 @@ int RunCli(QCoreApplication& app, const StartupOptions& options) {
     if (!options.use_fake_api) {
       Settings::ResetStoredSettings();
     }
-    auth.Logout();
+    auth->Logout();
   };
   CliRunner runner({&home, &devices, &scenarios, &account, reset}, write_result);
   QObject::connect(&runner, &CliRunner::finished, &app, &QCoreApplication::exit);
@@ -135,17 +136,17 @@ int RunCli(QCoreApplication& app, const StartupOptions& options) {
     progress.SetMessage(QCoreApplication::translate("CliApp", "Выполнение команды..."));
     runner.Start(command);
   };
-  QObject::connect(&auth, &AuthorizationService::authorized, &app, dispatch);
-  QObject::connect(&auth, &AuthorizationService::unauthorized, &app, [&] {
+  QObject::connect(auth.get(), &IAuthorizationService::authorized, &app, dispatch);
+  QObject::connect(auth.get(), &IAuthorizationService::unauthorized, &app, [&] {
     fail_auth(CliRunner::Unauthorized, "authorization_required",
               QCoreApplication::translate("CliApp", "Сначала войдите в аккаунт через приложение."));
   });
-  QObject::connect(&auth, &AuthorizationService::authorizationFailed, &app, [&] {
+  QObject::connect(auth.get(), &IAuthorizationService::authorizationFailed, &app, [&] {
     fail_auth(
         CliRunner::Unauthorized, "authorization_failed",
         QCoreApplication::translate("CliApp", "Не удалось прочитать сохранённые данные входа."));
   });
-  QObject::connect(&auth, &AuthorizationService::authorizationCanceled, &app, [&] {
+  QObject::connect(auth.get(), &IAuthorizationService::authorizationCanceled, &app, [&] {
     fail_auth(CliRunner::Unauthorized, "authorization_canceled",
               QCoreApplication::translate("CliApp", "Доступ к сохранённым данным входа отменён."));
   });
@@ -163,7 +164,7 @@ int RunCli(QCoreApplication& app, const StartupOptions& options) {
     } else {
       progress.SetMessage(QCoreApplication::translate(
           "CliApp", "Чтение сохранённых данных входа; подтвердите запрос системы..."));
-      auth.AttemptLocalAuthorization();
+      auth->AttemptLocalAuthorization();
     }
   });
   return app.exec();

@@ -9,7 +9,8 @@
 #include "app/StartupOptions.h"
 #include "utils/Settings.h"
 #ifdef YH_DEBUG_FAKE_API
-#include "auth/AuthorizationService.h"
+#include "auth/AuthorizationFactory.h"
+#include <memory>
 #endif
 
 class ApiFixtureTests final : public QObject {
@@ -140,16 +141,33 @@ private slots:
 
 #ifdef YH_DEBUG_FAKE_API
   void FixtureSignInAndLogoutStayLocal() {
-    AuthorizationService auth(nullptr, true);
-    QSignalSpy authorized(&auth, &AuthorizationService::authorized);
-    QSignalSpy unauthorized(&auth, &AuthorizationService::unauthorized);
-    QSignalSpy logged_out(&auth, &AuthorizationService::logoutFinished);
-    QVERIFY(auth.IsAuthorized()); QVERIFY(!auth.GetToken());
-    auth.AttemptLocalAuthorization(); QCOMPARE(authorized.size(), 0);
+    std::unique_ptr<IAuthorizationService> auth(CreateAuthorizationService(AuthorizationMode::Fixture, nullptr));
+    QSignalSpy authorized(auth.get(), &IAuthorizationService::authorized);
+    QSignalSpy unauthorized(auth.get(), &IAuthorizationService::unauthorized);
+    QSignalSpy logged_out(auth.get(), &IAuthorizationService::logoutFinished);
+    QVERIFY(auth->IsAuthorized()); QVERIFY(!auth->GetToken());
+    auth->AttemptLocalAuthorization(); QCOMPARE(authorized.size(), 0);
     QTRY_COMPARE(authorized.size(), 1);
-    auth.Logout(); QVERIFY(!auth.IsAuthorized()); QTRY_COMPARE(logged_out.size(), 1);
-    auth.AttemptLocalAuthorization(); QTRY_COMPARE(unauthorized.size(), 1);
-    auth.AttemptAuthorization(); QTRY_COMPARE(authorized.size(), 2); QVERIFY(auth.IsAuthorized());
+    auth->Logout(); QVERIFY(!auth->IsAuthorized()); QTRY_COMPARE(logged_out.size(), 1);
+    auth->AttemptLocalAuthorization(); QTRY_COMPARE(unauthorized.size(), 1);
+    auth->AttemptAuthorization(); QTRY_COMPARE(authorized.size(), 2); QVERIFY(auth->IsAuthorized());
+  }
+
+  void FixtureLogoutInvalidatesQueuedLoginAndBlocksOverlappingCommands() {
+    std::unique_ptr<IAuthorizationService> auth(CreateAuthorizationService(AuthorizationMode::Fixture, nullptr));
+    QSignalSpy authorized(auth.get(), &IAuthorizationService::authorized);
+    QSignalSpy logout(auth.get(), &IAuthorizationService::logout);
+    QSignalSpy finished(auth.get(), &IAuthorizationService::logoutFinished);
+    auth->AttemptLocalAuthorization();
+    auth->Logout();
+    auth->Logout();
+    auth->AttemptAuthorization();
+    QCOMPARE(logout.size(), 1);
+    QTRY_COMPARE(finished.size(), 1);
+    QCOMPARE(authorized.size(), 0);
+    QVERIFY(!auth->IsAuthorized());
+    auth->AttemptAuthorization();
+    QTRY_COMPARE(authorized.size(), 1);
   }
 #endif
 };

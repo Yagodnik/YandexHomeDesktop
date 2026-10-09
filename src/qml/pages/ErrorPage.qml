@@ -9,9 +9,6 @@ UI.PageSurface {
     secondaryButtonText: qsTr("Выйти из аккаунта")
     equalButtonWidths: true
     onPrimaryClicked: router.navigateTo("loading")
-    onSecondaryClicked: {
-      authorizationService.Logout();
-      router.navigateTo("auth");
-    }
+    onSecondaryClicked: authorizationService.Logout()
   }
 }

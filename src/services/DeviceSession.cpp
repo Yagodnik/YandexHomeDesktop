@@ -30,7 +30,9 @@ void DeviceSession::LoadDevice(const QString& device_id) {
   // Models must reset before an API implementation can reply synchronously.
   emit loadRequestMade();
   service_->GetDeviceInfo(device_id_, this,
-    [this](ApiResult<DeviceInfo> result) { ReceiveDeviceInfo(std::move(result)); });
+    [this, generation = session_generation_](ApiResult<DeviceInfo> result) {
+      if (generation == session_generation_) { ReceiveDeviceInfo(std::move(result)); }
+    });
 }
 
 void DeviceSession::TryReloadDevice() { LoadDevice(device_id_); }
@@ -47,10 +49,20 @@ void DeviceSession::ForgetDevice() {
   is_in_use_ = false;
 }
 
+void DeviceSession::ResetSession() {
+  ++session_generation_;
+  ForgetDevice();
+  capabilities_updates_.clear();
+  last_update_start_time_ = 0;
+  emit loadRequestMade();
+}
+
 void DeviceSession::Refresh() {
   last_update_start_time_ = time_provider_();
   service_->GetDeviceInfo(device_id_, this,
-    [this](ApiResult<DeviceInfo> result) { ReceiveDeviceInfo(std::move(result)); });
+    [this, generation = session_generation_](ApiResult<DeviceInfo> result) {
+      if (generation == session_generation_) { ReceiveDeviceInfo(std::move(result)); }
+    });
 }
 
 void DeviceSession::UseCapability(int index, CapabilityType type, const QVariantMap& state) {
@@ -60,7 +72,9 @@ void DeviceSession::UseCapability(int index, CapabilityType type, const QVariant
     update.start_time = time_provider_();
   }
   service_->UseCapability(device_id_, type, state, this,
-    [this, index](ApiResult<void> result) { FinishAction(index, std::move(result)); });
+    [this, index, generation = session_generation_](ApiResult<void> result) {
+      if (generation == session_generation_) { FinishAction(index, std::move(result)); }
+    });
 }
 
 void DeviceSession::ReceiveDeviceInfo(ApiResult<DeviceInfo> result) {

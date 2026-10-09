@@ -19,6 +19,18 @@ target_link_libraries(AppTests PRIVATE Qt6::Core Qt6::Network Qt6::Test Qt6::Gui
 
 add_test(NAME All COMMAND AppTests)
 
+add_executable(AuthorizationTests AuthorizationTests.cpp)
+target_link_libraries(AuthorizationTests PRIVATE Qt6::Test AuthCore Models)
+add_test(NAME Authorization COMMAND AuthorizationTests)
+set_tests_properties(Authorization PROPERTIES TIMEOUT 30)
+
+if(BUILD_DESKTOP_APP)
+  add_executable(OAuthAdapterTests OAuthAdapterTests.cpp)
+  target_link_libraries(OAuthAdapterTests PRIVATE Qt6::Test YandexAuth)
+  add_test(NAME OAuthAdapter COMMAND OAuthAdapterTests)
+  set_tests_properties(OAuthAdapter PROPERTIES TIMEOUT 30)
+endif()
+
 add_executable(DeviceControlTests DeviceControlTests.cpp)
 target_link_libraries(DeviceControlTests PRIVATE Qt6::Test Models)
 add_test(NAME DeviceControl COMMAND DeviceControlTests)

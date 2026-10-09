@@ -38,9 +38,6 @@ jobs:
           modules: qt5compat qtnetworkauth qtsvg qttools
           cache: true
 
-      - name: Create build-only OAuth config
-        run: python3 scripts/write-oauth-config.py --dummy --output "$RUNNER_TEMP/oauth.json"
-
       - name: Configure
         run: >-
           cmake -S . -B build -G Ninja
@@ -49,7 +46,7 @@ jobs:
           -DCMAKE_OSX_ARCHITECTURES=${{ matrix.architecture }}
           -DBUILD_DESKTOP_APP=ON
           -DBUILD_TESTING=ON
-          -DAUTH_CONFIG_FILE="$RUNNER_TEMP/oauth.json"
+          -DYH_AUTH_CONFIG_FILE=resources/auth/example.json
 
       - name: Build application and tests
         run: cmake --build build --parallel 2

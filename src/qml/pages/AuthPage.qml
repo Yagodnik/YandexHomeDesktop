@@ -3,14 +3,6 @@ import YandexHomeDesktop.Ui as UI
 import YandexHomeDesktop.Components as Components
 
 UI.PageSurface {
-  Connections {
-    target: authorizationService
-
-    function onAuthorized() {
-      router.navigateTo("main");
-    }
-  }
-
   Components.SignInCard {
     anchors.centerIn: parent
     title: qsTr("Yandex Home Desktop")

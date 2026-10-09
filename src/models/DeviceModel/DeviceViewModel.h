@@ -32,6 +32,7 @@ public:
   Q_INVOKABLE void ContinuePollingIfNeeded();
   Q_INVOKABLE void StopPolling();
   Q_INVOKABLE void ForgetDevice();
+  void ResetSession();
   void Refresh();
 
   // Compatibility signals for consumers of the former deviceController context.

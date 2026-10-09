@@ -1,0 +1,3 @@
+interface:
+  display_name: "YandexHomeDesktop QML"
+  short_description: "Compose QML pages with explicit component contracts"

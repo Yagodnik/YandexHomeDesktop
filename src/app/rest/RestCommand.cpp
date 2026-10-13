@@ -1,4 +1,5 @@
 #include "RestCommand.h"
+#include "RestServerConfiguration.h"
 #include <QCommandLineParser>
 #include <QJsonDocument>
 #include <QSet>
@@ -86,7 +87,8 @@ std::expected<RestConsoleOptions, int> ParseRestConsole(const StartupOptions& op
   if (parser.isSet("help") || parser.isSet("help-all")) {
     const auto help =
         options.cli_arguments.value(0) +
-        " [--fake-api] [--fake-api-data <path>] [--rest-port <port>] [--json] [--timeout <ms>]\n"
+        " [--fake-api] [--fake-api-data <path>] [--rest-config <path>] [--rest-port <port>] "
+        "[--json] [--timeout <ms>]\n"
         "  --enable-rest  --disable-rest  --status-rest\n" +
         RestAppMessages::tr("YandexHomeRest runs the server in the foreground by default.") + "\n";
     RestPrint(json ? QJsonDocument(QJsonObject{{"ok", true}, {"help", help}})
@@ -102,8 +104,24 @@ int RunRestControl(QCoreApplication& app, const StartupOptions& options) {
   const auto parsed = ParseRestConsole(options);
   if (!parsed)
     return parsed.error();
-  Settings settings(nullptr, options.use_fake_api);
-  RestControlService service(&settings, RestConfiguration(options));
+  const auto server_configuration = LoadRestServerConfiguration(options.rest_config_file);
+  if (!server_configuration && options.rest_command == StartupOptions::RestCommand::Enable) {
+    RestPrint(RestError(parsed->json, "config_error", server_configuration.error()), true);
+    return RestConsole::Usage;
+  }
+  Settings settings(nullptr, options.use_fake_api || !options.rest_config_file.isEmpty());
+  auto launch_configuration = RestConfiguration(options);
+  auto port = options.rest_port;
+  if (server_configuration && !options.rest_config_file.isEmpty()) {
+    launch_configuration.host = server_configuration->host.toString();
+    if (!port) {
+      port = server_configuration->port;
+    }
+    if (port) {
+      settings.SetRestPort(*port);
+    }
+  }
+  RestControlService service(&settings, launch_configuration);
   auto command = RestControlService::Command::Status;
   if (options.rest_command == StartupOptions::RestCommand::Enable)
     command = RestControlService::Command::Enable;
@@ -111,7 +129,6 @@ int RunRestControl(QCoreApplication& app, const StartupOptions& options) {
     command = RestControlService::Command::Disable;
   QObject::connect(&service, &RestControlService::finished, &app,
                    [&](const QJsonObject& result) { app.exit(RestOutput(result, parsed->json)); });
-  QTimer::singleShot(0, &app,
-                     [&] { service.Request(command, options.rest_port, parsed->timeout_ms); });
+  QTimer::singleShot(0, &app, [&] { service.Request(command, port, parsed->timeout_ms); });
   return app.exec();
 }

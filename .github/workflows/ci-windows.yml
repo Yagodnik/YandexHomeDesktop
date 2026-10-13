@@ -86,7 +86,7 @@ jobs:
         if: matrix.pch == 'OFF' && matrix.configuration == 'Debug'
         run: just build_dir=build config=Debug tidy
 
-      - name: Run C++, QML, CLI, REST process, and Python example tests
+      - name: Run C++, QML, CLI, REST OpenAPI/JSON profiles, process, and Python example tests
         run: just build_dir=build config=${{ matrix.configuration }} test
 
       - name: Exercise console CLI recipe

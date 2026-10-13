@@ -6,11 +6,10 @@
 #include "RestRouter.h"
 
 RestServer::RestServer(const RestRouter& routes, QObject* parent, int timeout_ms)
-  : QObject(parent), routes_(routes), timeout_ms_(timeout_ms) {
-  http_.setMissingHandler(
-    this, [this](const QHttpServerRequest& request, QHttpServerResponder& responder) {
-      Handle(request, responder);
-    });
+    : QObject(parent), routes_(routes), timeout_ms_(timeout_ms) {
+  http_.setMissingHandler(this,
+                          [this](const QHttpServerRequest& request,
+                                 QHttpServerResponder& responder) { Handle(request, responder); });
 }
 
 RestServer::~RestServer() {
@@ -18,10 +17,14 @@ RestServer::~RestServer() {
 }
 
 bool RestServer::Start(quint16 port) {
+  return Start(port, QHostAddress::LocalHost);
+}
+
+bool RestServer::Start(quint16 port, const QHostAddress& host) {
   if (tcp_.isListening()) {
-    return port == Port();
+    return port == Port() && host == tcp_.serverAddress();
   }
-  if (!tcp_.listen(QHostAddress::LocalHost, port)) {
+  if (host.isNull() || !tcp_.listen(host, port)) {
     return false;
   }
   if (!http_.servers().contains(&tcp_) && !http_.bind(&tcp_)) {
@@ -60,22 +63,33 @@ void RestServer::Handle(const QHttpServerRequest& request, QHttpServerResponder&
   }
   if (!request.headers().value("Origin").isEmpty()) {
     reply->Fail(RestReply::StatusCode::Forbidden, "origin_forbidden",
-      tr("Запросы из браузера не разрешены."));
+                tr("Запросы из браузера не разрешены."));
     return;
   }
-  // Validate the authority even for non-browser clients. Only this IPv4
-  // loopback listener (and the localhost alias) may address the API.
+  // Match the authority to the actual connection's destination, including
+  // IPv6 and wildcard listeners. Localhost is an alias for loopback only.
   const auto host = request.headers().value("Host").toByteArray().toLower();
-  const auto suffix = QByteArray(":") + QByteArray::number(Port());
-  if (host != QByteArray("127.0.0.1") + suffix && host != QByteArray("localhost") + suffix) {
-    reply->Fail(RestReply::StatusCode::Forbidden, "host_forbidden",
-      tr("Invalid REST API host."));
+  const auto authority = QUrl::fromEncoded("http://" + host, QUrl::StrictMode);
+  const QHostAddress address(authority.host());
+  const bool matches_address =
+      address.isEqual(request.localAddress(), QHostAddress::ConvertV4MappedToIPv4) ||
+      (authority.host() == "localhost" && request.localAddress().isLoopback());
+  if (!authority.isValid() || !authority.userInfo().isEmpty() || !authority.path().isEmpty() ||
+      authority.hasQuery() || authority.hasFragment() || authority.port() != Port() ||
+      !matches_address) {
+    reply->Fail(RestReply::StatusCode::Forbidden, "host_forbidden", tr("Invalid REST API host."));
     return;
   }
   if (request.method() == QHttpServerRequest::Method::Post &&
-      request.headers().value("Content-Type").toByteArray().split(';').first().trimmed().toLower() != "application/json") {
+      request.headers()
+              .value("Content-Type")
+              .toByteArray()
+              .split(';')
+              .first()
+              .trimmed()
+              .toLower() != "application/json") {
     reply->Fail(RestReply::StatusCode::UnsupportedMediaType, "content_type",
-      tr("Content-Type must be application/json."));
+                tr("Content-Type must be application/json."));
     return;
   }
   routes_.Handle(request, reply);

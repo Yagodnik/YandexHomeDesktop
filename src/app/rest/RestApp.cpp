@@ -1,5 +1,6 @@
 #include "RestApp.h"
 #include "RestCommand.h"
+#include "RestServerConfiguration.h"
 #include "rest/RestServer.h"
 #include "rest/RestEndpoints.h"
 #include "services/HomeService.h"
@@ -26,7 +27,8 @@ constexpr qsizetype MaxControlRequestBytes = 1024;
 constexpr int ShutdownDelayMs = 100;
 constexpr int StartupErrorGraceMs = 1'000;
 int Serve(QCoreApplication& app, const StartupOptions& options, Settings& settings,
-          const RestLaunchConfiguration& configuration, bool json, int timeout_ms) {
+          const RestLaunchConfiguration& configuration,
+          const RestServerConfiguration& server_configuration, bool json, int timeout_ms) {
   QString lock_path;
 #ifdef Q_OS_UNIX
   const auto directory = QFileInfo(configuration.control_name).absolutePath();
@@ -60,11 +62,16 @@ int Serve(QCoreApplication& app, const StartupOptions& options, Settings& settin
               true);
     return RestConsole::RequestFailed;
   }
-  auto auth = std::unique_ptr<IAuthorizationService>(CreateAuthorizationService(
-      options.use_fake_api ? AuthorizationMode::Fixture : AuthorizationMode::SavedTokenOnly,
-      nullptr));
+  std::unique_ptr<IAuthorizationService> auth;
+  if (options.use_fake_api || server_configuration.oauth_token.isEmpty()) {
+    auth.reset(CreateAuthorizationService(options.use_fake_api ? AuthorizationMode::Fixture
+                                                               : AuthorizationMode::SavedTokenOnly,
+                                          nullptr));
+  }
   QtHttpTransport transport(&app, timeout_ms);
-  const auto token_provider = [&auth] { return auth->GetToken().value_or(QString{}); };
+  const auto token_provider = [&auth, &server_configuration] {
+    return auth ? auth->GetToken().value_or(QString{}) : server_configuration.oauth_token;
+  };
   YandexHomeApi live_home(token_provider, &transport);
   YandexAccountApi live_account(token_provider, &transport);
   IHomeApi* home_api = &live_home;
@@ -83,7 +90,8 @@ int Serve(QCoreApplication& app, const StartupOptions& options, Settings& settin
   AccountService account(account_api);
   const auto routes = CreateRestRoutes(home, devices, scenarios, account);
   RestServer rest(routes, nullptr, timeout_ms);
-  const auto port = options.rest_port.value_or(settings.GetRestPort());
+  const auto port =
+      options.rest_port.value_or(server_configuration.port.value_or(settings.GetRestPort()));
   bool running = false;
   bool starting = true;
   QJsonObject startup_error;
@@ -97,8 +105,9 @@ int Serve(QCoreApplication& app, const StartupOptions& options, Settings& settin
                        {"starting", starting},
                        {"pid", QCoreApplication::applicationPid()},
                        {"fixture", options.use_fake_api},
+                       {"host", server_configuration.host.toString()},
                        {"port", port},
-                       {"url", QString("http://127.0.0.1:%1/v1").arg(port)}};
+                       {"url", server_configuration.Url(port)}};
   };
   QObject::connect(&control, &QLocalServer::newConnection, &app, [&] {
     while (auto* socket = control.nextPendingConnection()) {
@@ -165,7 +174,7 @@ int Serve(QCoreApplication& app, const StartupOptions& options, Settings& settin
     if (!starting) {
       return;
     }
-    if (!rest.Start(port)) {
+    if (!rest.Start(port, server_configuration.host)) {
       fail("listen_error",
            RestAppMessages::tr("Не удалось открыть порт REST API: %1.").arg(rest.Error()));
       return;
@@ -177,25 +186,31 @@ int Serve(QCoreApplication& app, const StartupOptions& options, Settings& settin
     settings.SetRestEnabled(true);
     RestOutput(status(), json);
   };
-  QObject::connect(auth.get(), &IAuthorizationService::authorized, &app, start);
-  QObject::connect(auth.get(), &IAuthorizationService::unauthorized, &app, [&] {
-    fail("authorization_required",
-         RestAppMessages::tr("Сначала войдите в аккаунт через приложение."));
-  });
-  QObject::connect(auth.get(), &IAuthorizationService::authorizationFailed, &app, [&] {
-    fail("authorization_failed",
-         RestAppMessages::tr("Не удалось прочитать сохранённые данные входа."));
-  });
-  QObject::connect(auth.get(), &IAuthorizationService::authorizationCanceled, &app, [&] {
-    fail("authorization_canceled",
-         RestAppMessages::tr("Доступ к сохранённым данным входа отменён."));
-  });
+  if (auth) {
+    QObject::connect(auth.get(), &IAuthorizationService::authorized, &app, start);
+    QObject::connect(auth.get(), &IAuthorizationService::unauthorized, &app, [&] {
+      fail("authorization_required",
+           RestAppMessages::tr("Сначала войдите в аккаунт через приложение."));
+    });
+    QObject::connect(auth.get(), &IAuthorizationService::authorizationFailed, &app, [&] {
+      fail("authorization_failed",
+           RestAppMessages::tr("Не удалось прочитать сохранённые данные входа."));
+    });
+    QObject::connect(auth.get(), &IAuthorizationService::authorizationCanceled, &app, [&] {
+      fail("authorization_canceled",
+           RestAppMessages::tr("Доступ к сохранённым данным входа отменён."));
+    });
+  }
   QObject::connect(&startup_timeout, &QTimer::timeout, &app, [&] {
     fail("timeout", RestAppMessages::tr("Время запуска REST API истекло."));
   });
   QTimer::singleShot(0, &app, [&] {
     startup_timeout.start(timeout_ms);
-    auth->AttemptLocalAuthorization();
+    if (auth) {
+      auth->AttemptLocalAuthorization();
+    } else {
+      start();
+    }
   });
   const auto result = app.exec();
   rest.Stop();
@@ -218,7 +233,12 @@ int RunRest(QCoreApplication& app, const StartupOptions& options) {
 #endif
   if (options.rest_command != StartupOptions::RestCommand::Serve)
     return RunRestControl(app, options);
-  Settings settings(nullptr, options.use_fake_api);
-  return Serve(app, options, settings, RestConfiguration(options), parsed->json,
-               parsed->timeout_ms);
+  const auto server_configuration = LoadRestServerConfiguration(options.rest_config_file);
+  if (!server_configuration) {
+    RestPrint(RestError(parsed->json, "config_error", server_configuration.error()), true);
+    return RestConsole::Usage;
+  }
+  Settings settings(nullptr, options.use_fake_api || !options.rest_config_file.isEmpty());
+  return Serve(app, options, settings, RestConfiguration(options), *server_configuration,
+               parsed->json, parsed->timeout_ms);
 }

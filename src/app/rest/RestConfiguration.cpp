@@ -30,6 +30,10 @@ RestLaunchConfiguration RestConfiguration(const StartupOptions& options) {
     identity = QDir::homePath() + "/fixture/" + path;
     configuration.arguments = {"--fake-api", "--fake-api-data", path};
   }
+  if (!options.rest_config_file.isEmpty()) {
+    identity += "/config/" + options.rest_config_file;
+    configuration.arguments << "--rest-config" << options.rest_config_file;
+  }
   const auto name =
       "yh-rest-" +
       QString::fromLatin1(QCryptographicHash::hash(identity.toUtf8(), QCryptographicHash::Sha256)

@@ -73,7 +73,8 @@ set_tests_properties(CapabilityRules PROPERTIES TIMEOUT 30)
 
 if(YH_BUILD_REST_ADAPTER)
 add_executable(RestTests RestTests.cpp)
-target_link_libraries(RestTests PRIVATE Qt6::Test AppRest AppRestControl AppStartup Models)
+target_link_libraries(RestTests PRIVATE Qt6::Test AppRest AppRestControl AppStartup RestControlBootstrap Models)
+target_compile_definitions(RestTests PRIVATE OPENAPI_PATH="${PROJECT_SOURCE_DIR}/resources/rest/openapi.json")
 add_test(NAME Rest COMMAND RestTests)
 set_tests_properties(Rest PROPERTIES TIMEOUT 30)
 

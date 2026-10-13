@@ -50,9 +50,10 @@ QString CommandRegistry::Help(const QString& program) const {
   QCommandLineParser parser;
   Configure(parser);
   parser.parse({program});
-  return parser.helpText() + Describe() + "\n" + tr("REST API:") + "\n"
-    "  --enable-rest [--rest-port <port>]\n  --disable-rest\n  --status-rest\n"
-    "  YandexHomeRest [--rest-port <port>]\n";
+  return parser.helpText() + Describe() + "\n" + tr("REST API:") +
+         "\n"
+         "  --enable-rest [--rest-port <port>]\n  --disable-rest\n  --status-rest\n"
+         "  --rest-config <path>\n  YandexHomeRest [--rest-config <path>] [--rest-port <port>]\n";
 }
 std::expected<CommandRegistry::ResolvedCommand, QString>
 CommandRegistry::ResolveLegacy(QStringList path, CliArguments arguments) const {

@@ -15,6 +15,7 @@ public:
   RestReply(QHttpServerResponder&& responder, QObject* parent, int timeout_ms);
 
   void Send(QJsonObject result, StatusCode status = StatusCode::Ok);
+  void SendDocument(const QJsonObject& document, StatusCode status = StatusCode::Ok);
   void Fail(StatusCode status, const QString& code, const QString& message);
 
 private:

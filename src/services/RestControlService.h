@@ -13,6 +13,7 @@ struct RestLaunchConfiguration {
   QString executable;
   QStringList arguments;
   bool fixture = false;
+  QString host;
 };
 
 // GUI and CLI share this asynchronous lifecycle controller. It never reads OAuth tokens.
@@ -21,10 +22,10 @@ class APPRESTCONTROL_EXPORT RestControlService final : public QObject {
 public:
   enum class Command { Enable, Disable, Status };
   static constexpr int DefaultTimeoutMs = 30'000;
-  RestControlService(
-    Settings* settings, RestLaunchConfiguration configuration, QObject* parent = nullptr);
-  void Request(
-    Command command, std::optional<quint16> port = {}, int timeout_ms = DefaultTimeoutMs);
+  RestControlService(Settings* settings, RestLaunchConfiguration configuration,
+                     QObject* parent = nullptr);
+  void Request(Command command, std::optional<quint16> port = {},
+               int timeout_ms = DefaultTimeoutMs);
   bool IsBusy() const;
 signals:
   void finished(const QJsonObject& result);
@@ -33,6 +34,7 @@ private:
   void Probe();
   void Unavailable(QLocalSocket::LocalSocketError error);
   void Receive();
+  void WaitForExit();
   void Finish(QJsonObject result);
   QJsonObject Status() const;
   Settings* settings_;
@@ -41,6 +43,8 @@ private:
   QTimer timeout_;
   QTimer retry_;
   QByteArray buffer_;
+  QJsonObject shutdown_result_;
+  qint64 worker_pid_ = 0;
   Command command_ = Command::Status;
   std::optional<quint16> requested_port_;
   bool busy_ = false;

@@ -2,6 +2,9 @@
 
 #include <QCoreApplication>
 #include <QJsonArray>
+#include <QFile>
+#include <QJsonDocument>
+#include <QUrl>
 
 #include "RestAction.h"
 #include "RestErrors.h"
@@ -13,6 +16,32 @@
 #include "services/ScenarioService.h"
 
 namespace {
+void SendOpenApi(const QHttpServerRequest& request, RestReply* reply) {
+  static const auto document = [] {
+    QFile file(":/rest/openapi.json");
+    if (!file.open(QIODevice::ReadOnly)) {
+      return QJsonObject{};
+    }
+    return QJsonDocument::fromJson(file.readAll()).object();
+  }();
+  if (document.isEmpty()) {
+    reply->Fail(RestReply::StatusCode::InternalServerError, "spec_unavailable",
+                QCoreApplication::translate("RestServer", "OpenAPI specification is unavailable."));
+    return;
+  }
+  // Host has already passed listener authority validation. Preserve localhost
+  // aliases and IPv6 brackets while advertising the active listener's port.
+  QUrl server = QUrl::fromEncoded("http://" + request.headers().value("Host").toByteArray());
+  auto result = document;
+  auto servers = result["servers"].toArray();
+  servers.prepend(QJsonObject{
+      {"url", server.toString()},
+      {"description", QCoreApplication::translate("RestServer", "This REST listener")}});
+  result["servers"] = servers;
+  // An OpenAPI document has its own top-level contract and no success envelope.
+  reply->SendDocument(result);
+}
+
 void ListDevices(HomeService& home, RestReply* reply) {
   home.ReadHome(reply, [reply](ApiResult<UserInfo> result) {
     if (!result) {
@@ -28,12 +57,15 @@ void ListDevices(HomeService& home, RestReply* reply) {
     QJsonArray rooms;
     QJsonArray households;
     for (const auto& device : result->devices) {
-      devices.append(QJsonObject{{"id", device.id}, {"name", device.name}, {"type", device.type},
-        {"room", device.room}, {"household_id", device.household_id}});
+      devices.append(QJsonObject{{"id", device.id},
+                                 {"name", device.name},
+                                 {"type", device.type},
+                                 {"room", device.room},
+                                 {"household_id", device.household_id}});
     }
     for (const auto& room : result->rooms) {
       rooms.append(
-        QJsonObject{{"id", room.id}, {"name", room.name}, {"household_id", room.household_id}});
+          QJsonObject{{"id", room.id}, {"name", room.name}, {"household_id", room.household_id}});
     }
     for (const auto& household : result->households) {
       households.append(QJsonObject{{"id", household.id}, {"name", household.name}});
@@ -49,31 +81,32 @@ void ReadDevice(DeviceService& devices, const QString& id, RestReply* reply) {
       return;
     }
     if (result->status != Status::Ok || result->id != id) {
-      FailApi(reply, {ApiErrorKind::InvalidResponse, QCoreApplication::translate("RestServer",
-                                                       "Некорректный ответ устройства.")});
+      FailApi(reply, {ApiErrorKind::InvalidResponse,
+                      QCoreApplication::translate("RestServer", "Некорректный ответ устройства.")});
       return;
     }
     reply->Send({{"device", DeviceJson(*result)}});
   });
 }
 
-void ApplyAction(
-  DeviceService& devices, const QString& id, const QHttpServerRequest& request, RestReply* reply) {
+void ApplyAction(DeviceService& devices, const QString& id, const QHttpServerRequest& request,
+                 RestReply* reply) {
   const auto action = ParseRestAction(request);
   if (!action) {
     const auto& error = action.error();
     reply->Fail(error.status, error.code, error.message);
     return;
   }
-  devices.ApplyCapability(
-    id, action->type, action->state, reply, [reply, id, action = *action](CommandResult result) {
-      if (!result) {
-        FailCommand(reply, result.error());
-        return;
-      }
-      reply->Send({{"device_id", id}, {"capability", CapabilityType::AsString(action.type)},
-        {"state", QJsonObject::fromVariantMap(action.state)}});
-    });
+  devices.ApplyCapability(id, action->type, action->state, reply,
+                          [reply, id, action = *action](CommandResult result) {
+                            if (!result) {
+                              FailCommand(reply, result.error());
+                              return;
+                            }
+                            reply->Send({{"device_id", id},
+                                         {"capability", CapabilityType::AsString(action.type)},
+                                         {"state", QJsonObject::fromVariantMap(action.state)}});
+                          });
 }
 
 void ListScenarios(ScenarioService& scenarios, RestReply* reply) {
@@ -85,7 +118,7 @@ void ListScenarios(ScenarioService& scenarios, RestReply* reply) {
     QJsonArray items;
     for (const auto& scenario : *result) {
       items.append(QJsonObject{
-        {"id", scenario.id}, {"name", scenario.name}, {"is_active", scenario.is_active}});
+          {"id", scenario.id}, {"name", scenario.name}, {"is_active", scenario.is_active}});
     }
     reply->Send({{"scenarios", items}});
   });
@@ -107,38 +140,41 @@ void ReadAccount(AccountService& account, RestReply* reply) {
       FailApi(reply, result.error());
       return;
     }
-    reply->Send({{"account", QJsonObject{{"id", result->id}, {"name", result->display_name},
-                               {"email", result->default_email}}}});
+    reply->Send({{"account", QJsonObject{{"id", result->id},
+                                         {"name", result->display_name},
+                                         {"email", result->default_email}}}});
   });
 }
 } // namespace
 
-RestRouter CreateRestRoutes(
-  HomeService& home, DeviceService& devices, ScenarioService& scenarios, AccountService& account) {
+RestRouter CreateRestRoutes(HomeService& home, DeviceService& devices, ScenarioService& scenarios,
+                            AccountService& account) {
   using Method = QHttpServerRequest::Method;
   RestRouter routes;
+  routes.Add(
+      Method::Get, "/v1/openapi.json",
+      [](const auto& request, const auto&, RestReply* reply) { SendOpenApi(request, reply); });
   routes.Add(Method::Get, "/v1/status", [](const auto&, const auto&, RestReply* reply) {
     reply->Send({{"running", true}, {"version", RestProtocol::Version}});
   });
-  routes.Add(Method::Get, "/v1/devices", [&home](const auto&, const auto&, RestReply* reply) {
-    ListDevices(home, reply);
-  });
+  routes.Add(Method::Get, "/v1/devices",
+             [&home](const auto&, const auto&, RestReply* reply) { ListDevices(home, reply); });
   routes.Add(Method::Get, "/v1/devices/{device_id}",
-    [&devices](const auto&, const auto& parameters, RestReply* reply) {
-      ReadDevice(devices, parameters.value("device_id"), reply);
-    });
+             [&devices](const auto&, const auto& parameters, RestReply* reply) {
+               ReadDevice(devices, parameters.value("device_id"), reply);
+             });
   routes.Add(Method::Post, "/v1/devices/{device_id}/actions",
-    [&devices](const auto& request, const auto& parameters, RestReply* reply) {
-      ApplyAction(devices, parameters.value("device_id"), request, reply);
-    });
-  routes.Add(
-    Method::Get, "/v1/scenarios", [&scenarios](const auto&, const auto&, RestReply* reply) {
-      ListScenarios(scenarios, reply);
-    });
+             [&devices](const auto& request, const auto& parameters, RestReply* reply) {
+               ApplyAction(devices, parameters.value("device_id"), request, reply);
+             });
+  routes.Add(Method::Get, "/v1/scenarios",
+             [&scenarios](const auto&, const auto&, RestReply* reply) {
+               ListScenarios(scenarios, reply);
+             });
   routes.Add(Method::Post, "/v1/scenarios/{scenario_id}/run",
-    [&scenarios](const auto&, const auto& parameters, RestReply* reply) {
-      RunScenario(scenarios, parameters.value("scenario_id"), reply);
-    });
+             [&scenarios](const auto&, const auto& parameters, RestReply* reply) {
+               RunScenario(scenarios, parameters.value("scenario_id"), reply);
+             });
   routes.Add(Method::Get, "/v1/account", [&account](const auto&, const auto&, RestReply* reply) {
     ReadAccount(account, reply);
   });

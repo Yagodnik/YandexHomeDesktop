@@ -11,6 +11,14 @@
 
 The Yandex APIs keep their existing token-provider callbacks. Providers only return the current token and have no application-exit side effects. A missing token yields an HTTP-style 401 error before transport is invoked; the API layer does not depend on authentication implementations.
 
+An advanced REST profile can supply `oauth_token` in its runtime JSON file.
+`RestApp` then supplies that token through the same API callbacks and starts the
+listener without constructing an authorization service or token-store adapter.
+It does not read or modify Keychain, save the token to settings, or expose it
+through control/status responses. Omitting the field keeps the saved-token path;
+fixture mode retains its local authorization service. Profile preferences are
+temporary and its control identity comes from the config path. See [rest.md](rest.md).
+
 ## Asynchronous contract
 
 Stores and flows deliver one result per operation while its QObject context is alive. Canceling a browser flow releases its listener and suppresses the canceled completion. The session service correlates attempts, rejects late reads/grants after a replacement or logout, and suppresses duplicate in-flight commands. Logout clears the in-memory session and emits `logout` immediately. If a token write is pending, deletion starts after that write completes. `logoutFinished` means deletion succeeded or the entry was already absent; `logoutFailed` means secure storage could not remove it, while the in-memory session remains cleared. Sign-in is blocked until the pending logout completes. A write failure retains the valid in-memory session, matching the existing sign-in behavior, and records the storage diagnostic code.

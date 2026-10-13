@@ -15,9 +15,10 @@ class APPREST_EXPORT RestServer final : public QObject {
   Q_OBJECT
 public:
   explicit RestServer(const RestRouter& routes, QObject* parent = nullptr,
-    int timeout_ms = RestProtocol::DefaultTimeoutMs);
+                      int timeout_ms = RestProtocol::DefaultTimeoutMs);
   ~RestServer() override;
   bool Start(quint16 port);
+  bool Start(quint16 port, const QHostAddress& host);
   void Stop();
   quint16 Port() const;
   QString Error() const;

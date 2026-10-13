@@ -109,6 +109,24 @@ If a macOS build fails with `ld: framework 'AGL' not found`, check the cached Qt
 
 The REST adapter uses the declared Qt HTTP Server module and its WebSockets dependency. Windows, macOS, Linux, and release workflows install these modules with their pinned Qt 6.9.1 kit. `Rest` tests run in portable builds; CTest runs the CLI/REST process integration test and the settings toggle interaction test. See [rest.md](rest.md) for the background controls and credential-free Python example.
 
+Runtime REST profiles need no additional dependency or embedded credential. The
+committed `resources/rest/example.json` contains only a host and port; pass a private
+file with `--rest-config` for a supplied OAuth token. The existing Windows
+Debug/Release/PCH CTest matrix exercises JSON validation, configured listeners,
+and synthetic-token worker startup without secret storage or live upstream calls.
+
+`resources/rest/openapi.json` is committed source, bundled by the `AppRest`
+CMake resource target and installed under `share/YandexHome/rest/`. It needs no
+generator or runtime schema dependency. `Rest` checks resource/source equality,
+router coverage, internal references, and the documented action examples; the
+Windows matrix and portable CTest runs exercise the same resource path.
+For optional full OpenAPI validation while editing the document, use a pinned
+authoring tool (separate from the build):
+
+```sh
+uvx --from openapi-spec-validator==0.7.2 openapi-spec-validator resources/rest/openapi.json
+```
+
 ## C++ formatting and analysis
 
 `.clang-format` uses LLVM style with two-space indentation, 100-column wrapping,

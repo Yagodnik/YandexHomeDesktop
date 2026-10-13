@@ -34,6 +34,19 @@ void RestRouter::Add(QHttpServerRequest::Method method, const QString& pattern, 
   routes_.append(std::move(route));
 }
 
+QList<RestRouter::Endpoint> RestRouter::Endpoints() const {
+  QList<Endpoint> endpoints;
+  for (const auto& route : routes_) {
+    QStringList segments;
+    for (const auto& segment : route.segments) {
+      segments.append(segment.parameter.isEmpty() ? segment.literal
+                                                  : "{" + segment.parameter + "}");
+    }
+    endpoints.append({route.method, "/" + segments.join('/')});
+  }
+  return endpoints;
+}
+
 void RestRouter::Handle(const QHttpServerRequest& request, RestReply* reply) const {
   // Split before decoding so an encoded slash remains part of an entity ID.
   auto path = request.url().path(QUrl::FullyEncoded).split('/', Qt::SkipEmptyParts);
@@ -53,7 +66,7 @@ void RestRouter::Handle(const QHttpServerRequest& request, RestReply* reply) con
     }
     if (request.body().size() > RestProtocol::MaxBodyBytes) {
       reply->Fail(RestReply::StatusCode::PayloadTooLarge, "body_too_large",
-        QCoreApplication::translate("RestServer", "Тело запроса слишком большое."));
+                  QCoreApplication::translate("RestServer", "Тело запроса слишком большое."));
       return;
     }
     route.handler(request, *parameters, reply);
@@ -62,9 +75,9 @@ void RestRouter::Handle(const QHttpServerRequest& request, RestReply* reply) con
 
   if (path_found) {
     reply->Fail(RestReply::StatusCode::MethodNotAllowed, "method_not_allowed",
-      QCoreApplication::translate("RestServer", "Метод не разрешён."));
+                QCoreApplication::translate("RestServer", "Метод не разрешён."));
   } else {
     reply->Fail(RestReply::StatusCode::NotFound, "not_found",
-      QCoreApplication::translate("RestServer", "Маршрут не найден."));
+                QCoreApplication::translate("RestServer", "Маршрут не найден."));
   }
 }

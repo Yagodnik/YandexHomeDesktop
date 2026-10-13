@@ -17,6 +17,7 @@
 /.idea
 /scratches
 /resources/auth/secrets.json
+/rest.local.json
 .DS_Store
 CMakeLists.txt.user
 *.qm

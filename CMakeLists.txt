@@ -114,7 +114,8 @@ endif()
 
 qt_add_resources(DEBUG_FIXTURE_RESOURCES resources/debug/debug.qrc)
 add_library(RestControlBootstrap STATIC src/app/rest/RestConfiguration.cpp src/app/rest/RestConfiguration.h
-  src/app/rest/RestCommand.cpp src/app/rest/RestCommand.h)
+  src/app/rest/RestCommand.cpp src/app/rest/RestCommand.h
+  src/app/rest/RestServerConfiguration.cpp src/app/rest/RestServerConfiguration.h)
 target_link_libraries(RestControlBootstrap PUBLIC AppStartup AppRestControl)
 
 if(BUILD_CLI_APP)

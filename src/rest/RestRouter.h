@@ -18,6 +18,11 @@ public:
 
   void Add(QHttpServerRequest::Method method, const QString& pattern, Handler handler);
   void Handle(const QHttpServerRequest& request, RestReply* reply) const;
+  struct Endpoint {
+    QHttpServerRequest::Method method;
+    QString path;
+  };
+  QList<Endpoint> Endpoints() const;
 
 private:
   struct Segment {

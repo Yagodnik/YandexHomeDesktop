@@ -10,6 +10,7 @@ struct StartupOptions {
   QString fixture_path = ":/debug/api.json";
   RestCommand rest_command = RestCommand::None;
   std::optional<quint16> rest_port;
+  QString rest_config_file;
   QStringList cli_arguments;
 };
 

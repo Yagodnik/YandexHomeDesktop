@@ -22,6 +22,10 @@ shares the bundle's deployed Qt frameworks. CLI/REST-only installs use `bin/` wi
 
 Local REST controls are `--enable-rest`, `--disable-rest`, and `--status-rest`,
 and are available even with the desktop disabled. Run `YandexHomeRest` for the foreground server. They support `--fake-api` in Debug builds.
+Use `--rest-port 9000` with enable/foreground mode to choose a port, or
+`--rest-config ./rest.local.json` for host, port, and an optional Yandex OAuth
+token that bypasses secret storage. Config files apply to REST commands;
+ordinary device/scenario CLI commands retain the saved-login flow.
 See [rest.md](rest.md) for endpoints, background operation, authentication,
 GUI settings, and the Python example.
 

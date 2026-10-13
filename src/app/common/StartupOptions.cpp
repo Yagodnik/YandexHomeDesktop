@@ -1,5 +1,6 @@
 #include "StartupOptions.h"
 #include <QCoreApplication>
+#include <QFileInfo>
 
 class StartupMessages {
   Q_DECLARE_TR_FUNCTIONS(StartupMessages)
@@ -32,6 +33,17 @@ std::expected<StartupOptions, QString> ParseStartupOptions(const QStringList& ar
         options.rest_command = StartupOptions::RestCommand::Status;
       if (argument == "--serve-rest")
         options.rest_command = StartupOptions::RestCommand::Serve;
+    } else if (argument == "--rest-config" || argument.startsWith("--rest-config=")) {
+      if (!options.rest_config_file.isEmpty()) {
+        return std::unexpected(StartupMessages::tr("Duplicate option: --rest-config."));
+      }
+      const auto path = argument == "--rest-config"
+                            ? arguments.value(++i)
+                            : argument.mid(QString("--rest-config=").size());
+      if (path.isEmpty() || path.startsWith("--")) {
+        return std::unexpected(StartupMessages::tr("--rest-config requires a JSON file path."));
+      }
+      options.rest_config_file = QFileInfo(path).absoluteFilePath();
     } else if (argument == "--rest-port" || argument.startsWith("--rest-port=")) {
       if (options.rest_port)
         return std::unexpected(StartupMessages::tr("Повторяющийся параметр: --rest-port."));
@@ -72,6 +84,11 @@ std::expected<StartupOptions, QString> ParseStartupOptions(const QStringList& ar
       !(rest_worker && options.rest_command == StartupOptions::RestCommand::None)) {
     return std::unexpected(
         StartupMessages::tr("--rest-port требует --enable-rest или --serve-rest."));
+  }
+  if (!options.rest_config_file.isEmpty() &&
+      options.rest_command == StartupOptions::RestCommand::None && !rest_worker) {
+    return std::unexpected(
+        StartupMessages::tr("--rest-config requires a REST command or YandexHomeRest."));
   }
   return options;
 }

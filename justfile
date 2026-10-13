@@ -70,6 +70,22 @@ build *args: _configure-if-needed
 test *args: build
     ctest --test-dir "$YH_JUST_BUILD_DIR" -C "$YH_JUST_CONFIG" --output-on-failure --parallel "$YH_JUST_JOBS" "$@"
 
+# List described test cases without configuring or building; use --suites to group.
+tests-list *args:
+    {{ if os() == "windows" { "python" } else { "python3" } }} scripts/test_catalog.py list "$@"
+
+# Explain a suite or concrete case ID, e.g. DeviceControl::EmptyAttributesStillInitializeViewModel.
+tests-show id *args:
+    {{ if os() == "windows" { "python" } else { "python3" } }} scripts/test_catalog.py show "$@"
+
+# Build and run suite/case IDs, --feature tags, or --all through CTest.
+tests-run *args: build
+    {{ if os() == "windows" { "python" } else { "python3" } }} scripts/test_catalog.py run --build-dir "$YH_JUST_BUILD_DIR" --config "$YH_JUST_CONFIG" --jobs "$YH_JUST_JOBS" "$@"
+
+# Build and reconcile the catalog with CTest and actual Qt function discovery.
+tests-check *args: build
+    {{ if os() == "windows" { "python" } else { "python3" } }} scripts/test_catalog.py check --build-dir "$YH_JUST_BUILD_DIR" --config "$YH_JUST_CONFIG" "$@"
+
 # Build and launch the desktop executable with extra app arguments.
 run *args: build-gui
     bash scripts/launch.sh '{{ if os() == "macos" { "YandexHomeDesktop.app/Contents/MacOS/YandexHomeDesktop" } else { "YandexHomeDesktop.exe" } }}' "$@"

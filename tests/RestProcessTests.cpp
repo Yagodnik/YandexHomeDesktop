@@ -233,15 +233,20 @@ private slots:
 
 int main(int argc, char** argv) {
   QCoreApplication app(argc, argv);
-  if (argc != 4) {
+  if (argc < 4) {
     return 2;
   }
   executable = QString::fromLocal8Bit(argv[1]);
   worker_executable = QString::fromLocal8Bit(argv[2]);
   fixture_available = QString::fromLocal8Bit(argv[3]) == "Debug";
-  char* test_argv[] = {argv[0]};
+  // Keep the executable/configuration arguments out of Qt Test's parser while
+  // forwarding discovery options and individual test selectors.
+  QList<char*> test_argv{argv[0]};
+  for (int index = 4; index < argc; ++index) {
+    test_argv.append(argv[index]);
+  }
   RestProcessTests tests;
-  return QTest::qExec(&tests, 1, test_argv);
+  return QTest::qExec(&tests, test_argv.size(), test_argv.data());
 }
 
 #include "RestProcessTests.moc"

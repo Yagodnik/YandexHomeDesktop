@@ -146,6 +146,8 @@ if(BUILD_REST_APP)
 endif()
 
 if(BUILD_TESTING)
+  find_package(Python3 3.9 REQUIRED COMPONENTS Interpreter)
+  include(tests/TestCatalog.cmake)
   add_subdirectory(tests)
 endif()
 
@@ -183,7 +185,7 @@ if(BUILD_DESKTOP_APP)
       YandexHomeDesktopUiplugin YandexHomeDesktopPagesplugin)
     foreach(_qml_page AuthPage AuthCanceledPage ErrorPage LoadingPage MainPage
         DevicePage DevicesPage ScenariosPage SettingsPage)
-      add_test(NAME ${_qml_page}Loads COMMAND QmlPageLoadTest
+      yh_add_test(NAME ${_qml_page}Loads COMMAND QmlPageLoadTest
         "${CMAKE_CURRENT_SOURCE_DIR}/src/qml/pages/${_qml_page}.qml"
         "${CMAKE_CURRENT_BINARY_DIR}")
       set_tests_properties(${_qml_page}Loads PROPERTIES
@@ -195,7 +197,7 @@ if(BUILD_DESKTOP_APP)
     target_link_libraries(QmlLayoutTests PRIVATE Qt6::QuickTest Qt6::Qml Qt6::Gui Models Utils Iot)
     add_dependencies(QmlLayoutTests YandexHomeDesktopComponentsplugin
       YandexHomeDesktopUiplugin YandexHomeDesktopPagesplugin)
-    add_test(NAME QmlLayouts COMMAND QmlLayoutTests
+    yh_add_test(NAME QmlLayouts COMMAND QmlLayoutTests
       -input "${CMAKE_CURRENT_SOURCE_DIR}/tests/qml"
       -import "${CMAKE_CURRENT_BINARY_DIR}")
     set_tests_properties(QmlLayouts PROPERTIES
@@ -380,7 +382,8 @@ endif()
 yh_install_sdk()
 
 if(YH_ENABLE_PCH)
-  foreach(_pch_target YandexApiAdapter Models Utils Iot AppTests appYandexHomeDesktop)
+  foreach(_pch_target YandexApiAdapter Models Utils Iot appYandexHomeDesktop
+      SerializationTests ApiTests ApiBoundaryTests ModelBoundaryTests CapabilitiesTests ModelsTests)
     if(TARGET ${_pch_target})
       target_precompile_headers(${_pch_target} PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/src/serialization/PrecompiledHeaders.h")

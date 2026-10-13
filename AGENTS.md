@@ -7,6 +7,7 @@ Read the relevant repository skill before implementing or reviewing work in thes
 - [yh-qml-composition](.agents/skills/yh-qml-composition/SKILL.md): QML pages, reusable visuals, property/signal contracts, and UI verification.
 - [yh-application-architecture](.agents/skills/yh-application-architecture/SKILL.md): C++ view models, list models, services, API boundaries, and asynchronous lifecycle behavior.
 - [yh-json-serialization](.agents/skills/yh-json-serialization/SKILL.md): Typed JSON structs, enums, codecs, file loading, and configuration validation.
+- [yh-testing](.agents/skills/yh-testing/SKILL.md): Test discovery, feature/suite/case selection, and maintaining the test catalog. Read it when implementing changed behavior or choosing verification for a feature or fix.
 
 Use the QML composition and application architecture skills together when a feature crosses the QML/C++ boundary. These skills describe the intended architecture; existing compatibility wiring is migrated only within the requested scope.
 

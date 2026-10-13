@@ -89,6 +89,16 @@ jobs:
       - name: Run C++, QML, CLI, REST OpenAPI/JSON profiles, process, and Python example tests
         run: just build_dir=build config=${{ matrix.configuration }} test
 
+      - name: Exercise test catalog and concrete C++, QML, and process selection
+        shell: pwsh
+        run: |
+          just tests-list --feature devices --suites
+          if ($LASTEXITCODE -ne 0) { throw 'Test listing failed' }
+          just build_dir=build config=${{ matrix.configuration }} tests-check
+          if ($LASTEXITCODE -ne 0) { throw 'Test catalog check failed' }
+          just build_dir=build config=${{ matrix.configuration }} tests-run Serialization::FromJsonSimple QmlLayouts::PageComposition::test_deviceCommandThroughRealDelegate RestProcess::JsonConfigurationAndExplicitTokenAvoidSecretStorage
+          if ($LASTEXITCODE -ne 0) { throw 'Concrete test selection failed' }
+
       - name: Exercise console CLI recipe
         run: just build_dir=build config=${{ matrix.configuration }} cli --help --json
 

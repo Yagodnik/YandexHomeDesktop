@@ -1,0 +1,1196 @@
+{
+  "version": 1,
+  "suites": [
+    {
+      "id": "Serialization",
+      "description": "Typed JSON structs, enums, nested objects, and arrays preserve their values.",
+      "features": [
+        "serialization"
+      ],
+      "layer": "unit",
+      "kind": "qt",
+      "source": "tests/SerializationTests.cpp",
+      "cases": [
+        {
+          "name": "FromJsonSimple",
+          "description": "Decode primitive fields from a JSON object into a typed struct."
+        },
+        {
+          "name": "FromJsonSubObject",
+          "description": "Decode a nested typed struct without losing its fields."
+        },
+        {
+          "name": "ToJsonSimple",
+          "description": "Encode primitive struct fields with their declared JSON types."
+        },
+        {
+          "name": "ToJsonSubObject",
+          "description": "Encode a nested typed struct as a nested JSON object."
+        },
+        {
+          "name": "JsonEnumTest",
+          "description": "Resolve declared enum strings to the corresponding enum values."
+        },
+        {
+          "name": "JsonEnumSerializationTest",
+          "description": "Decode a struct enum field from its declared wire string (legacy name)."
+        },
+        {
+          "name": "JsonEnumDeserializationTest",
+          "description": "Encode an enum field using its declared wire string (legacy name)."
+        },
+        {
+          "name": "JsonEnumDeserialization2Test",
+          "description": "Encode two enum fields independently in the same struct (legacy name)."
+        },
+        {
+          "name": "JsonIntArrayTest",
+          "description": "Decode an array of integers alongside ordinary struct fields."
+        },
+        {
+          "name": "JsonArrayTest",
+          "description": "Decode an array of nested typed objects."
+        },
+        {
+          "name": "JsonArraySerializationTest",
+          "description": "Encode an integer array and preserve every element in order."
+        },
+        {
+          "name": "JsonArraySerializationTest2",
+          "description": "Encode multiple typed array elements in order."
+        },
+        {
+          "name": "TripTest",
+          "description": "Preserve nested trip records, enum values, and string arrays through JSON conversion."
+        },
+        {
+          "name": "JsonEnumNoValueTest",
+          "description": "Exercise unknown-enum conversion without asserting the returned value (legacy smoke case)."
+        }
+      ]
+    },
+    {
+      "id": "Api",
+      "description": "Shared API payload codecs decode snapshots and encode device actions.",
+      "features": [
+        "api",
+        "serialization"
+      ],
+      "layer": "unit",
+      "kind": "qt",
+      "source": "tests/ApiTests.cpp",
+      "cases": [
+        {
+          "name": "TestCapabilities",
+          "description": "Decode a capability including its parameters and scalar state."
+        },
+        {
+          "name": "CapabilitiesNullTest",
+          "description": "Treat a null capability state as an empty state map."
+        },
+        {
+          "name": "CapabilitiesObjectTest",
+          "description": "Preserve a nested color object in a capability state."
+        },
+        {
+          "name": "PropertiesTest",
+          "description": "Decode all properties in a device response."
+        },
+        {
+          "name": "SharedResponseCodecs",
+          "description": "Use the shared compiled codecs for home, device, and action responses."
+        },
+        {
+          "name": "SharedActionCodec",
+          "description": "Round-trip a capability inside a device action payload."
+        }
+      ]
+    },
+    {
+      "id": "ApiBoundary",
+      "description": "API adapters scope requests, interpret results, and cancel callback delivery.",
+      "features": [
+        "api",
+        "auth",
+        "devices",
+        "scenarios",
+        "account"
+      ],
+      "layer": "integration",
+      "kind": "qt",
+      "source": "tests/ApiBoundaryTests.cpp",
+      "cases": [
+        {
+          "name": "HomeRequestsAreScoped",
+          "description": "Build authenticated home requests and deliver each response to its request owner."
+        },
+        {
+          "name": "ParsingAndScenarioResults",
+          "description": "Decode home/scenario results and report malformed or failed responses."
+        },
+        {
+          "name": "ActionResultIsAggregated",
+          "description": "Combine per-capability action results into one operation result."
+        },
+        {
+          "name": "AccountResults",
+          "description": "Decode account responses and surface account API failures."
+        },
+        {
+          "name": "TimeoutReportsOnce",
+          "description": "Report a timed-out request exactly once despite late transport completion."
+        },
+        {
+          "name": "DestroyedContextSuppressesEvents",
+          "description": "Suppress transport completions after the callback context is destroyed."
+        },
+        {
+          "name": "MissingCredentialsSkipTransport",
+          "description": "Reject requests without credentials before issuing HTTP transport calls."
+        }
+      ]
+    },
+    {
+      "id": "ModelBoundary",
+      "description": "View models preserve observable contracts across API completions and session reset.",
+      "features": [
+        "models",
+        "home",
+        "devices",
+        "scenarios",
+        "account",
+        "auth"
+      ],
+      "layer": "integration",
+      "kind": "qt",
+      "source": "tests/ModelBoundaryTests.cpp",
+      "cases": [
+        {
+          "name": "HomeRefreshUpdatesAllModels",
+          "description": "Project a refreshed home snapshot into every dependent display model."
+        },
+        {
+          "name": "ScenarioResultsRemainScoped",
+          "description": "Route scenario completions to the matching scenario operation."
+        },
+        {
+          "name": "DeviceDataFlowsThroughController",
+          "description": "Expose loaded device attributes through the device view model."
+        },
+        {
+          "name": "ImmediateDeviceResultSurvivesReset",
+          "description": "Preserve device initialization when the API completes inline."
+        },
+        {
+          "name": "ActionEventsReachController",
+          "description": "Forward capability action results to the device operation owner."
+        },
+        {
+          "name": "AccountModelKeepsQmlContract",
+          "description": "Keep the account model properties and notifications used by QML."
+        },
+        {
+          "name": "AccountResetRejectsOldSessionResults",
+          "description": "Ignore account replies belonging to a session that was reset."
+        },
+        {
+          "name": "DeviceResetRejectsOldSessionResults",
+          "description": "Ignore device replies belonging to a session that was reset."
+        }
+      ]
+    },
+    {
+      "id": "Capabilities",
+      "description": "Desktop capability wrappers preserve shared payload builders and defaults.",
+      "features": [
+        "devices"
+      ],
+      "layer": "unit",
+      "kind": "qt",
+      "source": "tests/CapabilitiesTests.cpp",
+      "cases": [
+        {
+          "name": "TestOnOff",
+          "description": "Build the on/off action state and parameters expected by desktop controls."
+        },
+        {
+          "name": "TestColorSetting",
+          "description": "Reject an unsupported color model by returning an empty action state."
+        },
+        {
+          "name": "TestRange",
+          "description": "Preserve range defaults, parameter setters, and numeric action values."
+        },
+        {
+          "name": "TestToggle",
+          "description": "Build toggle actions with the expected instance and boolean value."
+        },
+        {
+          "name": "SharedBuildersPreserveDesktopPayloads",
+          "description": "Preserve desktop action payloads when delegating to shared builders."
+        },
+        {
+          "name": "SharedParametersPreserveDesktopDefaults",
+          "description": "Preserve desktop defaults when delegating parameter parsing to the shared core."
+        }
+      ]
+    },
+    {
+      "id": "Models",
+      "description": "Color display models filter supported presets and temperature ranges.",
+      "features": [
+        "models",
+        "devices"
+      ],
+      "layer": "unit",
+      "kind": "qt",
+      "source": "tests/ModelsTests.cpp",
+      "cases": [
+        {
+          "name": "TestColors",
+          "description": "Filter color/temperature presets and choose the nearest supported fixed temperature."
+        }
+      ]
+    },
+    {
+      "id": "Authorization",
+      "description": "Authentication uses injected storage/flows and rejects stale session completions.",
+      "features": [
+        "auth"
+      ],
+      "layer": "integration",
+      "kind": "qt",
+      "source": "tests/AuthorizationTests.cpp",
+      "cases": [
+        {
+          "name": "SavedSessionUsesOnlyStorage",
+          "description": "Restore a saved session without starting an interactive authorization flow."
+        },
+        {
+          "name": "ReadErrors",
+          "description": "Surface credential-store read errors without authorizing a session."
+        },
+        {
+          "name": "EmptyStoredTokenDoesNotCreateSession",
+          "description": "Keep the session unauthorized when storage returns an empty token."
+        },
+        {
+          "name": "InteractiveLoginSupersedesPendingRead",
+          "description": "Ignore a saved-token read superseded by interactive sign-in."
+        },
+        {
+          "name": "FlowErrors",
+          "description": "Propagate interactive authorization errors and cancellation."
+        },
+        {
+          "name": "EmptyGrantFailsWithoutPersistence",
+          "description": "Reject an empty authorization grant without writing it to storage."
+        },
+        {
+          "name": "LogoutRejectsPendingReadAndIsIdempotent",
+          "description": "Ignore pending token reads after logout and collapse repeated logout requests."
+        },
+        {
+          "name": "LogoutCancelsFlowAndRejectsLateGrant",
+          "description": "Cancel interactive sign-in during logout and ignore its late grant."
+        },
+        {
+          "name": "LogoutWaitsForPendingWrite",
+          "description": "Finish a pending token write before deleting stored credentials during logout."
+        },
+        {
+          "name": "FailedDeletionKeepsSessionClearedAndCanBeRetried",
+          "description": "Keep the session cleared after a storage deletion failure and allow retry."
+        },
+        {
+          "name": "ReentrantWriteCompletionDuringLogoutStartsOneDeletion",
+          "description": "Start exactly one deletion if a write completes reentrantly during logout."
+        },
+        {
+          "name": "FailedWriteDoesNotInvalidateGrantedSession",
+          "description": "Keep an authorized session usable when persisting its grant fails."
+        },
+        {
+          "name": "SavedTokenOnlyServiceCannotStartBrowserLogin",
+          "description": "Reject interactive sign-in in the saved-token-only service."
+        },
+        {
+          "name": "DestroyedContextSuppressesOutstandingResults",
+          "description": "Stop authorization result delivery after the owning context is destroyed."
+        },
+        {
+          "name": "InlineCompletionsSupportLogoutFromAuthorizedSignal",
+          "description": "Handle logout triggered by an authorization signal even with inline dependencies."
+        },
+        {
+          "name": "ModelPreservesQmlMethodsAndSignalsWithoutCredentials",
+          "description": "Expose the existing QML authorization commands and signals without exposing tokens."
+        }
+      ]
+    },
+    {
+      "id": "OAuthAdapter",
+      "description": "OAuth configuration and setup errors are validated without live sign-in.",
+      "features": [
+        "auth"
+      ],
+      "layer": "integration",
+      "kind": "qt",
+      "source": "tests/OAuthAdapterTests.cpp",
+      "requires": [
+        "BUILD_DESKTOP_APP"
+      ],
+      "cases": [
+        {
+          "name": "ParsesConfiguredRedirectAndScopes",
+          "description": "Parse the configured redirect path, port, and authorization scopes."
+        },
+        {
+          "name": "AcceptsLocalhostRedirects",
+          "description": "Accept supported IPv4, IPv6, and localhost loopback redirect URLs."
+        },
+        {
+          "name": "RejectsMalformedConfiguration",
+          "description": "Reject invalid endpoints, redirect URLs, ports, and scope values."
+        },
+        {
+          "name": "RejectsMissingFieldsAndMalformedJson",
+          "description": "Report missing configuration fields and malformed OAuth JSON."
+        },
+        {
+          "name": "ConfigurationFailureIsLazyAndAsynchronous",
+          "description": "Validate configuration only on sign-in and deliver setup failure asynchronously."
+        },
+        {
+          "name": "CancellationAndContextDestructionSuppressSetupResults",
+          "description": "Suppress setup failure callbacks after cancellation or context destruction."
+        },
+        {
+          "name": "CompositionDoesNotInitializeBrowserOrReadKeychain",
+          "description": "Construct OAuth dependencies without opening a browser or reading credentials."
+        }
+      ]
+    },
+    {
+      "id": "DeviceControl",
+      "description": "Characterize device polling, optimistic actions, and conflict suppression with a controlled clock.",
+      "features": [
+        "devices"
+      ],
+      "layer": "integration",
+      "kind": "qt",
+      "source": "tests/DeviceControlTests.cpp",
+      "cases": [
+        {
+          "name": "ViewModelReadinessSurvivesRefreshFailureAndResetsForRetry",
+          "description": "Keep displayed device data after a background failure and reset it for an explicit retry."
+        },
+        {
+          "name": "EmptyAttributesStillInitializeViewModel",
+          "description": "Enter ready state when a device has no capabilities or properties."
+        },
+        {
+          "name": "MobileChangesAppearOnNextPoll",
+          "description": "Display external capability changes from the next unsuppressed poll."
+        },
+        {
+          "name": "DesktopValueIsOptimisticAndRequestIsScoped",
+          "description": "Display a desktop change immediately and send it for the selected device/capability."
+        },
+        {
+          "name": "PendingDesktopActionSuppressesOnlyItsCapability",
+          "description": "Suppress external updates only for the capability with a pending action."
+        },
+        {
+          "name": "DesktopChangeWinsWhenAppliedAfterMobile",
+          "description": "Let a desktop action replace the external state already displayed."
+        },
+        {
+          "name": "MobileChangeWinsAfterDesktopSuppression",
+          "description": "Accept external updates once the desktop suppression window expires."
+        },
+        {
+          "name": "SuppressedMobileSnapshotIsNotReplayed",
+          "description": "Discard a suppressed external snapshot instead of replaying it later."
+        },
+        {
+          "name": "SuppressionWindowUsesRequestAndReceiveTimes",
+          "description": "Preserve the exact suppression boundary using controlled request and response times."
+        },
+        {
+          "name": "FailedDesktopActionKeepsOptimisticValueUntilFreshPoll",
+          "description": "Keep the optimistic value after action failure until an accepted poll replaces it."
+        },
+        {
+          "name": "PollFailureDoesNotEndPendingAction",
+          "description": "Keep the pending action active when a concurrent poll fails."
+        },
+        {
+          "name": "ConcurrentDesktopActionsShareOnePendingFlag",
+          "description": "Characterize the shared pending flag for repeated actions on one capability."
+        },
+        {
+          "name": "ConcurrentActionsOnDifferentCapabilitiesResumeIndependently",
+          "description": "Resume updates independently for actions on different capabilities."
+        },
+        {
+          "name": "SuppressionIsPerRowForCapabilitiesOfTheSameType",
+          "description": "Keep suppression scoped to each row even when capability types match."
+        },
+        {
+          "name": "OutOfOrderPollRepliesCanRestoreOlderMobileState",
+          "description": "Characterize the existing older-state restoration from out-of-order poll replies."
+        },
+        {
+          "name": "NewPollChangesSuppressionOfAnOlderReply",
+          "description": "Characterize how a newer poll affects acceptance of an older response."
+        },
+        {
+          "name": "PreviousDeviceMobileSnapshotIsIgnoredAfterSwitch",
+          "description": "Ignore an old device snapshot after selecting a different device."
+        }
+      ]
+    },
+    {
+      "id": "DeviceService",
+      "description": "Reusable device commands and independent sessions scope validation, reads, and lifetimes.",
+      "features": [
+        "devices"
+      ],
+      "layer": "integration",
+      "kind": "qt",
+      "source": "tests/DeviceServiceTests.cpp",
+      "cases": [
+        {
+          "name": "ValidatedCommandsRejectBeforeDispatchAndCheckFreshMetadata",
+          "description": "Reject invalid commands before dispatch and validate them against fresh device metadata."
+        },
+        {
+          "name": "ValidatedCommandsPreserveInlineReadsErrorsAndCallerLifetime",
+          "description": "Preserve inline validation reads, structured failures, and caller-scoped cancellation."
+        },
+        {
+          "name": "CommandsUseExplicitIdsWithoutSelectingOrLoading",
+          "description": "Dispatch commands by explicit device ID without mutating a selected GUI device."
+        },
+        {
+          "name": "ReadsPreserveSnapshotsAndStructuredErrors",
+          "description": "Deliver device snapshots and structured API failures without losing their details."
+        },
+        {
+          "name": "CallerDestructionCancelsReadsAndCommands",
+          "description": "Cancel read and command delivery when the caller is destroyed."
+        },
+        {
+          "name": "SessionsShareServiceButKeepSelectionAndSuppressionSeparate",
+          "description": "Share the service while keeping each session's selection and suppression independent."
+        },
+        {
+          "name": "SessionDestructionCancelsItsOutstandingOperations",
+          "description": "Cancel a session's outstanding operations when it is destroyed."
+        },
+        {
+          "name": "SessionResetRejectsOldReadsAndCommandsForTheSameDevice",
+          "description": "Ignore pre-reset completions even if the new session selects the same device."
+        },
+        {
+          "name": "SynchronousResponsePreservesResetAndUpdateOrder",
+          "description": "Preserve reset/update notification order when dependencies complete inline."
+        },
+        {
+          "name": "PollingLifecyclePreservesLateReplyRestart",
+          "description": "Preserve polling restart behavior around late responses."
+        }
+      ]
+    },
+    {
+      "id": "Home",
+      "description": "Home snapshots, household filtering, favorites, preferences, and desktop interactions.",
+      "features": [
+        "home",
+        "devices"
+      ],
+      "layer": "integration",
+      "kind": "qt",
+      "source": "tests/HomeTests.cpp",
+      "cases": [
+        {
+          "name": "RoomsHaveStableLexicographicOrder",
+          "description": "Sort rooms deterministically across duplicate names and shuffled snapshots."
+        },
+        {
+          "name": "FavoritesKeepAdditionOrderAcrossRefreshAndHouseholds",
+          "description": "Preserve favorite addition order while filtering by household and refreshing snapshots."
+        },
+        {
+          "name": "PreferencesPersistAndStayScopedToStableAccountId",
+          "description": "Persist room/favorite preferences under stable account identities."
+        },
+        {
+          "name": "AccountFailureCanBeRetriedWithoutSharingPreferences",
+          "description": "Retry failed account loading without applying another account's preferences."
+        },
+        {
+          "name": "LoadsOneSnapshotAndFiltersBySelection",
+          "description": "Load a shared home snapshot and filter rows for the selected household."
+        },
+        {
+          "name": "RefreshPreservesSelectionAndUpdatesNames",
+          "description": "Keep valid household selection while refreshing display names and data."
+        },
+        {
+          "name": "FailureAndLateRepliesDoNotCorruptRetry",
+          "description": "Keep retries intact when older home requests fail or complete late."
+        },
+        {
+          "name": "ResetAndNewViewModelUseCurrentSession",
+          "description": "Reset session data and expose current state to newly created view models."
+        },
+        {
+          "name": "ExpandingLargeSectionKeepsItsHeadingInPlace",
+          "description": "Keep a large section's heading and scroll position stable during expansion/collapse.",
+          "requires": [
+            "BUILD_DESKTOP_APP"
+          ]
+        },
+        {
+          "name": "RoomCollapseAndFavoriteClicksReachViewModel",
+          "description": "Route real room/favorite clicks to the view model and preserve navigation behavior.",
+          "requires": [
+            "BUILD_DESKTOP_APP"
+          ]
+        },
+        {
+          "name": "PageStateAndHouseholdClicksReachViewModel",
+          "description": "Bind page states and route refresh/household clicks through the actual QML page.",
+          "requires": [
+            "BUILD_DESKTOP_APP"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ApiFixture",
+      "description": "Committed fixture playback, startup flags, isolated settings, and local fixture sign-in.",
+      "features": [
+        "fixtures",
+        "startup",
+        "auth"
+      ],
+      "layer": "integration",
+      "kind": "qt",
+      "source": "tests/ApiFixtureTests.cpp",
+      "cases": [
+        {
+          "name": "SharedSettingsPreserveTheGuiExecutable",
+          "description": "Keep the saved GUI executable path when headless settings update REST preferences."
+        },
+        {
+          "name": "StartupFlagsChooseGuiOrPreserveCliArguments",
+          "description": "Parse fixture flags while preserving CLI arguments and rejecting invalid combinations."
+        },
+        {
+          "name": "FixtureDeliversAllReadEndpointsAsynchronously",
+          "description": "Deliver fixture home, device, scenario, and account responses asynchronously."
+        },
+        {
+          "name": "ReloadsFileAndReportsFailuresWithoutFallback",
+          "description": "Reload edited fixture data and report invalid data without falling back to live APIs."
+        },
+        {
+          "name": "ValidatesFixtureShapeAndScopesCallbacks",
+          "description": "Reject malformed fixture fields and suppress callbacks after context destruction."
+        },
+        {
+          "name": "DebugSettingsAreIsolatedInMemory",
+          "description": "Keep fixture settings isolated in memory across separate settings instances."
+        },
+        {
+          "name": "FixtureSignInAndLogoutStayLocal",
+          "description": "Sign in/out locally without reading or producing a real OAuth token.",
+          "requires": [
+            "BUILD_DESKTOP_APP",
+            "Debug"
+          ]
+        },
+        {
+          "name": "FixtureLogoutInvalidatesQueuedLoginAndBlocksOverlappingCommands",
+          "description": "Invalidate queued fixture sign-in and block overlapping commands during logout.",
+          "requires": [
+            "BUILD_DESKTOP_APP",
+            "Debug"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Scenarios",
+      "description": "Scenario loading, execution guards, refresh races, and page command wiring.",
+      "features": [
+        "scenarios"
+      ],
+      "layer": "integration",
+      "kind": "qt",
+      "source": "tests/ScenariosTests.cpp",
+      "cases": [
+        {
+          "name": "OneShotRunsValidateFreshDataWithoutLoadingGuiState",
+          "description": "Validate one-shot scenario execution against fresh metadata without loading GUI state."
+        },
+        {
+          "name": "OneShotRunsCancelWithTheirCallerOrService",
+          "description": "Cancel one-shot execution when its caller or service is destroyed."
+        },
+        {
+          "name": "LoadingAndRefreshState",
+          "description": "Expose the correct states during initial scenario loading and refresh."
+        },
+        {
+          "name": "LoadingFailureAndRetry",
+          "description": "Expose a loading error and recover through an explicit retry."
+        },
+        {
+          "name": "ExecutionGuardsAndFailure",
+          "description": "Guard duplicate/invalid executions and report failed scenario actions."
+        },
+        {
+          "name": "RefreshDuringExecutionUsesStableIds",
+          "description": "Keep execution associated with scenario IDs when a refresh reorders rows."
+        },
+        {
+          "name": "RemovedScenarioStillCompletes",
+          "description": "Complete an in-flight action even if refresh removes its scenario row."
+        },
+        {
+          "name": "ResetDiscardsPreviousSessionResponses",
+          "description": "Ignore previous-session load and execution completions after reset."
+        },
+        {
+          "name": "NewViewModelReflectsExistingState",
+          "description": "Initialize a new view model from the service's current state."
+        },
+        {
+          "name": "QmlPageBindsStateAndForwardsCommands",
+          "description": "Route real scenario-page clicks and refresh intent to the owning view model.",
+          "requires": [
+            "BUILD_DESKTOP_APP"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Cli",
+      "description": "CLI parsing, typed commands, selectors, progress, output, and cancellation.",
+      "features": [
+        "cli",
+        "devices",
+        "scenarios",
+        "auth",
+        "account",
+        "startup"
+      ],
+      "layer": "integration",
+      "kind": "qt",
+      "source": "tests/CliTests.cpp",
+      "cases": [
+        {
+          "name": "NativeMainQueueCallbacksReachTheCli",
+          "description": "Deliver native main-queue callbacks on macOS; other platforms explicitly skip this case."
+        },
+        {
+          "name": "NoProgressIsAGlobalOption",
+          "description": "Accept the no-progress option consistently across CLI commands."
+        },
+        {
+          "name": "ProgressPreservesAutomationOutput",
+          "description": "Suppress progress in JSON, redirected-stderr, and explicitly disabled modes."
+        },
+        {
+          "name": "ProgressStopsBeforeResults",
+          "description": "Clear the progress indicator before success, failure, and timeout output."
+        },
+        {
+          "name": "RegisteredCommandNeedsNoCentralDispatchChange",
+          "description": "Execute a newly registered command without changing central dispatch."
+        },
+        {
+          "name": "RegisteredInputUsesSharedDomainRules",
+          "description": "Validate registered capability inputs through the shared domain rules."
+        },
+        {
+          "name": "InvalidArguments",
+          "description": "Reject invalid command arguments with the expected structured CLI error."
+        },
+        {
+          "name": "InvalidCapabilityValues",
+          "description": "Reject incorrectly typed or out-of-range capability values."
+        },
+        {
+          "name": "LegacyCommandsAndHelpRemainUsable",
+          "description": "Preserve legacy command aliases and help output."
+        },
+        {
+          "name": "TypedActions",
+          "description": "Build correctly typed payloads for the supported action forms."
+        },
+        {
+          "name": "DeviceMetadataRejectsUnsupportedActions",
+          "description": "Reject actions unsupported by the device's fresh capability metadata."
+        },
+        {
+          "name": "NameResolutionNeverChoosesAnArbitraryDevice",
+          "description": "Reject ambiguous device names instead of choosing an arbitrary match."
+        },
+        {
+          "name": "ShowAndListSerializeSnapshotsWithoutChangingGuiState",
+          "description": "Serialize device snapshots without changing the GUI's selected device state."
+        },
+        {
+          "name": "ApiErrors",
+          "description": "Map API error kinds to the expected CLI error output."
+        },
+        {
+          "name": "InvalidOrAmbiguousDeviceReplyDoesNotSendAnAction",
+          "description": "Avoid dispatching an action when device resolution produces invalid or ambiguous data."
+        },
+        {
+          "name": "TimeoutAndDestructionCancelDelivery",
+          "description": "Cancel operation delivery on timeout or caller destruction."
+        },
+        {
+          "name": "SynchronousApisCanCompleteExactlyOnce",
+          "description": "Complete commands exactly once when API dependencies reply inline."
+        },
+        {
+          "name": "ScenariosResolveValidateAndExecuteWithoutGuiState",
+          "description": "Resolve and validate scenario commands without using GUI selection state."
+        },
+        {
+          "name": "AccountAndConfirmedResetUseInjectedServices",
+          "description": "Use injected account/reset services and require the reset command's confirmation flag."
+        }
+      ]
+    },
+    {
+      "id": "CapabilityRules",
+      "description": "Shared typed validation checks device capability instances and metadata.",
+      "features": [
+        "devices"
+      ],
+      "layer": "unit",
+      "kind": "qt",
+      "source": "tests/CapabilityRulesTests.cpp",
+      "cases": [
+        {
+          "name": "ColorChecksTypedValuesWithoutCoercingStringsOrBooleans",
+          "description": "Validate typed color values without coercing strings or booleans into numbers."
+        },
+        {
+          "name": "ColorMetadataSupportsSeveralInstancesInOneCapability",
+          "description": "Validate multiple supported color instances within one capability."
+        },
+        {
+          "name": "RangeRulesKeepRelativeChangesSeparateFromAbsoluteLimits",
+          "description": "Validate relative range changes separately from absolute device limits."
+        },
+        {
+          "name": "InstanceMatchingAndModeValidationUseDeviceMetadata",
+          "description": "Match capability instances and validate allowed modes against device metadata."
+        }
+      ]
+    },
+    {
+      "id": "Rest",
+      "description": "REST configuration, HTTP routes, typed commands, and worker control state.",
+      "features": [
+        "rest",
+        "devices",
+        "scenarios",
+        "auth",
+        "startup"
+      ],
+      "layer": "integration",
+      "kind": "qt",
+      "source": "tests/RestTests.cpp",
+      "requires": [
+        "YH_BUILD_REST_ADAPTER"
+      ],
+      "cases": [
+        {
+          "name": "StartupAndPersistence",
+          "description": "Start/stop REST control and persist its enabled setting through the shared service."
+        },
+        {
+          "name": "ConfigurationStartupOptionsAndLaunchIdentity",
+          "description": "Apply startup configuration and keep worker launch identities consistent."
+        },
+        {
+          "name": "ConfigurationDefaultsAndExplicitToken",
+          "description": "Apply configuration defaults and use an explicit token without credential-store access."
+        },
+        {
+          "name": "RejectsInvalidConfiguration",
+          "description": "Reject invalid REST hosts, ports, tokens, timeouts, and JSON field types."
+        },
+        {
+          "name": "ConfiguredHostsValidateTheConnectionDestination",
+          "description": "Validate the configured listener destination, including loopback address variants."
+        },
+        {
+          "name": "AuthRoutesAndReads",
+          "description": "Enforce REST authentication and serve snapshot read routes."
+        },
+        {
+          "name": "OpenApiDocumentMatchesBundledSourceAndRouter",
+          "description": "Serve the bundled OpenAPI document with routes and schemas matching the router."
+        },
+        {
+          "name": "OpenApiActionExamplesReachDeviceService",
+          "description": "Dispatch documented OpenAPI action examples through the actual device service."
+        },
+        {
+          "name": "RejectsNonJsonScenarioRequests",
+          "description": "Reject scenario action requests with unsupported content types."
+        },
+        {
+          "name": "TypedValidationAndInlineActions",
+          "description": "Validate typed REST actions and handle inline dependency completions."
+        },
+        {
+          "name": "RouteParametersMethodsAndBodyLimit",
+          "description": "Validate route parameters, HTTP methods, and request body limits."
+        },
+        {
+          "name": "StructuredErrors",
+          "description": "Return structured errors for REST operation failures."
+        },
+        {
+          "name": "OverlapTimeoutAndDisableCancelDelivery",
+          "description": "Cancel overlapping, timed-out, and disabled-worker operation delivery."
+        },
+        {
+          "name": "ControllerAndViewModelReflectExternalChanges",
+          "description": "Reflect externally changed REST status in the controller and view model."
+        },
+        {
+          "name": "DisableWaitsForWorkerExit",
+          "description": "Keep disable pending until the worker exits and handle shutdown failures."
+        },
+        {
+          "name": "DisableSupersedesStartBeforeControlChannelExists",
+          "description": "Supersede an in-progress worker startup before its control channel exists."
+        }
+      ]
+    },
+    {
+      "id": "RestProcess",
+      "description": "CLI/REST executable integration and the Python client use only local fixture/configuration data.",
+      "features": [
+        "rest",
+        "cli",
+        "startup"
+      ],
+      "layer": "process",
+      "kind": "qt",
+      "source": "tests/RestProcessTests.cpp",
+      "requires": [
+        "BUILD_CLI_APP",
+        "BUILD_REST_APP"
+      ],
+      "cases": [
+        {
+          "name": "JsonConfigurationAndExplicitTokenAvoidSecretStorage",
+          "description": "Run REST from JSON configuration with an explicit token and verify authentication locally."
+        },
+        {
+          "name": "EntryPointControlAndFixtureRest",
+          "description": "Exercise worker enable/status/disable entry points, fixture REST routes, and the Python client."
+        }
+      ]
+    },
+    {
+      "id": "CliProcess_YandexHomeCli",
+      "description": "Smoke-test the CLI executable: Debug uses fixtures; Release rejects fixture flags.",
+      "features": [
+        "cli",
+        "startup",
+        "fixtures"
+      ],
+      "layer": "process",
+      "kind": "ctest",
+      "source": "tests/CliSmoke.cmake",
+      "requires": [
+        "BUILD_CLI_APP"
+      ]
+    },
+    {
+      "id": "GuiRejectsCommands",
+      "description": "Verify that the GUI entry point rejects console commands with the expected exit result.",
+      "features": [
+        "startup",
+        "ui"
+      ],
+      "layer": "process",
+      "kind": "ctest",
+      "source": "tests/GuiEntryPoint.cmake",
+      "requires": [
+        "BUILD_DESKTOP_APP"
+      ]
+    },
+    {
+      "id": "InstalledSdkConsumer",
+      "description": "Install the SDK, build an independent consumer, and run it without live API access.",
+      "features": [
+        "sdk"
+      ],
+      "layer": "integration",
+      "kind": "ctest",
+      "source": "tests/SdkConsumer.cmake"
+    },
+    {
+      "id": "QmlLayouts",
+      "description": "Actual QML component layout, scrolling, animations, and user-intent wiring.",
+      "features": [
+        "ui",
+        "devices",
+        "home",
+        "auth",
+        "settings",
+        "scenarios",
+        "rest"
+      ],
+      "layer": "ui",
+      "kind": "quick",
+      "source": "tests/qml/tst_PageComposition.qml",
+      "requires": [
+        "BUILD_DESKTOP_APP"
+      ],
+      "cases": [
+        {
+          "name": "DeviceControlsLayout::test_bottomPadding",
+          "description": "Keep device-control bottom padding correct for each empty/nonempty attribute combination.",
+          "source": "tests/qml/tst_DeviceControlsLayout.qml"
+        },
+        {
+          "name": "DeviceControlsLayout::test_modelAndHeightChanges",
+          "description": "Update device-control layout when models and available height change.",
+          "source": "tests/qml/tst_DeviceControlsLayout.qml"
+        },
+        {
+          "name": "DeviceControlsLayout::test_emptyModels",
+          "description": "Lay out empty device-control models without creating invalid delegates.",
+          "source": "tests/qml/tst_DeviceControlsLayout.qml"
+        },
+        {
+          "name": "DeviceListSections::test_arrowFollowsTitleAndFitsLongNames",
+          "description": "Keep collapse arrows correctly spaced and long section titles within the available width.",
+          "source": "tests/qml/tst_DeviceListSections.qml"
+        },
+        {
+          "name": "DeviceListSections::test_emptySectionCanCollapseAndExpand",
+          "description": "Collapse and expand an empty section with the expected content visibility.",
+          "source": "tests/qml/tst_DeviceListSections.qml"
+        },
+        {
+          "name": "DeviceListSections::test_animationCanReverseBeforeCompletion",
+          "description": "Reverse a section animation before completion and reach the new requested state.",
+          "source": "tests/qml/tst_DeviceListSections.qml"
+        },
+        {
+          "name": "PageComposition::test_authAction",
+          "description": "Forward sign-in button intent through the actual authorization page.",
+          "source": "tests/qml/tst_PageComposition.qml"
+        },
+        {
+          "name": "PageComposition::test_deviceRetryAndInitialization",
+          "description": "Forward device retry intent and bind initialization/loading states.",
+          "source": "tests/qml/tst_PageComposition.qml"
+        },
+        {
+          "name": "PageComposition::test_deviceReadyBeforePageCreation",
+          "description": "Display a device that became ready before its QML page was created.",
+          "source": "tests/qml/tst_PageComposition.qml"
+        },
+        {
+          "name": "PageComposition::test_deviceCommandThroughRealDelegate",
+          "description": "Forward an actual capability-delegate click with the correct device action payload.",
+          "source": "tests/qml/tst_PageComposition.qml"
+        },
+        {
+          "name": "PageComposition::test_mainHouseholdPicker",
+          "description": "Open the household picker from the main page's top bar.",
+          "source": "tests/qml/tst_PageComposition.qml"
+        },
+        {
+          "name": "PageComposition::test_householdSelection",
+          "description": "Forward household selection with the correct stable household ID.",
+          "source": "tests/qml/tst_PageComposition.qml"
+        },
+        {
+          "name": "PageComposition::test_settingsScrollingAndActions",
+          "description": "Keep settings controls reachable by scrolling and forward their user actions.",
+          "source": "tests/qml/tst_PageComposition.qml"
+        },
+        {
+          "name": "PageComposition::test_restToggleReachesService",
+          "description": "Route the settings REST toggle through the view model to the control service.",
+          "source": "tests/qml/tst_PageComposition.qml"
+        },
+        {
+          "name": "PageComposition::test_scenariosScrollingAndAction",
+          "description": "Keep scenario rows reachable by scrolling and forward execution intent.",
+          "source": "tests/qml/tst_PageComposition.qml"
+        }
+      ]
+    },
+    {
+      "id": "AuthPageLoads",
+      "description": "Create AuthPage with local test models and fail on QML creation errors or warnings.",
+      "features": [
+        "auth",
+        "ui"
+      ],
+      "layer": "ui",
+      "kind": "ctest",
+      "source": "tests/QmlPageLoadTest.cpp",
+      "requires": [
+        "BUILD_DESKTOP_APP"
+      ]
+    },
+    {
+      "id": "AuthCanceledPageLoads",
+      "description": "Create AuthCanceledPage with local test models and fail on QML creation errors or warnings.",
+      "features": [
+        "auth",
+        "ui"
+      ],
+      "layer": "ui",
+      "kind": "ctest",
+      "source": "tests/QmlPageLoadTest.cpp",
+      "requires": [
+        "BUILD_DESKTOP_APP"
+      ]
+    },
+    {
+      "id": "ErrorPageLoads",
+      "description": "Create ErrorPage with local test models and fail on QML creation errors or warnings.",
+      "features": [
+        "startup",
+        "ui"
+      ],
+      "layer": "ui",
+      "kind": "ctest",
+      "source": "tests/QmlPageLoadTest.cpp",
+      "requires": [
+        "BUILD_DESKTOP_APP"
+      ]
+    },
+    {
+      "id": "LoadingPageLoads",
+      "description": "Create LoadingPage with local test models and fail on QML creation errors or warnings.",
+      "features": [
+        "startup",
+        "auth",
+        "ui"
+      ],
+      "layer": "ui",
+      "kind": "ctest",
+      "source": "tests/QmlPageLoadTest.cpp",
+      "requires": [
+        "BUILD_DESKTOP_APP"
+      ]
+    },
+    {
+      "id": "MainPageLoads",
+      "description": "Create MainPage with local test models and fail on QML creation errors or warnings.",
+      "features": [
+        "home",
+        "ui"
+      ],
+      "layer": "ui",
+      "kind": "ctest",
+      "source": "tests/QmlPageLoadTest.cpp",
+      "requires": [
+        "BUILD_DESKTOP_APP"
+      ]
+    },
+    {
+      "id": "DevicePageLoads",
+      "description": "Create DevicePage with local test models and fail on QML creation errors or warnings.",
+      "features": [
+        "devices",
+        "ui"
+      ],
+      "layer": "ui",
+      "kind": "ctest",
+      "source": "tests/QmlPageLoadTest.cpp",
+      "requires": [
+        "BUILD_DESKTOP_APP"
+      ]
+    },
+    {
+      "id": "DevicesPageLoads",
+      "description": "Create DevicesPage with local test models and fail on QML creation errors or warnings.",
+      "features": [
+        "home",
+        "devices",
+        "ui"
+      ],
+      "layer": "ui",
+      "kind": "ctest",
+      "source": "tests/QmlPageLoadTest.cpp",
+      "requires": [
+        "BUILD_DESKTOP_APP"
+      ]
+    },
+    {
+      "id": "ScenariosPageLoads",
+      "description": "Create ScenariosPage with local test models and fail on QML creation errors or warnings.",
+      "features": [
+        "scenarios",
+        "ui"
+      ],
+      "layer": "ui",
+      "kind": "ctest",
+      "source": "tests/QmlPageLoadTest.cpp",
+      "requires": [
+        "BUILD_DESKTOP_APP"
+      ]
+    },
+    {
+      "id": "SettingsPageLoads",
+      "description": "Create SettingsPage with local test models and fail on QML creation errors or warnings.",
+      "features": [
+        "settings",
+        "rest",
+        "ui"
+      ],
+      "layer": "ui",
+      "kind": "ctest",
+      "source": "tests/QmlPageLoadTest.cpp",
+      "requires": [
+        "BUILD_DESKTOP_APP"
+      ]
+    },
+    {
+      "id": "TestTooling",
+      "description": "Check catalog validation, exact selection, discovery failures, and CTest execution semantics.",
+      "features": [
+        "testing"
+      ],
+      "layer": "tooling",
+      "kind": "ctest",
+      "source": "tests/TestCatalogToolTests.py"
+    },
+    {
+      "id": "TestCatalog",
+      "description": "Verify every configured CTest suite and discovered Qt case has current catalog metadata.",
+      "features": [
+        "testing"
+      ],
+      "layer": "tooling",
+      "kind": "ctest",
+      "source": "scripts/test_catalog.py"
+    }
+  ]
+}

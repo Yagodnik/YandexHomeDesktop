@@ -96,7 +96,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Test listing failed' }
           just build_dir=build config=${{ matrix.configuration }} tests-check
           if ($LASTEXITCODE -ne 0) { throw 'Test catalog check failed' }
-          just build_dir=build config=${{ matrix.configuration }} tests-run Serialization::FromJsonSimple QmlLayouts::PageComposition::test_deviceCommandThroughRealDelegate RestProcess::JsonConfigurationAndExplicitTokenAvoidSecretStorage
+          just build_dir=build config=${{ matrix.configuration }} tests-run Serialization::FromJsonSimple Serialization::CheckedDecodingRejectsInvalidFields QmlLayouts::PageComposition::test_deviceCommandThroughRealDelegate QmlLayouts::SettingsTransfer::test_exportAndConfirmedImport SettingsTransfer::ConfirmationCancellationAndAccountChanges RestProcess::JsonConfigurationAndExplicitTokenAvoidSecretStorage
           if ($LASTEXITCODE -ne 0) { throw 'Concrete test selection failed' }
 
       - name: Exercise console CLI recipe

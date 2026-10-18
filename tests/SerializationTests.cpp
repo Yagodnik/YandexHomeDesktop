@@ -1,5 +1,55 @@
 #include "SerializationTests.h"
 #include "serialization/Serialization.h"
+#include <limits>
+
+JSON_STRUCT(CheckedValues, (qint64, integer), (bool, enabled), (QVariantMap, state), (MyEnumeration, mode));
+
+void SerializationTests::CheckedDecodingRejectsInvalidFields() {
+  const QJsonObject valid{{"a", 1}, {"b", 2.5}, {"c", 3}};
+  QVERIFY(Serialization::TryFrom<TestStruct>(valid));
+  for (const auto& field : {"a", "b", "c"}) {
+    auto invalid = valid;
+    invalid.remove(field);
+    QVERIFY(!Serialization::TryFrom<TestStruct>(invalid));
+    for (const QJsonValue value : {QJsonValue{}, QJsonValue("1"), QJsonValue(true), QJsonValue(QJsonArray{})}) {
+      invalid = valid;
+      invalid[field] = value;
+      QVERIFY(!Serialization::TryFrom<TestStruct>(invalid));
+    }
+  }
+  for (const auto value : {1.5, 2147483648.0, -2147483649.0, 1e30}) {
+    auto invalid = valid;
+    invalid["a"] = value;
+    QVERIFY(!Serialization::TryFrom<TestStruct>(invalid));
+  }
+  QJsonObject nested{{"a", 1}, {"b", 2}, {"c", 3}, {"test", valid}};
+  QVERIFY(Serialization::TryFrom<TestStruct2>(nested));
+  auto child = valid; child.remove("c"); nested["test"] = child;
+  QVERIFY(!Serialization::TryFrom<TestStruct2>(nested));
+  QJsonObject list{{"d_value", 1}, {"test_array", QJsonArray{QJsonObject{{"id", 1}, {"name", "one"}}}}};
+  QVERIFY(Serialization::TryFrom<StructArray>(list));
+  list["test_array"] = QJsonArray{42};
+  QVERIFY(!Serialization::TryFrom<StructArray>(list));
+  list["test_array"] = QJsonObject{};
+  QVERIFY(!Serialization::TryFrom<StructArray>(list));
+}
+
+void SerializationTests::CheckedDecodingSupportsNestedTypesAndIntegerBoundaries() {
+  const QJsonObject object{{"integer", std::numeric_limits<qint64>::max()}, {"enabled", false},
+    {"state", QJsonObject{{"value", 42}}}, {"mode", "MyEnum::A"}, {"future_metadata", "ignored"}};
+  const auto result = Serialization::TryFrom<CheckedValues>(object);
+  QVERIFY(result);
+  QCOMPARE(result->integer, std::numeric_limits<qint64>::max());
+  QCOMPARE(result->enabled, false);
+  QCOMPARE(result->state.value("value").toInt(), 42);
+  QCOMPARE(result->mode, MyEnumeration::A);
+  for (const auto field : {"enabled", "state", "mode"}) {
+    auto invalid = object; invalid[field] = 42;
+    QVERIFY(!Serialization::TryFrom<CheckedValues>(invalid));
+  }
+  auto overflow = object; overflow["integer"] = 1e30;
+  QVERIFY(!Serialization::TryFrom<CheckedValues>(overflow));
+}
 
 void SerializationTests::FromJsonSimple() {
   QByteArray raw = R"({

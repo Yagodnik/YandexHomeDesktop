@@ -38,6 +38,8 @@
 #include "iot/properties/EventProperty.h"
 #include "iot/properties/FloatProperty.h"
 #include "models/DeviceModel/DeviceViewModel.h"
+#include "models/KeybindSettingsModel.h"
+#include "models/SettingsTransferModel.h"
 #include "models/DeviceModel/DeviceDataModel.h"
 #include "utils/IconsProvider.h"
 #include "utils/LogManager.h"
@@ -48,6 +50,13 @@ GuiApp::GuiApp(AppContext& app_context, QObject* parent)
   QQuickStyle::setStyle("Basic");
 
   const auto root_context = engine.rootContext();
+  root_context->setContextProperty(
+      "settingsTransferModel",
+      new SettingsTransferModel(new SettingsTransferService(app_context.settings, app_context.app_),
+                                app_context.yandex_account, app_context.app_));
+  root_context->setContextProperty(
+      "keybindSettingsModel",
+      new KeybindSettingsModel(app_context.settings, app_context.yandex_account, app_context.app_));
   const auto rest_control = new RestControlService(
       app_context.settings, RestConfiguration(app_context.startup_options), app_context.app_);
   const auto rest_model = new RestViewModel(rest_control, app_context.app_);
@@ -60,6 +69,14 @@ GuiApp::GuiApp(AppContext& app_context, QObject* parent)
   QObject::connect(app_context.authorization_service, &IAuthorizationService::logout, rest_model,
                    [rest_model] { rest_model->SetEnabled(false); });
   const auto themes = new Themes(app_context.app_);
+  connect(app_context.settings, &Settings::accountPreferencesChanged, themes,
+          [themes, app_context](const QString&) {
+            themes->SetTheme(app_context.settings->GetCurrentTheme());
+            if (app_context.settings->GetTrayModeEnabled())
+              app_context.platform_service->ShowOnlyInTray();
+            else
+              app_context.platform_service->ShowAsApp();
+          });
   const auto router = new Router(app_context.app_);
   const auto scenarios_view_model =
       new ScenariosViewModel(app_context.scenario_service, app_context.app_);
@@ -154,6 +171,10 @@ void GuiApp::RegisterFonts() {
 }
 
 void GuiApp::RegisterModels() {
+  qmlRegisterUncreatableType<SettingsTransferModel>(
+      "YandexHomeDesktop.ViewModels", 1, 0, "SettingsTransferModel", "Supplied by the application");
+  qmlRegisterUncreatableType<KeybindSettingsModel>(
+      "YandexHomeDesktop.ViewModels", 1, 0, "KeybindSettingsModel", "Supplied by the application");
   qmlRegisterUncreatableType<RestViewModel>("YandexHomeDesktop.ViewModels", 1, 0, "RestViewModel",
                                             "Supplied by the application");
   qmlRegisterUncreatableType<DeviceViewModel>("YandexHomeDesktop.ViewModels", 1, 0,

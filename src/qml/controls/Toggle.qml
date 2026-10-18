@@ -4,7 +4,9 @@ import YandexHomeDesktop.Capabilities as Capabilities
 
 Item {
   id: root
+  objectName: "deviceToggleControl"
   height: 48
+  readonly property string keybindTitle: toggleCapability.title
 
   Capabilities.Toggle {
     id: toggleCapability

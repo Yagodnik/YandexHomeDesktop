@@ -7,6 +7,7 @@ import Qt5Compat.GraphicalEffects
 Item {
   id: root
   height: 58
+  readonly property string keybindTitle: qsTr("Вкл/Выкл")
 
   Capabilities.OnOff {
     id: onOffCapability

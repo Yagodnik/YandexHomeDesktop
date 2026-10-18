@@ -54,6 +54,7 @@ function(yh_install_sdk)
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/YandexHome/iot/core"
     COMPONENT SDK FILES_MATCHING PATTERN "*.h")
   install(FILES "${PROJECT_SOURCE_DIR}/src/utils/Settings.h"
+    "${PROJECT_SOURCE_DIR}/src/utils/KeybindSettings.h"
     "${PROJECT_SOURCE_DIR}/src/utils/LogManager.h"
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/YandexHome/utils" COMPONENT SDK)
   get_property(YH_SDK_TARGETS GLOBAL PROPERTY YH_SDK_TARGETS)

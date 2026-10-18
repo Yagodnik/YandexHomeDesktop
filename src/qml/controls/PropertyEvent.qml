@@ -3,6 +3,7 @@ import YandexHomeDesktop.Components as Components
 import YandexHomeDesktop.Properties as Properties
 
 Components.PropertyValueCard {
+  objectName: "eventPropertyControl"
   iconSource: propertiesIcons.GetIcon(eventProperty.instance)
   valueText: eventProperty.formattedValue
   titleText: eventProperty.title + (model.updateTime !== null ? (" • " + model.updateTime) : "")

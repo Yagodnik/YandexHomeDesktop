@@ -2,9 +2,15 @@ import QtQuick
 import QtQuick.Layouts
 import YandexHomeDesktop.Ui as UI
 import YandexHomeDesktop.Capabilities as Capabilities
+import YandexHomeDesktop.Components as Components
+import YandexHomeDesktop.ViewModels
 
 Item {
   id: rangeControl
+  property bool showKeybinds: false
+  property KeybindSettingsModel keybindSettings: null
+  property var keybindTarget: ({})
+  property string keybindDeviceName
 
   // height: 74
   // height: 90
@@ -23,10 +29,11 @@ Item {
   // 90 - for random access, 74 - for slider
   property var properHeight: randomAccess ? 74 : 90
 
-  height: properHeight
+  height: properHeight + (showKeybinds ? 22 : 0)
 
   UI.CardSurface {
-    anchors.fill: parent
+    width: parent.width
+    height: rangeControl.properHeight
   }
 
   Item {
@@ -101,6 +108,7 @@ Item {
         }
 
         MouseArea {
+          objectName: "deviceRangeIncreaseAction"
           anchors.fill: parent
           cursorShape: Qt.PointingHandCursor
 
@@ -128,6 +136,7 @@ Item {
         }
 
         MouseArea {
+          objectName: "deviceRangeDecreaseAction"
           anchors.fill: parent
           cursorShape: Qt.PointingHandCursor
 
@@ -142,6 +151,7 @@ Item {
 
   UI.MySlider {
     id: rangeSlider
+    objectName: "deviceRangeSlider"
     anchors.top: top.bottom
     anchors.topMargin: 10
     anchors.left: parent.left
@@ -165,5 +175,31 @@ Item {
         capabilitiesModel.UseCapability(model.index, capability_action);
       }
     }
+  }
+
+  Components.CapabilityKeybind {
+    objectName: "rangeDecreaseKeybind"
+    visible: rangeControl.showKeybinds
+    width: Math.min(implicitWidth, (parent.width - 24) / 2)
+    x: rangeControl.randomAccess ? 8 : parent.width - width - 8
+    y: rangeControl.properHeight - 4
+    capabilityTitle: qsTr("%1: уменьшить").arg(rangeCapability.title)
+    actionLabel: "−"
+    keybindSettings: rangeControl.keybindSettings
+    deviceName: rangeControl.keybindDeviceName
+    bindingTarget: Object.assign({}, rangeControl.keybindTarget, { action: "decrease", value: "" })
+  }
+
+  Components.CapabilityKeybind {
+    objectName: "rangeIncreaseKeybind"
+    visible: rangeControl.showKeybinds
+    width: Math.min(implicitWidth, (parent.width - 24) / 2)
+    x: rangeControl.randomAccess ? parent.width - width - 8 : 8
+    y: rangeControl.properHeight - 4
+    capabilityTitle: qsTr("%1: увеличить").arg(rangeCapability.title)
+    actionLabel: "+"
+    keybindSettings: rangeControl.keybindSettings
+    deviceName: rangeControl.keybindDeviceName
+    bindingTarget: Object.assign({}, rangeControl.keybindTarget, { action: "increase", value: "" })
   }
 }

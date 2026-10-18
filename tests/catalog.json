@@ -66,6 +66,14 @@
         {
           "name": "JsonEnumNoValueTest",
           "description": "Exercise unknown-enum conversion without asserting the returned value (legacy smoke case)."
+        },
+        {
+          "name": "CheckedDecodingRejectsInvalidFields",
+          "description": "Reject missing or wrongly typed fields, fractional/overflowing integers, and malformed nested objects and arrays through checked decoding."
+        },
+        {
+          "name": "CheckedDecodingSupportsNestedTypesAndIntegerBoundaries",
+          "description": "Decode booleans, maps, enums, and exact 64-bit integers while preserving permissive decoding compatibility."
         }
       ]
     },
@@ -606,6 +614,10 @@
           "description": "Keep fixture settings isolated in memory across separate settings instances."
         },
         {
+          "name": "KeybindVisibilityPersistsAndResets",
+          "description": "Persist the keybind attachment visibility preference, notify once per change, and restore the visible default on reset."
+        },
+        {
           "name": "FixtureSignInAndLogoutStayLocal",
           "description": "Sign in/out locally without reading or producing a real OAuth token.",
           "requires": [
@@ -620,6 +632,10 @@
             "BUILD_DESKTOP_APP",
             "Debug"
           ]
+        },
+        {
+          "name": "DemoDevicesCoverEveryControlVariant",
+          "description": "Load every demo device through FixtureApi, keep home/detail attributes and room membership consistent, and cover all control variants with several controls per device."
         }
       ]
     },
@@ -1040,6 +1056,76 @@
           "name": "PageComposition::test_scenariosScrollingAndAction",
           "description": "Keep scenario rows reachable by scrolling and forward execution intent.",
           "source": "tests/qml/tst_PageComposition.qml"
+        },
+        {
+          "name": "DeviceControlsLayout::test_keybindAttachments",
+          "description": "Attach keybind badges only to capabilities, reserve their scroll extent, and restore the original layout when hidden.",
+          "source": "tests/qml/tst_DeviceControlsLayout.qml"
+        },
+        {
+          "name": "PageComposition::test_keybindPreviewDoesNotControlDevice",
+          "description": "Record, cancel, and clear a saved keybind through the real capability UI without dispatching device actions.",
+          "source": "tests/qml/tst_PageComposition.qml"
+        },
+        {
+          "name": "PageComposition::test_keybindVisibilitySetting",
+          "description": "Toggle the real settings preference through the settings page and immediately hide or show device capability attachments.",
+          "source": "tests/qml/tst_PageComposition.qml"
+        },
+        {
+          "name": "PageComposition::test_keybindEditorLayout",
+          "description": "Keep the shortcut editor within narrow windows in both themes, preserve Tab navigation, and close it when attachments are hidden.",
+          "source": "tests/qml/tst_PageComposition.qml"
+        },
+        {
+          "name": "CapabilityKeybinds::test_rangeBindings",
+          "description": "Keep independent decrease/increase UI assignments on absolute and relative ranges, hide both attachments, and preserve pointer action dispatch.",
+          "source": "tests/qml/tst_CapabilityKeybinds.qml"
+        },
+        {
+          "name": "CapabilityKeybinds::test_colorAndSceneBindings",
+          "description": "Assign keys independently to colors, temperatures, and scenes; retain drafts across tabs and hiding; preserve option click payloads.",
+          "source": "tests/qml/tst_CapabilityKeybinds.qml"
+        },
+        {
+          "name": "CapabilityKeybinds::test_modeBindings",
+          "description": "Assign keys to individual dropdown modes without selecting them, retain drafts on reopening, and preserve mode selection with attachments hidden.",
+          "source": "tests/qml/tst_CapabilityKeybinds.qml"
+        },
+        {
+          "name": "DemoDevices::test_demoDevicePages",
+          "description": "Load every bundled demo device through the real device page without QML warnings, exercise color/mode variants, and scroll to the properties in both themes and narrow windows.",
+          "source": "tests/qml/tst_DemoDevices.qml"
+        },
+        {
+          "name": "SavedKeybinds::test_crossDevicePersistenceAndConflicts",
+          "description": "Persist assignments across device page recreation and renaming; block cross-device duplicates inline; clear/reassign through the real UI in both themes.",
+          "source": "tests/qml/tst_SavedKeybinds.qml"
+        },
+        {
+          "name": "SavedKeybinds::test_sameDeviceConflictAndHidingPreservesAssignment",
+          "description": "Block duplicate keys on another action of the same device and preserve saved keys when attachments are hidden or pages recreated.",
+          "source": "tests/qml/tst_SavedKeybinds.qml"
+        },
+        {
+          "name": "SavedKeybinds::test_accountSwitchClosesEditorAndSeparatesAssignments",
+          "description": "Close in-progress editors on account switch/logout, isolate saved keys, and disable saving without an account.",
+          "source": "tests/qml/tst_SavedKeybinds.qml"
+        },
+        {
+          "name": "SettingsTransfer::test_exportAndConfirmedImport",
+          "description": "Export and load through real settings buttons/dialogs, cancel or confirm replacement, and restore saved keybinds at narrow widths in both themes.",
+          "source": "tests/qml/tst_SettingsTransfer.qml"
+        },
+        {
+          "name": "SettingsTransfer::test_unavailableAndFileError",
+          "description": "Disable transfer before account loading and display file errors without applying settings.",
+          "source": "tests/qml/tst_SettingsTransfer.qml"
+        },
+        {
+          "name": "PageComposition::test_keybindEditorAnimation",
+          "description": "Animate the real keybind editor opening/closing, retain cancellation and focus behavior when reopened, and save without dispatching device actions.",
+          "source": "tests/qml/tst_PageComposition.qml"
         }
       ]
     },
@@ -1191,6 +1277,86 @@
       "layer": "tooling",
       "kind": "ctest",
       "source": "scripts/test_catalog.py"
+    },
+    {
+      "id": "KeybindSettings",
+      "description": "Account-scoped saved keybind settings, stable action identities, canonical combinations, duplicate validation, and storage/account failures.",
+      "features": [
+        "settings",
+        "devices",
+        "keybinds"
+      ],
+      "layer": "unit",
+      "kind": "qt",
+      "source": "tests/KeybindSettingsTests.cpp",
+      "cases": [
+        {
+          "name": "PersistsAllActionIdentitiesAcrossRecreation",
+          "description": "Round-trip every supported action target through settings and retain assignments after device/label renaming."
+        },
+        {
+          "name": "RejectsDuplicatesAndReleasesReplacedOrClearedCombinations",
+          "description": "Reject duplicates across devices and actions; allow unchanged saves; release replaced/cleared combinations and isolate accounts."
+        },
+        {
+          "name": "NormalizesKeysAndRejectsInvalidAssignments",
+          "description": "Normalize letters, Enter, and keypad modifiers; reject modifier-only, reserved, or unsupported targets."
+        },
+        {
+          "name": "AccountLifecycleAndDemoIsolation",
+          "description": "Load and isolate assignments on account changes, disable edits after logout, keep demo stores in memory, and clear assignments on reset."
+        },
+        {
+          "name": "RejectsMalformedAndDuplicateStoredDocuments",
+          "description": "Reject malformed, unsupported-version, duplicate, or invalid stored bindings without overwriting them."
+        },
+        {
+          "name": "RechecksSettingsAtSaveAndReportsOwner",
+          "description": "Recheck duplicate ownership at save and report the existing device/action while keeping settings unchanged."
+        },
+        {
+          "name": "ReportsWriteFailuresWithoutChangingDisplayedAssignment",
+          "description": "Report settings write failure while retaining the displayed and persisted assignment state."
+        }
+      ]
+    },
+    {
+      "id": "SettingsTransfer",
+      "description": "Current-account settings export/import, confirmation, validation, atomic files, storage failures, and immediate home preference updates.",
+      "features": [
+        "settings",
+        "account",
+        "keybinds"
+      ],
+      "layer": "unit",
+      "kind": "qt",
+      "source": "tests/SettingsTransferTests.cpp",
+      "cases": [
+        {
+          "name": "RoundTripReplacesCurrentAccountAndPreservesOtherSettings",
+          "description": "Round-trip app preferences and current-account keybinds/home layout through disk without changing other accounts or REST configuration."
+        },
+        {
+          "name": "InvalidImportsLeavePreferencesUnchanged",
+          "description": "Reject malformed/unsupported files, duplicate assignments and account mismatches before mutation."
+        },
+        {
+          "name": "ConfirmationCancellationAndAccountChanges",
+          "description": "Keep imports pending until confirmation, discard on cancellation/account switch, and apply the validated snapshot."
+        },
+        {
+          "name": "FileErrorsAndAtomicExport",
+          "description": "Use atomic local-file export and report invalid/unreadable paths without changing saved files."
+        },
+        {
+          "name": "StorageFailurePreservesValuesAndNotifications",
+          "description": "Roll back settings cache after a write failure and emit no preference notifications."
+        },
+        {
+          "name": "ImportReloadsHomePreferencesImmediately",
+          "description": "Reload Favorites and collapse preferences through the real home model after importing settings."
+        }
+      ]
     }
   ]
 }

@@ -8,6 +8,8 @@ add_library(Models STATIC
         RestViewModel.h RestViewModel.cpp
         AccountModel.cpp
         AccountModel.h
+        KeybindSettingsModel.h KeybindSettingsModel.cpp
+        SettingsTransferModel.h SettingsTransferModel.cpp
         HomeViewModel.cpp
         HomeViewModel.h
         DeviceModel/DeviceController.cpp

@@ -7,6 +7,7 @@ TestCase {
   name: "DeviceControlsLayout"
   width: 600
   height: 600
+  visible: true
   when: windowShown
 
   ListModel { id: capabilities }
@@ -107,5 +108,32 @@ TestCase {
     verify(pane !== null);
     tryCompare(pane, "contentHeight", 16);
     compare(pane.contentWidth, pane.width);
+  }
+
+  function test_keybindAttachments() {
+    appendControl(capabilities, "capability", 58);
+    appendControl(properties, "property", 64);
+    const pane = createTemporaryObject(paneComponent, testCase, { showKeybinds: true });
+    const capability = findChild(pane, "capability");
+    const property = findChild(pane, "property");
+    const badge = findChild(capability.parent.parent, "capabilityKeybind");
+    const propertyBadge = findChild(property.parent.parent, "capabilityKeybind");
+    tryCompare(badge, "visible", true);
+    compare(propertyBadge.visible, false);
+    compare(capability.parent.parent.height, capability.height + 22);
+    verifyBottomGap(pane, "property");
+
+    pane.showKeybinds = false;
+    compare(badge.visible, false);
+    compare(capability.parent.parent.height, capability.height);
+    verifyBottomGap(pane, "property");
+    pane.showKeybinds = true;
+    properties.clear();
+    pane.width = 320;
+    tryVerify(function() {
+      const bottom = badge.mapToItem(pane.contentItem, 0, badge.height).y;
+      return Math.abs(pane.contentHeight - bottom - 12) < 0.1;
+    });
+    verify(badge.x >= 0 && badge.x + badge.width <= capability.width);
   }
 }

@@ -75,6 +75,58 @@ composes `AdvancedSettingsCard`. Its toggle emits intent to the view model;
 handles CLI controls. See [rest.md](rest.md). QML tests save enabled/disabled
 settings previews in the build directory for visual inspection.
 
+The settings page also receives a required `SettingsTransferModel` and composes
+`SettingsTransferCard` and `SettingsTransferDialogs`. Export and import use native
+JSON file pickers. The section heading sits above the card. Each `SettingActionRow`
+shows a title and description on the left and a compact action button on the right,
+using the same text styles and insets as the general settings.
+Import validates a snapshot before showing a replacement
+confirmation; cancellation and account changes discard that pending snapshot.
+`SettingsTransferService` owns bounded file reads and atomic `QSaveFile` exports,
+while `Settings` serializes and applies the preferences. Successful imports reload
+keybinds and home preferences and apply theme/tray changes immediately.
+
+`ui/AnimatedDialog.qml` supplies the 200 ms opacity and scale transitions used by
+the keybind editor and settings import confirmation, matching the error dialog's
+opening and closing motion. Popup transitions keep focus and closing lifecycle
+under Qt Quick Controls.
+
+The version-1 backup includes theme, tray mode, keybind visibility, and the current
+account's ID, keybinds, ordered Favorites, collapsed rooms, and Favorites collapse
+state. Import replaces those preferences for the same account and leaves other
+accounts intact. Authentication and machine-local REST configuration are excluded.
+Fixture mode uses the same file format with in-memory preferences.
+
+On/off and toggle controls expose a display-only `keybindTitle`.
+`DeviceAttributeSection` attaches one translucent `CapabilityKeybind` pill to
+these controls. Range controls receive `showKeybinds` through the loader and
+render separate decrease/increase pills. Color and temperature tiles, color
+scenes, and individual mode dropdown options each have a compact pill of their
+own. `CapabilityOptionTile` shares the color/scene presentation and keeps
+selection separate from keybind editing. Properties have no attachment.
+The shared pill opens `ui/KeybindEditor.qml` to replace or clear a key combination.
+Only the editor draft is local QML state. `KeybindSettingsModel` adapts the existing
+`Settings` storage for the UI; it does not register shortcuts or dispatch device
+commands. The editor explains that keyboard control is not available yet.
+`MyComboBox` exposes its normal ComboBox delegate contract and
+`popupWidth` so the mode control can supply options with keybind pills.
+`Settings.showKeybinds` persists the visibility preference (default on); the
+settings page wires `BasicSettingsCard.keybindsToggled` to it, and the device page
+passes it explicitly to the controls pane. Hiding the pills restores the original
+control spacing without clearing assignments.
+
+Assignments persist in a versioned JSON document under
+`accounts/<SHA256 account ID>/keybinds`, alongside the existing account preferences.
+Each target uses a device ID, capability type, instance, action, and optional value
+(a mode/scene ID, lowercase RGB hex color, or temperature). A canonical Qt key and
+modifier integer is stored; native display labels are formatted separately.
+Device and action names are saved only to identify a conflict in the editor.
+Both the editor and `Settings` reject a combination assigned to another target
+in the same account. Replacing or clearing an assignment releases its old
+combination. Invalid stored data and write failures leave assignments unchanged.
+Logout closes an open editor and clears the current projection while retaining
+saved account preferences. Fixture mode keeps assignments and visibility in memory.
+
 - For a new routed page, add the QML file to `resources/resources.qrc` under `/pages` and register its route in `Main.qml`. Add it to `YandexHomeDesktop.Pages` in `src/qml/CMakeLists.txt` if another QML file will import it as a module type.
 - For a new reusable component or visual primitive, add the QML file to the appropriate module in `src/qml/CMakeLists.txt` and import that module where needed.
 - For a new device control, register its `qrc:/controls/...` resource, map the corresponding capability or property type to that URL in `CapabilitiesModel` or `PropertiesModel`, and use an appropriate C++ QML type for action or value handling.

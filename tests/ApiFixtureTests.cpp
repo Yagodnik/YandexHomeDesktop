@@ -5,6 +5,7 @@
 #include <QTemporaryDir>
 #include <QTest>
 #include <QScopeGuard>
+#include <QSet>
 #include <optional>
 #include "api/debug/FixtureApi.h"
 #include "app/common/StartupOptions.h"
@@ -92,8 +93,73 @@ private slots:
     QVERIFY((*account)->default_avatar_id.isEmpty());
     QCOMPARE((*account)->id, QString("demo-user"));
     QVERIFY(device->has_value()); QCOMPARE((*device)->id, QString("lamp"));
-    QCOMPARE((*device)->capabilities.size(), 1);
+    QCOMPARE((*device)->capabilities.size(),
+      Fixture()["device_info"].toObject()["lamp"].toObject()["capabilities"].toArray().size());
     QVERIFY(execution->has_value());
+  }
+
+  void DemoDevicesCoverEveryControlVariant() {
+    QTemporaryDir directory;
+    const auto path = directory.filePath("fixture.json");
+    QVERIFY(Write(path, Fixture()));
+    FixtureApi api(path);
+    QVERIFY(api.Validate());
+    QObject context;
+    std::optional<ApiResult<UserInfo>> home;
+    api.GetUserInfo(&context, [&](auto result) { home = std::move(result); });
+    QTRY_VERIFY(home.has_value());
+    QVERIFY(home->has_value());
+    QSet<QString> variants;
+    for (const auto& summary : (*home)->devices) {
+      std::optional<ApiResult<DeviceInfo>> detail;
+      api.GetDeviceInfo(summary.id, &context, [&](auto result) { detail = std::move(result); });
+      QTRY_VERIFY(detail.has_value());
+      QVERIFY(detail->has_value());
+      const auto& device = detail->value();
+      QCOMPARE(device.name, summary.name);
+      QCOMPARE(device.type, summary.type);
+      QVERIFY2(device.capabilities.size() >= 3, qPrintable(summary.id));
+      QVERIFY2(!device.properties.isEmpty(), qPrintable(summary.id));
+      QCOMPARE(device.capabilities.size(), summary.capabilities.size());
+      QCOMPARE(device.properties.size(), summary.properties.size());
+      bool in_room = false;
+      for (const auto& room : (*home)->rooms) {
+        if (room.id == summary.room) {
+          QVERIFY(room.devices.contains(summary.id));
+          QCOMPARE(room.household_id, summary.household_id);
+          in_room = true;
+        }
+      }
+      QVERIFY(in_room);
+      for (qsizetype i = 0; i < device.capabilities.size(); ++i) {
+        const auto& capability = device.capabilities[i];
+        QCOMPARE(CapabilityType::AsString(capability.type), CapabilityType::AsString(summary.capabilities[i].type));
+        QCOMPARE(capability.state, summary.capabilities[i].state);
+        QCOMPARE(capability.parameters, summary.capabilities[i].parameters);
+        if (capability.type == CapabilityType::Range) {
+          variants.insert(capability.parameters["random_access"].toBool() ? "slider" : "relative");
+        } else if (capability.type == CapabilityType::ColorSetting) {
+          const auto& parameters = capability.parameters;
+          const auto model = parameters.value("color_model").toString();
+          if (!model.isEmpty()) variants.insert(model);
+          if (parameters.contains("temperature_k") && model.isEmpty()) variants.insert("temperature-only");
+          if (parameters.contains("color_scene") && model.isEmpty()) variants.insert("scene-only");
+        } else {
+          variants.insert(CapabilityType::AsString(capability.type));
+        }
+      }
+      for (qsizetype i = 0; i < device.properties.size(); ++i) {
+        const auto& property = device.properties[i];
+        const auto type = PropertyType::AsString(property.type);
+        QCOMPARE(type, PropertyType::AsString(summary.properties[i].type));
+        QCOMPARE(property.state, summary.properties[i].state);
+        QCOMPARE(property.parameters, summary.properties[i].parameters);
+        variants.insert(type);
+      }
+    }
+    QCOMPARE(variants, (QSet<QString>{"devices.capabilities.on_off", "devices.capabilities.toggle",
+      "devices.capabilities.mode", "devices.capabilities.video_stream", "slider", "relative",
+      "rgb", "hsv", "temperature-only", "scene-only", "devices.properties.float", "devices.properties.event"}));
   }
 
   void ReloadsFileAndReportsFailuresWithoutFallback() {
@@ -153,10 +219,36 @@ private slots:
   void DebugSettingsAreIsolatedInMemory() {
     Settings first(nullptr, true);
     first.SetCurrentTheme(1); first.SetTrayModeEnabled(true);
+    first.SetShowKeybinds(false);
     QCOMPARE(first.GetCurrentTheme(), 1); QVERIFY(first.GetTrayModeEnabled());
     Settings second(nullptr, true);
     QCOMPARE(second.GetCurrentTheme(), 0); QVERIFY(!second.GetTrayModeEnabled());
+    QVERIFY(second.GetShowKeybinds());
+    QVERIFY(!first.GetShowKeybinds());
     first.Reset(); QCOMPARE(first.GetCurrentTheme(), 0); QVERIFY(!first.GetTrayModeEnabled());
+    QVERIFY(first.GetShowKeybinds());
+  }
+
+  void KeybindVisibilityPersistsAndResets() {
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    const auto path = directory.filePath("settings.ini");
+    {
+      Settings settings(path);
+      QVERIFY(settings.GetShowKeybinds());
+      QSignalSpy changed(&settings, &Settings::showKeybindsChanged);
+      settings.SetShowKeybinds(false);
+      settings.SetShowKeybinds(false);
+      QCOMPARE(changed.size(), 1);
+    }
+    Settings restored(path);
+    QVERIFY(!restored.GetShowKeybinds());
+    QSignalSpy changed(&restored, &Settings::showKeybindsChanged);
+    restored.Reset();
+    QVERIFY(restored.GetShowKeybinds());
+    QCOMPARE(changed.size(), 1);
+    Settings reset(path);
+    QVERIFY(reset.GetShowKeybinds());
   }
 
 #ifdef YH_DEBUG_FAKE_API

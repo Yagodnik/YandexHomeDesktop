@@ -1,4 +1,4 @@
-add_library(AppRuntime SHARED Settings.cpp Settings.h LogManager.cpp LogManager.h)
+add_library(AppRuntime SHARED Settings.cpp Settings.h KeybindSettings.h LogManager.cpp LogManager.h)
 target_link_libraries(AppRuntime PUBLIC Qt6::Core)
 yh_shared_library(AppRuntime)
 

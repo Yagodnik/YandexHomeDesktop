@@ -54,6 +54,7 @@ private:
   void UpdateSnapshot();
   void UpdateSelection();
   void UpdateAccount();
+  void ReloadPreferences();
   void UpdateFavorites();
   HomeService* service_;
   Settings* settings_;

@@ -8,6 +8,7 @@ class DeviceViewModel final : public QObject {
   Q_OBJECT
   Q_PROPERTY(PageState state READ GetState NOTIFY stateChanged)
   Q_PROPERTY(bool isLoading READ IsLoading NOTIFY stateChanged)
+  Q_PROPERTY(QString deviceId READ GetDeviceId NOTIFY deviceIdChanged)
   Q_PROPERTY(CapabilitiesModel* capabilities READ GetCapabilities CONSTANT)
   Q_PROPERTY(PropertiesModel* properties READ GetProperties CONSTANT)
   Q_PROPERTY(DeviceDataModel* deviceData READ GetDeviceData CONSTANT)
@@ -23,6 +24,7 @@ public:
 
   [[nodiscard]] PageState GetState() const;
   [[nodiscard]] bool IsLoading() const;
+  [[nodiscard]] QString GetDeviceId() const;
   CapabilitiesModel* GetCapabilities();
   PropertiesModel* GetProperties();
   DeviceDataModel* GetDeviceData();
@@ -38,6 +40,7 @@ public:
   // Compatibility signals for consumers of the former deviceController context.
 signals:
   void stateChanged();
+  void deviceIdChanged();
   void loadRequestMade();
   void capabilitiesUpdateReady(const CapabilitiesList& capabilities);
   void propertiesUpdateReady(const PropertiesList& properties);
@@ -60,4 +63,5 @@ private:
   bool capabilities_ready_ = false;
   bool properties_ready_ = false;
   bool device_data_ready_ = false;
+  QString device_id_;
 };

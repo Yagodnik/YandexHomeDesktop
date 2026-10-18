@@ -47,15 +47,25 @@ DeviceViewModel::DeviceViewModel(DeviceService* service, QObject* parent, TimePr
 
 DeviceViewModel::PageState DeviceViewModel::GetState() const { return state_; }
 bool DeviceViewModel::IsLoading() const { return state_ == Loading; }
+QString DeviceViewModel::GetDeviceId() const { return device_id_; }
 CapabilitiesModel* DeviceViewModel::GetCapabilities() { return &capabilities_; }
 PropertiesModel* DeviceViewModel::GetProperties() { return &properties_; }
 DeviceDataModel* DeviceViewModel::GetDeviceData() { return &device_data_; }
-void DeviceViewModel::LoadDevice(const QString& device_id) { session_.LoadDevice(device_id); }
+void DeviceViewModel::LoadDevice(const QString& device_id) {
+  if (device_id_ != device_id) { device_id_ = device_id; emit deviceIdChanged(); }
+  session_.LoadDevice(device_id);
+}
 void DeviceViewModel::TryReloadDevice() { session_.TryReloadDevice(); }
 void DeviceViewModel::ContinuePollingIfNeeded() { session_.ContinuePollingIfNeeded(); }
 void DeviceViewModel::StopPolling() { session_.StopPolling(); }
-void DeviceViewModel::ForgetDevice() { session_.ForgetDevice(); }
-void DeviceViewModel::ResetSession() { session_.ResetSession(); }
+void DeviceViewModel::ForgetDevice() {
+  session_.ForgetDevice();
+  if (!device_id_.isEmpty()) { device_id_.clear(); emit deviceIdChanged(); }
+}
+void DeviceViewModel::ResetSession() {
+  session_.ResetSession();
+  if (!device_id_.isEmpty()) { device_id_.clear(); emit deviceIdChanged(); }
+}
 void DeviceViewModel::Refresh() { session_.Refresh(); }
 
 void DeviceViewModel::Reset() {

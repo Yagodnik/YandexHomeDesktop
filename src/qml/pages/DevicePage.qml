@@ -67,6 +67,10 @@ UI.PageSurface {
     }
 
     Components.DeviceControlsPane {
+      showKeybinds: settings.showKeybinds
+      keybindSettings: keybindSettingsModel
+      deviceId: deviceViewModel.deviceId
+      deviceName: deviceViewModel.deviceData.name
       capabilitiesSourceModel: deviceViewModel.capabilities
       propertiesSourceModel: deviceViewModel.properties
       capabilitiesTitle: qsTr("Умения")

@@ -5,6 +5,7 @@
 #include <QPointer>
 #include <QTest>
 #include <QLocalServer>
+#include <optional>
 #include "models/RestViewModel.h"
 #include "api/IHomeApi.h"
 
@@ -13,6 +14,7 @@ class QmlTestDeviceApi final : public QObject, public IHomeApi {
   Q_OBJECT
   Q_PROPERTY(int requestCount MEMBER request_count_ NOTIFY requested)
   Q_PROPERTY(QString deviceId MEMBER device_id_ NOTIFY requested)
+  Q_PROPERTY(QString deviceName MEMBER device_name_)
   Q_PROPERTY(bool withCapability MEMBER with_capability_)
   Q_PROPERTY(int actionCount MEMBER action_count_ NOTIFY actionSent)
   Q_PROPERTY(QString actionDeviceId MEMBER action_device_id_ NOTIFY actionSent)
@@ -40,6 +42,20 @@ public:
   void GetScenarios(QObject*, ApiResultHandler<QList<ScenarioObject>>) override { qFatal("Unexpected scenarios request"); }
   void ExecuteScenario(const QString&, QObject*, ApiResultHandler<void>) override { qFatal("Unexpected scenario action"); }
 
+  Q_INVOKABLE void SetCapability(const QString& kind, const QVariantMap& state, const QVariantMap& parameters) {
+    CapabilityObject capability{};
+    if (kind == "range") capability.type = CapabilityType::Range;
+    else if (kind == "color") capability.type = CapabilityType::ColorSetting;
+    else if (kind == "mode") capability.type = CapabilityType::Mode;
+    else qFatal("Unexpected test capability kind");
+    capability.retrievable = true;
+    capability.state = state;
+    capability.parameters = parameters;
+    capability_override_ = capability;
+  }
+  Q_INVOKABLE void ReplyFromFixture(const QVariantMap& device);
+  Q_INVOKABLE void SelectTestAccount(const QString& accountId) { emit testAccountSelected(accountId); }
+
   Q_INVOKABLE void ReplyDevice(bool success) {
     if (!context_ || !handler_) {
       qFatal("No pending device request");
@@ -55,7 +71,7 @@ public:
     }
     DeviceInfo info{};
     info.id = device_id_;
-    info.name = "Test device";
+    info.name = device_name_;
     info.status = Status::Ok;
     info.state = DeviceState::Online;
     if (with_capability_) {
@@ -65,6 +81,7 @@ public:
       capability.parameters = {{"instance", "on"}};
       info.capabilities = {capability};
     }
+    if (capability_override_) info.capabilities.append(*capability_override_);
     handler(info);
   }
   Q_INVOKABLE void reset() {
@@ -72,20 +89,27 @@ public:
     context_.clear();
     request_count_ = 0;
     device_id_.clear();
+    device_name_ = "Test device";
     with_capability_ = false;
+    capability_override_.reset();
     action_count_ = 0;
     action_device_id_.clear();
     action_state_.clear();
     emit requested();
     emit actionSent();
+    emit fixtureReset();
   }
 signals:
+  void fixtureReset();
+  void testAccountSelected(const QString& accountId);
   void requested();
   void actionSent();
 private:
   int request_count_ = 0;
   QString device_id_;
+  QString device_name_ = "Test device";
   bool with_capability_ = false;
+  std::optional<CapabilityObject> capability_override_;
   int action_count_ = 0;
   QString action_device_id_;
   QVariantMap action_state_;

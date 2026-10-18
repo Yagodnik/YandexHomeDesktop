@@ -43,6 +43,14 @@ target_link_libraries(ApiFixtureTests PRIVATE Qt6::Test FixtureApi AppStartup Ut
 target_compile_definitions(ApiFixtureTests PRIVATE FIXTURE_PATH="${CMAKE_SOURCE_DIR}/resources/debug/api.json")
 yh_add_test(NAME ApiFixture COMMAND ApiFixtureTests)
 
+add_executable(KeybindSettingsTests KeybindSettingsTests.cpp)
+target_link_libraries(KeybindSettingsTests PRIVATE Qt6::Test Models)
+yh_add_test(NAME KeybindSettings COMMAND KeybindSettingsTests)
+
+add_executable(SettingsTransferTests SettingsTransferTests.cpp)
+target_link_libraries(SettingsTransferTests PRIVATE Qt6::Test Models)
+yh_add_test(NAME SettingsTransfer COMMAND SettingsTransferTests)
+
 add_executable(ScenariosTests ScenariosTests.cpp)
 target_link_libraries(ScenariosTests PRIVATE Qt6::Test Models)
 yh_add_test(NAME Scenarios COMMAND ScenariosTests)

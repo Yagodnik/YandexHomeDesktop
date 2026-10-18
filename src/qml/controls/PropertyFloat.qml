@@ -3,6 +3,7 @@ import YandexHomeDesktop.Components as Components
 import YandexHomeDesktop.Properties as Properties
 
 Components.PropertyValueCard {
+  objectName: "floatPropertyControl"
   iconSource: propertiesIcons.GetIcon(floatProperty.instance)
   valueText: floatProperty.formattedValue
   titleText: floatProperty.title + (model.updateTime !== null ? (" • " + model.updateTime) : "")

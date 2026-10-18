@@ -25,7 +25,9 @@
         "name": "Office",
         "household_id": "home",
         "devices": [
-          "lamp"
+          "lamp",
+          "light-strip",
+          "camera"
         ]
       },
       {
@@ -33,7 +35,9 @@
         "name": "Living room",
         "household_id": "home",
         "devices": [
-          "socket"
+          "socket",
+          "climate",
+          "speaker"
         ]
       },
       {
@@ -41,7 +45,8 @@
         "name": "Cabin room",
         "household_id": "cabin",
         "devices": [
-          "cabin-lamp"
+          "cabin-lamp",
+          "scene-light"
         ]
       }
     ],
@@ -63,9 +68,105 @@
             },
             "parameters": {},
             "last_updated": 0
+          },
+          {
+            "type": "devices.capabilities.range",
+            "retrievable": true,
+            "state": {
+              "instance": "brightness",
+              "value": 60
+            },
+            "parameters": {
+              "instance": "brightness",
+              "random_access": true,
+              "range": {
+                "min": 0,
+                "max": 100,
+                "precision": 1
+              },
+              "unit": "unit.percent"
+            },
+            "last_updated": 0
+          },
+          {
+            "type": "devices.capabilities.color_setting",
+            "retrievable": true,
+            "state": {
+              "instance": "rgb",
+              "value": 15882587
+            },
+            "parameters": {
+              "color_model": "rgb",
+              "temperature_k": {
+                "min": 2000,
+                "max": 6500
+              },
+              "color_scene": {
+                "scenes": [
+                  {
+                    "id": "reading"
+                  },
+                  {
+                    "id": "night"
+                  },
+                  {
+                    "id": "party"
+                  },
+                  {
+                    "id": "alice"
+                  },
+                  {
+                    "id": "garland"
+                  },
+                  {
+                    "id": "romance"
+                  }
+                ]
+              }
+            },
+            "last_updated": 0
+          },
+          {
+            "type": "devices.capabilities.toggle",
+            "retrievable": true,
+            "state": {
+              "instance": "backlight",
+              "value": true
+            },
+            "parameters": {
+              "instance": "backlight"
+            },
+            "last_updated": 0
           }
         ],
-        "properties": []
+        "properties": [
+          {
+            "type": "devices.properties.float",
+            "retrievable": true,
+            "state": {
+              "instance": "power",
+              "value": 6.4
+            },
+            "parameters": {
+              "instance": "power",
+              "unit": "unit.watt"
+            },
+            "last_updated": 0
+          },
+          {
+            "type": "devices.properties.float",
+            "retrievable": true,
+            "state": {
+              "instance": "temperature",
+              "value": 24.5
+            },
+            "parameters": {
+              "instance": "temperature",
+              "unit": "unit.temperature.celsius"
+            },
+            "last_updated": 0
+          }
+        ]
       },
       {
         "id": "socket",
@@ -84,13 +185,458 @@
             },
             "parameters": {},
             "last_updated": 0
+          },
+          {
+            "type": "devices.capabilities.toggle",
+            "retrievable": true,
+            "state": {
+              "instance": "backlight",
+              "value": true
+            },
+            "parameters": {
+              "instance": "backlight"
+            },
+            "last_updated": 0
+          },
+          {
+            "type": "devices.capabilities.toggle",
+            "retrievable": true,
+            "state": {
+              "instance": "controls_locked",
+              "value": false
+            },
+            "parameters": {
+              "instance": "controls_locked"
+            },
+            "last_updated": 0
           }
         ],
-        "properties": []
+        "properties": [
+          {
+            "type": "devices.properties.float",
+            "retrievable": true,
+            "state": {
+              "instance": "voltage",
+              "value": 230
+            },
+            "parameters": {
+              "instance": "voltage",
+              "unit": "unit.volt"
+            },
+            "last_updated": 0
+          },
+          {
+            "type": "devices.properties.float",
+            "retrievable": true,
+            "state": {
+              "instance": "amperage",
+              "value": 0.12
+            },
+            "parameters": {
+              "instance": "amperage",
+              "unit": "unit.ampere"
+            },
+            "last_updated": 0
+          },
+          {
+            "type": "devices.properties.float",
+            "retrievable": true,
+            "state": {
+              "instance": "power",
+              "value": 27.6
+            },
+            "parameters": {
+              "instance": "power",
+              "unit": "unit.watt"
+            },
+            "last_updated": 0
+          }
+        ]
       },
       {
         "id": "cabin-lamp",
         "name": "Cabin lamp",
+        "type": "devices.types.light.lamp",
+        "room": "cabin-room",
+        "household_id": "cabin",
+        "aliases": [],
+        "capabilities": [
+          {
+            "type": "devices.capabilities.on_off",
+            "retrievable": true,
+            "state": {
+              "instance": "on",
+              "value": true
+            },
+            "parameters": {},
+            "last_updated": 0
+          },
+          {
+            "type": "devices.capabilities.range",
+            "retrievable": true,
+            "state": {
+              "instance": "brightness",
+              "value": 45
+            },
+            "parameters": {
+              "instance": "brightness",
+              "random_access": true,
+              "range": {
+                "min": 0,
+                "max": 100,
+                "precision": 1
+              },
+              "unit": "unit.percent"
+            },
+            "last_updated": 0
+          },
+          {
+            "type": "devices.capabilities.color_setting",
+            "retrievable": true,
+            "state": {
+              "instance": "temperature_k",
+              "value": 3400
+            },
+            "parameters": {
+              "temperature_k": {
+                "min": 2700,
+                "max": 6500
+              }
+            },
+            "last_updated": 0
+          }
+        ],
+        "properties": [
+          {
+            "type": "devices.properties.float",
+            "retrievable": true,
+            "state": {
+              "instance": "power",
+              "value": 4.2
+            },
+            "parameters": {
+              "instance": "power",
+              "unit": "unit.watt"
+            },
+            "last_updated": 0
+          }
+        ]
+      },
+      {
+        "id": "climate",
+        "name": "Climate unit",
+        "type": "devices.types.thermostat.ac",
+        "room": "living",
+        "household_id": "home",
+        "aliases": [],
+        "capabilities": [
+          {
+            "type": "devices.capabilities.on_off",
+            "retrievable": true,
+            "state": {
+              "instance": "on",
+              "value": true
+            },
+            "parameters": {},
+            "last_updated": 0
+          },
+          {
+            "type": "devices.capabilities.range",
+            "retrievable": true,
+            "state": {
+              "instance": "temperature",
+              "value": 23
+            },
+            "parameters": {
+              "instance": "temperature",
+              "random_access": true,
+              "range": {
+                "min": 16,
+                "max": 30,
+                "precision": 0.5
+              },
+              "unit": "unit.temperature.celsius"
+            },
+            "last_updated": 0
+          },
+          {
+            "type": "devices.capabilities.mode",
+            "retrievable": true,
+            "state": {
+              "instance": "thermostat",
+              "value": "cool"
+            },
+            "parameters": {
+              "instance": "thermostat",
+              "modes": [
+                {
+                  "value": "auto"
+                },
+                {
+                  "value": "cool"
+                },
+                {
+                  "value": "heat"
+                },
+                {
+                  "value": "dry"
+                },
+                {
+                  "value": "fan_only"
+                }
+              ]
+            },
+            "last_updated": 0
+          },
+          {
+            "type": "devices.capabilities.mode",
+            "retrievable": true,
+            "state": {
+              "instance": "fan_speed",
+              "value": "auto"
+            },
+            "parameters": {
+              "instance": "fan_speed",
+              "modes": [
+                {
+                  "value": "auto"
+                },
+                {
+                  "value": "low"
+                },
+                {
+                  "value": "medium"
+                },
+                {
+                  "value": "high"
+                },
+                {
+                  "value": "turbo"
+                }
+              ]
+            },
+            "last_updated": 0
+          },
+          {
+            "type": "devices.capabilities.toggle",
+            "retrievable": true,
+            "state": {
+              "instance": "ionization",
+              "value": false
+            },
+            "parameters": {
+              "instance": "ionization"
+            },
+            "last_updated": 0
+          }
+        ],
+        "properties": [
+          {
+            "type": "devices.properties.float",
+            "retrievable": true,
+            "state": {
+              "instance": "temperature",
+              "value": 22.5
+            },
+            "parameters": {
+              "instance": "temperature",
+              "unit": "unit.temperature.celsius"
+            },
+            "last_updated": 0
+          },
+          {
+            "type": "devices.properties.float",
+            "retrievable": true,
+            "state": {
+              "instance": "humidity",
+              "value": 46
+            },
+            "parameters": {
+              "instance": "humidity",
+              "unit": "unit.percent"
+            },
+            "last_updated": 0
+          }
+        ]
+      },
+      {
+        "id": "speaker",
+        "name": "Living room speaker",
+        "type": "devices.types.media_device.receiver",
+        "room": "living",
+        "household_id": "home",
+        "aliases": [],
+        "capabilities": [
+          {
+            "type": "devices.capabilities.on_off",
+            "retrievable": true,
+            "state": {
+              "instance": "on",
+              "value": true
+            },
+            "parameters": {},
+            "last_updated": 0
+          },
+          {
+            "type": "devices.capabilities.range",
+            "retrievable": true,
+            "state": {
+              "instance": "volume",
+              "value": 35
+            },
+            "parameters": {
+              "instance": "volume",
+              "random_access": false,
+              "range": {
+                "min": 0,
+                "max": 100,
+                "precision": 5
+              },
+              "unit": "unit.percent"
+            },
+            "last_updated": 0
+          },
+          {
+            "type": "devices.capabilities.toggle",
+            "retrievable": true,
+            "state": {
+              "instance": "mute",
+              "value": false
+            },
+            "parameters": {
+              "instance": "mute"
+            },
+            "last_updated": 0
+          },
+          {
+            "type": "devices.capabilities.mode",
+            "retrievable": true,
+            "state": {
+              "instance": "input_source",
+              "value": "one"
+            },
+            "parameters": {
+              "instance": "input_source",
+              "modes": [
+                {
+                  "value": "one"
+                },
+                {
+                  "value": "two"
+                },
+                {
+                  "value": "three"
+                }
+              ]
+            },
+            "last_updated": 0
+          }
+        ],
+        "properties": [
+          {
+            "type": "devices.properties.float",
+            "retrievable": true,
+            "state": {
+              "instance": "power",
+              "value": 12.8
+            },
+            "parameters": {
+              "instance": "power",
+              "unit": "unit.watt"
+            },
+            "last_updated": 0
+          }
+        ]
+      },
+      {
+        "id": "light-strip",
+        "name": "Color strip (HSV)",
+        "type": "devices.types.light.strip",
+        "room": "office",
+        "household_id": "home",
+        "aliases": [],
+        "capabilities": [
+          {
+            "type": "devices.capabilities.on_off",
+            "retrievable": true,
+            "state": {
+              "instance": "on",
+              "value": true
+            },
+            "parameters": {},
+            "last_updated": 0
+          },
+          {
+            "type": "devices.capabilities.range",
+            "retrievable": true,
+            "state": {
+              "instance": "brightness",
+              "value": 80
+            },
+            "parameters": {
+              "instance": "brightness",
+              "random_access": true,
+              "range": {
+                "min": 0,
+                "max": 100,
+                "precision": 1
+              },
+              "unit": "unit.percent"
+            },
+            "last_updated": 0
+          },
+          {
+            "type": "devices.capabilities.color_setting",
+            "retrievable": true,
+            "state": {
+              "instance": "hsv",
+              "value": {
+                "h": 210,
+                "s": 65,
+                "v": 80
+              }
+            },
+            "parameters": {
+              "color_model": "hsv",
+              "color_scene": {
+                "scenes": [
+                  {
+                    "id": "ocean"
+                  },
+                  {
+                    "id": "neon"
+                  },
+                  {
+                    "id": "jungle"
+                  },
+                  {
+                    "id": "romance"
+                  }
+                ]
+              }
+            },
+            "last_updated": 0
+          }
+        ],
+        "properties": [
+          {
+            "type": "devices.properties.float",
+            "retrievable": true,
+            "state": {
+              "instance": "power",
+              "value": 9.6
+            },
+            "parameters": {
+              "instance": "power",
+              "unit": "unit.watt"
+            },
+            "last_updated": 0
+          }
+        ]
+      },
+      {
+        "id": "scene-light",
+        "name": "Scene light",
         "type": "devices.types.light",
         "room": "cabin-room",
         "household_id": "cabin",
@@ -101,13 +647,142 @@
             "retrievable": true,
             "state": {
               "instance": "on",
-              "value": false
+              "value": true
             },
             "parameters": {},
             "last_updated": 0
+          },
+          {
+            "type": "devices.capabilities.color_setting",
+            "retrievable": true,
+            "state": {
+              "instance": "scene",
+              "value": "candle"
+            },
+            "parameters": {
+              "color_scene": {
+                "scenes": [
+                  {
+                    "id": "candle"
+                  },
+                  {
+                    "id": "dinner"
+                  },
+                  {
+                    "id": "rest"
+                  },
+                  {
+                    "id": "movie"
+                  },
+                  {
+                    "id": "fantasy"
+                  }
+                ]
+              }
+            },
+            "last_updated": 0
+          },
+          {
+            "type": "devices.capabilities.toggle",
+            "retrievable": true,
+            "state": {
+              "instance": "pause",
+              "value": false
+            },
+            "parameters": {
+              "instance": "pause"
+            },
+            "last_updated": 0
           }
         ],
-        "properties": []
+        "properties": [
+          {
+            "type": "devices.properties.float",
+            "retrievable": true,
+            "state": {
+              "instance": "power",
+              "value": 3.1
+            },
+            "parameters": {
+              "instance": "power",
+              "unit": "unit.watt"
+            },
+            "last_updated": 0
+          }
+        ]
+      },
+      {
+        "id": "camera",
+        "name": "Camera (unsupported video)",
+        "type": "devices.types.camera",
+        "room": "office",
+        "household_id": "home",
+        "aliases": [],
+        "capabilities": [
+          {
+            "type": "devices.capabilities.on_off",
+            "retrievable": true,
+            "state": {
+              "instance": "on",
+              "value": true
+            },
+            "parameters": {},
+            "last_updated": 0
+          },
+          {
+            "type": "devices.capabilities.toggle",
+            "retrievable": true,
+            "state": {
+              "instance": "backlight",
+              "value": false
+            },
+            "parameters": {
+              "instance": "backlight"
+            },
+            "last_updated": 0
+          },
+          {
+            "type": "devices.capabilities.video_stream",
+            "retrievable": true,
+            "state": {
+              "instance": "get_stream",
+              "value": {}
+            },
+            "parameters": {
+              "protocols": [
+                "hls"
+              ]
+            },
+            "last_updated": 0
+          }
+        ],
+        "properties": [
+          {
+            "type": "devices.properties.float",
+            "retrievable": true,
+            "state": {
+              "instance": "battery_level",
+              "value": 84
+            },
+            "parameters": {
+              "instance": "battery_level",
+              "unit": "unit.percent"
+            },
+            "last_updated": 0
+          },
+          {
+            "type": "devices.properties.event",
+            "retrievable": true,
+            "state": {
+              "instance": "motion",
+              "value": "not_detected"
+            },
+            "parameters": {
+              "instance": "motion"
+            },
+            "last_updated": 0
+          }
+        ]
       }
     ],
     "groups": [],
@@ -148,9 +823,105 @@
           },
           "parameters": {},
           "last_updated": 0
+        },
+        {
+          "type": "devices.capabilities.range",
+          "retrievable": true,
+          "state": {
+            "instance": "brightness",
+            "value": 60
+          },
+          "parameters": {
+            "instance": "brightness",
+            "random_access": true,
+            "range": {
+              "min": 0,
+              "max": 100,
+              "precision": 1
+            },
+            "unit": "unit.percent"
+          },
+          "last_updated": 0
+        },
+        {
+          "type": "devices.capabilities.color_setting",
+          "retrievable": true,
+          "state": {
+            "instance": "rgb",
+            "value": 15882587
+          },
+          "parameters": {
+            "color_model": "rgb",
+            "temperature_k": {
+              "min": 2000,
+              "max": 6500
+            },
+            "color_scene": {
+              "scenes": [
+                {
+                  "id": "reading"
+                },
+                {
+                  "id": "night"
+                },
+                {
+                  "id": "party"
+                },
+                {
+                  "id": "alice"
+                },
+                {
+                  "id": "garland"
+                },
+                {
+                  "id": "romance"
+                }
+              ]
+            }
+          },
+          "last_updated": 0
+        },
+        {
+          "type": "devices.capabilities.toggle",
+          "retrievable": true,
+          "state": {
+            "instance": "backlight",
+            "value": true
+          },
+          "parameters": {
+            "instance": "backlight"
+          },
+          "last_updated": 0
         }
       ],
-      "properties": []
+      "properties": [
+        {
+          "type": "devices.properties.float",
+          "retrievable": true,
+          "state": {
+            "instance": "power",
+            "value": 6.4
+          },
+          "parameters": {
+            "instance": "power",
+            "unit": "unit.watt"
+          },
+          "last_updated": 0
+        },
+        {
+          "type": "devices.properties.float",
+          "retrievable": true,
+          "state": {
+            "instance": "temperature",
+            "value": 24.5
+          },
+          "parameters": {
+            "instance": "temperature",
+            "unit": "unit.temperature.celsius"
+          },
+          "last_updated": 0
+        }
+      ]
     },
     "socket": {
       "status": "ok",
@@ -170,14 +941,463 @@
           },
           "parameters": {},
           "last_updated": 0
+        },
+        {
+          "type": "devices.capabilities.toggle",
+          "retrievable": true,
+          "state": {
+            "instance": "backlight",
+            "value": true
+          },
+          "parameters": {
+            "instance": "backlight"
+          },
+          "last_updated": 0
+        },
+        {
+          "type": "devices.capabilities.toggle",
+          "retrievable": true,
+          "state": {
+            "instance": "controls_locked",
+            "value": false
+          },
+          "parameters": {
+            "instance": "controls_locked"
+          },
+          "last_updated": 0
         }
       ],
-      "properties": []
+      "properties": [
+        {
+          "type": "devices.properties.float",
+          "retrievable": true,
+          "state": {
+            "instance": "voltage",
+            "value": 230
+          },
+          "parameters": {
+            "instance": "voltage",
+            "unit": "unit.volt"
+          },
+          "last_updated": 0
+        },
+        {
+          "type": "devices.properties.float",
+          "retrievable": true,
+          "state": {
+            "instance": "amperage",
+            "value": 0.12
+          },
+          "parameters": {
+            "instance": "amperage",
+            "unit": "unit.ampere"
+          },
+          "last_updated": 0
+        },
+        {
+          "type": "devices.properties.float",
+          "retrievable": true,
+          "state": {
+            "instance": "power",
+            "value": 27.6
+          },
+          "parameters": {
+            "instance": "power",
+            "unit": "unit.watt"
+          },
+          "last_updated": 0
+        }
+      ]
     },
     "cabin-lamp": {
       "status": "ok",
       "id": "cabin-lamp",
       "name": "Cabin lamp",
+      "type": "devices.types.light.lamp",
+      "state": "online",
+      "request_id": "fixture",
+      "message": "",
+      "capabilities": [
+        {
+          "type": "devices.capabilities.on_off",
+          "retrievable": true,
+          "state": {
+            "instance": "on",
+            "value": true
+          },
+          "parameters": {},
+          "last_updated": 0
+        },
+        {
+          "type": "devices.capabilities.range",
+          "retrievable": true,
+          "state": {
+            "instance": "brightness",
+            "value": 45
+          },
+          "parameters": {
+            "instance": "brightness",
+            "random_access": true,
+            "range": {
+              "min": 0,
+              "max": 100,
+              "precision": 1
+            },
+            "unit": "unit.percent"
+          },
+          "last_updated": 0
+        },
+        {
+          "type": "devices.capabilities.color_setting",
+          "retrievable": true,
+          "state": {
+            "instance": "temperature_k",
+            "value": 3400
+          },
+          "parameters": {
+            "temperature_k": {
+              "min": 2700,
+              "max": 6500
+            }
+          },
+          "last_updated": 0
+        }
+      ],
+      "properties": [
+        {
+          "type": "devices.properties.float",
+          "retrievable": true,
+          "state": {
+            "instance": "power",
+            "value": 4.2
+          },
+          "parameters": {
+            "instance": "power",
+            "unit": "unit.watt"
+          },
+          "last_updated": 0
+        }
+      ]
+    },
+    "climate": {
+      "status": "ok",
+      "id": "climate",
+      "name": "Climate unit",
+      "type": "devices.types.thermostat.ac",
+      "state": "online",
+      "request_id": "fixture",
+      "message": "",
+      "capabilities": [
+        {
+          "type": "devices.capabilities.on_off",
+          "retrievable": true,
+          "state": {
+            "instance": "on",
+            "value": true
+          },
+          "parameters": {},
+          "last_updated": 0
+        },
+        {
+          "type": "devices.capabilities.range",
+          "retrievable": true,
+          "state": {
+            "instance": "temperature",
+            "value": 23
+          },
+          "parameters": {
+            "instance": "temperature",
+            "random_access": true,
+            "range": {
+              "min": 16,
+              "max": 30,
+              "precision": 0.5
+            },
+            "unit": "unit.temperature.celsius"
+          },
+          "last_updated": 0
+        },
+        {
+          "type": "devices.capabilities.mode",
+          "retrievable": true,
+          "state": {
+            "instance": "thermostat",
+            "value": "cool"
+          },
+          "parameters": {
+            "instance": "thermostat",
+            "modes": [
+              {
+                "value": "auto"
+              },
+              {
+                "value": "cool"
+              },
+              {
+                "value": "heat"
+              },
+              {
+                "value": "dry"
+              },
+              {
+                "value": "fan_only"
+              }
+            ]
+          },
+          "last_updated": 0
+        },
+        {
+          "type": "devices.capabilities.mode",
+          "retrievable": true,
+          "state": {
+            "instance": "fan_speed",
+            "value": "auto"
+          },
+          "parameters": {
+            "instance": "fan_speed",
+            "modes": [
+              {
+                "value": "auto"
+              },
+              {
+                "value": "low"
+              },
+              {
+                "value": "medium"
+              },
+              {
+                "value": "high"
+              },
+              {
+                "value": "turbo"
+              }
+            ]
+          },
+          "last_updated": 0
+        },
+        {
+          "type": "devices.capabilities.toggle",
+          "retrievable": true,
+          "state": {
+            "instance": "ionization",
+            "value": false
+          },
+          "parameters": {
+            "instance": "ionization"
+          },
+          "last_updated": 0
+        }
+      ],
+      "properties": [
+        {
+          "type": "devices.properties.float",
+          "retrievable": true,
+          "state": {
+            "instance": "temperature",
+            "value": 22.5
+          },
+          "parameters": {
+            "instance": "temperature",
+            "unit": "unit.temperature.celsius"
+          },
+          "last_updated": 0
+        },
+        {
+          "type": "devices.properties.float",
+          "retrievable": true,
+          "state": {
+            "instance": "humidity",
+            "value": 46
+          },
+          "parameters": {
+            "instance": "humidity",
+            "unit": "unit.percent"
+          },
+          "last_updated": 0
+        }
+      ]
+    },
+    "speaker": {
+      "status": "ok",
+      "id": "speaker",
+      "name": "Living room speaker",
+      "type": "devices.types.media_device.receiver",
+      "state": "online",
+      "request_id": "fixture",
+      "message": "",
+      "capabilities": [
+        {
+          "type": "devices.capabilities.on_off",
+          "retrievable": true,
+          "state": {
+            "instance": "on",
+            "value": true
+          },
+          "parameters": {},
+          "last_updated": 0
+        },
+        {
+          "type": "devices.capabilities.range",
+          "retrievable": true,
+          "state": {
+            "instance": "volume",
+            "value": 35
+          },
+          "parameters": {
+            "instance": "volume",
+            "random_access": false,
+            "range": {
+              "min": 0,
+              "max": 100,
+              "precision": 5
+            },
+            "unit": "unit.percent"
+          },
+          "last_updated": 0
+        },
+        {
+          "type": "devices.capabilities.toggle",
+          "retrievable": true,
+          "state": {
+            "instance": "mute",
+            "value": false
+          },
+          "parameters": {
+            "instance": "mute"
+          },
+          "last_updated": 0
+        },
+        {
+          "type": "devices.capabilities.mode",
+          "retrievable": true,
+          "state": {
+            "instance": "input_source",
+            "value": "one"
+          },
+          "parameters": {
+            "instance": "input_source",
+            "modes": [
+              {
+                "value": "one"
+              },
+              {
+                "value": "two"
+              },
+              {
+                "value": "three"
+              }
+            ]
+          },
+          "last_updated": 0
+        }
+      ],
+      "properties": [
+        {
+          "type": "devices.properties.float",
+          "retrievable": true,
+          "state": {
+            "instance": "power",
+            "value": 12.8
+          },
+          "parameters": {
+            "instance": "power",
+            "unit": "unit.watt"
+          },
+          "last_updated": 0
+        }
+      ]
+    },
+    "light-strip": {
+      "status": "ok",
+      "id": "light-strip",
+      "name": "Color strip (HSV)",
+      "type": "devices.types.light.strip",
+      "state": "online",
+      "request_id": "fixture",
+      "message": "",
+      "capabilities": [
+        {
+          "type": "devices.capabilities.on_off",
+          "retrievable": true,
+          "state": {
+            "instance": "on",
+            "value": true
+          },
+          "parameters": {},
+          "last_updated": 0
+        },
+        {
+          "type": "devices.capabilities.range",
+          "retrievable": true,
+          "state": {
+            "instance": "brightness",
+            "value": 80
+          },
+          "parameters": {
+            "instance": "brightness",
+            "random_access": true,
+            "range": {
+              "min": 0,
+              "max": 100,
+              "precision": 1
+            },
+            "unit": "unit.percent"
+          },
+          "last_updated": 0
+        },
+        {
+          "type": "devices.capabilities.color_setting",
+          "retrievable": true,
+          "state": {
+            "instance": "hsv",
+            "value": {
+              "h": 210,
+              "s": 65,
+              "v": 80
+            }
+          },
+          "parameters": {
+            "color_model": "hsv",
+            "color_scene": {
+              "scenes": [
+                {
+                  "id": "ocean"
+                },
+                {
+                  "id": "neon"
+                },
+                {
+                  "id": "jungle"
+                },
+                {
+                  "id": "romance"
+                }
+              ]
+            }
+          },
+          "last_updated": 0
+        }
+      ],
+      "properties": [
+        {
+          "type": "devices.properties.float",
+          "retrievable": true,
+          "state": {
+            "instance": "power",
+            "value": 9.6
+          },
+          "parameters": {
+            "instance": "power",
+            "unit": "unit.watt"
+          },
+          "last_updated": 0
+        }
+      ]
+    },
+    "scene-light": {
+      "status": "ok",
+      "id": "scene-light",
+      "name": "Scene light",
       "type": "devices.types.light",
       "state": "online",
       "request_id": "fixture",
@@ -188,13 +1408,143 @@
           "retrievable": true,
           "state": {
             "instance": "on",
-            "value": false
+            "value": true
           },
           "parameters": {},
           "last_updated": 0
+        },
+        {
+          "type": "devices.capabilities.color_setting",
+          "retrievable": true,
+          "state": {
+            "instance": "scene",
+            "value": "candle"
+          },
+          "parameters": {
+            "color_scene": {
+              "scenes": [
+                {
+                  "id": "candle"
+                },
+                {
+                  "id": "dinner"
+                },
+                {
+                  "id": "rest"
+                },
+                {
+                  "id": "movie"
+                },
+                {
+                  "id": "fantasy"
+                }
+              ]
+            }
+          },
+          "last_updated": 0
+        },
+        {
+          "type": "devices.capabilities.toggle",
+          "retrievable": true,
+          "state": {
+            "instance": "pause",
+            "value": false
+          },
+          "parameters": {
+            "instance": "pause"
+          },
+          "last_updated": 0
         }
       ],
-      "properties": []
+      "properties": [
+        {
+          "type": "devices.properties.float",
+          "retrievable": true,
+          "state": {
+            "instance": "power",
+            "value": 3.1
+          },
+          "parameters": {
+            "instance": "power",
+            "unit": "unit.watt"
+          },
+          "last_updated": 0
+        }
+      ]
+    },
+    "camera": {
+      "status": "ok",
+      "id": "camera",
+      "name": "Camera (unsupported video)",
+      "type": "devices.types.camera",
+      "state": "online",
+      "request_id": "fixture",
+      "message": "",
+      "capabilities": [
+        {
+          "type": "devices.capabilities.on_off",
+          "retrievable": true,
+          "state": {
+            "instance": "on",
+            "value": true
+          },
+          "parameters": {},
+          "last_updated": 0
+        },
+        {
+          "type": "devices.capabilities.toggle",
+          "retrievable": true,
+          "state": {
+            "instance": "backlight",
+            "value": false
+          },
+          "parameters": {
+            "instance": "backlight"
+          },
+          "last_updated": 0
+        },
+        {
+          "type": "devices.capabilities.video_stream",
+          "retrievable": true,
+          "state": {
+            "instance": "get_stream",
+            "value": {}
+          },
+          "parameters": {
+            "protocols": [
+              "hls"
+            ]
+          },
+          "last_updated": 0
+        }
+      ],
+      "properties": [
+        {
+          "type": "devices.properties.float",
+          "retrievable": true,
+          "state": {
+            "instance": "battery_level",
+            "value": 84
+          },
+          "parameters": {
+            "instance": "battery_level",
+            "unit": "unit.percent"
+          },
+          "last_updated": 0
+        },
+        {
+          "type": "devices.properties.event",
+          "retrievable": true,
+          "state": {
+            "instance": "motion",
+            "value": "not_detected"
+          },
+          "parameters": {
+            "instance": "motion"
+          },
+          "last_updated": 0
+        }
+      ]
     }
   },
   "scenario_errors": {

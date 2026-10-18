@@ -6,6 +6,8 @@ import YandexHomeDesktop.Components as Components
 UI.PageSurface {
   id: root
   required property RestViewModel restModel
+  required property SettingsTransferModel transferModel
+  Components.SettingsTransferDialogs { id: transferDialogs; viewModel: root.transferModel }
   UI.ScrollColumn {
     objectName: "settingsContent"
     anchors.fill: parent
@@ -27,6 +29,9 @@ UI.PageSurface {
       themeTitle: qsTr("Тема")
       themeNames: [qsTr("Светлая"), qsTr("Тёмная")]
       currentTheme: settings.currentTheme
+      keybindsTitle: qsTr("Сочетания клавиш")
+      keybindsDescription: qsTr("Показывать кнопки назначения\nрядом с умениями устройств")
+      showKeybinds: settings.showKeybinds
       projectLinkText: qsTr("GitHub")
 
       onTrayModeToggled: function(enabled) {
@@ -43,7 +48,25 @@ UI.PageSurface {
         themes.SetTheme(index);
       }
 
+      onKeybindsToggled: function(visible) { settings.showKeybinds = visible; }
+
       onProjectLinkClicked: Qt.openUrlExternally("https://github.com/Yagodnik/YandexHomeDesktop")
+    }
+
+    UI.HeadingText {
+      objectName: "settingsTransferHeading"
+      text: qsTr("Перенос настроек")
+      width: parent.width
+    }
+
+    Components.SettingsTransferCard {
+      objectName: "settingsTransferCard"
+      width: parent.width
+      available: root.transferModel.available
+      statusText: root.transferModel.status
+      failed: root.transferModel.failed
+      onExportRequested: transferDialogs.openExport()
+      onImportRequested: transferDialogs.openImport()
     }
 
     UI.HeadingText {

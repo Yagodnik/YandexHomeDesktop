@@ -12,6 +12,7 @@ ComboBox {
   property color pressedColor: themes.accent2
   property color textColor: themes.controlText
   property color popupBackground: themes.headerBackground
+  property real popupWidth: width
 
   font.pixelSize: 14
   focusPolicy: Qt.StrongFocus
@@ -39,15 +40,49 @@ ComboBox {
 
   indicator: Item {}
 
+  delegate: Item {
+    width: root.popup.width
+    height: 32
+
+    Rectangle {
+      anchors.fill: parent
+      radius: 8
+      color: ListView.isCurrentItem ? themes.accent : "transparent"
+    }
+
+    Text {
+      text: model.displayText || modelData
+      anchors.verticalCenter: parent.verticalCenter
+      anchors.left: parent.left
+      anchors.leftMargin: 12
+      color: ListView.isCurrentItem ? themes.controlText2 : root.textColor
+      wrapMode: Text.WordWrap
+    }
+
+    MouseArea {
+      anchors.fill: parent
+      cursorShape: Qt.PointingHandCursor
+      hoverEnabled: true
+
+      onClicked: {
+        root.currentIndex = index
+        root.activated(index)
+        root.indexSelected(index)
+        root.popup.close()
+      }
+    }
+  }
+
   popup: Popup {
     y: root.height + 4
-    width: root.width
+    x: root.width - width
+    width: root.popupWidth
     padding: 0
     focus: true
 
     background: Item {
       id: shadowContainer
-      width: root.width
+      width: root.popup.width
       height: listView.implicitHeight
 
       Rectangle {
@@ -70,7 +105,7 @@ ComboBox {
 
     contentItem: ListView {
       id: listView
-      model: root.model
+      model: root.delegateModel
       clip: true
       interactive: true
       currentIndex: root.currentIndex
@@ -79,38 +114,6 @@ ComboBox {
       highlightMoveDuration: 0
       highlightRangeMode: ListView.ApplyRange
 
-      delegate: Item {
-        width: root.width
-        height: 32
-
-        Rectangle {
-          anchors.fill: parent
-          radius: 8
-          color: ListView.isCurrentItem ? themes.accent : "transparent"
-        }
-
-        Text {
-          text: model.displayText || modelData
-          anchors.verticalCenter: parent.verticalCenter
-          anchors.left: parent.left
-          anchors.leftMargin: 12
-          color: ListView.isCurrentItem ? themes.controlText2 : root.textColor
-          wrapMode: Text.WordWrap
-        }
-
-        MouseArea {
-          anchors.fill: parent
-          cursorShape: Qt.PointingHandCursor
-          hoverEnabled: true
-
-          onClicked: {
-            root.currentIndex = index
-            root.activated(index)
-            root.indexSelected(index)
-            root.popup.close()
-          }
-        }
-      }
     }
   }
 }

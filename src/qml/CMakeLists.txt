@@ -17,6 +17,8 @@ qt_add_qml_module(YandexHomeDesktopUi
         ui/MySlider.qml
         ui/ImageButton.qml
         ui/FavoriteButton.qml
+        ui/KeybindEditor.qml
+        ui/AnimatedDialog.qml
         ui/ErrorDialog.qml
         ui/Skeleton.qml
         ui/CardSurface.qml
@@ -35,6 +37,7 @@ qt_add_qml_module(YandexHomeDesktopUi
         ui/SettingSwitchRow.qml
         ui/SettingChoiceRow.qml
         ui/SettingLinkRow.qml
+        ui/SettingActionRow.qml
         ui/Shadow.qml
 )
 
@@ -71,6 +74,8 @@ qt_add_qml_module(YandexHomeDesktopComponents
         components/AdaptiveGrid.qml
         components/DeviceHeader.qml
         components/DeviceAttributeSection.qml
+        components/CapabilityKeybind.qml
+        components/CapabilityOptionTile.qml
         components/DeviceControlsPane.qml
         components/PropertyValueCard.qml
         components/SignInCard.qml
@@ -78,6 +83,8 @@ qt_add_qml_module(YandexHomeDesktopComponents
         components/HouseholdPicker.qml
         components/BasicSettingsCard.qml
         components/AdvancedSettingsCard.qml
+        components/SettingsTransferCard.qml
+        components/SettingsTransferDialogs.qml
         components/RoomsPane.qml
         components/ScenariosPane.qml
 )

@@ -114,6 +114,29 @@ your devices</translation>
     </message>
 </context>
 <context>
+    <name>CapabilityKeybind</name>
+    <message>
+        <location filename="../src/qml/components/CapabilityKeybind.qml" line="31"/>
+        <source>Изменить сочетание %1 для «%2»</source>
+        <translation>Edit shortcut %1 for “%2”</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/components/CapabilityKeybind.qml" line="32"/>
+        <source>Назначить сочетание для «%1»</source>
+        <translation>Set a shortcut for “%1”</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/components/CapabilityKeybind.qml" line="76"/>
+        <source>Назначить</source>
+        <translation>Set key</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/components/CapabilityKeybind.qml" line="105"/>
+        <source>Настройки сочетаний недоступны.</source>
+        <translation>Keybind settings are unavailable.</translation>
+    </message>
+</context>
+<context>
     <name>CapabilityMessages</name>
     <message>
         <location filename="../src/iot/core/Validation.cpp" line="14"/>
@@ -310,12 +333,12 @@ your devices</translation>
 <context>
     <name>ColorSetting</name>
     <message>
-        <location filename="../src/qml/controls/ColorSetting.qml" line="34"/>
+        <location filename="../src/qml/controls/ColorSetting.qml" line="43"/>
         <source>Цвета</source>
         <translation>Colors</translation>
     </message>
     <message>
-        <location filename="../src/qml/controls/ColorSetting.qml" line="35"/>
+        <location filename="../src/qml/controls/ColorSetting.qml" line="44"/>
         <source>Режимы</source>
         <translation>Modes</translation>
     </message>
@@ -1762,12 +1785,12 @@ your devices</translation>
         <translation>Try again</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/DevicePage.qml" line="72"/>
+        <location filename="../src/qml/pages/DevicePage.qml" line="76"/>
         <source>Умения</source>
         <translation>Capabilities</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/DevicePage.qml" line="73"/>
+        <location filename="../src/qml/pages/DevicePage.qml" line="77"/>
         <source>Свойства</source>
         <translation>Properties</translation>
     </message>
@@ -1835,6 +1858,95 @@ your devices</translation>
         <location filename="../src/qml/components/FavoriteDevicesList.qml" line="7"/>
         <source>В избранном нет устройств!</source>
         <translation>No favorite devices!</translation>
+    </message>
+</context>
+<context>
+    <name>KeybindEditor</name>
+    <message>
+        <source>Пробел</source>
+        <translation type="vanished">Space</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/ui/KeybindEditor.qml" line="61"/>
+        <source>Сочетание клавиш</source>
+        <translation>Keyboard shortcut</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/ui/KeybindEditor.qml" line="80"/>
+        <source>Нажмите клавишу или сочетание</source>
+        <translation>Press a key or combination</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/ui/KeybindEditor.qml" line="97"/>
+        <source>Нажмите клавиши…</source>
+        <translation>Press your keys…</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/ui/KeybindEditor.qml" line="111"/>
+        <source>Esc — отмена · Backspace — очистить</source>
+        <translation>Esc to cancel · Backspace to clear</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/ui/KeybindEditor.qml" line="119"/>
+        <source>Сочетание сохранится в настройках. Управление устройствами с клавиатуры пока недоступно.</source>
+        <translation>The keybind will be saved in settings. Keyboard control of devices is not available yet.</translation>
+    </message>
+    <message>
+        <source>Предпросмотр интерфейса. Сочетания пока не управляют устройствами. Назначение сбросится при уходе со страницы.</source>
+        <translation type="vanished">UI preview only. Shortcuts do not control devices yet. Assignments reset when you leave this page.</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/ui/KeybindEditor.qml" line="143"/>
+        <source>Очистить</source>
+        <translation>Clear</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/ui/KeybindEditor.qml" line="155"/>
+        <source>Отмена</source>
+        <translation>Cancel</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/ui/KeybindEditor.qml" line="161"/>
+        <source>Готово</source>
+        <translation>Done</translation>
+    </message>
+</context>
+<context>
+    <name>KeybindSettingsModel</name>
+    <message>
+        <location filename="../src/models/KeybindSettingsModel.cpp" line="81"/>
+        <source>Дождитесь загрузки аккаунта, чтобы сохранить сочетание.</source>
+        <translation>Wait for your account to load before saving a keybind.</translation>
+    </message>
+    <message>
+        <location filename="../src/models/KeybindSettingsModel.cpp" line="83"/>
+        <source>Не удалось прочитать сохранённые сочетания. Настройки не изменены.</source>
+        <translation>Could not read saved keybinds. Settings have not changed.</translation>
+    </message>
+    <message>
+        <location filename="../src/models/KeybindSettingsModel.cpp" line="86"/>
+        <source>Не удалось определить действие для этого сочетания.</source>
+        <translation>Could not identify the action for this keybind.</translation>
+    </message>
+    <message>
+        <location filename="../src/models/KeybindSettingsModel.cpp" line="95"/>
+        <source>%1 уже назначено устройству «%2». Выберите другое сочетание.</source>
+        <translation>%1 is already assigned to “%2”. Choose another keybind.</translation>
+    </message>
+    <message>
+        <location filename="../src/models/KeybindSettingsModel.cpp" line="97"/>
+        <source>%1 уже назначено: %2 — %3. Выберите другое сочетание.</source>
+        <translation>%1 is already assigned to %2 — %3. Choose another keybind.</translation>
+    </message>
+    <message>
+        <location filename="../src/models/KeybindSettingsModel.cpp" line="124"/>
+        <source>Не удалось сохранить это сочетание.</source>
+        <translation>Could not save this keybind.</translation>
+    </message>
+    <message>
+        <location filename="../src/models/KeybindSettingsModel.cpp" line="127"/>
+        <source>Не удалось сохранить настройки. Попробуйте снова.</source>
+        <translation>Could not save settings. Try again.</translation>
     </message>
 </context>
 <context>
@@ -1915,6 +2027,14 @@ Email: %2
     </message>
 </context>
 <context>
+    <name>Mode</name>
+    <message>
+        <location filename="../src/qml/controls/Mode.qml" line="129"/>
+        <source>%1: %2</source>
+        <translation>%1: %2</translation>
+    </message>
+</context>
+<context>
     <name>MyTab</name>
     <message>
         <location filename="../src/qml/ui/MyTab.qml" line="9"/>
@@ -1925,12 +2045,17 @@ Email: %2
 <context>
     <name>OnOff</name>
     <message>
-        <location filename="../src/qml/controls/OnOff.qml" line="65"/>
+        <location filename="../src/qml/controls/OnOff.qml" line="10"/>
+        <source>Вкл/Выкл</source>
+        <translation>On/Off</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/controls/OnOff.qml" line="66"/>
         <source>Вкл</source>
         <translation>On</translation>
     </message>
     <message>
-        <location filename="../src/qml/controls/OnOff.qml" line="110"/>
+        <location filename="../src/qml/controls/OnOff.qml" line="111"/>
         <source>Выкл</source>
         <translation>Off</translation>
     </message>
@@ -1941,6 +2066,19 @@ Email: %2
         <location filename="../src/models/DeviceModel/PropertiesModel.cpp" line="62"/>
         <source>Неизвестный тип свойства</source>
         <translation>Unknown property type</translation>
+    </message>
+</context>
+<context>
+    <name>Range</name>
+    <message>
+        <location filename="../src/qml/controls/Range.qml" line="186"/>
+        <source>%1: уменьшить</source>
+        <translation>%1: decrease</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/controls/Range.qml" line="199"/>
+        <source>%1: увеличить</source>
+        <translation>%1: increase</translation>
     </message>
 </context>
 <context>
@@ -2037,32 +2175,32 @@ Email: %2
 <context>
     <name>RestConfigurationMessages</name>
     <message>
-        <location filename="../src/app/rest/RestServerConfiguration.cpp" line="33"/>
+        <location filename="../src/app/rest/RestServerConfiguration.cpp" line="36"/>
         <source>Cannot read REST configuration file.</source>
         <translation>Cannot read REST configuration file.</translation>
     </message>
     <message>
-        <location filename="../src/app/rest/RestServerConfiguration.cpp" line="40"/>
+        <location filename="../src/app/rest/RestServerConfiguration.cpp" line="43"/>
         <source>REST configuration must be a JSON object no larger than 64 KiB.</source>
         <translation>REST configuration must be a JSON object no larger than 64 KiB.</translation>
     </message>
     <message>
-        <location filename="../src/app/rest/RestServerConfiguration.cpp" line="46"/>
+        <location filename="../src/app/rest/RestServerConfiguration.cpp" line="52"/>
         <source>Unknown REST configuration field.</source>
         <translation>Unknown REST configuration field.</translation>
     </message>
     <message>
-        <location filename="../src/app/rest/RestServerConfiguration.cpp" line="56"/>
+        <location filename="../src/app/rest/RestServerConfiguration.cpp" line="64"/>
         <source>REST host must be an IPv4/IPv6 address or localhost.</source>
         <translation>REST host must be an IPv4/IPv6 address or localhost.</translation>
     </message>
     <message>
-        <location filename="../src/app/rest/RestServerConfiguration.cpp" line="64"/>
+        <location filename="../src/app/rest/RestServerConfiguration.cpp" line="72"/>
         <source>REST port must be an integer from 1 to 65535.</source>
         <translation>REST port must be an integer from 1 to 65535.</translation>
     </message>
     <message>
-        <location filename="../src/app/rest/RestServerConfiguration.cpp" line="77"/>
+        <location filename="../src/app/rest/RestServerConfiguration.cpp" line="85"/>
         <source>oauth_token must be a nonempty string without whitespace or control characters.</source>
         <translation>oauth_token must be a nonempty string without whitespace or control characters.</translation>
     </message>
@@ -2302,66 +2440,210 @@ Email: %2
 <context>
     <name>SettingsPage</name>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="15"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="17"/>
         <source>Настройки</source>
         <translation>Settings</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="24"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="26"/>
         <source>Tray-режим</source>
         <translation>Tray mode</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="25"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="27"/>
         <source>Приложение будет отображаться
 как иконка на панели задач</source>
         <translation>The app will appear as an icon
 in the system tray</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="27"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="29"/>
         <source>Тема</source>
         <translation>Theme</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="28"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="30"/>
         <source>Светлая</source>
         <translation>Light</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="28"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="30"/>
         <source>Тёмная</source>
         <translation>Dark</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="30"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="32"/>
+        <source>Сочетания клавиш</source>
+        <translation>Keyboard shortcuts</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="33"/>
+        <source>Показывать кнопки назначения
+рядом с умениями устройств</source>
+        <translation>Show shortcut buttons
+next to device capabilities</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="35"/>
         <source>GitHub</source>
         <translation>GitHub</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="50"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="58"/>
+        <source>Перенос настроек</source>
+        <translation>Settings backup</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="73"/>
         <source>Дополнительно</source>
         <translation>Advanced</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="57"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="80"/>
         <source>REST API</source>
         <translation>REST API</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="58"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="81"/>
         <source>Локальный доступ для скриптов</source>
         <translation>Local access for scripts</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="61"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="84"/>
         <source>Подождите…</source>
         <translation>Please wait…</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="63"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="86"/>
         <source>Сервер остановлен</source>
         <translation>Server stopped</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsTransferCard</name>
+    <message>
+        <source>Перенос настроек</source>
+        <translation type="vanished">Settings backup</translation>
+    </message>
+    <message>
+        <source>Тема, tray-режим, сочетания клавиш и расположение избранного и комнат текущего аккаунта.</source>
+        <translation type="vanished">Theme, tray mode, keybinds, and Favorites and room layout for the current account.</translation>
+    </message>
+    <message>
+        <source>Сохранить в файл…</source>
+        <translation type="vanished">Export to file…</translation>
+    </message>
+    <message>
+        <source>Загрузить из файла…</source>
+        <translation type="vanished">Import from file…</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/components/SettingsTransferCard.qml" line="21"/>
+        <source>Экспорт настроек</source>
+        <translation>Export settings</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/components/SettingsTransferCard.qml" line="22"/>
+        <source>Сохранить настройки в JSON-файл.</source>
+        <translation>Save settings to a JSON file.</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/components/SettingsTransferCard.qml" line="23"/>
+        <source>Сохранить</source>
+        <translation>Save</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/components/SettingsTransferCard.qml" line="30"/>
+        <source>Импорт настроек</source>
+        <translation>Import settings</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/components/SettingsTransferCard.qml" line="31"/>
+        <source>Заменить настройки данными из файла.</source>
+        <translation>Replace settings with data from a file.</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/components/SettingsTransferCard.qml" line="32"/>
+        <source>Загрузить</source>
+        <translation>Load</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/components/SettingsTransferCard.qml" line="40"/>
+        <source>Дождитесь загрузки аккаунта.</source>
+        <translation>Wait for your account to load.</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsTransferDialogs</name>
+    <message>
+        <location filename="../src/qml/components/SettingsTransferDialogs.qml" line="16"/>
+        <source>Сохранить настройки</source>
+        <translation>Export settings</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/components/SettingsTransferDialogs.qml" line="19"/>
+        <location filename="../src/qml/components/SettingsTransferDialogs.qml" line="27"/>
+        <source>Настройки JSON (*.json)</source>
+        <translation>JSON settings (*.json)</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/components/SettingsTransferDialogs.qml" line="25"/>
+        <location filename="../src/qml/components/SettingsTransferDialogs.qml" line="70"/>
+        <source>Загрузить настройки</source>
+        <translation>Import settings</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/components/SettingsTransferDialogs.qml" line="57"/>
+        <source>Заменить настройки?</source>
+        <translation>Replace settings?</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/components/SettingsTransferDialogs.qml" line="63"/>
+        <source>Тема, tray-режим, сочетания клавиш и настройки избранного и комнат будут заменены данными из файла.</source>
+        <translation>Theme, tray mode, keybinds, and Favorites and room preferences will be replaced with settings from the file.</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/components/SettingsTransferDialogs.qml" line="76"/>
+        <source>Отмена</source>
+        <translation>Cancel</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsTransferModel</name>
+    <message>
+        <location filename="../src/models/SettingsTransferModel.cpp" line="38"/>
+        <source>Дождитесь загрузки аккаунта.</source>
+        <translation>Wait for your account to load.</translation>
+    </message>
+    <message>
+        <location filename="../src/models/SettingsTransferModel.cpp" line="46"/>
+        <source>Не удалось открыть или сохранить файл. Проверьте путь и права доступа.</source>
+        <translation>Could not open or save the file. Check the path and access permissions.</translation>
+    </message>
+    <message>
+        <location filename="../src/models/SettingsTransferModel.cpp" line="49"/>
+        <source>Файл содержит некорректные настройки или неподдерживаемую версию.</source>
+        <translation>The file contains invalid settings or an unsupported version.</translation>
+    </message>
+    <message>
+        <location filename="../src/models/SettingsTransferModel.cpp" line="52"/>
+        <source>Файл настроек принадлежит другому аккаунту.</source>
+        <translation>The settings file belongs to another account.</translation>
+    </message>
+    <message>
+        <location filename="../src/models/SettingsTransferModel.cpp" line="55"/>
+        <source>Не удалось прочитать или сохранить настройки.</source>
+        <translation>Could not read or save settings.</translation>
+    </message>
+    <message>
+        <location filename="../src/models/SettingsTransferModel.cpp" line="68"/>
+        <source>Настройки сохранены в файл.</source>
+        <translation>Settings exported.</translation>
+    </message>
+    <message>
+        <location filename="../src/models/SettingsTransferModel.cpp" line="93"/>
+        <source>Настройки загружены.</source>
+        <translation>Settings imported.</translation>
     </message>
 </context>
 <context>
@@ -2433,7 +2715,7 @@ in the system tray</translation>
 <context>
     <name>Unsupported</name>
     <message>
-        <location filename="../src/qml/controls/Unsupported.qml" line="17"/>
+        <location filename="../src/qml/controls/Unsupported.qml" line="23"/>
         <source>Неподдерживаемое умение: %1</source>
         <translation>Unsupported capability: %1</translation>
     </message>

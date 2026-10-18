@@ -3,6 +3,7 @@
 #include <QJsonObject>
 #include <QVariant>
 #include <type_traits>
+#include <optional>
 #include <boost/hana/define_struct.hpp>
 #include "Enumeration.h"
 
@@ -17,6 +18,10 @@ namespace Serialization {
 
   template<Serializable T>
   T From(const QJsonObject& data);
+
+  // Require every declared field and its JSON type; unknown fields are ignored.
+  template<Serializable T>
+  std::optional<T> TryFrom(const QJsonObject& data);
 
   template<Serializable T>
   QJsonObject To(const T& data);

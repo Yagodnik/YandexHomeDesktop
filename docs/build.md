@@ -16,6 +16,40 @@ On Windows, use the compiler kit that matches the Qt binaries and add `--config 
 
 Desktop CTest runs the C++ suite, creates all nine QML pages with local test models, and runs Qt Quick layout and interaction tests. The QML tests use the offscreen platform, software renderer, and bundled font/assets; they need no sign-in or live API access and run in both Windows and macOS CI. No OAuth configuration is included in the QML test executables.
 
+The same `QmlLayouts` runner checks saved capability keybinds: key capture,
+cancel/clear, page recreation, cross-device conflicts, account switching, no
+device action dispatch, attachment spacing, and the settings visibility toggle.
+`KeybindSettings` checks disk persistence, stable action identities, normalized
+combinations, duplicate prevention, invalid data, write failures, and demo
+isolation. `ApiFixture` checks persistence/reset and fixture isolation for the
+visibility preference. These run in the existing Windows CTest matrix;
+the feature adds no dependencies or generated source inputs.
+The same QML suite checks independent range decrease/increase assignments and
+per-color, temperature, scene, and mode assignments through the real controls,
+including normal pointer actions, tab changes, dropdown reopening, narrow
+windows, both themes, and hiding the attachments.
+It also verifies animated editor opening/closing and reopening after cancellation.
+The QML suite has a 90-second timeout to include these real dialog transitions
+on slower CI runners.
+
+`SettingsTransfer` verifies current-account settings backup/restore, full-file
+validation, duplicate detection, confirmation/cancellation, account changes,
+atomic file export, storage failures, and immediate home preference updates.
+`QmlLayouts::SettingsTransfer` exercises the real file-dialog wiring with local
+temporary JSON files and checks the card and confirmation at narrow widths in
+both themes. Native OS pickers are replaced by Qt's file picker in automated
+tests. Windows CI runs these suites and concrete selections in every existing
+Debug/Release/PCH job. The pickers use Qt Quick Dialogs from the existing desktop
+Qt installation, without additional external dependencies.
+
+Settings use the serialization engine's `TryFrom<T>` for checked decoding:
+declared fields are required, scalar JSON types and numeric ranges are validated,
+and nested structs/lists are checked recursively. Unknown fields remain ignored,
+and the existing permissive `From<T>` behavior is unchanged. The `Serialization`
+suite checks missing/wrong types, fractional/overflowing integers, nesting, and
+64-bit boundaries. This also removes repeated JSON field schemas from keybind
+settings validation.
+
 `Authorization` tests session restoration, sign-in, storage failures, cancellation, stale completions, logout ordering, and the QML model using injected stores and flows. It links the Qt Core authentication library and runs in portable builds too, without NetworkAuth, QtKeychain, credentials, a browser, or a callback listener. Desktop `OAuthAdapter` tests configuration validation and lazy setup failures without live OAuth or Keychain access. Windows and macOS CI embed `resources/auth/example.json` and run these checks with the rest of CTest. The pinned dependency versions and clean-build commands above also cover the new targets. See [authorization-architecture.md](authorization-architecture.md) for the dependency and lifetime contracts.
 
 The `Scenarios` test covers loading, execution, refresh, and session reset through a fake `IHomeApi`. Desktop builds also exercise the scenarios page with real mouse clicks; portable builds run the same service and view model checks without Qt Quick.
@@ -43,6 +77,27 @@ YandexHomeCli --fake-api --list-devices
 On macOS the executable is `<build-dir>/YandexHomeDesktop.app/Contents/MacOS/YandexHomeDesktop`; on Windows it is `<build-dir>/YandexHomeDesktop.exe`. Each executable accepts fixture flags: the GUI opens its UI, the CLI executes a command, and REST serves in the foreground. Release builds reject the flags and do not link the fixture API or bundle its data.
 
 Copy `resources/debug/api.json` as the starting point for a custom fixture. `user_info` contains the usual home API response with devices, rooms, households, and scenarios. `account_info` provides a dummy display name, email, and stable `id` for account-specific room/favorite preferences. `device_info` maps device IDs to device-detail API responses. `latency_ms` controls the queued response delay (0–60000 ms). `scenario_errors` maps scenario IDs to execution failure messages; other active scenarios succeed locally. Set `user_info.status` to `error` and supply `message` to exercise loading failures.
+
+The bundled demo includes eight devices, each with several controls and sensor
+readings. Home-list attributes and device-detail responses contain the same data.
+
+| Device | Control examples |
+| --- | --- |
+| Desk lamp | On/off, brightness slider, RGB colors, white temperatures, scenes, backlight toggle |
+| Reading socket | On/off, backlight and child-lock toggles, voltage/current/power readings |
+| Cabin lamp | On/off, brightness, white temperatures without RGB colors |
+| Climate unit | On/off, fractional temperature slider, thermostat and fan-speed modes, ionization toggle, temperature/humidity readings |
+| Living room speaker | On/off, relative volume (+/−), mute toggle, input-source modes |
+| Color strip (HSV) | On/off, brightness, HSV colors and scenes without white temperatures |
+| Scene light | On/off, scene-only color control, pause toggle |
+| Camera (unsupported video) | On/off, backlight, unsupported video-stream capability, battery and motion readings |
+
+`ApiFixture::DemoDevicesCoverEveryControlVariant` checks fixture coverage and
+consistency. `QmlLayouts::DemoDevices::test_demoDevicePages` bundles the same JSON
+into its test executable and opens every device at 320/350 px in both themes,
+including mode lists, scene tabs, unsupported content, and scrolling to readings.
+These run in the existing Windows Debug/Release CTest matrix; the regular app
+continues to bundle demo data only in Debug builds.
 
 Capability and property entries use the API fields, including `type`, `retrievable`, and `last_updated`. Omit the arrays or use empty arrays when those attributes are not needed.
 

@@ -1,14 +1,20 @@
 import QtQuick
 import QtQuick.Controls
 import YandexHomeDesktop.Components as Components
+import YandexHomeDesktop.ViewModels
 
 Flickable {
   id: root
+  objectName: "deviceControlsPane"
 
   property var capabilitiesSourceModel: null
   property var propertiesSourceModel: null
   property string capabilitiesTitle
   property string propertiesTitle
+  property bool showKeybinds: false
+  property KeybindSettingsModel keybindSettings: null
+  property string deviceId
+  property string deviceName
   property int topPadding: 4
   property int bottomPadding: 12
 
@@ -41,6 +47,10 @@ Flickable {
       width: parent.width
       title: root.capabilitiesTitle
       sourceModel: root.capabilitiesSourceModel
+      showKeybinds: root.showKeybinds
+      keybindSettings: root.keybindSettings
+      deviceId: root.deviceId
+      deviceName: root.deviceName
     }
 
     Components.DeviceAttributeSection {

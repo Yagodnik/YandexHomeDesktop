@@ -16,6 +16,11 @@ HomeViewModel::HomeViewModel(HomeService* service, Settings* settings, AccountMo
   if (account_) {
     connect(account_, &AccountModel::dataLoaded, this, &HomeViewModel::UpdateAccount);
   }
+  if (settings_) {
+    connect(settings_, &Settings::accountPreferencesChanged, this, [this](const QString& id) {
+      if (id == account_id_) ReloadPreferences();
+    });
+  }
   UpdateAccount();
   UpdateSnapshot();
   UpdateSelection();
@@ -68,6 +73,11 @@ void HomeViewModel::UpdateAccount() {
   const auto id = account_ ? account_->GetAccountId() : QString{};
   if (account_id_ == id) { return; }
   account_id_ = id;
+  ReloadPreferences();
+}
+
+void HomeViewModel::ReloadPreferences() {
+  const auto& id = account_id_;
   favorite_ids_ = settings_ ? settings_->GetFavoriteDevices(id) : QStringList{};
   collapsed_room_ids_ = settings_ ? settings_->GetCollapsedRooms(id) : QStringList{};
   const bool favorites_collapsed = settings_ && settings_->GetFavoritesCollapsed(id);

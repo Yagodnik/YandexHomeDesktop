@@ -973,7 +973,8 @@
         "auth",
         "settings",
         "scenarios",
-        "rest"
+        "rest",
+        "shortcuts"
       ],
       "layer": "ui",
       "kind": "quick",
@@ -1126,6 +1127,31 @@
           "name": "PageComposition::test_keybindEditorAnimation",
           "description": "Animate the real keybind editor opening/closing, retain cancellation and focus behavior when reopened, and save without dispatching device actions.",
           "source": "tests/qml/tst_PageComposition.qml"
+        },
+        {
+          "name": "SavedKeybinds::test_recordingWaitsForShortcutRelease",
+          "description": "Block capture until the real shortcut controller confirms release, then save through the actual editor.",
+          "source": "tests/qml/tst_SavedKeybinds.qml"
+        },
+        {
+          "name": "PageComposition::test_shortcutSettingsReachController",
+          "description": "Route enable and background switches through the settings page into the real shortcut controller.",
+          "source": "tests/qml/tst_PageComposition.qml"
+        },
+        {
+          "name": "ScenarioKeybinds::test_editPersistClearAndRunByStableId",
+          "description": "Record, cancel, persist, and clear scenario bindings at narrow widths in both themes while play uses the stable scenario ID.",
+          "source": "tests/qml/tst_ScenarioKeybinds.qml"
+        },
+        {
+          "name": "ScenarioKeybinds::test_deviceAndScenarioConflictsAndInactiveEditing",
+          "description": "Share conflicts between devices and scenarios and allow editing inactive scenarios without executing them.",
+          "source": "tests/qml/tst_ScenarioKeybinds.qml"
+        },
+        {
+          "name": "ScenarioKeybinds::test_hideAndAccountSwitchPreserveAssignmentsAndCloseEditor",
+          "description": "Hide scenario badges and switch accounts while closing drafts and preserving account-specific bindings.",
+          "source": "tests/qml/tst_ScenarioKeybinds.qml"
         }
       ]
     },
@@ -1284,7 +1310,8 @@
       "features": [
         "settings",
         "devices",
-        "keybinds"
+        "keybinds",
+        "scenarios"
       ],
       "layer": "unit",
       "kind": "qt",
@@ -1317,6 +1344,18 @@
         {
           "name": "ReportsWriteFailuresWithoutChangingDisplayedAssignment",
           "description": "Report settings write failure while retaining the displayed and persisted assignment state."
+        },
+        {
+          "name": "ScenarioIdentityPersistenceAndSharedDeviceConflicts",
+          "description": "Persist scenario IDs independently of device IDs and names, share key conflicts, and transfer mixed bindings."
+        },
+        {
+          "name": "LegacyDeviceStorageAndBackupsUpgradeWithoutLosingAssignments",
+          "description": "Read version-1 device settings and backups and write version 2 while retaining assignments."
+        },
+        {
+          "name": "RejectsAmbiguousScenarioTargetsAndMalformedVersionTwo",
+          "description": "Reject mixed target identities, malformed version-2 fields, and scenario targets in legacy backups without changing settings."
         }
       ]
     },
@@ -1492,6 +1531,183 @@
         {
           "name": "IdlePartialRequestExpiresWithoutDispatch",
           "description": "Disconnect stalled partial frames and continue serving subsequent valid requests."
+        }
+      ]
+    },
+    {
+      "id": "Shortcuts",
+      "description": "Global shortcut registration, safe device dispatch, account configuration and client leases.",
+      "features": [
+        "shortcuts",
+        "devices",
+        "workers",
+        "scenarios"
+      ],
+      "layer": "unit",
+      "kind": "qt",
+      "source": "tests/ShortcutTests.cpp",
+      "cases": [
+        {
+          "name": "SavedBindingDispatchesFreshToggleOncePerDevice",
+          "description": "Saved Binding Dispatches Fresh Toggle Once Per Device."
+        },
+        {
+          "name": "ActionPayloads",
+          "description": "Action Payloads."
+        },
+        {
+          "name": "InvalidFreshSnapshotsNeverWrite",
+          "description": "Invalid Fresh Snapshots Never Write."
+        },
+        {
+          "name": "UnsupportedSavedValueIsValidatedAgainstCurrentDevice",
+          "description": "Unsupported Saved Value Is Validated Against Current Device."
+        },
+        {
+          "name": "ReloadPauseAndStopCancelPendingCallbacks",
+          "description": "Reload Pause And Stop Cancel Pending Callbacks."
+        },
+        {
+          "name": "IdempotentHeartbeatKeepsNativeRegistrationAndPendingCommand",
+          "description": "Idempotent Heartbeat Keeps Native Registration And Pending Command."
+        },
+        {
+          "name": "RegistrationConflictsAreReportedWithoutDisablingOtherBindings",
+          "description": "Registration Conflicts Are Reported Without Disabling Other Bindings."
+        },
+        {
+          "name": "InvalidConfigurationIsAtomic",
+          "description": "Invalid Configuration Is Atomic."
+        },
+        {
+          "name": "LeasesStopAbandonedForegroundWorkerAndResumeBackgroundRecording",
+          "description": "Leases Stop Abandoned Foreground Worker And Resume Background Recording."
+        },
+        {
+          "name": "MultipleGuiLeasesReleaseIndependently",
+          "description": "Multiple Gui Leases Release Independently."
+        },
+        {
+          "name": "UnconfiguredWorkerAlsoExpiresAndShutdownRejectsReconfiguration",
+          "description": "Unconfigured Worker Also Expires And Shutdown Rejects Reconfiguration."
+        },
+        {
+          "name": "ErrorsTimeoutsInlineCompletionAndServiceDestruction",
+          "description": "Errors Timeouts Inline Completion And Service Destruction."
+        },
+        {
+          "name": "DifferentDevicesCanRunIndependentlyAndErrorsReleaseGuard",
+          "description": "Different Devices Can Run Independently And Errors Release Guard."
+        },
+        {
+          "name": "MachinePreferencesArePersistentAndExcludedFromAccountBackup",
+          "description": "Machine Preferences Are Persistent And Excluded From Account Backup."
+        },
+        {
+          "name": "FailedNativeReleaseBlocksRecordingAndLateActivations",
+          "description": "Refuse editor acknowledgement when native unregister fails and reject retired activation callbacks."
+        },
+        {
+          "name": "RetiredNativeCallbacksCannotDispatchAfterReloadOrDestruction",
+          "description": "Ignore queued native activations after bindings are replaced or the runtime is destroyed."
+        },
+        {
+          "name": "StopHandlersMayDestroyRuntimeDuringIpcCompletion",
+          "description": "Allow stop or final client release callbacks to destroy the runtime before its IPC handler returns."
+        },
+        {
+          "name": "ScenarioShortcutsValidateFreshStateAndHaveIndependentGuards",
+          "description": "Run a freshly validated active scenario with one pending request per scenario and independent device guards."
+        },
+        {
+          "name": "MissingInactiveAndFailedScenariosNeverExecute",
+          "description": "Reject unavailable, inactive, and failed scenario lookups and release the pending guard."
+        },
+        {
+          "name": "ScenarioReloadPauseAndStopCancelBothExecutionPhases",
+          "description": "Cancel scenario lookup and execution contexts on reload, recording pause, and worker stop; ignore late callbacks."
+        },
+        {
+          "name": "InlineScenarioResultsAndReentrantDeadlineRespectCancellation",
+          "description": "Handle synchronous scenario results and prevent a late lookup from dispatching reentrantly at the deadline."
+        },
+        {
+          "name": "WorkerAcceptsLegacyDeviceBindingsAndRejectsDuplicateScenarioTargets",
+          "description": "Accept legacy device IPC bindings and reject duplicate scenario targets without replacing active registrations."
+        }
+      ]
+    },
+    {
+      "id": "ShortcutProcess",
+      "description": "Installed shortcut worker and GUI controller startup, recording, reload, logout and detached shutdown.",
+      "features": [
+        "shortcuts",
+        "workers",
+        "startup",
+        "scenarios"
+      ],
+      "layer": "integration",
+      "kind": "qt",
+      "source": "tests/ShortcutProcessTests.cpp",
+      "requires": [
+        "BUILD_SHORTCUTS_APP"
+      ],
+      "cases": [
+        {
+          "name": "HelpAndInvalidArgumentsDoNotNeedGuiOrCredentials",
+          "description": "Help And Invalid Arguments Do Not Need Gui Or Credentials."
+        },
+        {
+          "name": "GuiControllerReloadsRecordsAndDisablesRealWorker",
+          "description": "Gui Controller Reloads Records And Disables Real Worker."
+        },
+        {
+          "name": "ShutdownDuringStartupAndLogoutCannotLeaveWorkerRunning",
+          "description": "Shutdown During Startup And Logout Cannot Leave Worker Running."
+        },
+        {
+          "name": "BackgroundWorkerSurvivesGuiAndForegroundWorkerExitsOnRelease",
+          "description": "Background Worker Survives Gui And Foreground Worker Exits On Release."
+        },
+        {
+          "name": "ConcurrentGuiControllersShareOneWorkerAndIndependentRecordingLeases",
+          "description": "Concurrent Gui Controllers Share One Worker And Independent Recording Leases."
+        },
+        {
+          "name": "AbandonedGuiLeaseEventuallyStopsDetachedWorker",
+          "description": "Abandoned Gui Lease Eventually Stops Detached Worker."
+        },
+        {
+          "name": "NewGuiStopsBackgroundWorkerWhenPreviousDisableWasInterrupted",
+          "description": "Reconcile a disabled preference on GUI startup and stop an orphaned background worker."
+        },
+        {
+          "name": "ScenarioBindingExecutesThroughWorkerAndRejectsInactiveScenario",
+          "description": "Send a saved scenario binding to the detached worker, execute it successfully, recheck activity, and release it on clear and disable."
+        }
+      ]
+    },
+    {
+      "id": "NativeShortcuts",
+      "description": "Native OS registration ownership, conflicts and release using the production QHotkey adapter.",
+      "features": [
+        "shortcuts",
+        "workers"
+      ],
+      "layer": "integration",
+      "kind": "qt",
+      "source": "tests/NativeShortcutTests.cpp",
+      "requires": [
+        "BUILD_SHORTCUTS_APP"
+      ],
+      "cases": [
+        {
+          "name": "NativeOwnershipConflictAndReleaseAcrossProcesses",
+          "description": "Native Ownership Conflict And Release Across Processes."
+        },
+        {
+          "name": "AdapterDeliversActivationAndClearsRegistrations",
+          "description": "Adapter Delivers Activation And Clears Registrations."
         }
       ]
     }

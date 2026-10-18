@@ -91,7 +91,7 @@ private slots:
       auto app = object["app"].toObject();
       auto account = object["account"].toObject();
       if (variant == 0)
-        object["version"] = 2;
+        object["version"] = 3;
       if (variant == 1)
         app.remove("theme");
       if (variant == 2)

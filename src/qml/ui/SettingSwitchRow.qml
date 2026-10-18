@@ -3,7 +3,7 @@ import YandexHomeDesktop.Ui as UI
 
 Item {
   id: root
-  implicitHeight: details.implicitHeight + 20
+  implicitHeight: Math.max(details.implicitHeight, control.height) + 20
   property string title
   property string description
   property bool checked: false
@@ -13,13 +13,24 @@ Item {
     id: details
     anchors.left: parent.left
     anchors.leftMargin: 10
+    anchors.right: control.left
+    anchors.rightMargin: 12
     anchors.verticalCenter: parent.verticalCenter
 
-    UI.DefaultText { text: root.title }
-    UI.SubheadingText { text: root.description }
+    UI.DefaultText {
+      width: parent.width
+      text: root.title
+      wrapMode: Text.Wrap
+    }
+    UI.SubheadingText {
+      width: parent.width
+      text: root.description
+      wrapMode: Text.Wrap
+    }
   }
 
   UI.MySwitch {
+    id: control
     objectName: "settingSwitch"
     anchors.right: parent.right
     anchors.rightMargin: 10

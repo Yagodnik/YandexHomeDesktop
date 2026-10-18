@@ -15,6 +15,7 @@
 
 #include "api/IHomeApi.h"
 #include "models/ScenariosModel/ScenariosViewModel.h"
+#include "models/KeybindSettingsModel.h"
 
 template<typename T>
 struct PendingResult {
@@ -119,6 +120,7 @@ private slots:
 #ifdef SCENARIOS_QML_TESTS
     QQuickStyle::setStyle("Basic");
     qRegisterMetaType<QList<ScenarioObject>>();
+    qmlRegisterUncreatableType<KeybindSettingsModel>("YandexHomeDesktop.ViewModels", 1, 0, "KeybindSettingsModel", "Supplied by the application");
     qmlRegisterUncreatableType<ScenariosViewModel>("YandexHomeDesktop.ViewModels", 1, 0,
       "ScenariosViewModel", "Supplied by the application");
     qmlRegisterUncreatableType<ScenariosModel>("YandexHomeDesktop.ViewModels", 1, 0,
@@ -321,7 +323,8 @@ private slots:
     QTRY_VERIFY_WITH_TIMEOUT(component.status() != QQmlComponent::Loading, 5000);
     QVERIFY2(component.isReady(), qPrintable(component.errorString()));
     std::unique_ptr<QObject> page(component.createWithInitialProperties({
-      {"viewModel", QVariant::fromValue(&view_model)}
+      {"viewModel", QVariant::fromValue(&view_model)},
+      {"keybindSettings", QVariant::fromValue(static_cast<KeybindSettingsModel*>(nullptr))}
     }));
     QVERIFY2(page, qPrintable(component.errorString()));
     auto* item = qobject_cast<QQuickItem*>(page.get());

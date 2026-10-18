@@ -91,11 +91,12 @@ the keybind editor and settings import confirmation, matching the error dialog's
 opening and closing motion. Popup transitions keep focus and closing lifecycle
 under Qt Quick Controls.
 
-The version-1 backup includes theme, tray mode, keybind visibility, and the current
+The version-2 backup includes theme, tray mode, keybind visibility, and the current
 account's ID, keybinds, ordered Favorites, collapsed rooms, and Favorites collapse
 state. Import replaces those preferences for the same account and leaves other
 accounts intact. Authentication and machine-local REST configuration are excluded.
-Fixture mode uses the same file format with in-memory preferences.
+Fixture mode uses the same file format with in-memory preferences. Version-1
+device-only backups remain readable; new saves and exports use version 2.
 
 On/off and toggle controls expose a display-only `keybindTitle`.
 `DeviceAttributeSection` attaches one translucent `CapabilityKeybind` pill to
@@ -104,23 +105,28 @@ render separate decrease/increase pills. Color and temperature tiles, color
 scenes, and individual mode dropdown options each have a compact pill of their
 own. `CapabilityOptionTile` shares the color/scene presentation and keeps
 selection separate from keybind editing. Properties have no attachment.
+Scenario rows use the same pill and editor, supplied explicitly through
+`ScenariosPage`, `ScenariosPane`, and `ScenariosList`. Each scenario has one run
+assignment, including inactive scenarios; execution rechecks activity in the worker.
 The shared pill opens `ui/KeybindEditor.qml` to replace or clear a key combination.
 Only the editor draft is local QML state. `KeybindSettingsModel` adapts the existing
 `Settings` storage for the UI; it does not register shortcuts or dispatch device
-commands. The editor explains that keyboard control is not available yet.
+commands. The editor obtains a recording lease through `ShortcutControlService` and waits for native key registrations to be released before accepting input. Settings exposes `ShortcutViewModel` to enable execution and independently keep the worker after the GUI closes; see [shortcuts.md](shortcuts.md).
 `MyComboBox` exposes its normal ComboBox delegate contract and
 `popupWidth` so the mode control can supply options with keybind pills.
 `Settings.showKeybinds` persists the visibility preference (default on); the
-settings page wires `BasicSettingsCard.keybindsToggled` to it, and the device page
-passes it explicitly to the controls pane. Hiding the pills restores the original
+settings page wires `BasicSettingsCard.keybindsToggled` to it, and the device and
+scenarios pages pass it explicitly to their controls. Hiding the pills restores the original
 control spacing without clearing assignments.
 
 Assignments persist in a versioned JSON document under
 `accounts/<SHA256 account ID>/keybinds`, alongside the existing account preferences.
-Each target uses a device ID, capability type, instance, action, and optional value
-(a mode/scene ID, lowercase RGB hex color, or temperature). A canonical Qt key and
+Device targets use a device ID, capability type, instance, action, and optional value
+(a mode/scene ID, lowercase RGB hex color, or temperature), with an empty scenario ID.
+Scenario targets use a stable scenario ID and `run` action with empty device fields.
+Version-1 device-only documents are upgraded when read. A canonical Qt key and
 modifier integer is stored; native display labels are formatted separately.
-Device and action names are saved only to identify a conflict in the editor.
+Device/scenario and action names are saved only to identify a conflict in the editor.
 Both the editor and `Settings` reject a combination assigned to another target
 in the same account. Replacing or clearing an assignment releases its old
 combination. Invalid stored data and write failures leave assignments unchanged.

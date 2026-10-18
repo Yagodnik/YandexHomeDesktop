@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.28)
 
 project(YandexHomeDesktop VERSION 0.1.0 LANGUAGES CXX)
+if(APPLE)
+  enable_language(OBJCXX)
+endif()
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -32,6 +35,10 @@ option(BUILD_DESKTOP_APP "Build the Windows or macOS desktop application" ${_des
 
 option(BUILD_CLI_APP "Build the console CLI" ON)
 option(BUILD_REST_APP "Build the headless REST worker" ON)
+option(BUILD_SHORTCUTS_APP "Build the native global shortcut worker" ${BUILD_DESKTOP_APP})
+if(BUILD_SHORTCUTS_APP AND NOT (APPLE OR WIN32))
+  message(FATAL_ERROR "Global shortcuts are supported on Windows and macOS only")
+endif()
 option(YH_BUILD_REST_ADAPTER "Build the reusable REST adapter" ${BUILD_REST_APP})
 if(BUILD_REST_APP AND NOT YH_BUILD_REST_ADAPTER)
   message(FATAL_ERROR "BUILD_REST_APP requires YH_BUILD_REST_ADAPTER")
@@ -45,7 +52,7 @@ find_package(Qt6 6.9 REQUIRED COMPONENTS Core Network)
 if(YH_BUILD_REST_ADAPTER)
   find_package(Qt6 6.9 REQUIRED COMPONENTS HttpServer)
 endif()
-if(BUILD_DESKTOP_APP OR BUILD_TESTING)
+if(BUILD_DESKTOP_APP OR BUILD_SHORTCUTS_APP OR BUILD_TESTING)
   find_package(Qt6 6.9 REQUIRED COMPONENTS Gui)
 endif()
 if(BUILD_TESTING)
@@ -113,7 +120,33 @@ if(BUILD_DESKTOP_APP OR BUILD_TESTING)
   add_subdirectory(src/models)
 endif()
 
+add_library(AppShortcuts SHARED
+  src/services/ShortcutActionService.h src/services/ShortcutActionService.cpp
+  src/services/ShortcutRuntime.h src/services/ShortcutRuntime.cpp
+  src/services/ShortcutControlService.h src/services/ShortcutControlService.cpp)
+target_link_libraries(AppShortcuts PUBLIC AppServices WorkerControl AppRuntime)
+yh_shared_library(AppShortcuts)
+add_library(ShortcutControlBootstrap STATIC src/app/shortcuts/ShortcutConfiguration.h src/app/shortcuts/ShortcutConfiguration.cpp)
+target_link_libraries(ShortcutControlBootstrap PUBLIC AppStartup AppShortcuts)
+
 qt_add_resources(DEBUG_FIXTURE_RESOURCES resources/debug/debug.qrc)
+if(BUILD_SHORTCUTS_APP)
+  include(cmake/QHotkey.cmake)
+  yh_add_qhotkey()
+  qt_add_executable(YandexHomeShortcuts
+    src/app/shortcuts/ShortcutMain.cpp
+    src/app/shortcuts/QHotkeyRegistrar.h src/app/shortcuts/QHotkeyRegistrar.cpp)
+  set_target_properties(YandexHomeShortcuts PROPERTIES WIN32_EXECUTABLE TRUE)
+  target_compile_definitions(YandexHomeShortcuts PRIVATE "$<$<CONFIG:Debug>:YH_DEBUG_FAKE_API>")
+  target_link_libraries(YandexHomeShortcuts PRIVATE ShortcutControlBootstrap QHotkey::QHotkey
+    YandexAuth YandexApiAdapter "$<$<CONFIG:Debug>:FixtureApi>")
+  target_sources(YandexHomeShortcuts PRIVATE "$<$<CONFIG:Debug>:${DEBUG_FIXTURE_RESOURCES}>")
+  if(APPLE)
+    target_sources(YandexHomeShortcuts PRIVATE src/app/shortcuts/ShortcutWorkerMac.mm)
+    target_link_libraries(YandexHomeShortcuts PRIVATE "-framework AppKit")
+  endif()
+  install(TARGETS YandexHomeShortcuts RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+endif()
 add_library(RestControlBootstrap STATIC src/app/rest/RestConfiguration.cpp src/app/rest/RestConfiguration.h
   src/app/rest/RestCommand.cpp src/app/rest/RestCommand.h
   src/app/rest/RestServerConfiguration.cpp src/app/rest/RestServerConfiguration.h)
@@ -247,6 +280,9 @@ if(BUILD_DESKTOP_APP)
   if(TARGET YandexHomeRest)
     add_dependencies(appYandexHomeDesktop YandexHomeRest)
   endif()
+  if(TARGET YandexHomeShortcuts)
+    add_dependencies(appYandexHomeDesktop YandexHomeShortcuts)
+  endif()
 
   qt_add_qml_module(appYandexHomeDesktop
     URI YandexHomeDesktop
@@ -267,7 +303,7 @@ if(BUILD_DESKTOP_APP)
     YandexHomeDesktopUi YandexHomeDesktopPages
     YandexHomeDesktopComponents
     YandexApiAdapter YandexAuth YandexOAuth Models PlatformService Utils Iot
-    AppStartup RestControlBootstrap "$<$<CONFIG:Debug>:FixtureApi>"
+    AppStartup RestControlBootstrap ShortcutControlBootstrap "$<$<CONFIG:Debug>:FixtureApi>"
   )
 
   include(GNUInstallDirs)
@@ -283,7 +319,7 @@ if(BUILD_DESKTOP_APP)
     set_target_properties(appYandexHomeDesktop PROPERTIES
       INSTALL_RPATH "@executable_path/../Frameworks")
     set(_deploy_executables)
-    foreach(_console YandexHomeCli YandexHomeRest)
+    foreach(_console YandexHomeCli YandexHomeRest YandexHomeShortcuts)
       if(TARGET ${_console})
         set_target_properties(${_console} PROPERTIES
           INSTALL_RPATH "@executable_path/../Frameworks;@executable_path/../${CMAKE_INSTALL_LIBDIR}")
@@ -313,7 +349,7 @@ if(BUILD_DESKTOP_APP)
     set(YH_INSTALLED_CONSOLE_DIR "YandexHomeDesktop.app/Contents/MacOS")
   endif()
   set(YH_INSTALLED_CONSOLES)
-  foreach(_console YandexHomeCli YandexHomeRest)
+  foreach(_console YandexHomeCli YandexHomeRest YandexHomeShortcuts)
     if(TARGET ${_console})
       list(APPEND YH_INSTALLED_CONSOLES "${_console}${CMAKE_EXECUTABLE_SUFFIX}")
     endif()
@@ -343,7 +379,7 @@ endif()
 # Console-only Windows packages need their own Qt runtime deployment. REST's
 # HttpServer/WebSockets dependencies are absent from the GUI dependency graph.
 if(WIN32)
-  foreach(_console YandexHomeCli YandexHomeRest)
+  foreach(_console YandexHomeCli YandexHomeRest YandexHomeShortcuts)
     if(TARGET ${_console})
       qt_generate_deploy_app_script(TARGET ${_console} OUTPUT_SCRIPT _console_deploy)
       install(SCRIPT ${_console_deploy})
@@ -356,7 +392,7 @@ endif()
 
 # Translate each enabled entry point without linking the GUI.
 set(_translation_targets)
-foreach(_app appYandexHomeDesktop YandexHomeCli YandexHomeRest)
+foreach(_app appYandexHomeDesktop YandexHomeCli YandexHomeRest YandexHomeShortcuts)
   if(TARGET ${_app})
     list(APPEND _translation_targets ${_app})
   endif()
@@ -367,7 +403,7 @@ if(_translation_targets)
   if(BUILD_DESKTOP_APP)
     set(_gui_translation_sources appYandexHomeDesktop)
   endif()
-  set(_translation_sources ${_gui_translation_sources} AppStartup AppCli AppServices AppRestControl IotCore YandexApiAdapter RestControlBootstrap)
+  set(_translation_sources ${_gui_translation_sources} AppStartup AppCli AppServices AppRestControl AppShortcuts IotCore YandexApiAdapter RestControlBootstrap)
   foreach(_target CliBootstrap RestBootstrap AppRest)
     if(TARGET ${_target})
       list(APPEND _translation_sources ${_target})
@@ -378,7 +414,7 @@ if(_translation_targets)
     SOURCES ${QML_TRANSLATION_SOURCES} translations/DataStrings.cpp
       src/models/DeviceModel/CapabilitiesModel.cpp src/models/DeviceModel/PropertiesModel.cpp
       src/models/ScenariosModel/ScenariosViewModel.cpp src/models/RestViewModel.cpp
-      src/models/KeybindSettingsModel.cpp
+      src/models/KeybindSettingsModel.cpp src/models/ShortcutViewModel.cpp
       src/models/SettingsTransferModel.cpp
     SOURCE_TARGETS ${_translation_sources}
     RESOURCE_PREFIX "/i18n")

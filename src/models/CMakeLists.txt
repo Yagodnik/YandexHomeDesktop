@@ -6,6 +6,7 @@ add_library(Models STATIC
         AuthorizationModel.cpp
         AuthorizationModel.h
         RestViewModel.h RestViewModel.cpp
+        ShortcutViewModel.h ShortcutViewModel.cpp
         AccountModel.cpp
         AccountModel.h
         KeybindSettingsModel.h KeybindSettingsModel.cpp
@@ -50,4 +51,4 @@ add_library(Models STATIC
         DeviceModel/DeviceDataModel.h
 )
 
-target_link_libraries(Models PUBLIC ApiContracts AuthContracts PRIVATE Qt6::Core Qt6::Gui Utils AppServices AppRestControl)
+target_link_libraries(Models PUBLIC ApiContracts AuthContracts PRIVATE Qt6::Core Qt6::Gui Utils AppServices AppRestControl AppShortcuts)

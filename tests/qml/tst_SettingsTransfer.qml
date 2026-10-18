@@ -13,7 +13,7 @@ TestCase {
   when: windowShown
   Component {
     id: settingsPage
-    Pages.SettingsPage { height: 460; restModel: restViewModel; transferModel: settingsTransferModel }
+    Pages.SettingsPage { height: 460; restModel: restViewModel; transferModel: settingsTransferModel; shortcutModel: shortcutViewModel }
   }
   function init() {
     failOnWarning(/.?/);

@@ -89,9 +89,10 @@ void ScenarioService::RunScenario(
 void ScenarioService::RunActiveScenario(
   const QString& id, QObject* context, CommandResultHandler handler) {
   const QPointer<ScenarioService> service(this);
-  ListScenarios(context, [service, id, context, handler = std::move(handler)](
+  const QPointer<QObject> caller(context);
+  ListScenarios(context, [service, id, caller, handler = std::move(handler)](
                            ApiResult<QList<ScenarioObject>> result) mutable {
-    if (!service) {
+    if (!service || !caller) {
       return;
     }
     if (!result) {
@@ -110,7 +111,8 @@ void ScenarioService::RunActiveScenario(
       handler(std::unexpected(CommandRejection{CommandRejectionReason::InactiveScenario, {}}));
       return;
     }
-    service->RunScenario(id, context, [handler = std::move(handler)](ApiResult<void> result) {
+    service->RunScenario(id, caller, [service, caller, handler = std::move(handler)](ApiResult<void> result) {
+      if (!service || !caller) return;
       if (!result) {
         handler(std::unexpected(result.error()));
         return;

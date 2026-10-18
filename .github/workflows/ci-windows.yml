@@ -79,7 +79,7 @@ jobs:
           pch=${{ matrix.pch }} configure
           -DCMAKE_CXX_COMPILER=g++.exe
 
-      - name: Build GUI, CLI, REST, shared libraries, and tests
+      - name: Build GUI, CLI, REST, shortcuts, shared libraries, and tests
         run: just build_dir=build config=${{ matrix.configuration }} build
 
       - name: Analyze application startup code
@@ -102,10 +102,16 @@ jobs:
       - name: Stress shared worker startup and shutdown races
         run: >-
           ctest --test-dir build -C ${{ matrix.configuration }}
-          -R '^WorkerControl$' --repeat until-fail:5 --output-on-failure
+          -R '^(WorkerControl|Shortcuts)$' --repeat until-fail:5 --output-on-failure
 
       - name: Exercise console CLI recipe
         run: just build_dir=build config=${{ matrix.configuration }} cli --help --json
+
+      - name: Exercise shortcut worker
+        shell: pwsh
+        run: |
+          & ./build/YandexHomeShortcuts.exe --help --json
+          if ($LASTEXITCODE -ne 0) { throw 'Shortcut worker failed' }
 
       - name: Exercise REST worker recipe
         run: just build_dir=build config=${{ matrix.configuration }} rest --help --json
@@ -124,6 +130,10 @@ jobs:
           if (-not $cli) { throw 'Missing installed console CLI' }
           $rest = Get-ChildItem build/stage -Recurse -File -Filter YandexHomeRest.exe | Select-Object -First 1
           if (-not $rest) { throw 'Missing installed REST worker' }
+          $shortcuts = Get-ChildItem build/stage -Recurse -File -Filter YandexHomeShortcuts.exe | Select-Object -First 1
+          if (-not $shortcuts) { throw 'Missing installed shortcut worker' }
+          & $shortcuts.FullName --help --json
+          if ($LASTEXITCODE -ne 0) { throw 'Installed shortcut worker failed' }
           & $rest.FullName --help --json
           if ($LASTEXITCODE -ne 0) { throw 'Installed REST worker failed' }
           cmake "-DAPP_PATH=$($cli.FullName)" -DCONFIGURATION=Release -P tests/CliSmoke.cmake

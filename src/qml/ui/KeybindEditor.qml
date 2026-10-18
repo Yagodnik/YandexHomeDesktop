@@ -20,6 +20,7 @@ UI.AnimatedDialog {
   property var formatCombination: function(combination) { return ""; }
   readonly property string draftSequence: formatCombination(draftCombination)
   property string errorMessage: ""
+  property bool recordingReady: true
   signal keyRecorded(int key, int modifiers)
   signal combinationAccepted(int combination)
 
@@ -30,6 +31,7 @@ UI.AnimatedDialog {
     event.accepted = true;
     if (event.isAutoRepeat) return;
     if (event.key === Qt.Key_Escape) { reject(); return; }
+    if (!recordingReady) return;
     if (event.key === Qt.Key_Backspace || event.key === Qt.Key_Delete) {
       draftCombination = 0;
       return;
@@ -94,7 +96,8 @@ UI.AnimatedDialog {
       UI.DefaultText {
         anchors.fill: parent
         anchors.margins: 12
-        text: root.draftSequence.length > 0 ? root.draftSequence : qsTr("Нажмите клавиши…")
+        text: !root.recordingReady ? qsTr("Подготовка записи…")
+          : root.draftSequence.length > 0 ? root.draftSequence : qsTr("Нажмите клавиши…")
         font.pixelSize: root.draftSequence.length > 0 ? 22 : 15
         font.bold: root.draftSequence.length > 0
         color: root.draftSequence.length > 0 ? themes.mainText : themes.inactive
@@ -116,7 +119,7 @@ UI.AnimatedDialog {
 
     UI.DefaultText {
       Layout.fillWidth: true
-      text: qsTr("Сочетание сохранится в настройках. Управление устройствами с клавиатуры пока недоступно.")
+      text: qsTr("Включите глобальные сочетания в настройках. На время записи управление с клавиатуры приостанавливается.")
       font.pixelSize: 12
       color: themes.mainText
       opacity: 0.65
@@ -160,7 +163,7 @@ UI.AnimatedDialog {
         objectName: "keybindSave"
         text: qsTr("Готово")
         primary: true
-        enabled: root.errorMessage.length === 0
+        enabled: root.recordingReady && root.errorMessage.length === 0
         onClicked: {
           root.combinationAccepted(root.draftCombination);
         }

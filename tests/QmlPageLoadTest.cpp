@@ -28,10 +28,12 @@ int main(int argc, char* argv[]) {
   }
   QVariantMap initial_properties;
   if (QString::fromLocal8Bit(argv[1]).endsWith("SettingsPage.qml")) {
+    initial_properties.insert("shortcutModel", engine.rootContext()->contextProperty("shortcutViewModel"));
     initial_properties.insert("restModel", engine.rootContext()->contextProperty("restViewModel"));
     initial_properties.insert("transferModel", engine.rootContext()->contextProperty("settingsTransferModel"));
   }
   if (QString::fromLocal8Bit(argv[1]).endsWith("ScenariosPage.qml")) {
+    initial_properties.insert("keybindSettings", engine.rootContext()->contextProperty("keybindSettingsModel"));
     initial_properties.insert("viewModel", engine.rootContext()->contextProperty("scenariosViewModel"));
   }
   if (QString::fromLocal8Bit(argv[1]).endsWith("DevicesPage.qml")) {

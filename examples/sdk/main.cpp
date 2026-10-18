@@ -9,6 +9,7 @@
 #include "services/HomeService.h"
 #include "worker/WorkerControlClient.h"
 #include "worker/WorkerControlServer.h"
+#include "services/ShortcutRuntime.h"
 #ifdef YH_EXAMPLE_REST
 #include "rest/RestRouter.h"
 #include "rest/RestServer.h"
@@ -26,6 +27,12 @@ public:
   void GetDeviceInfo(const QString&, QObject*, ApiResultHandler<DeviceInfo> handler) override { handler(DeviceInfo{}); }
   void ExecuteScenario(const QString&, QObject*, ApiResultHandler<void> handler) override { handler({}); }
   void PerformActions(const QList<DeviceActionsObject>&, QObject*, ApiResultHandler<void> handler) override { handler({}); }
+};
+
+class ExampleRegistrar final : public IShortcutRegistrar {
+public:
+  bool Register(int, std::function<void()>) override { return true; }
+  bool Clear() override { return true; }
 };
 
 class ExampleTokenStore final : public ITokenStore {
@@ -54,6 +61,11 @@ int main(int argc, char** argv) {
   WorkerControlClient worker_client({"sdk-example", {}, {}});
   WorkerControlServer worker_server;
   if (worker_client.IsBusy()) return 6;
+  DeviceService devices(&api);
+  ShortcutActionService actions(&devices);
+  ExampleRegistrar registrar;
+  ShortcutRuntime shortcuts(&registrar, &actions, "sdk-account");
+  if (!shortcuts.Status()["running"].toBool()) return 7;
   if (!CommandRegistry::Builtin().Help("example").contains("devices set")) return 4;
 #ifdef YH_EXAMPLE_REST
   RestRouter routes;

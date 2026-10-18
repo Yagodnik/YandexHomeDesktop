@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.28)
 project(YandexHomeSdkExample LANGUAGES CXX)
-find_package(YandexHome CONFIG REQUIRED COMPONENTS AppServices AuthCore YandexApiAdapter AppCli WorkerControl)
+find_package(YandexHome CONFIG REQUIRED COMPONENTS AppServices AuthCore YandexApiAdapter AppCli WorkerControl AppShortcuts)
 add_executable(yh-sdk-example main.cpp)
 target_link_libraries(yh-sdk-example PRIVATE YandexHome::AppServices
-  YandexHome::AuthCore YandexHome::YandexApiAdapter YandexHome::AppCli YandexHome::WorkerControl)
+  YandexHome::AuthCore YandexHome::YandexApiAdapter YandexHome::AppCli YandexHome::WorkerControl YandexHome::AppShortcuts)
 if(TARGET YandexHome::AppRest)
   find_package(YandexHome CONFIG REQUIRED COMPONENTS AppRest)
   target_compile_definitions(yh-sdk-example PRIVATE YH_EXAMPLE_REST)

@@ -1,4 +1,5 @@
 #include "KeybindSettingsModel.h"
+#include "services/ShortcutControlService.h"
 #include "AccountModel.h"
 #include "serialization/Serialization.h"
 #include <QKeySequence>
@@ -89,10 +90,12 @@ QString KeybindSettingsModel::ConflictMessage(const QVariantMap& target, int com
   for (const auto& binding : *bindings_) {
     if (binding.combination == combination &&
         !Settings::SameKeybindTarget(binding.target, identity)) {
-      const auto name =
-          binding.device_name.isEmpty() ? binding.target.device_id : binding.device_name;
+      const auto name = binding.device_name.isEmpty()
+                            ? (binding.target.scenario_id.isEmpty() ? binding.target.device_id
+                                                                    : binding.target.scenario_id)
+                            : binding.device_name;
       return binding.action_label.isEmpty()
-                 ? tr("%1 уже назначено устройству «%2». Выберите другое сочетание.")
+                 ? tr("%1 уже назначено: «%2». Выберите другое сочетание.")
                        .arg(DisplayCombination(combination), name)
                  : tr("%1 уже назначено: %2 — %3. Выберите другое сочетание.")
                        .arg(DisplayCombination(combination), name, binding.action_label);
@@ -128,4 +131,28 @@ bool KeybindSettingsModel::Save(const QVariantMap& target, int combination,
     return false;
   }
   return false;
+}
+void KeybindSettingsModel::SetShortcutControl(ShortcutControlService* control) {
+  shortcut_control_ = control;
+  connect(control, &ShortcutControlService::changed, this, &KeybindSettingsModel::recordingChanged);
+}
+bool KeybindSettingsModel::IsRecordingReady() const {
+  return !shortcut_control_ || shortcut_control_->IsRecordingReady();
+}
+void KeybindSettingsModel::BeginRecording() {
+  if (shortcut_control_)
+    shortcut_control_->BeginRecording();
+}
+void KeybindSettingsModel::EndRecording() {
+  if (shortcut_control_)
+    shortcut_control_->EndRecording();
+}
+
+QString KeybindSettingsModel::GetRecordingError() const {
+  if (shortcut_control_ && !IsRecordingReady() &&
+      (shortcut_control_->GetStatus().contains("error") ||
+       shortcut_control_->GetStatus()["release_failed"].toBool()))
+    return tr("Не удалось подготовить запись. Отключите глобальные сочетания в настройках и "
+              "повторите попытку.");
+  return {};
 }

@@ -7,6 +7,7 @@ UI.PageSurface {
   id: root
   required property RestViewModel restModel
   required property SettingsTransferModel transferModel
+  required property ShortcutViewModel shortcutModel
   Components.SettingsTransferDialogs { id: transferDialogs; viewModel: root.transferModel }
   UI.ScrollColumn {
     objectName: "settingsContent"
@@ -72,6 +73,18 @@ UI.PageSurface {
     UI.HeadingText {
       text: qsTr("Дополнительно")
       width: parent.width
+    }
+
+    Components.ShortcutSettingsCard {
+      objectName: "shortcutSettings"
+      width: parent.width
+      shortcutsEnabled: root.shortcutModel.enabled
+      backgroundEnabled: root.shortcutModel.background
+      busy: root.shortcutModel.busy
+      statusText: root.shortcutModel.status
+      errorText: root.shortcutModel.error
+      onEnabledToggled: function(enabled) { root.shortcutModel.SetEnabled(enabled); }
+      onBackgroundToggled: function(enabled) { root.shortcutModel.SetBackground(enabled); }
     }
 
     Components.AdvancedSettingsCard {

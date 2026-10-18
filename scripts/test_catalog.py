@@ -13,7 +13,7 @@ import tempfile
 ROOT = Path(__file__).resolve().parents[1]
 CATALOG = ROOT / "tests" / "catalog.json"
 KINDS = {"qt", "quick", "ctest"}
-REQUIREMENTS = {"BUILD_DESKTOP_APP", "BUILD_CLI_APP", "BUILD_REST_APP", "YH_BUILD_REST_ADAPTER", "Debug"}
+REQUIREMENTS = {"BUILD_DESKTOP_APP", "BUILD_CLI_APP", "BUILD_REST_APP", "BUILD_SHORTCUTS_APP", "YH_BUILD_REST_ADAPTER", "Debug"}
 
 
 class CatalogError(ValueError):

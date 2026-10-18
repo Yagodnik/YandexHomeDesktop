@@ -23,6 +23,10 @@ public:
   [[nodiscard]] quint16 GetRestPort() const;
   void SetRestEnabled(bool enabled);
   void SetRestPort(quint16 port);
+  [[nodiscard]] bool GetShortcutsEnabled() const;
+  [[nodiscard]] bool GetShortcutsBackground() const;
+  void SetShortcutsEnabled(bool enabled);
+  void SetShortcutsBackground(bool enabled);
   void Reset();
   static void ResetStoredSettings();
   [[nodiscard]] QStringList GetFavoriteDevices(const QString& accountId) const;
@@ -66,4 +70,6 @@ private:
   bool temporary_show_keybinds_ = true;
   bool temporary_rest_ = false;
   quint16 temporary_rest_port_ = 8766;
+  bool temporary_shortcuts_ = false;
+  bool temporary_shortcuts_background_ = false;
 };

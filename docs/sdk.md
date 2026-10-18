@@ -49,3 +49,10 @@ the live adapter, auth core, CLI registry, and optional REST server without
 making requests. CTest's `InstalledSdkConsumer` builds and runs it against only
 the staged SDK. GUI models/QML/platform helpers and executable startup code
 remain private; a future MCP adapter can consume the same public targets.
+
+`AppShortcuts` provides Qt Core-only `ShortcutActionService`, `ShortcutRuntime`,
+`IShortcutRegistrar`, and `ShortcutControlService`. Inject `DeviceService`,
+`ScenarioService`, and a registrar for device and scenario execution; the existing
+device-only constructor remains available. Native QHotkey integration remains
+private to `YandexHomeShortcuts`. The SDK does not depend on QHotkey or Qt Gui
+when requesting `AppShortcuts`. See [shortcuts.md](shortcuts.md).

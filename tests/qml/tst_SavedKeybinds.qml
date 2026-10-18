@@ -138,6 +138,28 @@ TestCase {
     compare(deviceTestApi.actionCount, 0);
   }
 
+  function test_recordingWaitsForShortcutRelease() {
+    shortcutViewModel.SetEnabled(true);
+    const page = openDevice("lamp", "Desk lamp");
+    const badge = findChild(page, "capabilityKeybind");
+    mouseClick(badge);
+    tryCompare(badge.editor, "opened", true);
+    compare(badge.editor.recordingReady, false);
+    keyClick(Qt.Key_F6);
+    compare(badge.editor.draftCombination, 0);
+    keyClick(Qt.Key_Escape);
+    tryCompare(badge.editor, "visible", false);
+    mouseClick(badge);
+    tryCompare(badge.editor, "opened", true);
+    compare(findChild(badge.editor.contentItem, "keybindSave").enabled, false);
+    shortcutViewModel.SetEnabled(false);
+    tryCompare(badge.editor, "recordingReady", true);
+    findChild(badge.editor.contentItem, "keybindRecorder").forceActiveFocus();
+    keyClick(Qt.Key_F6);
+    save(badge);
+    compare(badge.sequence, "F6");
+  }
+
   function test_accountSwitchClosesEditorAndSeparatesAssignments() {
     const page = openDevice("lamp", "Desk lamp");
     const badge = findChild(page, "capabilityKeybind");

@@ -83,6 +83,7 @@ qt_add_qml_module(YandexHomeDesktopComponents
         components/HouseholdPicker.qml
         components/BasicSettingsCard.qml
         components/AdvancedSettingsCard.qml
+        components/ShortcutSettingsCard.qml
         components/SettingsTransferCard.qml
         components/SettingsTransferDialogs.qml
         components/RoomsPane.qml

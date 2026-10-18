@@ -116,22 +116,22 @@ your devices</translation>
 <context>
     <name>CapabilityKeybind</name>
     <message>
-        <location filename="../src/qml/components/CapabilityKeybind.qml" line="31"/>
+        <location filename="../src/qml/components/CapabilityKeybind.qml" line="34"/>
         <source>Изменить сочетание %1 для «%2»</source>
         <translation>Edit shortcut %1 for “%2”</translation>
     </message>
     <message>
-        <location filename="../src/qml/components/CapabilityKeybind.qml" line="32"/>
+        <location filename="../src/qml/components/CapabilityKeybind.qml" line="35"/>
         <source>Назначить сочетание для «%1»</source>
         <translation>Set a shortcut for “%1”</translation>
     </message>
     <message>
-        <location filename="../src/qml/components/CapabilityKeybind.qml" line="76"/>
+        <location filename="../src/qml/components/CapabilityKeybind.qml" line="79"/>
         <source>Назначить</source>
         <translation>Set key</translation>
     </message>
     <message>
-        <location filename="../src/qml/components/CapabilityKeybind.qml" line="105"/>
+        <location filename="../src/qml/components/CapabilityKeybind.qml" line="111"/>
         <source>Настройки сочетаний недоступны.</source>
         <translation>Keybind settings are unavailable.</translation>
     </message>
@@ -274,7 +274,7 @@ your devices</translation>
     <name>CliCommand</name>
     <message>
         <location filename="../src/cli/CliCommand.cpp" line="13"/>
-        <location filename="../src/app/rest/RestCommand.cpp" line="73"/>
+        <location filename="../src/app/rest/RestCommand.cpp" line="74"/>
         <source>Повторяющийся параметр: --%1.</source>
         <translation>Repeated option: --%1.</translation>
     </message>
@@ -1867,46 +1867,55 @@ your devices</translation>
         <translation type="vanished">Space</translation>
     </message>
     <message>
-        <location filename="../src/qml/ui/KeybindEditor.qml" line="61"/>
+        <location filename="../src/qml/ui/KeybindEditor.qml" line="63"/>
         <source>Сочетание клавиш</source>
         <translation>Keyboard shortcut</translation>
     </message>
     <message>
-        <location filename="../src/qml/ui/KeybindEditor.qml" line="80"/>
+        <location filename="../src/qml/ui/KeybindEditor.qml" line="82"/>
         <source>Нажмите клавишу или сочетание</source>
         <translation>Press a key or combination</translation>
     </message>
     <message>
-        <location filename="../src/qml/ui/KeybindEditor.qml" line="97"/>
+        <location filename="../src/qml/ui/KeybindEditor.qml" line="99"/>
+        <source>Подготовка записи…</source>
+        <translation>Preparing to record…</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/ui/KeybindEditor.qml" line="100"/>
         <source>Нажмите клавиши…</source>
         <translation>Press your keys…</translation>
     </message>
     <message>
-        <location filename="../src/qml/ui/KeybindEditor.qml" line="111"/>
+        <location filename="../src/qml/ui/KeybindEditor.qml" line="114"/>
         <source>Esc — отмена · Backspace — очистить</source>
         <translation>Esc to cancel · Backspace to clear</translation>
     </message>
     <message>
-        <location filename="../src/qml/ui/KeybindEditor.qml" line="119"/>
+        <location filename="../src/qml/ui/KeybindEditor.qml" line="122"/>
+        <source>Включите глобальные сочетания в настройках. На время записи управление с клавиатуры приостанавливается.</source>
+        <translation>Enable global shortcuts in Settings. Keyboard control pauses while recording.</translation>
+    </message>
+    <message>
         <source>Сочетание сохранится в настройках. Управление устройствами с клавиатуры пока недоступно.</source>
-        <translation>The keybind will be saved in settings. Keyboard control of devices is not available yet.</translation>
+        <translation type="vanished">The keybind will be saved in settings. Keyboard control of devices is not available yet.</translation>
     </message>
     <message>
         <source>Предпросмотр интерфейса. Сочетания пока не управляют устройствами. Назначение сбросится при уходе со страницы.</source>
         <translation type="vanished">UI preview only. Shortcuts do not control devices yet. Assignments reset when you leave this page.</translation>
     </message>
     <message>
-        <location filename="../src/qml/ui/KeybindEditor.qml" line="143"/>
+        <location filename="../src/qml/ui/KeybindEditor.qml" line="146"/>
         <source>Очистить</source>
         <translation>Clear</translation>
     </message>
     <message>
-        <location filename="../src/qml/ui/KeybindEditor.qml" line="155"/>
+        <location filename="../src/qml/ui/KeybindEditor.qml" line="158"/>
         <source>Отмена</source>
         <translation>Cancel</translation>
     </message>
     <message>
-        <location filename="../src/qml/ui/KeybindEditor.qml" line="161"/>
+        <location filename="../src/qml/ui/KeybindEditor.qml" line="164"/>
         <source>Готово</source>
         <translation>Done</translation>
     </message>
@@ -1914,39 +1923,48 @@ your devices</translation>
 <context>
     <name>KeybindSettingsModel</name>
     <message>
-        <location filename="../src/models/KeybindSettingsModel.cpp" line="81"/>
+        <location filename="../src/models/KeybindSettingsModel.cpp" line="82"/>
         <source>Дождитесь загрузки аккаунта, чтобы сохранить сочетание.</source>
         <translation>Wait for your account to load before saving a keybind.</translation>
     </message>
     <message>
-        <location filename="../src/models/KeybindSettingsModel.cpp" line="83"/>
+        <location filename="../src/models/KeybindSettingsModel.cpp" line="84"/>
         <source>Не удалось прочитать сохранённые сочетания. Настройки не изменены.</source>
         <translation>Could not read saved keybinds. Settings have not changed.</translation>
     </message>
     <message>
-        <location filename="../src/models/KeybindSettingsModel.cpp" line="86"/>
+        <location filename="../src/models/KeybindSettingsModel.cpp" line="87"/>
         <source>Не удалось определить действие для этого сочетания.</source>
         <translation>Could not identify the action for this keybind.</translation>
     </message>
     <message>
-        <location filename="../src/models/KeybindSettingsModel.cpp" line="95"/>
         <source>%1 уже назначено устройству «%2». Выберите другое сочетание.</source>
+        <translation type="vanished">%1 is already assigned to “%2”. Choose another keybind.</translation>
+    </message>
+    <message>
+        <location filename="../src/models/KeybindSettingsModel.cpp" line="98"/>
+        <source>%1 уже назначено: «%2». Выберите другое сочетание.</source>
         <translation>%1 is already assigned to “%2”. Choose another keybind.</translation>
     </message>
     <message>
-        <location filename="../src/models/KeybindSettingsModel.cpp" line="97"/>
+        <location filename="../src/models/KeybindSettingsModel.cpp" line="100"/>
         <source>%1 уже назначено: %2 — %3. Выберите другое сочетание.</source>
         <translation>%1 is already assigned to %2 — %3. Choose another keybind.</translation>
     </message>
     <message>
-        <location filename="../src/models/KeybindSettingsModel.cpp" line="124"/>
+        <location filename="../src/models/KeybindSettingsModel.cpp" line="127"/>
         <source>Не удалось сохранить это сочетание.</source>
         <translation>Could not save this keybind.</translation>
     </message>
     <message>
-        <location filename="../src/models/KeybindSettingsModel.cpp" line="127"/>
+        <location filename="../src/models/KeybindSettingsModel.cpp" line="130"/>
         <source>Не удалось сохранить настройки. Попробуйте снова.</source>
         <translation>Could not save settings. Try again.</translation>
+    </message>
+    <message>
+        <location filename="../src/models/KeybindSettingsModel.cpp" line="155"/>
+        <source>Не удалось подготовить запись. Отключите глобальные сочетания в настройках и повторите попытку.</source>
+        <translation>Could not prepare recording. Disable global shortcuts in Settings and try again.</translation>
     </message>
 </context>
 <context>
@@ -2021,7 +2039,7 @@ Email: %2
 <context>
     <name>MainPage</name>
     <message>
-        <location filename="../src/qml/pages/MainPage.qml" line="33"/>
+        <location filename="../src/qml/pages/MainPage.qml" line="37"/>
         <source>Выберите Дом</source>
         <translation>Select a home</translation>
     </message>
@@ -2092,82 +2110,81 @@ Email: %2
 <context>
     <name>RestAppMessages</name>
     <message>
-        <location filename="../src/app/rest/RestCommand.cpp" line="42"/>
+        <location filename="../src/app/rest/RestCommand.cpp" line="43"/>
         <source>REST API работает: %1
 </source>
         <translation>REST API is running: %1
 </translation>
     </message>
     <message>
-        <location filename="../src/app/rest/RestCommand.cpp" line="43"/>
+        <location filename="../src/app/rest/RestCommand.cpp" line="44"/>
         <source>REST API остановлен (включён: %1).
 </source>
         <translation>REST API is stopped (enabled: %1).
 </translation>
     </message>
     <message>
-        <location filename="../src/app/rest/RestCommand.cpp" line="44"/>
+        <location filename="../src/app/rest/RestCommand.cpp" line="45"/>
         <source>да</source>
         <translation>yes</translation>
     </message>
     <message>
-        <location filename="../src/app/rest/RestCommand.cpp" line="45"/>
+        <location filename="../src/app/rest/RestCommand.cpp" line="46"/>
         <source>нет</source>
         <translation>no</translation>
     </message>
     <message>
-        <location filename="../src/app/rest/RestCommand.cpp" line="93"/>
+        <location filename="../src/app/rest/RestCommand.cpp" line="94"/>
         <source>YandexHomeRest runs the server in the foreground by default.</source>
         <translation>YandexHomeRest runs the server in the foreground by default.</translation>
     </message>
     <message>
-        <location filename="../src/app/rest/RestApp.cpp" line="52"/>
+        <location filename="../src/app/rest/RestApp.cpp" line="30"/>
         <source>Сервер REST API уже запущен.</source>
         <translation>The REST API server is already running.</translation>
     </message>
     <message>
-        <location filename="../src/app/rest/RestApp.cpp" line="38"/>
-        <location filename="../src/app/rest/RestApp.cpp" line="61"/>
+        <location filename="../src/app/rest/RestApp.cpp" line="31"/>
         <source>Не удалось открыть канал управления REST API.</source>
         <translation>Could not open the REST API control channel.</translation>
     </message>
     <message>
-        <location filename="../src/app/rest/RestApp.cpp" line="152"/>
+        <location filename="../src/app/rest/RestApp.cpp" line="97"/>
         <source>REST API отключён.</source>
         <translation>REST API is disabled.</translation>
     </message>
     <message>
-        <location filename="../src/app/rest/RestApp.cpp" line="179"/>
+        <location filename="../src/app/rest/RestApp.cpp" line="118"/>
         <source>Не удалось открыть порт REST API: %1.</source>
         <translation>Could not open the REST API port: %1.</translation>
     </message>
     <message>
-        <location filename="../src/app/rest/RestApp.cpp" line="193"/>
+        <location filename="../src/app/rest/RestApp.cpp" line="132"/>
         <source>Сначала войдите в аккаунт через приложение.</source>
         <translation>Sign in through the desktop app first.</translation>
     </message>
     <message>
-        <location filename="../src/app/rest/RestApp.cpp" line="197"/>
+        <location filename="../src/app/rest/RestApp.cpp" line="136"/>
         <source>Не удалось прочитать сохранённые данные входа.</source>
         <translation>Could not read the saved sign-in credentials.</translation>
     </message>
     <message>
-        <location filename="../src/app/rest/RestApp.cpp" line="201"/>
+        <location filename="../src/app/rest/RestApp.cpp" line="140"/>
         <source>Доступ к сохранённым данным входа отменён.</source>
         <translation>Access to the saved sign-in credentials was canceled.</translation>
     </message>
     <message>
-        <location filename="../src/app/rest/RestApp.cpp" line="205"/>
+        <location filename="../src/app/rest/RestApp.cpp" line="144"/>
         <source>Время запуска REST API истекло.</source>
         <translation>REST API startup timed out.</translation>
     </message>
     <message>
-        <location filename="../src/app/rest/RestCommand.cpp" line="63"/>
+        <location filename="../src/app/rest/RestCommand.cpp" line="64"/>
         <source>REST-команда не допускает других команд или параметров.</source>
         <translation>A REST command cannot be combined with other commands or options.</translation>
     </message>
     <message>
-        <location filename="../src/app/rest/RestCommand.cpp" line="83"/>
+        <location filename="../src/app/rest/RestCommand.cpp" line="84"/>
         <source>--timeout должен быть от 1 до 3600000 миллисекунд.</source>
         <translation>--timeout must be between 1 and 3600000 milliseconds.</translation>
     </message>
@@ -2208,22 +2225,22 @@ Email: %2
 <context>
     <name>RestControlService</name>
     <message>
-        <location filename="../src/services/RestControlService.cpp" line="80"/>
+        <location filename="../src/services/RestControlService.cpp" line="22"/>
         <source>Время управления REST API истекло.</source>
         <translation>The REST API control command timed out.</translation>
     </message>
     <message>
-        <location filename="../src/services/RestControlService.cpp" line="150"/>
+        <location filename="../src/services/RestControlService.cpp" line="26"/>
         <source>Не удалось подключиться к серверу REST API.</source>
         <translation>Could not connect to the REST API server.</translation>
     </message>
     <message>
-        <location filename="../src/services/RestControlService.cpp" line="166"/>
+        <location filename="../src/services/RestControlService.cpp" line="23"/>
         <source>Не удалось запустить сервер REST API.</source>
         <translation>Could not start the REST API server.</translation>
     </message>
     <message>
-        <location filename="../src/services/RestControlService.cpp" line="218"/>
+        <location filename="../src/services/RestControlService.cpp" line="39"/>
         <source>REST API is already running on another host. Disable it first.</source>
         <translation>REST API is already running on another host. Disable it first.</translation>
     </message>
@@ -2232,13 +2249,13 @@ Email: %2
         <translation type="vanished">REST API is disabled.</translation>
     </message>
     <message>
-        <location filename="../src/services/RestControlService.cpp" line="187"/>
-        <location filename="../src/services/RestControlService.cpp" line="198"/>
+        <location filename="../src/services/RestControlService.cpp" line="25"/>
+        <location filename="../src/services/RestControlService.cpp" line="32"/>
         <source>Некорректный ответ сервера REST API.</source>
         <translation>Invalid response from the REST API server.</translation>
     </message>
     <message>
-        <location filename="../src/services/RestControlService.cpp" line="213"/>
+        <location filename="../src/services/RestControlService.cpp" line="35"/>
         <source>REST API уже работает на другом порту. Сначала отключите его.</source>
         <translation>REST API is already running on another port. Disable it first.</translation>
     </message>
@@ -2402,29 +2419,37 @@ Email: %2
     </message>
 </context>
 <context>
+    <name>ScenarioDelegate</name>
+    <message>
+        <location filename="../src/qml/components/ScenarioDelegate.qml" line="91"/>
+        <source>Запуск сценария</source>
+        <translation>Run scenario</translation>
+    </message>
+</context>
+<context>
     <name>ScenariosPage</name>
     <message>
-        <location filename="../src/qml/pages/ScenariosPage.qml" line="17"/>
+        <location filename="../src/qml/pages/ScenariosPage.qml" line="19"/>
         <source>Ошибка</source>
         <translation>Error</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/ScenariosPage.qml" line="18"/>
+        <location filename="../src/qml/pages/ScenariosPage.qml" line="20"/>
         <source>Не удалось выполнить сценарий</source>
         <translation>Could not run the scenario</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/ScenariosPage.qml" line="33"/>
+        <location filename="../src/qml/pages/ScenariosPage.qml" line="35"/>
         <source>Все сценарии</source>
         <translation>All scenarios</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/ScenariosPage.qml" line="62"/>
+        <location filename="../src/qml/pages/ScenariosPage.qml" line="64"/>
         <source>Что-то пошло не так!</source>
         <translation>Something went wrong!</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/ScenariosPage.qml" line="67"/>
+        <location filename="../src/qml/pages/ScenariosPage.qml" line="71"/>
         <source>Пока что у вас нет сценариев</source>
         <translation>No scenarios yet</translation>
     </message>
@@ -2440,81 +2465,81 @@ Email: %2
 <context>
     <name>SettingsPage</name>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="17"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="18"/>
         <source>Настройки</source>
         <translation>Settings</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="26"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="27"/>
         <source>Tray-режим</source>
         <translation>Tray mode</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="27"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="28"/>
         <source>Приложение будет отображаться
 как иконка на панели задач</source>
         <translation>The app will appear as an icon
 in the system tray</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="29"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="30"/>
         <source>Тема</source>
         <translation>Theme</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="30"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="31"/>
         <source>Светлая</source>
         <translation>Light</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="30"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="31"/>
         <source>Тёмная</source>
         <translation>Dark</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="32"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="33"/>
         <source>Сочетания клавиш</source>
         <translation>Keyboard shortcuts</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="33"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="34"/>
         <source>Показывать кнопки назначения
 рядом с умениями устройств</source>
         <translation>Show shortcut buttons
 next to device capabilities</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="35"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="36"/>
         <source>GitHub</source>
         <translation>GitHub</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="58"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="59"/>
         <source>Перенос настроек</source>
         <translation>Settings backup</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="73"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="74"/>
         <source>Дополнительно</source>
         <translation>Advanced</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="80"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="93"/>
         <source>REST API</source>
         <translation>REST API</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="81"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="94"/>
         <source>Локальный доступ для скриптов</source>
         <translation>Local access for scripts</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="84"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="97"/>
         <source>Подождите…</source>
         <translation>Please wait…</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="86"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="99"/>
         <source>Сервер остановлен</source>
         <translation>Server stopped</translation>
     </message>
@@ -2644,6 +2669,96 @@ next to device capabilities</translation>
         <location filename="../src/models/SettingsTransferModel.cpp" line="93"/>
         <source>Настройки загружены.</source>
         <translation>Settings imported.</translation>
+    </message>
+</context>
+<context>
+    <name>ShortcutSettingsCard</name>
+    <message>
+        <location filename="../src/qml/components/ShortcutSettingsCard.qml" line="24"/>
+        <source>Глобальные сочетания</source>
+        <translation>Global shortcuts</translation>
+    </message>
+    <message>
+        <source>Управлять устройствами, даже когда
+другое приложение в фокусе</source>
+        <translation type="vanished">Control devices while another
+application is focused</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/components/ShortcutSettingsCard.qml" line="25"/>
+        <source>Управлять устройствами и запускать сценарии,
+даже когда другое приложение в фокусе</source>
+        <translation>Control devices and run scenarios,
+even while another application is focused</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/components/ShortcutSettingsCard.qml" line="33"/>
+        <source>После закрытия приложения</source>
+        <translation>After closing the application</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/components/ShortcutSettingsCard.qml" line="34"/>
+        <source>Оставлять службу сочетаний работающей
+без окна и иконки в трее</source>
+        <translation>Keep shortcuts running without
+a window or tray icon</translation>
+    </message>
+</context>
+<context>
+    <name>ShortcutViewModel</name>
+    <message>
+        <location filename="../src/models/ShortcutViewModel.cpp" line="26"/>
+        <source>Подождите…</source>
+        <translation>Please wait…</translation>
+    </message>
+    <message>
+        <location filename="../src/models/ShortcutViewModel.cpp" line="28"/>
+        <source>Служба сочетаний остановлена</source>
+        <translation>Shortcut service is stopped</translation>
+    </message>
+    <message>
+        <location filename="../src/models/ShortcutViewModel.cpp" line="30"/>
+        <source>Приостановлено на время назначения сочетания</source>
+        <translation>Paused while recording a shortcut</translation>
+    </message>
+    <message>
+        <location filename="../src/models/ShortcutViewModel.cpp" line="31"/>
+        <source>Активных сочетаний: %1</source>
+        <translation>Active shortcuts: %1</translation>
+    </message>
+    <message>
+        <location filename="../src/models/ShortcutViewModel.cpp" line="37"/>
+        <source>Аккаунт службы изменился. Отключите и включите сочетания.</source>
+        <translation>The service account changed. Disable and enable shortcuts again.</translation>
+    </message>
+    <message>
+        <location filename="../src/models/ShortcutViewModel.cpp" line="40"/>
+        <source>Не удалось прочитать данные входа. Войдите в аккаунт через приложение.</source>
+        <translation>Could not read saved credentials. Sign in through the application.</translation>
+    </message>
+    <message>
+        <location filename="../src/models/ShortcutViewModel.cpp" line="42"/>
+        <source>Ошибка службы сочетаний: %1</source>
+        <translation>Shortcut service error: %1</translation>
+    </message>
+    <message>
+        <location filename="../src/models/ShortcutViewModel.cpp" line="44"/>
+        <source>Не удалось освободить сочетания для записи. Отключите службу и повторите попытку.</source>
+        <translation>Could not release shortcuts for recording. Disable the service and try again.</translation>
+    </message>
+    <message>
+        <location filename="../src/models/ShortcutViewModel.cpp" line="48"/>
+        <source>Не удалось зарегистрировать сочетаний: %1. Проверьте «%2 — %3» и системные сочетания.</source>
+        <translation>Could not register %1 shortcut(s). Check “%2 — %3” and system shortcuts.</translation>
+    </message>
+    <message>
+        <location filename="../src/models/ShortcutViewModel.cpp" line="54"/>
+        <source>Не удалось выполнить действие. Проверьте доступность устройства или сценария и войдите снова при необходимости.</source>
+        <translation>Could not perform the action. Check that the device or scenario is available and sign in again if needed.</translation>
+    </message>
+    <message>
+        <source>Не удалось выполнить действие. Проверьте доступность устройства и войдите снова при необходимости.</source>
+        <translation type="vanished">Could not perform the action. Check that the device is available and sign in again if needed.</translation>
     </message>
 </context>
 <context>

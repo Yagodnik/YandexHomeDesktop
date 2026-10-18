@@ -5,6 +5,7 @@
 #include "utils/Settings.h"
 
 class AccountModel;
+class ShortcutControlService;
 
 // Presentation adapter for saved settings. It does not listen for shortcuts.
 class KeybindSettingsModel final : public QObject {
@@ -13,6 +14,8 @@ class KeybindSettingsModel final : public QObject {
   Q_PROPERTY(QString accountId READ GetAccountId NOTIFY changed)
   Q_PROPERTY(int revision READ GetRevision NOTIFY changed)
   Q_PROPERTY(QString lastError READ GetLastError NOTIFY lastErrorChanged)
+  Q_PROPERTY(QString recordingError READ GetRecordingError NOTIFY recordingChanged)
+  Q_PROPERTY(bool recordingReady READ IsRecordingReady NOTIFY recordingChanged)
 public:
   explicit KeybindSettingsModel(Settings* settings, AccountModel* account,
                                 QObject* parent = nullptr);
@@ -21,6 +24,11 @@ public:
   int GetRevision() const;
   QString GetLastError() const;
   void SetAccountId(const QString& accountId);
+  void SetShortcutControl(ShortcutControlService* control);
+  bool IsRecordingReady() const;
+  QString GetRecordingError() const;
+  Q_INVOKABLE void BeginRecording();
+  Q_INVOKABLE void EndRecording();
 
   Q_INVOKABLE int GetCombination(const QVariantMap& target) const;
   Q_INVOKABLE int MakeCombination(int key, int modifiers) const;
@@ -30,10 +38,12 @@ public:
                         const QString& actionLabel);
 
 signals:
+  void recordingChanged();
   void changed();
   void lastErrorChanged();
 
 private:
+  ShortcutControlService* shortcut_control_ = nullptr;
   void Reload();
   void SetError(const QString& error);
   static KeybindTarget Target(const QVariantMap& value);

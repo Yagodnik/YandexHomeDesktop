@@ -16,6 +16,23 @@ yh_add_test(NAME TestCatalog COMMAND "${Python3_EXECUTABLE}"
   --build-dir "${PROJECT_BINARY_DIR}" --config "$<CONFIG>" --ctest "${CMAKE_CTEST_COMMAND}")
 set_tests_properties(TestCatalog PROPERTIES TIMEOUT 90)
 
+if(BUILD_SHORTCUTS_APP)
+  add_executable(NativeShortcutTests NativeShortcutTests.cpp ../src/app/shortcuts/QHotkeyRegistrar.cpp)
+  target_link_libraries(NativeShortcutTests PRIVATE Qt6::Test QHotkey::QHotkey AppShortcuts)
+  yh_add_test(NAME NativeShortcuts COMMAND NativeShortcutTests)
+  set_tests_properties(NativeShortcuts PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+  add_executable(ShortcutProcessTests ShortcutProcessTests.cpp)
+  target_link_libraries(ShortcutProcessTests PRIVATE Qt6::Test ShortcutControlBootstrap)
+  target_compile_definitions(ShortcutProcessTests PRIVATE FIXTURE_PATH="${CMAKE_SOURCE_DIR}/resources/debug/api.json")
+  add_dependencies(ShortcutProcessTests YandexHomeShortcuts)
+  yh_add_test(NAME ShortcutProcess COMMAND ShortcutProcessTests $<TARGET_FILE:YandexHomeShortcuts> "$<IF:$<CONFIG:Debug>,1,0>")
+  set_tests_properties(ShortcutProcess PROPERTIES TIMEOUT 90 ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+endif()
+
+add_executable(ShortcutTests ShortcutTests.cpp)
+target_link_libraries(ShortcutTests PRIVATE Qt6::Test AppShortcuts)
+yh_add_test(NAME Shortcuts COMMAND ShortcutTests)
+
 add_executable(WorkerControlTests WorkerControlTests.cpp)
 target_link_libraries(WorkerControlTests PRIVATE Qt6::Test WorkerControl)
 yh_add_test(NAME WorkerControl COMMAND WorkerControlTests)

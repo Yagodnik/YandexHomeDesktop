@@ -117,7 +117,42 @@ private:
   ApiResultHandler<DeviceInfo> handler_;
 };
 
-// Page tests use empty local models and record service calls without any I/O.
+// Scenario page interactions exercise the real service and view model without I/O.
+class QmlTestScenarioApi final : public QObject, public IHomeApi {
+  Q_OBJECT
+  Q_PROPERTY(int executionCount MEMBER execution_count_ NOTIFY executed)
+  Q_PROPERTY(QString lastScenario MEMBER last_scenario_ NOTIFY executed)
+public:
+  using QObject::QObject;
+  Q_INVOKABLE void SetRows(const QVariantList& rows) {
+    scenarios_.clear();
+    execution_count_ = 0;
+    last_scenario_.clear();
+    for (const auto& row : rows) {
+      const auto value = row.toMap();
+      scenarios_.append(ScenarioObject{.id = value["id"].toString(), .name = value["name"].toString(), .is_active = value["is_active"].toBool()});
+    }
+    emit executed();
+  }
+  void GetScenarios(QObject*, ApiResultHandler<QList<ScenarioObject>> handler) override { handler(scenarios_); }
+  void ExecuteScenario(const QString& id, QObject*, ApiResultHandler<void> handler) override {
+    ++execution_count_;
+    last_scenario_ = id;
+    emit executed();
+    handler(ApiResult<void>{});
+  }
+  void GetUserInfo(QObject*, ApiResultHandler<UserInfo>) override { qFatal("Unexpected user request"); }
+  void GetDeviceInfo(const QString&, QObject*, ApiResultHandler<DeviceInfo>) override { qFatal("Unexpected device request"); }
+  void PerformActions(const QList<DeviceActionsObject>&, QObject*, ApiResultHandler<void>) override { qFatal("Unexpected device action"); }
+signals:
+  void executed();
+private:
+  QList<ScenarioObject> scenarios_;
+  int execution_count_ = 0;
+  QString last_scenario_;
+};
+
+// Other page tests use empty local models and record calls without any I/O.
 class QmlTestModel : public QStandardItemModel {
   Q_OBJECT
   Q_PROPERTY(int count READ rowCount NOTIFY dataLoaded)

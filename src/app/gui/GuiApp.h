@@ -3,6 +3,7 @@
 #include <QQmlApplicationEngine>
 
 #include "AppContext.h"
+#include "services/ShortcutControlService.h"
 
 class GuiApp : public QObject {
 public:
@@ -18,4 +19,5 @@ private:
 
   AppContext& app_context_;
   QQmlApplicationEngine engine;
+  ShortcutControlService* shortcuts_ = nullptr;
 };

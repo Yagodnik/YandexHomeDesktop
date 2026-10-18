@@ -30,6 +30,115 @@ private:
   using Result = Settings::KeybindSaveResult;
 
 private slots:
+  void ScenarioIdentityPersistenceAndSharedDeviceConflicts() {
+    QTemporaryDir directory;
+    const auto path = directory.filePath("settings.ini");
+    const KeybindTarget scenario{.action = "run", .scenario_id = "lamp"};
+    const KeybindTarget other{.action = "run", .scenario_id = "other"};
+    {
+      Settings settings(path);
+      KeybindSettingsModel model(&settings, nullptr);
+      model.SetAccountId("account");
+      QVERIFY(model.Save(Map(scenario), Qt::Key_F6, "Evening", "Run scenario"));
+      QVERIFY(!model.Save(Map(Range("lamp")), Qt::Key_F6, "Lamp", "Increase"));
+      QVERIFY(model.GetLastError().contains("Evening"));
+      QVERIFY(!model.Save(Map(other), Qt::Key_F6, "Evening", "Run scenario"));
+      QVERIFY(model.Save(Map(Range("lamp")), Qt::Key_F7, "Lamp", "Increase"));
+      QVERIFY(model.Save(Map(scenario), Qt::Key_F8, "Renamed", "Run scenario"));
+      QVERIFY(model.Save(Map(other), Qt::Key_F6, "Evening", "Run scenario"));
+      QCOMPARE(settings.GetKeybinds("account")->size(), 3);
+      QCOMPARE(settings.SaveKeybind("other-account", scenario, Qt::Key_F6, "Other", {}),
+               Result::Saved);
+    }
+    Settings restored(path);
+    KeybindSettingsModel model(&restored, nullptr);
+    model.SetAccountId("account");
+    QCOMPARE(model.GetCombination(Map(scenario)), int(Qt::Key_F8));
+    QCOMPARE(model.GetCombination(Map(Range("lamp"))), int(Qt::Key_F7));
+    Settings imported(nullptr, true);
+    QCOMPARE(imported.ImportSettings("account", *restored.ExportSettings("account")),
+             Settings::ImportResult::Imported);
+    QCOMPARE(imported.GetKeybinds("account")->size(), 3);
+    QVERIFY(model.Save(Map(scenario), 0, "Renamed", "Run scenario"));
+    QCOMPARE(model.GetCombination(Map(scenario)), 0);
+    model.SetAccountId("other-account");
+    QCOMPARE(model.GetCombination(Map(scenario)), int(Qt::Key_F6));
+  }
+
+  void LegacyDeviceStorageAndBackupsUpgradeWithoutLosingAssignments() {
+    QTemporaryDir directory;
+    const auto path = directory.filePath("settings.ini");
+    Settings settings(path);
+    QCOMPARE(settings.SaveKeybind("account", Range("lamp"), Qt::Key_F6, "Lamp", "Increase"),
+             Result::Saved);
+    QSettings raw(path, QSettings::IniFormat);
+    auto document =
+        QJsonDocument::fromJson(raw.value(StorageKey("account")).toString().toUtf8()).object();
+    auto binding = document["bindings"].toArray()[0].toObject();
+    auto target = binding["target"].toObject();
+    target.remove("scenario_id");
+    binding["target"] = target;
+    document["version"] = 1;
+    document["bindings"] = QJsonArray{binding};
+    raw.setValue(StorageKey("account"), QString::fromUtf8(QJsonDocument(document).toJson()));
+    raw.sync();
+    QCOMPARE(settings.GetKeybinds("account")->size(), 1);
+    QCOMPARE(settings.GetKeybinds("account")->first().combination, int(Qt::Key_F6));
+    auto backup = QJsonDocument::fromJson(*settings.ExportSettings("account")).object();
+    QCOMPARE(backup["version"].toInt(), 2);
+    backup["version"] = 1;
+    auto account = backup["account"].toObject();
+    account["keybinds"] = QJsonArray{binding};
+    backup["account"] = account;
+    Settings imported(nullptr, true);
+    QCOMPARE(imported.ImportSettings("account", QJsonDocument(backup).toJson()),
+             Settings::ImportResult::Imported);
+    QCOMPARE(imported.GetKeybinds("account")->first().target.scenario_id, QString{});
+    QCOMPARE(imported.GetKeybinds("account")->first().combination, int(Qt::Key_F6));
+    const KeybindTarget scenario{.action = "run", .scenario_id = "evening"};
+    QCOMPARE(settings.SaveKeybind("account", scenario, Qt::Key_F7, "Evening", "Run"),
+             Result::Saved);
+    raw.sync();
+    QCOMPARE(QJsonDocument::fromJson(raw.value(StorageKey("account")).toString().toUtf8())
+                 .object()["version"]
+                 .toInt(),
+             2);
+    QCOMPARE(settings.GetKeybinds("account")->size(), 2);
+  }
+
+  void RejectsAmbiguousScenarioTargetsAndMalformedVersionTwo() {
+    Settings settings(nullptr, true);
+    const KeybindTarget valid{.action = "run", .scenario_id = "evening"};
+    QCOMPARE(settings.SaveKeybind("account", valid, Qt::Key_F6, "Evening", "Run"), Result::Saved);
+    const auto before = *settings.ExportSettings("account");
+    for (int variant = 0; variant < 7; ++variant) {
+      auto backup = QJsonDocument::fromJson(before).object();
+      auto account = backup["account"].toObject();
+      auto binding = account["keybinds"].toArray()[0].toObject();
+      auto target = binding["target"].toObject();
+      if (variant == 0)
+        target["device_id"] = "lamp";
+      if (variant == 1)
+        target["instance"] = "on";
+      if (variant == 2)
+        target["action"] = "toggle";
+      if (variant == 3)
+        target["value"] = "true";
+      if (variant == 4)
+        target.remove("scenario_id");
+      if (variant == 5)
+        target["scenario_id"] = 123;
+      if (variant == 6)
+        backup["version"] = 1;
+      binding["target"] = target;
+      account["keybinds"] = QJsonArray{binding};
+      backup["account"] = account;
+      QCOMPARE(settings.ImportSettings("account", QJsonDocument(backup).toJson()),
+               Settings::ImportResult::InvalidData);
+      QCOMPARE(*settings.ExportSettings("account"), before);
+    }
+  }
+
   void PersistsAllActionIdentitiesAcrossRecreation() {
     QTemporaryDir directory;
     const auto path = directory.filePath("settings.ini");
@@ -171,7 +280,7 @@ private slots:
     const auto valid = QJsonDocument::fromJson(raw.value(key).toString().toUtf8()).object();
     QList<QJsonObject> invalid;
     auto document = valid;
-    document["version"] = 2;
+    document["version"] = 3;
     invalid.append(document);
     document = valid;
     document["bindings"] = QJsonValue::Null;

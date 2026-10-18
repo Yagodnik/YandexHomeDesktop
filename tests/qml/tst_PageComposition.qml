@@ -16,7 +16,7 @@ TestCase {
   Component { id: authPage; Pages.AuthPage { width: 350; height: 460 } }
   Component { id: mainPage; Pages.MainPage { width: 350; height: 460 } }
   Component { id: devicePage; Pages.DevicePage { width: 350; height: 460 } }
-  Component { id: settingsPage; Pages.SettingsPage { width: 350; height: 460; restModel: restViewModel; transferModel: settingsTransferModel } }
+  Component { id: settingsPage; Pages.SettingsPage { width: 350; height: 460; restModel: restViewModel; transferModel: settingsTransferModel; shortcutModel: shortcutViewModel } }
 
   ListModel { id: households }
   ListModel { id: scenarios }
@@ -365,6 +365,29 @@ TestCase {
       wait(100);
       grabImage(page).save(settingsPreviewPath + "-disabled.png");
     }
+  }
+
+  function test_shortcutSettingsReachController() {
+    shortcutViewModel.SetEnabled(false);
+    tryCompare(shortcutViewModel, "busy", false);
+    const page = createTemporaryObject(settingsPage, testCase, { height: 460 });
+    const content = findChild(page, "settingsContent");
+    const card = findChild(page, "shortcutSettings");
+    tryVerify(function() { return card.y > 0 && content.contentHeight > content.height; });
+    content.contentY = Math.min(card.y, content.contentHeight - content.height);
+    waitForRendering(card);
+    const toggle = findChild(findChild(card, "shortcutsEnabledRow"), "settingSwitch");
+    mouseClick(toggle);
+    tryCompare(shortcutViewModel, "enabled", true);
+    const background = findChild(findChild(card, "shortcutsBackgroundRow"), "settingSwitch");
+    mouseClick(background);
+    compare(shortcutViewModel.background, true);
+    mouseClick(background);
+    compare(shortcutViewModel.background, false);
+    if (settingsPreviewPath.length > 0) grabImage(page).save(settingsPreviewPath + "-shortcuts.png");
+    mouseClick(toggle);
+    tryCompare(shortcutViewModel, "enabled", false);
+    tryCompare(shortcutViewModel, "busy", false);
   }
 
   function test_scenariosScrollingAndAction() {

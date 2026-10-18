@@ -1,6 +1,6 @@
 # Clean build
 
-The CI builds are `.github/workflows/ci-windows.yml`, `ci-macos.yml`, and `ci-linux.yml`. They run for pull requests targeting `main`, `dev`, or `refactoring`, or when started manually; ordinary branch pushes do not trigger them. Windows and macOS build the desktop app and run CTest; Linux builds the headless CLI/REST applications and runs the portable tests using the Qt 6.9.1 `linux_gcc_64` kit. CMake fetches pinned Boost.Hana and QtKeychain sources into the build directory. No ignored `libs/` directory or machine-specific CMake file is required.
+The CI builds are `.github/workflows/ci-windows.yml`, `ci-macos.yml`, and `ci-linux.yml`. They run for pull requests targeting `main`, `dev`, or `refactoring`, or when started manually; ordinary branch pushes do not trigger them. Windows and macOS build the desktop app and run CTest; Linux builds the headless CLI/REST applications and runs the portable tests using the Qt 6.9.1 `linux_gcc_64` kit. CMake fetches pinned Boost.Hana, QtKeychain, and (for the shortcut worker) QHotkey sources into the build directory. No ignored `libs/` directory or machine-specific CMake file is required.
 
 For a local desktop build, install Qt 6.9 or newer with HttpServer, WebSockets, Quick, QuickTest, NetworkAuth, Widgets, Svg, Qt5Compat, LinguistTools, and Test, plus a C++23 compiler and CMake 3.28 or newer. Configure Qt through the standard CMake prefix path:
 
@@ -12,7 +12,7 @@ ctest --test-dir build --output-on-failure
 
 Precompiled headers are enabled by default for the main C++ targets. Configure with `-DYH_ENABLE_PCH=OFF` to build without them; Windows CI checks both modes. PCH uses the declared Qt, C++ standard library, and pinned Boost.Hana headers and writes generated files only under the build directory. Shared API model codecs are compiled in `YandexApiAdapter`; custom serializable types still include `serialization/Serialization.h` where their codecs are instantiated.
 
-On Windows, use the compiler kit that matches the Qt binaries and add `--config Release` to build and `-C Release` to CTest if using a multi-config generator. CMake downloads the pinned sources on the first configure. `FETCHCONTENT_SOURCE_DIR_HANA` and `FETCHCONTENT_SOURCE_DIR_QTKEYCHAIN` can point at already downloaded copies when working offline; use the revisions in `CMakeLists.txt`. All test builds require Python 3.9+ for catalog validation and tooling tests (CI pins Python 3.13). Portable tests also require the Qt HttpServer and WebSockets modules (the CI kit is pinned to Qt 6.9.1). On Linux, install `libsecret-1-dev` for QtKeychain and configure with `-DBUILD_DESKTOP_APP=OFF -DBUILD_TESTING=ON`. This builds CLI, REST, and the portable tests. Headless applications require Qt Core, Network, and LinguistTools; REST also requires HttpServer/WebSockets. Qt Gui is needed only for the desktop or the existing presentation-model tests.
+On Windows, use the compiler kit that matches the Qt binaries and add `--config Release` to build and `-C Release` to CTest if using a multi-config generator. CMake downloads the pinned sources on the first configure. `FETCHCONTENT_SOURCE_DIR_HANA` and `FETCHCONTENT_SOURCE_DIR_QTKEYCHAIN` (and `FETCHCONTENT_SOURCE_DIR_QHOTKEY` for desktop builds) can point at already downloaded copies when working offline; use the revisions in `CMakeLists.txt`. All test builds require Python 3.9+ for catalog validation and tooling tests (CI pins Python 3.13). Portable tests also require the Qt HttpServer and WebSockets modules (the CI kit is pinned to Qt 6.9.1). On Linux, install `libsecret-1-dev` for QtKeychain and configure with `-DBUILD_DESKTOP_APP=OFF -DBUILD_TESTING=ON`. This builds CLI, REST, and the portable tests. Headless applications require Qt Core, Network, and LinguistTools; REST also requires HttpServer/WebSockets. Qt Gui is needed only for the desktop or the existing presentation-model tests.
 
 Desktop CTest runs the C++ suite, creates all nine QML pages with local test models, and runs Qt Quick layout and interaction tests. The QML tests use the offscreen platform, software renderer, and bundled font/assets; they need no sign-in or live API access and run in both Windows and macOS CI. No OAuth configuration is included in the QML test executables.
 
@@ -23,12 +23,17 @@ device action dispatch, attachment spacing, and the settings visibility toggle.
 combinations, duplicate prevention, invalid data, write failures, and demo
 isolation. `ApiFixture` checks persistence/reset and fixture isolation for the
 visibility preference. These run in the existing Windows CTest matrix;
-the feature adds no dependencies or generated source inputs.
+saved binding storage uses the existing dependencies.
 The same QML suite checks independent range decrease/increase assignments and
 per-color, temperature, scene, and mode assignments through the real controls,
 including normal pointer actions, tab changes, dropdown reopening, narrow
 windows, both themes, and hiding the attachments.
 It also verifies animated editor opening/closing and reopening after cancellation.
+Scenario bindings use the same editor through the real scenarios page. Tests cover
+stable IDs, device/scenario conflicts, inactive editing, normal play actions,
+account changes, and visibility in both themes. Settings tests check mixed binding
+backups and migration from version-1 device-only documents; shortcut runtime and
+process tests verify fresh scenario validation, cancellation, and worker execution.
 The QML suite has a 90-second timeout to include these real dialog transitions
 on slower CI runners.
 
@@ -288,3 +293,28 @@ shared libraries and Qt frameworks; it also installs console executables in
 `bin/` and SDK libraries in `lib/`. Standalone headless/SDK installs on macOS
 and Linux require an installed matching Qt runtime. The bundle installer
 includes everything needed by its three applications.
+
+## Shortcut worker
+
+Desktop builds also build and package `YandexHomeShortcuts`. It uses Qt Core/Gui
+and QHotkey 1.5.0, pinned to commit
+`34330d6ff5d2ca111c376f6d7da66be9d1817430` in `cmake/QHotkey.cmake`;
+macOS builds require the Xcode Objective-C++ compiler and AppKit/Carbon frameworks.
+CMake checks the pinned macOS source hash and generates a patched copy inside the
+build directory: Carbon registration is exclusive and its event handlers install
+once. Downloaded sources remain unchanged. `NativeShortcuts` checks cross-process
+conflicts and release against that compiled code in macOS CI.
+QHotkey is static, its examples/install rules are disabled, and its BSD license
+is included under `share/YandexHome/licenses/QHotkey` in the installed package.
+`BUILD_SHORTCUTS_APP` defaults to `BUILD_DESKTOP_APP` and supports Windows/macOS.
+Set it OFF for a desktop without native shortcuts, or ON with the desktop OFF
+for a standalone worker. Portable CLI/REST builds keep it OFF and fetch no QHotkey.
+The reusable `AppShortcuts` SDK library requires Qt Core/Network only.
+
+Run `just tests-run --feature shortcuts` for portable runtime tests, real detached
+fixture-worker integration, native registration conflicts/release, and QML editor/
+settings interactions. Release runs reject fixture flags and skip fixture process
+scenarios. Native checks use a rarely used modifier/F19 combination briefly and
+skip if the current desktop cannot register it; they do not inject keyboard input.
+Windows CI builds/deploys the worker, tests it in every Debug/Release/PCH job,
+and checks installed help. See [shortcuts.md](shortcuts.md) for runtime behavior.

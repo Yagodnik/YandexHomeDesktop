@@ -7,6 +7,8 @@ UI.PageSurface {
   id: root
 
   required property ViewModels.ScenariosViewModel viewModel
+  required property ViewModels.KeybindSettingsModel keybindSettings
+  property bool showKeybinds: true
 
   Component.onCompleted: viewModel.EnsureLoaded()
 
@@ -64,6 +66,8 @@ UI.PageSurface {
 
     Components.ScenariosPane {
       sourceModel: root.viewModel.scenarios
+      keybindSettings: root.keybindSettings
+      showKeybinds: root.showKeybinds
       emptyMessage: qsTr("Пока что у вас нет сценариев")
       onScenarioRequested: function(scenarioId) { root.viewModel.ExecuteScenario(scenarioId); }
     }

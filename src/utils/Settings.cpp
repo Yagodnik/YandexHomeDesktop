@@ -1,6 +1,7 @@
 #include "Settings.h"
 #include <QCryptographicHash>
 #include <QJsonDocument>
+#include <QJsonArray>
 #include <QSet>
 #include <algorithm>
 #include <tuple>
@@ -22,6 +23,7 @@ Settings::Settings(const QString& fileName, QObject* parent)
   : QObject(parent), settings_(fileName, QSettings::IniFormat) {}
 
 namespace {
+constexpr int KeybindFormatVersion = 2;
 JSON_STRUCT(KeybindDocument,
   (int, version),
   (QList<KeybindAssignment>, bindings)
@@ -60,6 +62,12 @@ bool ValidBindings(const QList<KeybindAssignment>& bindings) {
   return true;
 }
 
+bool DeviceBindingsOnly(const QList<KeybindAssignment>& bindings) {
+  return std::all_of(bindings.cbegin(), bindings.cend(), [](const auto& binding) {
+    return binding.target.scenario_id.isEmpty();
+  });
+}
+
 bool ValidIds(const QStringList& ids) {
   QSet<QString> unique;
   for (const auto& id : ids) {
@@ -69,15 +77,37 @@ bool ValidIds(const QStringList& ids) {
   return true;
 }
 
+// Version 1 targets contain device fields only. Add the explicit empty scenario
+// identifier before strict decoding; never repair malformed version 2 input.
+QJsonArray UpgradeDeviceBindings(QJsonArray bindings) {
+  for (qsizetype index = 0; index < bindings.size(); ++index) {
+    if (!bindings[index].isObject()) continue;
+    auto binding = bindings[index].toObject();
+    if (!binding["target"].isObject()) continue;
+    auto target = binding["target"].toObject();
+    if (!target.contains("scenario_id")) target.insert("scenario_id", "");
+    binding.insert("target", target);
+    bindings[index] = binding;
+  }
+  return bindings;
+}
+
 std::expected<SettingsBackup, Settings::ImportResult> ReadBackup(const QString& accountId,
                                                                const QByteArray& data) {
   QJsonParseError error;
   const auto document = QJsonDocument::fromJson(data, &error);
   if (error.error != QJsonParseError::NoError || !document.isObject())
     return std::unexpected(Settings::ImportResult::InvalidData);
-  const auto backup = Serialization::TryFrom<SettingsBackup>(document.object());
-  if (!backup || backup->version != 1 || backup->app.theme < 0 || backup->app.theme > 1
+  auto object = document.object();
+  if (object["version"] == 1 && object["account"].isObject()) {
+    auto account = object["account"].toObject();
+    if (account["keybinds"].isArray()) account["keybinds"] = UpgradeDeviceBindings(account["keybinds"].toArray());
+    object["account"] = account;
+  }
+  const auto backup = Serialization::TryFrom<SettingsBackup>(object);
+  if (!backup || (backup->version != 1 && backup->version != KeybindFormatVersion) || backup->app.theme < 0 || backup->app.theme > 1
       || backup->account.id.isEmpty() || !ValidBindings(backup->account.keybinds)
+      || (backup->version == 1 && !DeviceBindingsOnly(backup->account.keybinds))
       || !ValidIds(backup->account.favorite_devices) || !ValidIds(backup->account.collapsed_rooms))
     return std::unexpected(Settings::ImportResult::InvalidData);
   if (accountId.isEmpty() || backup->account.id != accountId)
@@ -129,11 +159,14 @@ void Settings::SetFavoritesCollapsed(const QString& accountId, bool collapsed) {
 }
 
 bool Settings::SameKeybindTarget(const KeybindTarget& left, const KeybindTarget& right) {
-  return std::tie(left.device_id, left.capability_type, left.instance, left.action, left.value)
-    == std::tie(right.device_id, right.capability_type, right.instance, right.action, right.value);
+  return std::tie(left.device_id, left.capability_type, left.instance, left.action, left.value, left.scenario_id)
+    == std::tie(right.device_id, right.capability_type, right.instance, right.action, right.value, right.scenario_id);
 }
 
 bool Settings::IsValidKeybindTarget(const KeybindTarget& target) {
+  if (!target.scenario_id.isEmpty())
+    return target.device_id.isEmpty() && target.capability_type.isEmpty() && target.instance.isEmpty()
+      && target.action == "run" && target.value.isEmpty();
   if (target.device_id.isEmpty()) return false;
   const auto& type = target.capability_type;
   if (type == "devices.capabilities.on_off")
@@ -181,8 +214,12 @@ std::optional<QList<KeybindAssignment>> Settings::GetKeybinds(const QString& acc
   QJsonParseError error;
   const auto document = QJsonDocument::fromJson(stored.toString().toUtf8(), &error);
   if (error.error != QJsonParseError::NoError || !document.isObject()) return std::nullopt;
-  const auto decoded = Serialization::TryFrom<KeybindDocument>(document.object());
-  if (!decoded || decoded->version != 1 || !ValidBindings(decoded->bindings)) return std::nullopt;
+  auto object = document.object();
+  if (object["version"] == 1 && object["bindings"].isArray())
+    object["bindings"] = UpgradeDeviceBindings(object["bindings"].toArray());
+  const auto decoded = Serialization::TryFrom<KeybindDocument>(object);
+  if (!decoded || (decoded->version != 1 && decoded->version != KeybindFormatVersion) || !ValidBindings(decoded->bindings)
+      || (decoded->version == 1 && !DeviceBindingsOnly(decoded->bindings))) return std::nullopt;
   return decoded->bindings;
 }
 
@@ -207,7 +244,7 @@ Settings::KeybindSaveResult Settings::SaveKeybind(const QString& accountId, cons
     bindings->append(binding);
   }
   KeybindDocument document{};
-  document.version = 1;
+  document.version = KeybindFormatVersion;
   document.bindings = *bindings;
   const auto serialized = QString::fromUtf8(QJsonDocument(Serialization::To(document)).toJson(QJsonDocument::Compact));
   const auto previous = ReadAccountValue(accountId, "keybinds");
@@ -226,7 +263,7 @@ std::optional<QByteArray> Settings::ExportSettings(const QString& accountId) con
   const auto keybinds = GetKeybinds(accountId);
   if (!keybinds) return std::nullopt;
   SettingsBackup backup{};
-  backup.version = 1;
+  backup.version = KeybindFormatVersion;
   backup.app.theme = GetCurrentTheme();
   backup.app.tray_mode = GetTrayModeEnabled();
   backup.app.show_keybinds = GetShowKeybinds();
@@ -247,7 +284,7 @@ Settings::ImportResult Settings::ImportSettings(const QString& accountId, const 
   const auto backup = ReadBackup(accountId, data);
   if (!backup) return backup.error();
   KeybindDocument keybinds{};
-  keybinds.version = 1;
+  keybinds.version = KeybindFormatVersion;
   keybinds.bindings = backup->account.keybinds;
   const auto serialized = QString::fromUtf8(QJsonDocument(Serialization::To(keybinds)).toJson(QJsonDocument::Compact));
   const auto oldTheme = GetCurrentTheme();
@@ -324,6 +361,28 @@ void Settings::SetRestEnabled(bool enabled) {
 void Settings::SetRestPort(quint16 port) {
   if (temporary_) temporary_rest_port_ = port;
   else { settings_.setValue("rest/port", port); settings_.sync(); }
+}
+
+bool Settings::GetShortcutsEnabled() const {
+  if (temporary_) return temporary_shortcuts_;
+  settings_.sync();
+  return settings_.value("shortcuts/enabled", false).toBool();
+}
+
+bool Settings::GetShortcutsBackground() const {
+  if (temporary_) return temporary_shortcuts_background_;
+  settings_.sync();
+  return settings_.value("shortcuts/background", false).toBool();
+}
+
+void Settings::SetShortcutsEnabled(bool enabled) {
+  if (temporary_) temporary_shortcuts_ = enabled;
+  else { settings_.setValue("shortcuts/enabled", enabled); settings_.sync(); }
+}
+
+void Settings::SetShortcutsBackground(bool enabled) {
+  if (temporary_) temporary_shortcuts_background_ = enabled;
+  else { settings_.setValue("shortcuts/background", enabled); settings_.sync(); }
 }
 
 void Settings::Reset() {

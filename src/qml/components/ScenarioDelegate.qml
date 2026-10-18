@@ -1,5 +1,7 @@
 import QtQuick
 import YandexHomeDesktop.Ui as UI
+import YandexHomeDesktop.Components as Components
+import YandexHomeDesktop.ViewModels
 
 Item {
   id: delegateItem
@@ -9,6 +11,8 @@ Item {
   required property string name
   required property bool is_active
   required property bool is_waiting_response
+  property KeybindSettingsModel keybindSettings: null
+  property bool showKeybinds: true
   signal executeRequested()
 
   opacity: 0
@@ -63,10 +67,32 @@ Item {
   }
 
   UI.DefaultText {
+    objectName: "scenarioName"
     text: delegateItem.name
     anchors.verticalCenter: parent.verticalCenter
     anchors.left: parent.left
     anchors.leftMargin: 16
+    anchors.right: shortcut.visible ? shortcut.left : startButton.left
+    anchors.rightMargin: 8
+    elide: Text.ElideRight
+  }
+
+  Components.CapabilityKeybind {
+    id: shortcut
+    objectName: "scenarioKeybind"
+    anchors.verticalCenter: parent.verticalCenter
+    anchors.right: startButton.left
+    anchors.rightMargin: 8
+    width: Math.min(implicitWidth, delegateItem.width * 0.45)
+    visible: delegateItem.showKeybinds && delegateItem.keybindSettings !== null
+    z: 101 // Inactive scenarios still allow editing their assignment.
+    compact: true
+    capabilityTitle: delegateItem.name
+    bindingDescription: qsTr("Запуск сценария")
+    deviceName: delegateItem.name
+    keybindSettings: delegateItem.keybindSettings
+    bindingTarget: ({ scenario_id: delegateItem.scenario_id, device_id: "", capability_type: "",
+                      instance: "", action: "run", value: "" })
   }
 
   UI.MyProgressIndicator {

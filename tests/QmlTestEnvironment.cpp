@@ -1,4 +1,5 @@
 #include "QmlTestEnvironment.h"
+#include "models/ShortcutViewModel.h"
 #include <QLocalSocket>
 
 #include <QFontDatabase>
@@ -67,6 +68,8 @@ void initializeQmlTestEnvironment(QQmlEngine* engine) {
     qmlRegisterType<ColorsFilterModel>("YandexHomeDesktop.Models", 1, 0, "ColorsFilterModel");
     qmlRegisterType<ColorModesFilterModel>("YandexHomeDesktop.Models", 1, 0, "ColorModesFilterModel");
     qmlRegisterType<ModesFilterModel>("YandexHomeDesktop.Models", 1, 0, "ModesFilterModel");
+    qmlRegisterUncreatableType<ShortcutViewModel>("YandexHomeDesktop.ViewModels", 1, 0,
+      "ShortcutViewModel", "Supplied by the application");
     qmlRegisterUncreatableType<RestViewModel>("YandexHomeDesktop.ViewModels", 1, 0,
       "RestViewModel", "Supplied by the application");
     qmlRegisterType<DevicesFilterModel>("YandexHomeDesktop.Models", 1, 0, "DevicesFilterModel");
@@ -117,7 +120,9 @@ void initializeQmlTestEnvironment(QQmlEngine* engine) {
   auto* api = new QmlTestHomeApi(engine);
   auto* home = new HomeService(api, engine);
   engine->rootContext()->setContextProperty("homeViewModel", new HomeViewModel(home, engine));
-  auto* scenarios = new ScenarioService(api, engine);
+  auto* scenario_api = new QmlTestScenarioApi(engine);
+  engine->rootContext()->setContextProperty("scenarioTestApi", scenario_api);
+  auto* scenarios = new ScenarioService(scenario_api, engine);
   engine->rootContext()->setContextProperty("scenariosViewModel", new ScenariosViewModel(scenarios, engine));
 
   auto* device_api = new QmlTestDeviceApi(engine);
@@ -139,8 +144,16 @@ void initializeQmlTestEnvironment(QQmlEngine* engine) {
   engine->rootContext()->setContextProperty("settings", rest_settings);
   QObject::connect(rest_settings, &Settings::accountPreferencesChanged, themes,
     [themes, rest_settings](const QString&) { themes->SetTheme(rest_settings->GetCurrentTheme()); });
+  auto* shortcuts = new ShortcutControlService(rest_settings,
+    {"yh-shortcuts-qml-test-" + QUuid::createUuid().toString(QUuid::Id128), {}, {}}, engine);
+  engine->rootContext()->setContextProperty("shortcutViewModel", new ShortcutViewModel(shortcuts, engine));
+  QObject::connect(device_api, &QmlTestDeviceApi::fixtureReset, shortcuts, [shortcuts] {
+    shortcuts->SetEnabled(false);
+    shortcuts->SetBackground(false);
+  });
   auto* keybind_settings = new KeybindSettingsModel(rest_settings, nullptr, engine);
   keybind_settings->SetAccountId("test-account");
+  keybind_settings->SetShortcutControl(shortcuts);
   engine->rootContext()->setContextProperty("keybindSettingsModel", keybind_settings);
   auto* transfer = new SettingsTransferModel(new SettingsTransferService(rest_settings, engine), nullptr, engine);
   transfer->SetAccountId("test-account");

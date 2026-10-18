@@ -37,8 +37,9 @@ Item {
     anchors.rightMargin: 10
     anchors.verticalCenter: parent.verticalCenter
     text: root.buttonText
-    horizontalMargin: 12
-    verticalMargin: 6
+    font.pixelSize: 14
+    horizontalMargin: 10
+    verticalMargin: 4
     opacity: enabled ? 1 : 0.4
     onClicked: root.triggered()
   }

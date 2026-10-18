@@ -21,8 +21,12 @@ UI.PageSurface {
       currentIndex: topBar.activeTab
 
       Pages.DevicesPage { viewModel: homeViewModel }
-      Pages.ScenariosPage { viewModel: scenariosViewModel }
-      Pages.SettingsPage { restModel: restViewModel; transferModel: settingsTransferModel }
+      Pages.ScenariosPage {
+        viewModel: scenariosViewModel
+        keybindSettings: keybindSettingsModel
+        showKeybinds: settings.showKeybinds
+      }
+      Pages.SettingsPage { restModel: restViewModel; transferModel: settingsTransferModel; shortcutModel: shortcutViewModel }
     }
   }
 

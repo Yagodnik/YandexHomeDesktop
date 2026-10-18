@@ -8,6 +8,7 @@ AbstractButton {
   id: root
 
   property string capabilityTitle
+  property string bindingDescription: capabilityTitle
   property KeybindSettingsModel keybindSettings: null
   property var bindingTarget: ({})
   property string deviceName
@@ -18,6 +19,8 @@ AbstractButton {
   }
   readonly property string sequence: keybindSettings ? keybindSettings.DisplayCombination(combination) : ""
   property string saveError: ""
+  property bool recording: false
+  Component.onDestruction: { if (recording && keybindSettings) keybindSettings.EndRecording(); }
   property string editingAccount: ""
   property string actionLabel: ""
   property bool compact: false
@@ -100,11 +103,14 @@ AbstractButton {
     objectName: "keybindEditor"
     capabilityTitle: root.capabilityTitle
     currentCombination: root.combination
+    recordingReady: !root.keybindSettings || root.keybindSettings.recordingReady
+    onAboutToShow: { root.recording = true; if (root.keybindSettings) root.keybindSettings.BeginRecording(); }
+    onClosed: { if (root.recording && root.keybindSettings) root.keybindSettings.EndRecording(); root.recording = false; }
     formatCombination: function(combination) { return root.keybindSettings ? root.keybindSettings.DisplayCombination(combination) : ""; }
     errorMessage: {
       if (!root.keybindSettings) return qsTr("Настройки сочетаний недоступны.");
       root.keybindSettings.revision;
-      return root.saveError || root.keybindSettings.ConflictMessage(root.bindingTarget, draftCombination);
+      return root.keybindSettings.recordingError || root.saveError || root.keybindSettings.ConflictMessage(root.bindingTarget, draftCombination);
     }
     onDraftCombinationChanged: root.saveError = ""
     onKeyRecorded: function(key, modifiers) {
@@ -112,7 +118,7 @@ AbstractButton {
     }
     onCombinationAccepted: function(combination) {
       if (!root.keybindSettings || root.editingAccount !== root.keybindSettings.accountId) return;
-      if (root.keybindSettings.Save(root.bindingTarget, combination, root.deviceName, root.capabilityTitle)) accept();
+      if (root.keybindSettings.Save(root.bindingTarget, combination, root.deviceName, root.bindingDescription)) accept();
       else root.saveError = root.keybindSettings.lastError;
     }
   }

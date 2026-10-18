@@ -209,7 +209,11 @@ requested scenario exists and is active. These one-shot operations return
 typed application rejections; the REST adapter maps them to HTTP errors. They
 require no QML models or polling sessions and leave desktop session operations
 unchanged.
-`RestControlService` handles the local control channel and process startup.
+`RestControlService` adapts REST settings, launch arguments, and status fields to
+`WorkerControlClient`. The shared `WorkerControl` library owns local JSON IPC,
+launch coordination, detached startup, and complete shutdown;
+`WorkerControlServer` owns the worker endpoint and process lock. See
+[worker-control.md](worker-control.md) for the lifecycle and race contract.
 `RestViewModel` projects its lifecycle into settings. `src/app/rest/RestApp.cpp`
 composes the headless worker; `src/app/rest/RestMain.cpp` owns its `QCoreApplication`.
 The GUI links only lifecycle control, and the CLI links its own command adapter.

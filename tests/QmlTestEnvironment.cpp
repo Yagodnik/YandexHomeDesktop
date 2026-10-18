@@ -1,4 +1,5 @@
 #include "QmlTestEnvironment.h"
+#include <QLocalSocket>
 
 #include <QFontDatabase>
 #include <QGuiApplication>

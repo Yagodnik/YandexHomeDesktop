@@ -101,6 +101,7 @@ unset(BUILD_TEST_APPLICATION)
 
 add_subdirectory(src/api)
 add_subdirectory(src/iot)
+add_subdirectory(src/worker)
 add_subdirectory(src/services)
 if(YH_BUILD_REST_ADAPTER)
   add_subdirectory(src/rest)

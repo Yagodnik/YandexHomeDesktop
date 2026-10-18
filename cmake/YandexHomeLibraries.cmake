@@ -35,6 +35,9 @@ function(yh_install_sdk)
       DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/YandexHome/${directory}"
       COMPONENT SDK FILES_MATCHING PATTERN "*.h" PATTERN "debug" EXCLUDE)
   endforeach()
+  install(FILES "${PROJECT_SOURCE_DIR}/src/worker/WorkerControlClient.h"
+    "${PROJECT_SOURCE_DIR}/src/worker/WorkerControlServer.h"
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/YandexHome/worker" COMPONENT SDK)
   install(FILES "${PROJECT_SOURCE_DIR}/src/auth/AuthResult.h"
     "${PROJECT_SOURCE_DIR}/src/auth/IAuthorizationFlow.h" "${PROJECT_SOURCE_DIR}/src/auth/ITokenStore.h"
     "${PROJECT_SOURCE_DIR}/src/auth/IAuthorizationService.h" "${PROJECT_SOURCE_DIR}/src/auth/AuthorizationService.h"

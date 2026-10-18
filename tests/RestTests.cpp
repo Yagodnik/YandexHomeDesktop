@@ -14,6 +14,8 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QLocalServer>
+#include <QLocalSocket>
+#include <QTimer>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QPointer>

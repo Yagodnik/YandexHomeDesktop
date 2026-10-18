@@ -1,4 +1,5 @@
 #pragma once
+#include <QTimer>
 #include "services/RestControlService.h"
 
 class RestViewModel final : public QObject {

@@ -166,6 +166,15 @@ If a macOS build fails with `ld: framework 'AGL' not found`, check the cached Qt
 
 `build-gui`, `build-cli`, and `build-rest` build individual executables and their dependencies. `run`/`demo`, `cli`, and `rest` use those targets, respectively. A CLI or GUI target also builds its REST worker when `rest_app=ON`. When changing executable options in an existing profile, run `configure` explicitly.
 
+The shared `WorkerControl` target uses only the already declared Qt Core and
+Network modules. It is built and installed with the existing SDK targets and
+requires no new dependency or generated source. `WorkerControl` tests exercise
+independent controller processes, startup/stop races, crash recovery, malformed
+messages, callback lifetime, and workers that do not exit. Windows runs these
+checks in every Debug/Release/PCH job and repeats the race suite five times;
+portable builds run the same Qt Core/Network suite. See
+[worker-control.md](worker-control.md) for its ownership contract.
+
 The REST adapter uses the declared Qt HTTP Server module and its WebSockets dependency. Windows, macOS, Linux, and release workflows install these modules with their pinned Qt 6.9.1 kit. `Rest` tests run in portable builds; CTest runs the CLI/REST process integration test and the settings toggle interaction test. See [rest.md](rest.md) for the background controls and credential-free Python example.
 
 Runtime REST profiles need no additional dependency or embedded credential. The

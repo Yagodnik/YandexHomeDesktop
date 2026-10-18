@@ -1,4 +1,5 @@
 #include "RestApp.h"
+#include <QTimer>
 #include "RestCommand.h"
 #include "RestServerConfiguration.h"
 #include "rest/RestServer.h"
@@ -11,54 +12,23 @@
 #include "api/YandexHomeApi.h"
 #include "api/YandexAccountApi.h"
 #include "auth/AuthorizationFactory.h"
-#include <QDir>
-#include <QFile>
-#include <QFileInfo>
-#include <QJsonDocument>
-#include <QLocalServer>
-#include <QLockFile>
-#include <QStandardPaths>
+#include "worker/WorkerControlServer.h"
 #ifdef YH_DEBUG_FAKE_API
 #include "api/debug/FixtureApi.h"
 #endif
 namespace {
-constexpr int ControlReadTimeoutMs = 5'000;
-constexpr qsizetype MaxControlRequestBytes = 1024;
 constexpr int ShutdownDelayMs = 100;
 constexpr int StartupErrorGraceMs = 1'000;
 int Serve(QCoreApplication& app, const StartupOptions& options, Settings& settings,
           const RestLaunchConfiguration& configuration,
           const RestServerConfiguration& server_configuration, bool json, int timeout_ms) {
-  QString lock_path;
-#ifdef Q_OS_UNIX
-  const auto directory = QFileInfo(configuration.control_name).absolutePath();
-  const auto permissions = QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner;
-  if (!QDir().mkpath(directory) || !QFile::setPermissions(directory, permissions)) {
-    RestPrint(RestError(json, "control_error",
-                        RestAppMessages::tr("Не удалось открыть канал управления REST API.")),
-              true);
-    return RestConsole::RequestFailed;
-  }
-  lock_path = configuration.control_name + ".lock";
-#else
-  lock_path = QDir(QStandardPaths::writableLocation(QStandardPaths::TempLocation))
-                  .filePath(configuration.control_name + ".lock");
-#endif
-  QLockFile lock(lock_path);
-  // Long-running ownership is based on PID/liveness, never the age of the file.
-  lock.setStaleLockTime(0);
-  if (!lock.tryLock()) {
-    RestPrint(
-        RestError(json, "already_running", RestAppMessages::tr("Сервер REST API уже запущен.")),
-        true);
-    return RestConsole::RequestFailed;
-  }
-  QLocalServer control;
-  control.setSocketOptions(QLocalServer::UserAccessOption);
-  QLocalServer::removeServer(configuration.control_name);
-  if (!control.listen(configuration.control_name)) {
-    RestPrint(RestError(json, "control_error",
-                        RestAppMessages::tr("Не удалось открыть канал управления REST API.")),
+  WorkerControlServer control;
+  if (!control.Start(configuration.control_name)) {
+    const auto code = control.ErrorCode();
+    RestPrint(RestError(json, code,
+                        code == "already_running"
+                            ? RestAppMessages::tr("Сервер REST API уже запущен.")
+                            : RestAppMessages::tr("Не удалось открыть канал управления REST API.")),
               true);
     return RestConsole::RequestFailed;
   }
@@ -109,53 +79,22 @@ int Serve(QCoreApplication& app, const StartupOptions& options, Settings& settin
                        {"port", port},
                        {"url", server_configuration.Url(port)}};
   };
-  QObject::connect(&control, &QLocalServer::newConnection, &app, [&] {
-    while (auto* socket = control.nextPendingConnection()) {
-      auto buffer = std::make_shared<QByteArray>();
-      auto handled = std::make_shared<bool>(false);
-      auto* deadline = new QTimer(socket);
-      deadline->setSingleShot(true);
-      QObject::connect(deadline, &QTimer::timeout, socket, &QLocalSocket::abort);
-      deadline->start(ControlReadTimeoutMs);
-      QObject::connect(socket, &QLocalSocket::disconnected, socket, &QObject::deleteLater);
-      QObject::connect(socket, &QLocalSocket::readyRead, socket, [&, socket, buffer, handled] {
-        if (*handled) {
-          return;
-        }
-        *buffer += socket->readAll();
-        if (buffer->size() > MaxControlRequestBytes) {
-          socket->abort();
-          return;
-        }
-        const auto end = buffer->indexOf('\n');
-        if (end < 0) {
-          return;
-        }
-        *handled = true;
-        const auto command =
-            QJsonDocument::fromJson(buffer->left(end)).object()["command"].toString();
-        QJsonObject response;
-        if (command == "disable") {
-          starting = false;
-          running = false;
-          rest.Stop();
-          settings.SetRestEnabled(false);
-          startup_error = {};
-          response = status();
-          QTimer::singleShot(ShutdownDelayMs, &app, &QCoreApplication::quit);
-        } else if (command == "status") {
-          response = status();
-        } else {
-          response = {
-              {"ok", false},
-              {"error", QJsonObject{{"code", "disabled"},
-                                    {"message", RestAppMessages::tr("REST API отключён.")}}}};
-        }
-        socket->write(QJsonDocument(response).toJson(QJsonDocument::Compact) + '\n');
-        socket->flush();
-        socket->disconnectFromServer();
-      });
+  control.SetHandler([&](const QJsonObject& request) -> QJsonObject {
+    const auto command = request["command"].toString();
+    if (command == "disable") {
+      starting = false;
+      running = false;
+      rest.Stop();
+      settings.SetRestEnabled(false);
+      startup_error = {};
+      QTimer::singleShot(ShutdownDelayMs, &app, &QCoreApplication::quit);
+      return status();
     }
+    if (command == "status")
+      return status();
+    return {{"ok", false},
+            {"error", QJsonObject{{"code", "disabled"},
+                                  {"message", RestAppMessages::tr("REST API отключён.")}}}};
   });
   QTimer startup_timeout;
   startup_timeout.setSingleShot(true);

@@ -1357,6 +1357,143 @@
           "description": "Reload Favorites and collapse preferences through the real home model after importing settings."
         }
       ]
+    },
+    {
+      "id": "WorkerControl",
+      "description": "Shared local IPC and worker lifecycle, including concurrent controllers, crash recovery, bounded messages, and complete shutdown.",
+      "features": [
+        "workers",
+        "startup"
+      ],
+      "layer": "process",
+      "kind": "qt",
+      "source": "tests/WorkerControlTests.cpp",
+      "cases": [
+        {
+          "name": "MissingWorkerStatusAndStopAreIdempotent",
+          "description": "Report an absent worker without launching it and accept repeated stop requests."
+        },
+        {
+          "name": "LaunchFailureCompletesOnceAndCanRetry",
+          "description": "Report spawn failures exactly once and allow a subsequent retry."
+        },
+        {
+          "name": "EmptyEndpointAndUnwritableDirectoryAreRejected",
+          "description": "Reject invalid endpoints and unavailable lock directories before launch."
+        },
+        {
+          "name": "ServerOwnershipPreventsSocketReplacement",
+          "description": "Prevent a second owner from replacing a live endpoint and retain ownership during cleanup."
+        },
+        {
+          "name": "GenericMessagesPreservePayloadAndUseRealPid",
+          "description": "Carry application payloads without REST dependencies and attach the actual worker PID."
+        },
+        {
+          "name": "InvalidResponses",
+          "description": "Reject malformed, oversized, or incorrectly typed responses and process identities."
+        },
+        {
+          "name": "FragmentedResponseCompletesOnlyAfterNewline",
+          "description": "Wait for a complete response frame before delivering a result."
+        },
+        {
+          "name": "SilentPeerTimesOutAndNextRequestWorks",
+          "description": "Bound unresponsive peers and permit a fresh operation after timeout."
+        },
+        {
+          "name": "GenericMutationIsNotRetriedAfterDisconnect",
+          "description": "Do not replay an application command when its delivery outcome is ambiguous."
+        },
+        {
+          "name": "SupersededSocketCannotCompleteReplacement",
+          "description": "Discard late events from a canceled request after a stop supersedes it."
+        },
+        {
+          "name": "CompletionCanStartAnotherRequestOrDestroyClient",
+          "description": "Allow reentrant completion handlers to issue a request or destroy the client."
+        },
+        {
+          "name": "DestroyingClientCancelsPendingCallbacks",
+          "description": "Cancel timers and socket callbacks when a client is destroyed."
+        },
+        {
+          "name": "ServerValidatesRequests",
+          "description": "Reject invalid command envelopes before dispatching application handlers."
+        },
+        {
+          "name": "ServerDispatchesOneFrameAndBoundsMemory",
+          "description": "Dispatch one request per connection and disconnect oversized input."
+        },
+        {
+          "name": "ServerCanBeDestroyedByItsHandler",
+          "description": "Handle server destruction during application command dispatch safely."
+        },
+        {
+          "name": "RepeatedStartUsesOneProcessAndStopWaitsForExit",
+          "description": "Reuse one worker across repeated starts and wait for real exit before completing stop."
+        },
+        {
+          "name": "StopSupersedesStartBeforeOwnershipAndSocketExist",
+          "description": "Stop a child launched by a superseded request before it owns a lock or socket."
+        },
+        {
+          "name": "DifferentControllerFindsTimedOutLaunchBeforeSocketExists",
+          "description": "Recover a pending child from its launch receipt after another controller times out."
+        },
+        {
+          "name": "StopTimeoutDoesNotClaimSuccessAndCanBeRetried",
+          "description": "Report workers that do not exit and permit a later successful stop."
+        },
+        {
+          "name": "StartupExitIsReportedWithoutRespawnLoop",
+          "description": "Report early child exit without repeatedly spawning replacement processes."
+        },
+        {
+          "name": "StartupReadinessIsDistinctFromSocketAvailability",
+          "description": "Wait for application readiness rather than treating an open control socket as ready."
+        },
+        {
+          "name": "ConcurrentProcessesLaunchExactlyOneWorker",
+          "description": "Serialize eight independent starters and stoppers around exactly one launched worker."
+        },
+        {
+          "name": "SeparateStopWaitsForConcurrentStartThenStopsItsWorker",
+          "description": "Serialize a different controller stop behind startup and wait for child cleanup."
+        },
+        {
+          "name": "ControllerCrashDoesNotLoseItsStartingChild",
+          "description": "Find and stop a starting child after its launching controller crashes."
+        },
+        {
+          "name": "WorkerCrashReleasesStaleOwnershipAndSocket",
+          "description": "Recover stale process locks and sockets after a worker crash."
+        },
+        {
+          "name": "DistinctEndpointsRunIndependently",
+          "description": "Keep worker identities, processes, and stop operations isolated."
+        },
+        {
+          "name": "ForegroundStartSurvivesConcurrentStatusProbes",
+          "description": "Keep ownership observation read-only while four status clients race a foreground worker startup."
+        },
+        {
+          "name": "ServerBoundsResponsesAndRejectsUnsupportedCommands",
+          "description": "Bound serialized responses and reject commands when no application handler exists."
+        },
+        {
+          "name": "StopRejectsAnAcknowledgementThatStillClaimsRunning",
+          "description": "Reject inconsistent stop acknowledgements rather than claim shutdown success."
+        },
+        {
+          "name": "ApplicationStartupErrorsDoNotLaunchAnotherWorker",
+          "description": "Preserve application startup errors without spawning an extra worker."
+        },
+        {
+          "name": "IdlePartialRequestExpiresWithoutDispatch",
+          "description": "Disconnect stalled partial frames and continue serving subsequent valid requests."
+        }
+      ]
     }
   ]
 }

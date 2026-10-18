@@ -17,7 +17,7 @@ target_link_libraries(AppServices PUBLIC ApiContracts IotCore Qt6::Core)
 target_link_libraries(AppServices PRIVATE AppRuntime)
 
 add_library(AppRestControl SHARED RestControlService.h RestControlService.cpp)
-target_link_libraries(AppRestControl PUBLIC Qt6::Network AppRuntime)
+target_link_libraries(AppRestControl PUBLIC WorkerControl AppRuntime)
 
 yh_shared_library(AppServices)
 

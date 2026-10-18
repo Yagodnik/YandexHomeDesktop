@@ -1,4 +1,5 @@
 #include "RestCommand.h"
+#include <QTimer>
 #include "RestServerConfiguration.h"
 #include <QCommandLineParser>
 #include <QJsonDocument>

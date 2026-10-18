@@ -31,6 +31,7 @@ or use the installed SDK/Qt runtime.
 | `YandexHome::YandexAuth` | Platform credential store and composition factory |
 | `YandexHome::YandexOAuth` | Optional browser OAuth adapter, built with the GUI |
 | `YandexHome::AppRuntime` | Settings and logging without GUI dependencies |
+| `YandexHome::WorkerControl` | Local IPC, detached worker lifecycle, ownership, and controller coordination |
 | `YandexHome::AppRestControl` | Asynchronous REST process control over local IPC |
 | `YandexHome::AppCli` | Command registry, argument conversion, and command runner |
 | `YandexHome::AppRest` | Optional HTTP listener, routing, and service mapping |

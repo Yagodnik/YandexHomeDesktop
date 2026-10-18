@@ -7,6 +7,8 @@
 #include "cli/CommandRegistry.h"
 #include "iot/core/CapabilityState.h"
 #include "services/HomeService.h"
+#include "worker/WorkerControlClient.h"
+#include "worker/WorkerControlServer.h"
 #ifdef YH_EXAMPLE_REST
 #include "rest/RestRouter.h"
 #include "rest/RestServer.h"
@@ -49,6 +51,9 @@ int main(int argc, char** argv) {
   // Construction is lazy: no HTTP, OAuth, or credential-store access.
   QtHttpTransport transport;
   YandexHomeApi live([] { return QString{}; }, &transport);
+  WorkerControlClient worker_client({"sdk-example", {}, {}});
+  WorkerControlServer worker_server;
+  if (worker_client.IsBusy()) return 6;
   if (!CommandRegistry::Builtin().Help("example").contains("devices set")) return 4;
 #ifdef YH_EXAMPLE_REST
   RestRouter routes;

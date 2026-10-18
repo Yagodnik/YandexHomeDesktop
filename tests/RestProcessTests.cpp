@@ -216,8 +216,9 @@ private slots:
     foreground.start(worker_executable,
       base + QStringList{"--rest-port", QString::number(port), "--json"});
     QVERIFY(foreground.waitForStarted(5000));
-    QTRY_VERIFY_WITH_TIMEOUT(
-      Run(base + QStringList{"--status-rest"}).json["running"].toBool(), 5000);
+    QTRY_VERIFY2_WITH_TIMEOUT(
+      Run(base + QStringList{"--status-rest"}).json["running"].toBool(),
+      foreground.readAllStandardError().constData(), 5000);
     QCOMPARE(Run(base + QStringList{"--status-rest"}).json["pid"].toInteger(), foreground.processId());
     QCOMPARE(Run(base + QStringList{"--disable-rest"}).code, 0);
     // Successful disable must mean the worker has exited, not just closed HTTP.

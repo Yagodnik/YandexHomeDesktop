@@ -3,8 +3,7 @@
 #include "yh/apprestcontrol_export.h"
 
 #include <QJsonObject>
-#include <QLocalSocket>
-#include <QTimer>
+#include "worker/WorkerControlClient.h"
 #include <optional>
 #include "utils/Settings.h"
 
@@ -31,22 +30,11 @@ signals:
   void finished(const QJsonObject& result);
 
 private:
-  void Probe();
-  void Unavailable(QLocalSocket::LocalSocketError error);
-  void Receive();
-  void WaitForExit();
-  void Finish(QJsonObject result);
   QJsonObject Status() const;
   Settings* settings_;
   RestLaunchConfiguration configuration_;
-  QLocalSocket socket_;
-  QTimer timeout_;
-  QTimer retry_;
-  QByteArray buffer_;
-  QJsonObject shutdown_result_;
-  qint64 worker_pid_ = 0;
+  WorkerControlClient worker_;
   Command command_ = Command::Status;
   std::optional<quint16> requested_port_;
   bool busy_ = false;
-  bool launched_ = false;
 };

@@ -16,6 +16,11 @@ yh_add_test(NAME TestCatalog COMMAND "${Python3_EXECUTABLE}"
   --build-dir "${PROJECT_BINARY_DIR}" --config "$<CONFIG>" --ctest "${CMAKE_CTEST_COMMAND}")
 set_tests_properties(TestCatalog PROPERTIES TIMEOUT 90)
 
+add_executable(WorkerControlTests WorkerControlTests.cpp)
+target_link_libraries(WorkerControlTests PRIVATE Qt6::Test WorkerControl)
+yh_add_test(NAME WorkerControl COMMAND WorkerControlTests)
+set_tests_properties(WorkerControl PROPERTIES TIMEOUT 90)
+
 add_executable(AuthorizationTests AuthorizationTests.cpp)
 target_link_libraries(AuthorizationTests PRIVATE Qt6::Test AuthCore Models)
 yh_add_test(NAME Authorization COMMAND AuthorizationTests)

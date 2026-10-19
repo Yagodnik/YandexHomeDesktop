@@ -3,21 +3,18 @@ import YandexHomeDesktop.Ui as UI
 
 Item {
   id: root
-  property bool shortcutsEnabled: false
+  property bool shortcutsEnabled: true
   property bool backgroundEnabled: false
   property bool busy: false
   property string statusText
   property string errorText
   signal enabledToggled(bool enabled)
   signal backgroundToggled(bool enabled)
-  implicitHeight: rows.implicitHeight + 20
+  implicitHeight: rows.implicitHeight
   UI.CardSurface { anchors.fill: parent }
   Column {
     id: rows
-    width: root.width - 20
-    x: 10
-    y: 10
-    spacing: 8
+    width: root.width
     UI.SettingSwitchRow {
       objectName: "shortcutsEnabledRow"
       width: parent.width
@@ -37,15 +34,19 @@ Item {
       onToggled: function(checked) { root.backgroundToggled(checked); }
     }
     UI.SubheadingText {
-      width: parent.width
+      x: 10
+      width: parent.width - 20
       text: root.statusText
+      visible: text.length > 0
       wrapMode: Text.Wrap
     }
     UI.SubheadingText {
-      width: parent.width
+      x: 10
+      width: parent.width - 20
       text: root.errorText
       visible: text.length > 0
       wrapMode: Text.Wrap
     }
+    Item { width: 1; height: 10; visible: root.statusText.length > 0 || root.errorText.length > 0 }
   }
 }

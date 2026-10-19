@@ -63,18 +63,10 @@ Item {
     }
 
     onSelectedModeIdChanged: updateCurrentIndexFromValue()
+    onCountChanged: updateCurrentIndexFromValue()
 
     onActivated: {
-      console.log(deviceModelData.index);
-
-      const idx = currentIndex;
-      const id = model.get(idx).id;
-      if (selectedModeId !== id) {
-        selectedModeId = id;
-        console.log("New id:", id);
-      }
-
-      const capability_action = modesCapability.Create(selectedModeId);
+      const capability_action = modesCapability.Create(model.get(currentIndex).id);
       capabilitiesModel.UseCapability(deviceModelData.index, capability_action);
     }
 
@@ -85,23 +77,25 @@ Item {
       height: root.showKeybinds ? 42 : 32
       readonly property string modeId: model.modeId
       readonly property string title: model.displayText
+      readonly property bool isSelected: modeId === modesCapability.value
 
       Rectangle {
         anchors.fill: parent
         radius: 8
-        color: option.ListView.isCurrentItem ? themes.accent : "transparent"
+        color: option.isSelected ? themes.accent : "transparent"
       }
 
       UI.DefaultText {
         anchors.left: parent.left
         anchors.leftMargin: 12
         anchors.right: root.showKeybinds ? keybind.left : parent.right
-        anchors.rightMargin: 8
+        anchors.rightMargin: root.showKeybinds ? 8 : comboBox.rightPadding
         anchors.verticalCenter: parent.verticalCenter
         text: option.title
-        font.pixelSize: 12
+        font: comboBox.font
+        wrapMode: Text.NoWrap
         elide: Text.ElideRight
-        color: option.ListView.isCurrentItem ? themes.controlText2 : themes.controlText
+        color: option.isSelected ? themes.controlText2 : themes.controlText
       }
 
       MouseArea {
@@ -140,9 +134,10 @@ Item {
             currentIndex = i;
           }
 
-          break;
+          return;
         }
       }
+      currentIndex = -1;
     }
   }
 }

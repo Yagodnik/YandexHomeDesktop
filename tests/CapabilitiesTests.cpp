@@ -46,6 +46,25 @@ void CapabilitiesTests::TestColorSetting() {
   }
 }
 
+void CapabilitiesTests::CurrentColorMatchesOnlyTheActiveColorSpace() {
+  ColorSettingCapability capability;
+  const auto color = QColor::fromRgb(242, 89, 91);
+  capability.SetParameters({{"color_model", "rgb"}});
+  capability.SetState(capability.Create(color));
+  QVERIFY(capability.MatchesColor(color));
+  QVERIFY(!capability.MatchesColor(Qt::blue));
+  capability.SetParameters({{"color_model", "hsv"}});
+  capability.SetState(capability.Create(color));
+  QVERIFY(capability.MatchesColor(color));
+  QVERIFY(!capability.MatchesColor(Qt::blue));
+  capability.SetState(capability.Create(2700));
+  QVERIFY(!capability.MatchesColor(color));
+  capability.SetState(capability.Create(QString("party")));
+  QVERIFY(!capability.MatchesColor(color));
+  capability.SetState({});
+  QVERIFY(!capability.MatchesColor(Qt::black));
+}
+
 void CapabilitiesTests::TestRange() {
   RangeCapability capability;
 

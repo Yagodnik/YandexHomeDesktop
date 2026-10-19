@@ -16,6 +16,7 @@ Item {
     anchors.right: control.left
     anchors.rightMargin: 12
     anchors.verticalCenter: parent.verticalCenter
+    spacing: 4
 
     UI.DefaultText {
       width: parent.width

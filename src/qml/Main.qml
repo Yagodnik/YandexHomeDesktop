@@ -5,7 +5,7 @@ import Qt5Compat.GraphicalEffects
 import YandexHomeDesktop.Pages
 import YandexHomeDesktop.Ui
 
-Window {
+TrayWindow {
   id: window
   width: 350
   height: 460
@@ -14,6 +14,8 @@ Window {
   visible: !settings.trayModeEnabled
   title: qsTr("Yandex Home Desktop")
   color: "transparent"
+  trayModeEnabled: settings.trayModeEnabled
+  modalDialogOpen: pages.currentItem ? pages.currentItem.modalDialogOpen : false
 
   /* FPS Counter
   property int frames: 0
@@ -40,12 +42,6 @@ Window {
 
   Component.onCompleted: {
     platformService.SetWindow(window);
-  }
-
-  onActiveFocusItemChanged: {
-    if (!activeFocusItem && settings.trayModeEnabled) {
-      window.hide();
-    }
   }
 
   onActiveChanged: {

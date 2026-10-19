@@ -9,52 +9,66 @@ Item {
   property bool showSwatch: false
   property color swatchColor: "transparent"
   property url imageSource
+  property bool isSelected: false
   property bool showKeybinds: false
   property KeybindSettingsModel keybindSettings: null
   property var bindingTarget: ({})
   property string deviceName
   signal selected()
 
-  implicitHeight: 90 + (showKeybinds ? 22 : 0)
+  implicitHeight: card.height + (showKeybinds ? 22 : 0)
+  Accessible.role: Accessible.RadioButton
+  Accessible.name: title
+  Accessible.checkable: true
+  Accessible.checked: isSelected
 
   UI.CardSurface {
     id: card
+    objectName: "optionCard"
     width: parent.width
-    height: 90
+    height: 84
     radius: 12
+    border.width: root.isSelected ? 2 : 0
+    border.color: themes.accent
 
     Column {
+      objectName: "optionContent"
       anchors.centerIn: parent
-      width: parent.width - 12
-      spacing: 6
+      width: Math.max(0, parent.width - 20)
+      spacing: 8
 
-      Rectangle {
-        visible: root.showSwatch
+      Item {
+        objectName: "optionVisual"
+        anchors.horizontalCenter: parent.horizontalCenter
         width: 32
         height: 32
-        radius: 16
-        color: root.swatchColor
-        anchors.horizontalCenter: parent.horizontalCenter
-      }
 
-      Image {
-        visible: !root.showSwatch
-        width: 32
-        height: 32
-        anchors.horizontalCenter: parent.horizontalCenter
-        source: root.imageSource
-        onStatusChanged: {
-          if (status === Image.Error) source = "qrc:/images/modes/unknown.svg";
+        Rectangle {
+          visible: root.showSwatch
+          anchors.fill: parent
+          radius: 16
+          color: root.swatchColor
+        }
+
+        Image {
+          visible: !root.showSwatch
+          anchors.fill: parent
+          fillMode: Image.PreserveAspectFit
+          source: root.imageSource
+          onStatusChanged: {
+            if (status === Image.Error) source = "qrc:/images/modes/unknown.svg";
+          }
         }
       }
 
       UI.DefaultText {
+        objectName: "optionTitle"
         width: parent.width
         text: root.title
-        font.pixelSize: 10
+        font.pixelSize: 11
         color: themes.controlText
-        wrapMode: Text.WordWrap
-        maximumLineCount: 3
+        wrapMode: Text.Wrap
+        maximumLineCount: 2
         elide: Text.ElideRight
         horizontalAlignment: Text.AlignHCenter
       }

@@ -366,7 +366,7 @@ void Settings::SetRestPort(quint16 port) {
 bool Settings::GetShortcutsEnabled() const {
   if (temporary_) return temporary_shortcuts_;
   settings_.sync();
-  return settings_.value("shortcuts/enabled", false).toBool();
+  return settings_.value("shortcuts/enabled", true).toBool();
 }
 
 bool Settings::GetShortcutsBackground() const {

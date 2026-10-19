@@ -1,8 +1,9 @@
 # Global device and scenario shortcuts
 
 Windows and macOS desktop builds include `YandexHomeShortcuts`, a separate Qt Gui
-worker with no window, QML engine, or tray icon. Enable **Global shortcuts** in
-Settings after signing in. Saved bindings then work while another application is
+worker with no window, QML engine, or tray icon. **Global shortcuts** defaults to
+enabled for new preferences; an explicitly disabled preference is preserved.
+Saved bindings work after signing in while another application is
 focused. Showing binding buttons and enabling execution are independent settings.
 Assign scenario shortcuts using the key button beside its play button, with the
 same recording, clearing, and conflict checks as device controls. Devices and

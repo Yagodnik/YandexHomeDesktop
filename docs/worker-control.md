@@ -1,9 +1,10 @@
 # Shared worker control
 
 `WorkerControl` is a shared Qt Core/Network library in `src/worker`. It has no
-dependency on settings, authentication, REST, QML, or a GUI application. REST uses
-it now; a future shortcuts worker can use the same client/server with its own
-endpoint, executable, application commands, and readiness state.
+dependency on settings, authentication, REST, QML, or a GUI application. REST and
+shortcuts use the same client/server with their own endpoints, executables,
+application commands, and readiness state. New modules and forks should follow
+the [worker IPC skill](../.agents/skills/yh-worker-ipc/SKILL.md) to reuse it.
 
 `WorkerControlClient` accepts Start, Stop, Status, and Send operations. A launch
 configuration supplies the endpoint, executable, arguments, and stop command.

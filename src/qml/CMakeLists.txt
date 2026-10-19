@@ -26,6 +26,7 @@ qt_add_qml_module(YandexHomeDesktopUi
         ui/LoadingPane.qml
         ui/LoadErrorPane.qml
         ui/PageSurface.qml
+        ui/TrayWindow.qml
         ui/PageStates.qml
         ui/InsetPane.qml
         ui/ScrollColumn.qml

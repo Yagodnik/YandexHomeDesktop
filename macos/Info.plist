@@ -10,6 +10,9 @@
   <key>CFBundleName</key>
   <string>YandexHomeDesktop</string>
 
+  <key>CFBundleExecutable</key>
+  <string>YandexHomeDesktop</string>
+
   <key>CFBundleVersion</key>
   <string>@PROJECT_VERSION@</string>
 

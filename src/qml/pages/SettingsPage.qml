@@ -8,6 +8,7 @@ UI.PageSurface {
   required property RestViewModel restModel
   required property SettingsTransferModel transferModel
   required property ShortcutViewModel shortcutModel
+  modalDialogOpen: transferDialogs.dialogOpen
   Components.SettingsTransferDialogs { id: transferDialogs; viewModel: root.transferModel }
   UI.ScrollColumn {
     objectName: "settingsContent"

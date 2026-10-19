@@ -1,7 +1,6 @@
 import YandexHomeDesktop.Ui as UI
 import QtQuick 2.15
 import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
 
 ComboBox {
   id: root
@@ -14,19 +13,25 @@ ComboBox {
   property color popupBackground: themes.headerBackground
   property real popupWidth: width
 
-  font.pixelSize: 14
+  font.pixelSize: 12
+  padding: 0
+  leftPadding: 12
+  rightPadding: 12
   focusPolicy: Qt.StrongFocus
+  hoverEnabled: true
+
+  HoverHandler { cursorShape: Qt.PointingHandCursor }
 
   signal indexSelected(int index)
 
   contentItem: Text {
+    objectName: "comboBoxLabel"
     text: root.displayText
     color: themes.controlText2
     verticalAlignment: Text.AlignVCenter
-    leftPadding: 12
-    anchors.fill: parent
-    wrapMode: Text.WordWrap
-    font.pixelSize: 12
+    wrapMode: Text.NoWrap
+    elide: Text.ElideRight
+    font: root.font
   }
 
   background: Rectangle {
@@ -41,22 +46,29 @@ ComboBox {
   indicator: Item {}
 
   delegate: Item {
+    id: option
+    objectName: "comboBoxOption-" + index
+    readonly property bool isSelected: root.currentIndex === index
     width: root.popup.width
     height: 32
 
     Rectangle {
       anchors.fill: parent
       radius: 8
-      color: ListView.isCurrentItem ? themes.accent : "transparent"
+      color: option.isSelected ? themes.accent : "transparent"
     }
 
     Text {
-      text: model.displayText || modelData
-      anchors.verticalCenter: parent.verticalCenter
-      anchors.left: parent.left
-      anchors.leftMargin: 12
-      color: ListView.isCurrentItem ? themes.controlText2 : root.textColor
-      wrapMode: Text.WordWrap
+      objectName: "comboBoxOptionLabel"
+      text: root.textAt(index)
+      anchors.fill: parent
+      anchors.leftMargin: root.leftPadding
+      anchors.rightMargin: root.rightPadding
+      color: option.isSelected ? themes.controlText2 : root.textColor
+      verticalAlignment: Text.AlignVCenter
+      wrapMode: Text.NoWrap
+      elide: Text.ElideRight
+      font: root.font
     }
 
     MouseArea {

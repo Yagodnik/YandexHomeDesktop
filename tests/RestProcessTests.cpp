@@ -5,9 +5,13 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QProcess>
+#include <QProcessEnvironment>
 #include <QTcpServer>
 #include <QTemporaryDir>
 #include <QTest>
+#ifdef Q_OS_MACOS
+#include <CoreFoundation/CoreFoundation.h>
+#endif
 
 namespace {
 QString executable;
@@ -42,6 +46,22 @@ class RestProcessTests final : public QObject {
 private slots:
 
   void JsonConfigurationAndExplicitTokenAvoidSecretStorage() {
+#ifdef Q_OS_MACOS
+    const auto path_bytes = QFile::encodeName(worker_executable);
+    const auto url = CFURLCreateFromFileSystemRepresentation(
+        kCFAllocatorDefault, reinterpret_cast<const UInt8*>(path_bytes.constData()),
+        path_bytes.size(), false);
+    QVERIFY(url);
+    const auto info = CFBundleCopyInfoDictionaryForURL(url);
+    CFRelease(url);
+    QVERIFY(info);
+    const bool background = CFDictionaryGetValue(info, CFSTR("LSBackgroundOnly")) == kCFBooleanTrue;
+    const auto identity = CFDictionaryGetValue(info, kCFBundleIdentifierKey);
+    const bool independent = identity && CFEqual(identity, CFSTR("com.artemyagodnik.YandexHomeDesktop.rest"));
+    CFRelease(info);
+    QVERIFY(background);
+    QVERIFY(independent);
+#endif
     QTemporaryDir directory;
     const auto config_path = directory.filePath("rest config with spaces.json");
     const auto port = FreePort();
@@ -61,6 +81,9 @@ private slots:
     } cleanup{base};
     QProcess foreground;
     foreground.setWorkingDirectory(directory.path());
+    auto environment = QProcessEnvironment::systemEnvironment();
+    environment.insert("QT_QPA_PLATFORM", "invalid-headless-test-platform");
+    foreground.setProcessEnvironment(environment);
     foreground.start(worker_executable, base + QStringList{"--json"});
     QVERIFY(foreground.waitForStarted(5000));
     QTRY_VERIFY_WITH_TIMEOUT(

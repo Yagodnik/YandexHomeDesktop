@@ -86,6 +86,11 @@ confirmation; cancellation and account changes discard that pending snapshot.
 while `Settings` serializes and applies the preferences. Successful imports reload
 keybinds and home preferences and apply theme/tray changes immediately.
 
+`SettingsTransferDialogs.dialogOpen` passes through the settings and main pages to
+`ui/TrayWindow.qml`, which keeps the tray window open while a file picker or import
+confirmation has focus. Losing focus to another application still hides the tray
+window when no settings dialog is open.
+
 `ui/AnimatedDialog.qml` supplies the 200 ms opacity and scale transitions used by
 the keybind editor and settings import confirmation, matching the error dialog's
 opening and closing motion. Popup transitions keep focus and closing lifecycle
@@ -114,6 +119,11 @@ Only the editor draft is local QML state. `KeybindSettingsModel` adapts the exis
 commands. The editor obtains a recording lease through `ShortcutControlService` and waits for native key registrations to be released before accepting input. Settings exposes `ShortcutViewModel` to enable execution and independently keep the worker after the GUI closes; see [shortcuts.md](shortcuts.md).
 `MyComboBox` exposes its normal ComboBox delegate contract and
 `popupWidth` so the mode control can supply options with keybind pills.
+Its closed label and popup options share a font and horizontal padding, with
+single-line elision for long values. Color and scene tiles use the same
+responsive columns and compact cards that center each icon/label group at its
+rendered height. Action controls, navigation items, and dropdowns show a pointing
+hand on hover; the QML tests check the window cursor after actual pointer moves.
 `Settings.showKeybinds` persists the visibility preference (default on); the
 settings page wires `BasicSettingsCard.keybindsToggled` to it, and the device and
 scenarios pages pass it explicitly to their controls. Hiding the pills restores the original

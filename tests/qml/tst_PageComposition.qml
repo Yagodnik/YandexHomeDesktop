@@ -334,6 +334,43 @@ TestCase {
     compare(page.color, themes.background);
   }
 
+  function test_settingsCardsShareInsets_data() {
+    return [{ tag: "narrow-light", viewportWidth: 320, theme: 0 },
+            { tag: "dark", viewportWidth: 350, theme: 1 }];
+  }
+
+  function test_settingsCardsShareInsets(data) {
+    themes.SetTheme(data.theme);
+    const page = createTemporaryObject(settingsPage, testCase, { width: data.viewportWidth });
+    const basic = findChild(page, "basicSettings");
+    const shortcuts = findChild(page, "shortcutSettings");
+    const advanced = findChild(page, "advancedSettings");
+    const transfer = findChild(page, "settingsTransferCard");
+    const rows = [findChild(basic, "keybindsSettingRow"),
+                  findChild(shortcuts, "shortcutsEnabledRow"),
+                  findChild(advanced, "restSettingRow"),
+                  findChild(transfer, "exportSettingsRow")];
+    const cards = [basic, shortcuts, advanced, transfer];
+    waitForRendering(page);
+    const switches = rows.slice(0, 3).map(function(row) { return findChild(row, "settingSwitch"); });
+    for (let i = 0; i < rows.length; ++i) {
+      compare(rows[i].width, cards[i].width);
+      compare(rows[i].mapToItem(cards[i], 0, 0).x, 0);
+    }
+    compare(rows[1].mapToItem(shortcuts, 0, 0).y, 0);
+    compare(rows[2].mapToItem(advanced, 0, 0).y, 0);
+    for (let i = 1; i < switches.length; ++i) {
+      compare(switches[i].mapToItem(cards[i], 0, 0).x,
+              switches[0].mapToItem(cards[0], 0, 0).x);
+    }
+    const content = findChild(page, "settingsContent");
+    content.contentY = Math.max(0, content.contentHeight - content.height);
+    if (settingsPreviewPath.length > 0) {
+      waitForRendering(page);
+      grabImage(page).save(settingsPreviewPath + "-insets-" + data.tag + ".png");
+    }
+  }
+
   function test_restToggleReachesService() {
     restTestServer.SetRunning(false);
     restViewModel.Refresh();

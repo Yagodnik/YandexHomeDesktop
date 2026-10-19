@@ -3,11 +3,12 @@ import YandexHomeDesktop.Ui as UI
 
 Item {
   id: root
-  implicitHeight: 48
+  implicitHeight: label.implicitHeight + 20
   property string text
   signal clicked()
 
   UI.LinkLabel {
+    id: label
     text: root.text
     anchors.verticalCenter: parent.verticalCenter
     anchors.left: parent.left

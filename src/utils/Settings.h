@@ -70,6 +70,6 @@ private:
   bool temporary_show_keybinds_ = true;
   bool temporary_rest_ = false;
   quint16 temporary_rest_port_ = 8766;
-  bool temporary_shortcuts_ = false;
+  bool temporary_shortcuts_ = true;
   bool temporary_shortcuts_background_ = false;
 };

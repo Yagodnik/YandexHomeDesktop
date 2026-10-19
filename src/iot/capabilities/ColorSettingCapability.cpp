@@ -48,6 +48,21 @@ QVariantMap ColorSettingCapability::Create(const QString &value) {
   return Iot::State::Scene(value);
 }
 
+bool ColorSettingCapability::MatchesColor(const QColor& value) const {
+  const auto instance = state_.value("instance").toString();
+  if (instance == "rgb") {
+    return state_.value("value").toUInt() ==
+           Iot::State::PackRgb(value.red(), value.green(), value.blue());
+  }
+  if (instance == "hsv") {
+    const auto hsv = state_.value("value").toMap();
+    return hsv == Iot::State::HsvComponents(value.hue(),
+                                            static_cast<int>(value.saturation() / 255.0 * 100),
+                                            static_cast<int>(value.value() / 255.0 * 100));
+  }
+  return false;
+}
+
 int ColorSettingCapability::GetTemperatureMin() const {
   return Iot::ColorParameters(parameters_).Temperature().IntMin();
 }

@@ -4,6 +4,7 @@ import YandexHomeDesktop.Pages as Pages
 import YandexHomeDesktop.Components as Components
 
 UI.PageSurface {
+  modalDialogOpen: settingsPage.modalDialogOpen
   Components.TopBar {
     id: topBar
     householdName: homeViewModel.currentHouseholdName
@@ -26,7 +27,7 @@ UI.PageSurface {
         keybindSettings: keybindSettingsModel
         showKeybinds: settings.showKeybinds
       }
-      Pages.SettingsPage { restModel: restViewModel; transferModel: settingsTransferModel; shortcutModel: shortcutViewModel }
+      Pages.SettingsPage { id: settingsPage; restModel: restViewModel; transferModel: settingsTransferModel; shortcutModel: shortcutViewModel }
     }
   }
 

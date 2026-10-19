@@ -3,6 +3,7 @@ import QtQuick.Window
 import QtQuick.Dialogs
 import QtTest
 import YandexHomeDesktop.Pages as Pages
+import YandexHomeDesktop.Ui as UI
 
 TestCase {
   id: testCase
@@ -14,6 +15,26 @@ TestCase {
   Component {
     id: settingsPage
     Pages.SettingsPage { height: 460; restModel: restViewModel; transferModel: settingsTransferModel; shortcutModel: shortcutViewModel }
+  }
+  Component {
+    id: trayWindow
+    UI.TrayWindow {
+      width: 350
+      height: 460
+      visible: true
+      trayModeEnabled: true
+      property int activationChanges: 0
+      onActiveChanged: ++activationChanges
+      modalDialogOpen: trayPage.modalDialogOpen
+      Pages.SettingsPage {
+        id: trayPage
+        objectName: "traySettingsPage"
+        anchors.fill: parent
+        restModel: restViewModel
+        transferModel: settingsTransferModel
+        shortcutModel: shortcutViewModel
+      }
+    }
   }
   function init() {
     failOnWarning(/.?/);
@@ -103,5 +124,57 @@ TestCase {
     compare(settingsTransferModel.PrepareImport(settingsTransferTestFile + ".missing"), false);
     compare(settingsTransferModel.failed, true);
     verify(findChild(page, "settingsTransferStatus").text.length > 0);
+  }
+
+  function test_trayWindowSurvivesDialogs() {
+    const window = createTemporaryObject(trayWindow, null);
+    verify(window !== null);
+    const page = findChild(window.contentItem, "traySettingsPage");
+    const exportDialog = findChild(page, "exportSettingsDialog");
+    const importDialog = findChild(page, "importSettingsDialog");
+    exportDialog.options = FileDialog.DontUseNativeDialog;
+    importDialog.options = FileDialog.DontUseNativeDialog;
+    const content = findChild(page, "settingsContent");
+    content.contentY = findChild(page, "settingsTransferHeading").y;
+    waitForRendering(page);
+    mouseClick(findChild(findChild(page, "exportSettingsRow"), "settingActionButton"));
+    tryCompare(exportDialog, "visible", true);
+    compare(window.modalDialogOpen, true);
+    testCase.Window.window.requestActivate();
+    tryCompare(window, "active", false);
+    compare(window.visible, true);
+    exportDialog.selectedFile = settingsTransferTestFile;
+    exportDialog.accepted();
+    exportDialog.close();
+    compare(settingsTransferModel.failed, false);
+    tryCompare(window, "modalDialogOpen", false);
+    compare(window.visible, true);
+    content.contentY = findChild(page, "settingsTransferHeading").y;
+    waitForRendering(page);
+    const importButton = findChild(findChild(page, "importSettingsRow"), "settingActionButton");
+    mouseClick(importButton);
+    tryCompare(importDialog, "visible", true);
+    compare(window.modalDialogOpen, true);
+    testCase.Window.window.requestActivate();
+    tryCompare(window, "active", false);
+    compare(window.visible, true);
+    importDialog.selectedFile = settingsTransferTestFile;
+    importDialog.accepted();
+    importDialog.close();
+    const confirmation = findChild(page, "confirmSettingsImport");
+    tryCompare(confirmation, "opened", true);
+    compare(window.modalDialogOpen, true);
+    testCase.Window.window.requestActivate();
+    tryCompare(window, "active", false);
+    compare(window.visible, true);
+    mouseClick(findChild(confirmation.contentItem, "confirmSettingsImportAction"));
+    tryCompare(confirmation, "visible", false);
+    compare(settingsTransferModel.failed, false);
+    compare(window.modalDialogOpen, false);
+    window.requestActivate();
+    tryCompare(window, "active", true);
+    testCase.Window.window.requestActivate();
+    tryCompare(window, "visible", false);
+    verify(window.activationChanges > 0);
   }
 }

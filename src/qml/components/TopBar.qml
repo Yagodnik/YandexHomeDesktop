@@ -69,6 +69,7 @@ Item {
         MouseArea {
           objectName: "householdSelector"
           anchors.fill: parent
+          cursorShape: Qt.PointingHandCursor
 
           onClicked: {
             topBar.householdSelectRequested();
@@ -86,6 +87,7 @@ Item {
       width: parent.width
 
       UI.MyTab {
+        objectName: "devicesTab"
         text: qsTr("Устройства")
         leftCorner: true
         active: topBar.activeTab === 0
@@ -93,6 +95,7 @@ Item {
       }
 
       UI.MyTab {
+        objectName: "scenariosTab"
         text: qsTr("Сценарии")
         leftCorner: true
         active: topBar.activeTab === 1
@@ -100,6 +103,7 @@ Item {
       }
 
       UI.MyTab {
+        objectName: "settingsTab"
         text: qsTr("Настройки")
         leftCorner: true
         active: topBar.activeTab === 2

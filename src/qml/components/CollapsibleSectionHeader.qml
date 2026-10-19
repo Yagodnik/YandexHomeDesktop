@@ -46,6 +46,7 @@ AbstractButton {
       display: AbstractButton.IconOnly
       focusPolicy: Qt.NoFocus
       Accessible.ignored: true
+      HoverHandler { cursorShape: Qt.PointingHandCursor }
       rotation: root.collapsed ? 90 : 180
       onClicked: root.toggleRequested()
 

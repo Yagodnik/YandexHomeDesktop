@@ -6,6 +6,7 @@ Read the relevant repository skill before implementing or reviewing work in thes
 
 - [yh-qml-composition](.agents/skills/yh-qml-composition/SKILL.md): QML pages, reusable visuals, property/signal contracts, and UI verification.
 - [yh-application-architecture](.agents/skills/yh-application-architecture/SKILL.md): C++ view models, list models, services, API boundaries, and asynchronous lifecycle behavior.
+- [yh-worker-ipc](.agents/skills/yh-worker-ipc/SKILL.md): Reuse the shared local IPC client/server and worker lifecycle for new modules, worker commands, and fork integrations.
 - [yh-json-serialization](.agents/skills/yh-json-serialization/SKILL.md): Typed JSON structs, enums, codecs, file loading, and configuration validation.
 - [yh-testing](.agents/skills/yh-testing/SKILL.md): Test discovery, feature/suite/case selection, and maintaining the test catalog. Read it when implementing changed behavior or choosing verification for a feature or fix.
 

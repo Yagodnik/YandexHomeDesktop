@@ -17,9 +17,12 @@ Item {
   property var keybindTarget: ({})
   property string keybindDeviceName
   property var deviceModelData: model
+  readonly property int optionColumns: Math.max(1, Math.floor((width + 8) / (88 + 8)))
+  readonly property real optionWidth: (width - (optionColumns - 1) * 8) / optionColumns
 
   Component.onCompleted: {
-    if (!colorSettingCapability.supportsColors && !colorSettingCapability.supportsTemperatures)
+    if (colorSettingCapability.state.instance === "scene"
+        || (!colorSettingCapability.supportsColors && !colorSettingCapability.supportsTemperatures))
       currentTab = 1;
   }
 
@@ -84,10 +87,11 @@ Item {
   Component {
     id: colorsPage
 
-    Flow {
+    Grid {
+      objectName: "colorOptions"
       width: root.width
+      columns: root.optionColumns
       spacing: 8
-      height: childrenRect.height
 
       Repeater {
         model: Models.ColorsFilterModel {
@@ -100,10 +104,16 @@ Item {
 
         delegate: Components.CapabilityOptionTile {
           objectName: model.isTemperature ? "temperatureOption-" + model.temperature : "colorOption-" + model.colorIndex
-          width: Math.max(72, root.width / 5 - 10)
+          width: root.optionWidth
           title: model.name
           showSwatch: true
           swatchColor: model.color
+          isSelected: model.isTemperature
+            ? colorSettingCapability.state.instance === "temperature_k"
+              && colorSettingCapability.value === model.temperature
+            : (colorSettingCapability.state.instance === "rgb"
+               || colorSettingCapability.state.instance === "hsv")
+              && colorSettingCapability.MatchesColor(model.color)
           showKeybinds: root.showKeybinds
           keybindSettings: root.keybindSettings
           deviceName: root.keybindDeviceName
@@ -125,10 +135,11 @@ Item {
   Component {
     id: modesPage
 
-    Flow {
+    Grid {
+      objectName: "sceneOptions"
       width: root.width
+      columns: root.optionColumns
       spacing: 8
-      height: childrenRect.height
 
       Repeater {
         model: Models.ColorModesFilterModel {
@@ -138,9 +149,11 @@ Item {
 
         delegate: Components.CapabilityOptionTile {
           objectName: "sceneOption-" + model.modeId
-          width: Math.max(90, root.width / 4 - 10)
+          width: root.optionWidth
           title: model.name
           imageSource: model.image
+          isSelected: colorSettingCapability.state.instance === "scene"
+            && colorSettingCapability.value === model.modeId
           showKeybinds: root.showKeybinds
           keybindSettings: root.keybindSettings
           deviceName: root.keybindDeviceName

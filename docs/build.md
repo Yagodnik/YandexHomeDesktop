@@ -1,5 +1,11 @@
 # Clean build
 
+On macOS, CMake embeds `macos/RestInfo.plist.in` in the REST executable with its
+own background-only identity. This applies to both build-tree and bundled helpers
+and keeps REST startup out of the Dock. No external plist installation is needed.
+The REST process test asks CoreFoundation to read that identity from the built
+executable and runs the worker with an invalid GUI platform to check headless startup.
+
 The CI builds are `.github/workflows/ci-windows.yml`, `ci-macos.yml`, and `ci-linux.yml`. They run for pull requests targeting `main`, `dev`, or `refactoring`, or when started manually; ordinary branch pushes do not trigger them. Windows and macOS build the desktop app and run CTest; Linux builds the headless CLI/REST applications and runs the portable tests using the Qt 6.9.1 `linux_gcc_64` kit. CMake fetches pinned Boost.Hana, QtKeychain, and (for the shortcut worker) QHotkey sources into the build directory. No ignored `libs/` directory or machine-specific CMake file is required.
 
 For a local desktop build, install Qt 6.9 or newer with HttpServer, WebSockets, Quick, QuickTest, NetworkAuth, Widgets, Svg, Qt5Compat, LinguistTools, and Test, plus a C++23 compiler and CMake 3.28 or newer. Configure Qt through the standard CMake prefix path:

@@ -576,6 +576,8 @@ private slots:
     QTemporaryDir directory;
     const auto path = directory.filePath("settings.ini");
     Settings first(path);
+    QVERIFY(first.GetShortcutsEnabled());
+    QVERIFY(!first.GetShortcutsBackground());
     first.SetShortcutsEnabled(true);
     first.SetShortcutsBackground(true);
     Settings second(path);
@@ -584,7 +586,12 @@ private slots:
     const auto backup = second.ExportSettings("account");
     QVERIFY(backup);
     QVERIFY(!backup->contains("shortcuts"));
+    second.SetShortcutsEnabled(false);
+    Settings disabled(path);
+    QVERIFY(!disabled.GetShortcutsEnabled());
     Settings temporary(nullptr, true);
+    QVERIFY(temporary.GetShortcutsEnabled());
+    temporary.SetShortcutsEnabled(false);
     QVERIFY(!temporary.GetShortcutsEnabled());
     QVERIFY(!temporary.GetShortcutsBackground());
   }

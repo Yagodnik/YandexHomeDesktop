@@ -174,6 +174,14 @@ if(BUILD_REST_APP)
   target_compile_definitions(YandexHomeRest PRIVATE "$<$<CONFIG:Debug>:YH_DEBUG_FAKE_API>")
   target_link_libraries(YandexHomeRest PRIVATE RestBootstrap)
   target_sources(YandexHomeRest PRIVATE "$<$<CONFIG:Debug>:${DEBUG_FIXTURE_RESOURCES}>")
+  if(APPLE)
+    # Give the helper its own background identity even inside the GUI bundle.
+    configure_file(macos/RestInfo.plist.in "${CMAKE_CURRENT_BINARY_DIR}/RestInfo.plist" @ONLY)
+    target_link_options(YandexHomeRest PRIVATE
+      "LINKER:-sectcreate,__TEXT,__info_plist,${CMAKE_CURRENT_BINARY_DIR}/RestInfo.plist")
+    set_property(TARGET YandexHomeRest APPEND PROPERTY LINK_DEPENDS
+      "${CMAKE_CURRENT_BINARY_DIR}/RestInfo.plist")
+  endif()
   install(TARGETS YandexHomeRest RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
   if(TARGET YandexHomeCli)
     add_dependencies(YandexHomeCli YandexHomeRest)

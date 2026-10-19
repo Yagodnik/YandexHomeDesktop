@@ -240,6 +240,10 @@
         {
           "name": "SharedParametersPreserveDesktopDefaults",
           "description": "Preserve desktop defaults when delegating parameter parsing to the shared core."
+        },
+        {
+          "name": "CurrentColorMatchesOnlyTheActiveColorSpace",
+          "description": "Match RGB and HSV selections using desktop color encoding, and clear color selection for temperature, scene, or unknown state."
         }
       ]
     },
@@ -916,7 +920,7 @@
       "cases": [
         {
           "name": "JsonConfigurationAndExplicitTokenAvoidSecretStorage",
-          "description": "Run REST from JSON configuration with an explicit token and verify authentication locally."
+          "description": "Run headless REST with an explicit synthetic token, reject GUI-platform dependencies, and verify macOS reads an independent background-only worker identity."
         },
         {
           "name": "EntryPointControlAndFixtureRest",
@@ -1085,12 +1089,12 @@
         },
         {
           "name": "CapabilityKeybinds::test_colorAndSceneBindings",
-          "description": "Assign keys independently to colors, temperatures, and scenes; retain drafts across tabs and hiding; preserve option click payloads.",
+          "description": "Assign keys independently to colors, temperatures, and scenes; preserve option click payloads and highlight the current option as state changes.",
           "source": "tests/qml/tst_CapabilityKeybinds.qml"
         },
         {
           "name": "CapabilityKeybinds::test_modeBindings",
-          "description": "Assign keys to individual dropdown modes without selecting them, retain drafts on reopening, and preserve mode selection with attachments hidden.",
+          "description": "Assign keys without selecting dropdown modes, preserve action dispatch, and highlight the active mode when reopening the menu.",
           "source": "tests/qml/tst_CapabilityKeybinds.qml"
         },
         {
@@ -1152,6 +1156,31 @@
           "name": "ScenarioKeybinds::test_hideAndAccountSwitchPreserveAssignmentsAndCloseEditor",
           "description": "Hide scenario badges and switch accounts while closing drafts and preserving account-specific bindings.",
           "source": "tests/qml/tst_ScenarioKeybinds.qml"
+        },
+        {
+          "name": "SettingsTransfer::test_trayWindowSurvivesDialogs",
+          "description": "Keep the actual tray window visible through settings file pickers and import confirmation, then restore focus-loss dismissal.",
+          "source": "tests/qml/tst_SettingsTransfer.qml"
+        },
+        {
+          "name": "PageComposition::test_settingsCardsShareInsets",
+          "description": "Align switch/action rows and card insets across general, shortcut, REST, and transfer settings at narrow widths in both themes.",
+          "source": "tests/qml/tst_PageComposition.qml"
+        },
+        {
+          "name": "CapabilityKeybinds::test_reportedColorSelection",
+          "description": "Highlight the reported RGB, temperature, or scene value on initial load and select the scene tab for active scenes without dispatching actions.",
+          "source": "tests/qml/tst_CapabilityKeybinds.qml"
+        },
+        {
+          "name": "SharedControls::test_actionCursors",
+          "description": "Hover actual buttons, switches, tabs, links, tiles, keybinds and comboboxes and verify the window shows a pointing hand.",
+          "source": "tests/qml/tst_SharedControls.qml"
+        },
+        {
+          "name": "SharedControls::test_comboBoxTextAndInteraction",
+          "description": "Keep long combobox labels on one line within padded bounds in both themes while preserving pointer and keyboard selection.",
+          "source": "tests/qml/tst_SharedControls.qml"
         }
       ]
     },
@@ -1601,7 +1630,7 @@
         },
         {
           "name": "MachinePreferencesArePersistentAndExcludedFromAccountBackup",
-          "description": "Machine Preferences Are Persistent And Excluded From Account Backup."
+          "description": "Enable shortcut execution by default, preserve explicit opt-out and background preferences, and exclude machine settings from account backups."
         },
         {
           "name": "FailedNativeReleaseBlocksRecordingAndLateActivations",

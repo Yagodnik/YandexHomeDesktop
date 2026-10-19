@@ -4,13 +4,21 @@
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonArray>
+#include <QWindow>
 
 class QmlLayoutTestSetup : public QObject {
   Q_OBJECT
 
+public:
+  Q_INVOKABLE int cursorShape(QObject* object) const {
+    const auto* window = qobject_cast<QWindow*>(object);
+    return window ? window->cursor().shape() : -1;
+  }
+
 public slots:
   void qmlEngineAvailable(QQmlEngine* engine) {
     initializeQmlTestEnvironment(engine);
+    engine->rootContext()->setContextProperty("uiTestHelper", this);
     engine->rootContext()->setContextProperty("settingsPreviewPath",
       QCoreApplication::applicationDirPath() + "/settings-preview");
     QFile fixture(":/debug/api.json");

@@ -3,7 +3,7 @@ import YandexHomeDesktop.Ui as UI
 
 Item {
   id: root
-  implicitHeight: rows.implicitHeight + 20
+  implicitHeight: rows.implicitHeight
   property string title
   property string description
   property string statusText
@@ -16,10 +16,7 @@ Item {
 
   Column {
     id: rows
-    width: root.width - 20
-    x: 10
-    y: 10
-    spacing: 8
+    width: root.width
 
     UI.SettingSwitchRow {
       objectName: "restSettingRow"
@@ -31,15 +28,19 @@ Item {
       onToggled: function(checked) { root.restToggled(checked); }
     }
     UI.SubheadingText {
-      width: parent.width
+      x: 10
+      width: parent.width - 20
       text: root.statusText
+      visible: text.length > 0
       wrapMode: Text.Wrap
     }
     UI.SubheadingText {
-      width: parent.width
+      x: 10
+      width: parent.width - 20
       text: root.errorText
       visible: text.length > 0
       wrapMode: Text.Wrap
     }
+    Item { width: 1; height: 10; visible: root.statusText.length > 0 || root.errorText.length > 0 }
   }
 }

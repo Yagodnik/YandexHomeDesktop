@@ -7,8 +7,20 @@ import YandexHomeDesktop.ViewModels
 Item {
   id: root
   required property SettingsTransferModel viewModel
-  function openExport() { if (viewModel.available) exportDialog.open(); }
-  function openImport() { if (viewModel.available) importDialog.open(); }
+  property bool openingFileDialog: false
+  readonly property bool dialogOpen: openingFileDialog || exportDialog.visible || importDialog.visible || confirmation.visible
+  function openExport() {
+    if (!viewModel.available) return;
+    openingFileDialog = true;
+    exportDialog.open();
+    openingFileDialog = false;
+  }
+  function openImport() {
+    if (!viewModel.available) return;
+    openingFileDialog = true;
+    importDialog.open();
+    openingFileDialog = false;
+  }
 
   FileDialog {
     id: exportDialog

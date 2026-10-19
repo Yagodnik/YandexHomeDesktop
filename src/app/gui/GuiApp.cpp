@@ -19,6 +19,7 @@
 #include "models/RoomsModel/RoomsModel.h"
 #include "models/RoomsModel/RoomsFilterModel.h"
 #include "models/DeviceModel/CapabilitiesModel.h"
+#include "models/DeviceModel/CameraSnapshotModel.h"
 #include "models/DeviceModel/PropertiesModel.h"
 #include "models/ColorsModel/ColorsModel.h"
 #include "models/ColorsModel/ColorModesModel.h"
@@ -201,6 +202,7 @@ void GuiApp::RegisterFonts() {
 }
 
 void GuiApp::RegisterModels() {
+  qmlRegisterType<CameraSnapshotModel>("YandexHomeDesktop.ViewModels", 1, 0, "CameraSnapshotModel");
   qmlRegisterUncreatableType<ShortcutViewModel>("YandexHomeDesktop.ViewModels", 1, 0,
                                                 "ShortcutViewModel", "Supplied by the application");
   qmlRegisterUncreatableType<SettingsTransferModel>(

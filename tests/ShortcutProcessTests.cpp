@@ -137,9 +137,22 @@ private slots:
                    {{"command", "activate"},
                     {"combination", QKeyCombination(Qt::ControlModifier, Qt::Key_K).toCombined()}});
     QTRY_COMPARE_WITH_TIMEOUT(
+        worker.Request(WorkerControlClient::Command::Status)["completed"].toInt(), 1, 5'000);
+    QCOMPARE(worker.Request(WorkerControlClient::Command::Status)["failed"].toInt(), 0);
+    // Deliberate fixture failures remain available after successful local writes.
+    QFile fixture_file(worker.options.fixture_path);
+    QVERIFY(fixture_file.open(QIODevice::ReadOnly));
+    auto fixture = QJsonDocument::fromJson(fixture_file.readAll()).object();
+    fixture_file.close();
+    fixture["action_errors"] = QJsonObject{{"lamp", "TEST_ERROR"}};
+    QVERIFY(fixture_file.open(QIODevice::WriteOnly | QIODevice::Truncate));
+    QVERIFY(fixture_file.write(QJsonDocument(fixture).toJson()) > 0);
+    fixture_file.close();
+    worker.Request(WorkerControlClient::Command::Send,
+                   {{"command", "activate"},
+                    {"combination", QKeyCombination(Qt::ControlModifier, Qt::Key_K).toCombined()}});
+    QTRY_COMPARE_WITH_TIMEOUT(
         worker.Request(WorkerControlClient::Command::Status)["failed"].toInt(), 1, 5'000);
-    // The repository fixture deliberately rejects device writes. Unit tests
-    // cover successful writes; this verifies the worker reports the API error.
     QCOMPARE(worker.Request(WorkerControlClient::Command::Status)["action_error"].toString(),
              QString("api_error"));
     control.BeginRecording();

@@ -713,7 +713,7 @@
       },
       {
         "id": "camera",
-        "name": "Camera (unsupported video)",
+        "name": "Camera",
         "type": "devices.types.camera",
         "room": "office",
         "household_id": "home",
@@ -743,11 +743,8 @@
           },
           {
             "type": "devices.capabilities.video_stream",
-            "retrievable": true,
-            "state": {
-              "instance": "get_stream",
-              "value": {}
-            },
+            "retrievable": false,
+            "state": {},
             "parameters": {
               "protocols": [
                 "hls"
@@ -1475,7 +1472,7 @@
     "camera": {
       "status": "ok",
       "id": "camera",
-      "name": "Camera (unsupported video)",
+      "name": "Camera",
       "type": "devices.types.camera",
       "state": "online",
       "request_id": "fixture",
@@ -1505,11 +1502,8 @@
         },
         {
           "type": "devices.capabilities.video_stream",
-          "retrievable": true,
-          "state": {
-            "instance": "get_stream",
-            "value": {}
-          },
+          "retrievable": false,
+          "state": {},
           "parameters": {
             "protocols": [
               "hls"
@@ -1545,6 +1539,12 @@
           "last_updated": 0
         }
       ]
+    }
+  },
+  "video_streams": {
+    "camera": {
+      "stream_url": "qrc:/debug/camera.m3u8",
+      "protocol": "hls"
     }
   },
   "scenario_errors": {

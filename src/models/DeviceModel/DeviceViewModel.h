@@ -12,6 +12,9 @@ class DeviceViewModel final : public QObject {
   Q_PROPERTY(CapabilitiesModel* capabilities READ GetCapabilities CONSTANT)
   Q_PROPERTY(PropertiesModel* properties READ GetProperties CONSTANT)
   Q_PROPERTY(DeviceDataModel* deviceData READ GetDeviceData CONSTANT)
+  Q_PROPERTY(QUrl videoStreamUrl READ GetVideoStreamUrl NOTIFY videoStreamChanged)
+  Q_PROPERTY(bool videoStreamLoading READ IsVideoStreamLoading NOTIFY videoStreamChanged)
+  Q_PROPERTY(bool videoStreamFailed READ HasVideoStreamFailed NOTIFY videoStreamChanged)
 public:
   enum PageState { Loading, Error, Ready };
   Q_ENUM(PageState)
@@ -28,6 +31,21 @@ public:
   CapabilitiesModel* GetCapabilities();
   PropertiesModel* GetProperties();
   DeviceDataModel* GetDeviceData();
+  QUrl GetVideoStreamUrl() const {
+    return session_.VideoStreamUrl();
+  }
+  bool IsVideoStreamLoading() const {
+    return session_.VideoStreamLoading();
+  }
+  bool HasVideoStreamFailed() const {
+    return session_.VideoStreamFailed();
+  }
+  Q_INVOKABLE void RequestVideoStream() {
+    session_.RequestVideoStream();
+  }
+  Q_INVOKABLE void StopVideoStream() {
+    session_.StopVideoStream();
+  }
 
   Q_INVOKABLE void LoadDevice(const QString& device_id);
   Q_INVOKABLE void TryReloadDevice();
@@ -39,6 +57,7 @@ public:
 
   // Compatibility signals for consumers of the former deviceController context.
 signals:
+  void videoStreamChanged();
   void stateChanged();
   void deviceIdChanged();
   void loadRequestMade();

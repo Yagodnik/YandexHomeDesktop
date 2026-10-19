@@ -21,10 +21,10 @@ JSON_STRUCT(ActionResult,
   (QString, error_message)
 );
 
-JSON_STRUCT(CapabilityResponseState,
-  (QString, instance),
-  (ActionResult, action_result)
-);
+JSON_STRUCT(CapabilityResponseState, (QString, instance), (QVariantMap, value),
+            (ActionResult, action_result));
+
+JSON_STRUCT(VideoStream, (QString, stream_url), (QString, protocol));
 
 JSON_STRUCT(CapabilityResponse,
   (QString, type),

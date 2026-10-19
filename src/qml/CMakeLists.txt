@@ -16,6 +16,7 @@ qt_add_qml_module(YandexHomeDesktopUi
         ui/MyComboBox.qml
         ui/MySlider.qml
         ui/ImageButton.qml
+        ui/IconButton.qml
         ui/FavoriteButton.qml
         ui/KeybindEditor.qml
         ui/AnimatedDialog.qml
@@ -78,6 +79,8 @@ qt_add_qml_module(YandexHomeDesktopComponents
         components/CapabilityKeybind.qml
         components/CapabilityOptionTile.qml
         components/DeviceControlsPane.qml
+        components/VideoStreamPlayer.qml
+        components/CameraSnapshotDialog.qml
         components/PropertyValueCard.qml
         components/SignInCard.qml
         components/HouseholdDelegate.qml

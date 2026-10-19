@@ -23,6 +23,7 @@ bool DeviceSession::CapabilityUpdate::Contains(double time) const {
 }
 
 void DeviceSession::LoadDevice(const QString& device_id) {
+  StopVideoStream();
   device_id_ = device_id;
   last_update_start_time_ = time_provider_();
   capabilities_updates_.clear();
@@ -44,6 +45,7 @@ void DeviceSession::ContinuePollingIfNeeded() {
 void DeviceSession::StopPolling() { polling_timer_.stop(); }
 bool DeviceSession::IsPolling() const { return polling_timer_.isActive(); }
 void DeviceSession::ForgetDevice() {
+  StopVideoStream();
   StopPolling();
   device_id_.clear();
   is_in_use_ = false;
@@ -63,6 +65,33 @@ void DeviceSession::Refresh() {
     [this, generation = session_generation_](ApiResult<DeviceInfo> result) {
       if (generation == session_generation_) { ReceiveDeviceInfo(std::move(result)); }
     });
+}
+
+void DeviceSession::RequestVideoStream() {
+  if (device_id_.isEmpty() || video_stream_loading_)
+    return;
+  video_stream_url_.clear();
+  video_stream_loading_ = true;
+  video_stream_failed_ = false;
+  const auto generation = ++video_stream_generation_;
+  emit videoStreamChanged();
+  service_->GetVideoStream(device_id_, this, [this, generation](ApiResult<VideoStream> result) {
+    if (generation != video_stream_generation_)
+      return;
+    video_stream_loading_ = false;
+    video_stream_failed_ = !result;
+    if (result)
+      video_stream_url_ = QUrl(result->stream_url);
+    emit videoStreamChanged();
+  });
+}
+
+void DeviceSession::StopVideoStream() {
+  ++video_stream_generation_;
+  video_stream_loading_ = false;
+  video_stream_failed_ = false;
+  video_stream_url_.clear();
+  emit videoStreamChanged();
 }
 
 void DeviceSession::UseCapability(int index, CapabilityType type, const QVariantMap& state) {

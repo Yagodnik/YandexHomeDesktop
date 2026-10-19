@@ -17,6 +17,8 @@ public:
     const QString& device_id, QObject* context, ApiResultHandler<DeviceInfo> handler);
   void UseCapability(const QString& device_id, CapabilityType type, const QVariantMap& state,
     QObject* context, ApiResultHandler<void> handler);
+  void GetVideoStream(const QString& device_id, QObject* context,
+                      ApiResultHandler<VideoStream> handler);
   // Validate a one-shot command against fresh device metadata before sending it.
   void ApplyCapability(const QString& device_id, CapabilityType type, const QVariantMap& state,
     QObject* context, CommandResultHandler handler);

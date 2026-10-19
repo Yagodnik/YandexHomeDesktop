@@ -155,6 +155,10 @@
         {
           "name": "MissingCredentialsSkipTransport",
           "description": "Reject requests without credentials before issuing HTTP transport calls."
+        },
+        {
+          "name": "VideoStreamRequestAndResponse",
+          "description": "Send an authenticated HLS request and validate device identity, action status, protocol, URL, missing results, and callback lifetime."
         }
       ]
     },
@@ -460,6 +464,10 @@
         {
           "name": "PreviousDeviceMobileSnapshotIsIgnoredAfterSwitch",
           "description": "Ignore an old device snapshot after selecting a different device."
+        },
+        {
+          "name": "VideoStreamLifecycle",
+          "description": "Project camera loading, success and retry; ignore cancelled, replaced and logged-out replies, and handle inline completion."
         }
       ]
     },
@@ -640,6 +648,14 @@
         {
           "name": "DemoDevicesCoverEveryControlVariant",
           "description": "Load every demo device through FixtureApi, keep home/detail attributes and room membership consistent, and cover all control variants with several controls per device."
+        },
+        {
+          "name": "DeviceActionsSucceedAndSurviveRefresh",
+          "description": "Accept all bundled fixture control actions, retain simulated state on refresh, and support explicit failure injection."
+        },
+        {
+          "name": "LocalVideoStreamAndRelativeActions",
+          "description": "Prepare an offline HLS stream, reject missing cameras, clamp relative actions, and scope callbacks to their owner."
         }
       ]
     },
@@ -1181,6 +1197,26 @@
           "name": "SharedControls::test_comboBoxTextAndInteraction",
           "description": "Keep long combobox labels on one line within padded bounds in both themes while preserving pointer and keyboard selection.",
           "source": "tests/qml/tst_SharedControls.qml"
+        },
+        {
+          "name": "VideoStream::test_playRetryAndStop",
+          "description": "Click the real camera delegate through the device page, retry a failed request, decode local HLS frames, and stop playback.",
+          "source": "tests/qml/tst_VideoStream.qml"
+        },
+        {
+          "name": "VideoStream::test_cancelAndHide",
+          "description": "Cancel a pending stream from the real control and when hiding the page; ignore late replies.",
+          "source": "tests/qml/tst_VideoStream.qml"
+        },
+        {
+          "name": "VideoStream::test_snapshotSavesFrame",
+          "description": "Activate the snapshot icon by keyboard through the real page, preserve the tray window during the picker, and save a full-resolution decoded frame after the player is destroyed in both themes.",
+          "source": "tests/qml/tst_VideoStream.qml"
+        },
+        {
+          "name": "VideoStream::test_snapshotCancelAndFailure",
+          "description": "Handle missing frames and failed PNG writes, preserve playback when cancelling, and close a pending snapshot picker when leaving the device.",
+          "source": "tests/qml/tst_VideoStream.qml"
         }
       ]
     },
@@ -1688,7 +1724,7 @@
         },
         {
           "name": "GuiControllerReloadsRecordsAndDisablesRealWorker",
-          "description": "Gui Controller Reloads Records And Disables Real Worker."
+          "description": "Run fixture device actions successfully, report injected failures, reload saved bindings, and stop the real worker when disabled."
         },
         {
           "name": "ShutdownDuringStartupAndLogoutCannotLeaveWorkerRunning",

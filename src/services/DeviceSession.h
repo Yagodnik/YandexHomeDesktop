@@ -3,6 +3,7 @@
 #include "yh/appservices_export.h"
 
 #include <QTimer>
+#include <QUrl>
 #include <functional>
 #include <optional>
 #include "DeviceService.h"
@@ -28,8 +29,20 @@ public:
   [[nodiscard]] bool IsPolling() const;
   void Refresh();
   void UseCapability(int index, CapabilityType type, const QVariantMap& state);
+  void RequestVideoStream();
+  void StopVideoStream();
+  [[nodiscard]] QUrl VideoStreamUrl() const {
+    return video_stream_url_;
+  }
+  [[nodiscard]] bool VideoStreamLoading() const {
+    return video_stream_loading_;
+  }
+  [[nodiscard]] bool VideoStreamFailed() const {
+    return video_stream_failed_;
+  }
 
 signals:
+  void videoStreamChanged();
   void loadRequestMade();
   void capabilitiesUpdateReady(const CapabilitiesList& capabilities);
   void propertiesUpdateReady(const PropertiesList& properties);
@@ -56,6 +69,10 @@ private:
   QString device_id_;
   bool is_in_use_ = false;
   quint64 session_generation_ = 0;
+  quint64 video_stream_generation_ = 0;
+  QUrl video_stream_url_;
+  bool video_stream_loading_ = false;
+  bool video_stream_failed_ = false;
   QList<CapabilityUpdate> capabilities_updates_;
   // Intentionally shared across reads, matching the characterized controller.
   double last_update_start_time_ = 0;

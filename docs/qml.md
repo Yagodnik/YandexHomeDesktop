@@ -146,6 +146,25 @@ saved account preferences. Fixture mode keeps assignments and visibility in memo
 - For a new routed page, add the QML file to `resources/resources.qrc` under `/pages` and register its route in `Main.qml`. Add it to `YandexHomeDesktop.Pages` in `src/qml/CMakeLists.txt` if another QML file will import it as a module type.
 - For a new reusable component or visual primitive, add the QML file to the appropriate module in `src/qml/CMakeLists.txt` and import that module where needed.
 - For a new device control, register its `qrc:/controls/...` resource, map the corresponding capability or property type to that URL in `CapabilitiesModel` or `PropertiesModel`, and use an appropriate C++ QML type for action or value handling.
+
+`controls/VideoStream.qml` handles `devices.capabilities.video_stream`. Its start
+and stop signals pass through the attribute section and controls pane to the
+device page and `DeviceViewModel`. `DeviceSession` owns the pending request,
+temporary URL and failure state, invalidating replies on stop, selection change,
+forget and logout. `DeviceService` uses `IHomeApi::GetVideoStream`; the Yandex
+adapter requests `get_stream` with `protocols: ["hls"]` through the existing
+actions endpoint and validates the returned device, instance, action result,
+protocol and HTTP(S) URL. See the [Yandex video-stream contract](https://yandex.ru/dev/dialogs/smart-home/doc/en/concepts/video_stream).
+The control loads `components/VideoStreamPlayer.qml` only during playback.
+Qt Multimedia renders the stream with audio; stop and page hiding release the
+player. Request and playback failures offer an inline retry. Stream URLs are
+temporary and are never stored in settings or passed through capability logs.
+Playback and snapshot actions use compact icon buttons inside the video, with
+translated tooltips and keyboard focus. The snapshot intent reaches the device
+page's `CameraSnapshotDialog`; `CameraSnapshotModel` copies the current decoded
+frame before opening a native PNG save picker. It saves at camera resolution
+without player controls. The page keeps the tray window visible during the picker
+and discards pending snapshots when switching devices.
 - For a new image, theme data file, or other bundled asset, add it to `resources/resources.qrc`. Reuse `themes` properties and `ui/` types for consistent colors and typography.
 
 ## Current source notes

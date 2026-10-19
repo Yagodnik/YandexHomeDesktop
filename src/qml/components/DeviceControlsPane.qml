@@ -15,6 +15,12 @@ Flickable {
   property KeybindSettingsModel keybindSettings: null
   property string deviceId
   property string deviceName
+  property url streamSource
+  property bool streamLoading: false
+  property bool streamFailed: false
+  signal streamRequested()
+  signal streamStopRequested()
+  signal snapshotRequested(var videoSink)
   property int topPadding: 4
   property int bottomPadding: 12
 
@@ -51,6 +57,12 @@ Flickable {
       keybindSettings: root.keybindSettings
       deviceId: root.deviceId
       deviceName: root.deviceName
+      streamSource: root.streamSource
+      streamLoading: root.streamLoading
+      streamFailed: root.streamFailed
+      onStreamRequested: root.streamRequested()
+      onStreamStopRequested: root.streamStopRequested()
+      onSnapshotRequested: function(videoSink) { root.snapshotRequested(videoSink); }
     }
 
     Components.DeviceAttributeSection {

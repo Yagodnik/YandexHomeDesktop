@@ -3,6 +3,8 @@
 DeviceViewModel::DeviceViewModel(DeviceService* service, QObject* parent, TimeProvider time_provider)
   : QObject(parent), session_(service, this, std::move(time_provider)),
     capabilities_(this), properties_(this), device_data_(this) {
+  connect(&session_, &DeviceSession::videoStreamChanged, this,
+          &DeviceViewModel::videoStreamChanged);
   connect(&session_, &DeviceSession::loadRequestMade, this, &DeviceViewModel::Reset);
   connect(&session_, &DeviceSession::deviceDataReady, this, [this](const DeviceInfo& info) {
     emit deviceDataReady(info);

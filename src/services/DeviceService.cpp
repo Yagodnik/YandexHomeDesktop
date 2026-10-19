@@ -6,6 +6,11 @@
 
 DeviceService::DeviceService(IHomeApi* api, QObject* parent) : QObject(parent), api_(api) {}
 
+void DeviceService::GetVideoStream(const QString& device_id, QObject* context,
+                                   ApiResultHandler<VideoStream> handler) {
+  api_->GetVideoStream(device_id, context, std::move(handler));
+}
+
 void DeviceService::GetDeviceInfo(
   const QString& device_id, QObject* context, ApiResultHandler<DeviceInfo> handler) {
   api_->GetDeviceInfo(device_id, context, std::move(handler));

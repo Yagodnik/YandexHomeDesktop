@@ -81,10 +81,10 @@ TestCase {
           break;
         }
         case "devices.capabilities.video_stream": {
-          const control = findChild(page, "unsupportedCapabilityControl");
-          const label = findChild(control, "unsupportedCapabilityLabel");
-          verify(label.contentWidth <= label.width + 1);
-          verify(label.contentHeight <= control.height);
+          const control = findChild(page, "videoStreamControl");
+          verify(control !== null);
+          compare(control.streamSource.toString(), "");
+          verify(findChild(control, "videoStreamPlayAction") !== null);
           break;
         }
         default: fail("Unexpected demo capability " + capability.type);

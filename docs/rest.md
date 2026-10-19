@@ -190,8 +190,9 @@ YandexHomeCli --fake-api --disable-rest
 Pass the same `--fake-api-data /absolute/path/to/fixture.json` to the enable,
 status, disable, and Python commands for a custom fixture. Each path
 has a separate control channel and uses temporary preferences; fixtures never
-access live OAuth credentials. Reads and scenario execution work. Device
-actions return the existing fixture API's explicit "not simulated" error.
+access live OAuth credentials. Reads, active scenarios, and device actions work
+locally. Device actions update in-memory state for subsequent reads; custom
+fixtures can inject failures with `action_errors` or `scenario_errors`.
 Release rejects `--fake-api` before any server starts.
 
 ## Architecture and verification

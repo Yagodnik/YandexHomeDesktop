@@ -13,6 +13,12 @@ Column {
   property KeybindSettingsModel keybindSettings: null
   property string deviceId
   property string deviceName
+  property url streamSource
+  property bool streamLoading: false
+  property bool streamFailed: false
+  signal streamRequested()
+  signal streamStopRequested()
+  signal snapshotRequested(var videoSink)
 
   visible: sourceModel !== null && sourceModel.count !== 0
 
@@ -44,6 +50,35 @@ Column {
           id: attributeLoader
           source: delegateSource
           width: parent.width
+        }
+
+        Binding {
+          target: attributeLoader.item
+          property: "streamSource"
+          value: root.streamSource
+          when: attributeLoader.item !== null && attributeLoader.item.streamSource !== undefined
+        }
+
+        Binding {
+          target: attributeLoader.item
+          property: "streamLoading"
+          value: root.streamLoading
+          when: attributeLoader.item !== null && attributeLoader.item.streamLoading !== undefined
+        }
+
+        Binding {
+          target: attributeLoader.item
+          property: "streamFailed"
+          value: root.streamFailed
+          when: attributeLoader.item !== null && attributeLoader.item.streamFailed !== undefined
+        }
+
+        Connections {
+          target: attributeLoader.item
+          ignoreUnknownSignals: true
+          function onStreamRequested() { root.streamRequested(); }
+          function onStreamStopRequested() { root.streamStopRequested(); }
+          function onSnapshotRequested(videoSink) { root.snapshotRequested(videoSink); }
         }
 
         Binding {

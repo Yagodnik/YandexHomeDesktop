@@ -16,6 +16,7 @@
 #include "models/SettingsTransferModel.h"
 #include <QTemporaryDir>
 #include "models/DeviceModel/DeviceViewModel.h"
+#include "models/DeviceModel/CameraSnapshotModel.h"
 #include "iot/capabilities/OnOffCapability.h"
 #include "iot/capabilities/RangeCapability.h"
 #include "iot/capabilities/ColorSettingCapability.h"
@@ -54,6 +55,7 @@ public:
 
 void initializeQmlTestEnvironment(QQmlEngine* engine) {
   static const bool registered = [] {
+    qmlRegisterType<CameraSnapshotModel>("YandexHomeDesktop.ViewModels", 1, 0, "CameraSnapshotModel");
     qmlRegisterUncreatableType<SettingsTransferModel>("YandexHomeDesktop.ViewModels", 1, 0,
       "SettingsTransferModel", "Supplied by the application");
     qmlRegisterUncreatableType<KeybindSettingsModel>("YandexHomeDesktop.ViewModels", 1, 0,

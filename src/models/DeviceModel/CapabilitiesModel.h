@@ -45,13 +45,13 @@ public slots:
 private:
   const QString kUnsupportedDelegate = "qrc:/controls/Unsupported.qml";
   const QMap<CapabilityType, QString> kDelegates = {
-    { CapabilityType::OnOff,        "qrc:/controls/OnOff.qml" },
-    // { CapabilityType::OnOff,        "qrc:/controls/Mode.qml" },
-    { CapabilityType::VideoStream,  kUnsupportedDelegate },
-    { CapabilityType::ColorSetting, "qrc:/controls/ColorSetting.qml" },
-    { CapabilityType::Mode,         "qrc:/controls/Mode.qml" },
-    { CapabilityType::Range,        "qrc:/controls/Range.qml" },
-    { CapabilityType::Toggle,       "qrc:/controls/Toggle.qml" },
+      {CapabilityType::OnOff, "qrc:/controls/OnOff.qml"},
+      // { CapabilityType::OnOff,        "qrc:/controls/Mode.qml" },
+      {CapabilityType::VideoStream, "qrc:/controls/VideoStream.qml"},
+      {CapabilityType::ColorSetting, "qrc:/controls/ColorSetting.qml"},
+      {CapabilityType::Mode, "qrc:/controls/Mode.qml"},
+      {CapabilityType::Range, "qrc:/controls/Range.qml"},
+      {CapabilityType::Toggle, "qrc:/controls/Toggle.qml"},
   };
 
   QString device_id_;

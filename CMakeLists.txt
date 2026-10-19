@@ -60,7 +60,7 @@ if(BUILD_TESTING)
   find_package(Qt6 6.9 REQUIRED COMPONENTS Test)
 endif()
 if(BUILD_DESKTOP_APP)
-  find_package(Qt6 6.9 REQUIRED COMPONENTS Quick NetworkAuth QuickControls2 Widgets Svg LinguistTools)
+  find_package(Qt6 6.9 REQUIRED COMPONENTS Quick NetworkAuth QuickControls2 Widgets Svg LinguistTools Multimedia)
   if(BUILD_TESTING)
     find_package(Qt6 6.9 REQUIRED COMPONENTS QuickTest)
   endif()
@@ -418,6 +418,7 @@ if(_translation_targets)
       src/models/ScenariosModel/ScenariosViewModel.cpp src/models/RestViewModel.cpp
       src/models/KeybindSettingsModel.cpp src/models/ShortcutViewModel.cpp
       src/models/SettingsTransferModel.cpp
+      src/models/DeviceModel/CameraSnapshotModel.cpp
     SOURCE_TARGETS ${_translation_sources}
     RESOURCE_PREFIX "/i18n")
 endif()

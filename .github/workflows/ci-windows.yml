@@ -64,7 +64,7 @@ jobs:
           host: windows
           target: desktop
           arch: win64_mingw
-          modules: qt5compat qtnetworkauth qtsvg qttools qthttpserver qtwebsockets
+          modules: qt5compat qtnetworkauth qtsvg qttools qthttpserver qtwebsockets qtmultimedia
           tools: tools_mingw1310,qt.tools.win64_mingw1310
           cache: true
 

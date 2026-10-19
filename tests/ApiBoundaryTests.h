@@ -12,4 +12,5 @@ private slots:
   void TimeoutReportsOnce();
   void DestroyedContextSuppressesEvents();
   void MissingCredentialsSkipTransport();
+  void VideoStreamRequestAndResponse();
 };

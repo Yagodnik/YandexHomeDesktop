@@ -8,7 +8,7 @@ executable and runs the worker with an invalid GUI platform to check headless st
 
 The CI builds are `.github/workflows/ci-windows.yml`, `ci-macos.yml`, and `ci-linux.yml`. They run for pull requests targeting `main`, `dev`, or `refactoring`, or when started manually; ordinary branch pushes do not trigger them. Windows and macOS build the desktop app and run CTest; Linux builds the headless CLI/REST applications and runs the portable tests using the Qt 6.9.1 `linux_gcc_64` kit. CMake fetches pinned Boost.Hana, QtKeychain, and (for the shortcut worker) QHotkey sources into the build directory. No ignored `libs/` directory or machine-specific CMake file is required.
 
-For a local desktop build, install Qt 6.9 or newer with HttpServer, WebSockets, Quick, QuickTest, NetworkAuth, Widgets, Svg, Qt5Compat, LinguistTools, and Test, plus a C++23 compiler and CMake 3.28 or newer. Configure Qt through the standard CMake prefix path:
+For a local desktop build, install Qt 6.9 or newer with HttpServer, WebSockets, Quick, QuickTest, Multimedia, NetworkAuth, Widgets, Svg, Qt5Compat, LinguistTools, and Test, plus a C++23 compiler and CMake 3.28 or newer. Configure Qt through the standard CMake prefix path:
 
 ```sh
 cmake -S . -B build -G Ninja -DCMAKE_PREFIX_PATH=/path/to/Qt/6.x/<kit> -DBUILD_DESKTOP_APP=ON
@@ -101,18 +101,18 @@ readings. Home-list attributes and device-detail responses contain the same data
 | Living room speaker | On/off, relative volume (+/−), mute toggle, input-source modes |
 | Color strip (HSV) | On/off, brightness, HSV colors and scenes without white temperatures |
 | Scene light | On/off, scene-only color control, pause toggle |
-| Camera (unsupported video) | On/off, backlight, unsupported video-stream capability, battery and motion readings |
+| Camera | On/off, backlight, embedded HLS video, battery and motion readings |
 
 `ApiFixture::DemoDevicesCoverEveryControlVariant` checks fixture coverage and
 consistency. `QmlLayouts::DemoDevices::test_demoDevicePages` bundles the same JSON
 into its test executable and opens every device at 320/350 px in both themes,
-including mode lists, scene tabs, unsupported content, and scrolling to readings.
+including mode lists, scene tabs, camera controls, and scrolling to readings.
 These run in the existing Windows Debug/Release CTest matrix; the regular app
 continues to bundle demo data only in Debug builds.
 
 Capability and property entries use the API fields, including `type`, `retrievable`, and `last_updated`. Omit the arrays or use empty arrays when those attributes are not needed.
 
-The file is read for each request, so editing a custom fixture and refreshing the page shows the updated data. Invalid files produce explicit errors; the app does not fall back to the real API. Fixture mode uses local sign-in, a bundled avatar, and in-memory UI settings. It does not access OAuth credentials, keychain tokens, or the HTTP transport. Device-detail browsing works; device actions deliberately return a "not simulated" error until a device simulation is added.
+The file is read for each request, so editing a custom fixture and refreshing the page shows the updated data. Invalid files produce explicit errors; the app does not fall back to the real API. Fixture mode uses local sign-in, a bundled avatar, and in-memory UI settings. It does not access OAuth credentials, keychain tokens, or the HTTP transport. Device actions succeed locally and update in-memory capability state, including relative ranges. Refreshing preserves those values; editing the fixture file or restarting clears them. `action_errors` optionally maps device IDs to deliberate action failures. The bundled failure scenario remains available for error testing. `video_streams` maps camera IDs to `{ "stream_url": "...", "protocol": "hls" }`; the bundled camera plays a local HLS test pattern copied from resources to a temporary directory. No camera or media network access is needed. Desktop builds require Qt Multimedia; the Windows/macOS CI and release kits install `qtmultimedia`, and the standard QML deployment step includes its plugin and runtime libraries. `QmlLayouts::VideoStream` verifies actual local HLS decoding, retry, stop, and cancellation through the real device page.
 
 The default embedded OAuth JSON is `resources/auth/example.json`. It contains no usable credentials, so the resulting binary is suitable for build and test verification but cannot sign in. To build a runnable app, place your JSON outside Git (for example at ignored `resources/auth/secrets.json`) and configure with `-DYH_AUTH_CONFIG_FILE=/path/to/secrets.json` or `-DAUTH_CONFIG_FILE=/path/to/secrets.json`. This JSON is embedded in the binary, so keep binaries built with real credentials private. The file must supply `auth_url`, `access_token_url`, `client_id`, `client_secret`, `redirect_base`, `redirect_port`, and `scopes`. Authorization and token URLs must use HTTPS. `redirect_base` is an HTTP loopback URL (`127.0.0.1`, `localhost`, or `::1`), optionally with a callback path; put the port in `redirect_port` (1–65535). Public clients use an empty `client_secret`. Configuration is validated only when browser sign-in starts; saved-token restoration and the console CLI do not load it or bind a callback port.
 

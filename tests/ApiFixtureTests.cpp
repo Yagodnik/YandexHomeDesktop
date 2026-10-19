@@ -176,9 +176,12 @@ private slots:
     api.GetDeviceInfo("missing", &context, [&](ApiResult<DeviceInfo> result) {
       QVERIFY(!result); ++replies;
     });
-    api.PerformActions({}, &context, [&](ApiResult<void> result) {
-      QVERIFY(!result); QVERIFY(result.error().message.contains("does not simulate")); ++replies;
-    });
+    api.PerformActions({DeviceActionsObject{.id = "missing"}}, &context,
+                       [&](ApiResult<void> result) {
+                         QVERIFY(!result);
+                         QCOMPARE(result.error().kind, ApiErrorKind::InvalidResponse);
+                         ++replies;
+                       });
     QTRY_COMPARE(replies, 4);
     auto home = fixture["user_info"].toObject();
     home["status"] = "error"; home["message"] = "Simulated outage"; fixture["user_info"] = home;
@@ -214,6 +217,110 @@ private slots:
     auto* context = new QObject; bool delivered = false;
     api.GetUserInfo(context, [&](ApiResult<UserInfo>) { delivered = true; });
     delete context; QTest::qWait(20); QVERIFY(!delivered);
+  }
+
+  void DeviceActionsSucceedAndSurviveRefresh() {
+    QTemporaryDir dir;
+    const auto path = dir.filePath("fixture.json");
+    auto fixture = Fixture();
+    QVERIFY(Write(path, fixture));
+    FixtureApi api(path);
+    QObject context;
+    const auto details = fixture["device_info"].toObject();
+    for (auto it = details.begin(); it != details.end(); ++it) {
+      const auto info = Serialization::From<DeviceInfo>(it.value().toObject());
+      for (const auto& capability : info.capabilities) {
+        if (capability.type == CapabilityType::VideoStream)
+          continue;
+        auto action = capability;
+        if (action.type == CapabilityType::OnOff || action.type == CapabilityType::Toggle)
+          action.state["value"] = !action.state.value("value").toBool();
+        std::optional<ApiResult<void>> response;
+        api.PerformActions({DeviceActionsObject{.id = info.id, .actions = {action}}}, &context,
+                           [&](auto result) { response = std::move(result); });
+        QVERIFY(!response);
+        QTRY_VERIFY(response.has_value());
+        QVERIFY2(response->has_value(), qPrintable(info.id));
+        std::optional<ApiResult<DeviceInfo>> read;
+        api.GetDeviceInfo(info.id, &context, [&](auto result) { read = std::move(result); });
+        QTRY_VERIFY(read.has_value());
+        QVERIFY(read->has_value());
+        const auto row = &capability - info.capabilities.constData();
+        QCOMPARE(read->value().capabilities[row].state, action.state);
+      }
+    }
+    // Home snapshots reflect the same local state, and a new adapter starts clean.
+    std::optional<ApiResult<UserInfo>> home;
+    api.GetUserInfo(&context, [&](auto result) { home = std::move(result); });
+    QTRY_VERIFY(home.has_value());
+    QVERIFY(home->has_value());
+    QVERIFY(home->value().devices[0].capabilities[0].state !=
+            Serialization::From<UserInfo>(fixture["user_info"].toObject())
+                .devices[0]
+                .capabilities[0]
+                .state);
+    fixture["action_errors"] = QJsonObject{{"lamp", "TEST_ERROR"}};
+    QVERIFY(Write(path, fixture));
+    std::optional<ApiResult<void>> failure;
+    api.PerformActions({DeviceActionsObject{.id = "lamp"}}, &context,
+                       [&](auto result) { failure = std::move(result); });
+    QTRY_VERIFY(failure.has_value());
+    QVERIFY(!failure->has_value());
+    QCOMPARE(failure->error().message, QString("TEST_ERROR"));
+  }
+
+  void LocalVideoStreamAndRelativeActions() {
+    QTemporaryDir directory;
+    const auto path = directory.filePath("fixture.json");
+    QVERIFY(Write(path, Fixture()));
+    FixtureApi api(path);
+    QObject context;
+    std::optional<ApiResult<VideoStream>> stream;
+    api.GetVideoStream("camera", &context, [&](auto result) { stream = std::move(result); });
+    QVERIFY(!stream);
+    QTRY_VERIFY(stream.has_value());
+    QVERIFY(stream->has_value());
+    QCOMPARE(stream->value().protocol, QString("hls"));
+    const QUrl url(stream->value().stream_url);
+    QVERIFY(url.isLocalFile());
+    QVERIFY(QFile::exists(url.toLocalFile()));
+    QVERIFY(QFile::exists(QFileInfo(url.toLocalFile()).dir().filePath("camera.ts")));
+    stream.reset();
+    api.GetVideoStream("missing", &context, [&](auto result) { stream = std::move(result); });
+    QTRY_VERIFY(stream.has_value());
+    QVERIFY(!stream->has_value());
+
+    // Apply the same relative action twice in one batch and clamp at the maximum.
+    const auto details = Fixture()["device_info"].toObject();
+    for (auto it = details.begin(); it != details.end(); ++it) {
+      const auto info = Serialization::From<DeviceInfo>(it.value().toObject());
+      for (qsizetype row = 0; row < info.capabilities.size(); ++row) {
+        auto action = info.capabilities[row];
+        if (action.type != CapabilityType::Range ||
+            action.parameters.value("random_access").toBool())
+          continue;
+        action.state["relative"] = true;
+        action.state["value"] = 1000;
+        std::optional<ApiResult<void>> response;
+        api.PerformActions({DeviceActionsObject{.id = info.id, .actions = {action, action}}},
+                           &context, [&](auto result) { response = std::move(result); });
+        QTRY_VERIFY(response.has_value());
+        QVERIFY(response->has_value());
+        std::optional<ApiResult<DeviceInfo>> read;
+        api.GetDeviceInfo(info.id, &context, [&](auto result) { read = std::move(result); });
+        QTRY_VERIFY(read.has_value());
+        QVERIFY(read->has_value());
+        QCOMPARE(read->value().capabilities[row].state.value("value"),
+                 action.parameters.value("range").toMap().value("max"));
+        QVERIFY(!read->value().capabilities[row].state.contains("relative"));
+      }
+    }
+    bool delivered = false;
+    auto* owner = new QObject;
+    api.GetVideoStream("camera", owner, [&](auto) { delivered = true; });
+    delete owner;
+    QTest::qWait(10);
+    QVERIFY(!delivered);
   }
 
   void DebugSettingsAreIsolatedInMemory() {

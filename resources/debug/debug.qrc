@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="/debug">
     <file>api.json</file>
+    <file>camera.m3u8</file>
+    <file>camera.ts</file>
   </qresource>
 </RCC>

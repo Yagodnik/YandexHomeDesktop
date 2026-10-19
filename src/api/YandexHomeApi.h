@@ -22,8 +22,12 @@ public:
                        ApiResultHandler<void> handler) override;
   void PerformActions(const QList<DeviceActionsObject>& actions, QObject* context,
                       ApiResultHandler<void> handler) override;
+  void GetVideoStream(const QString& device_id, QObject* context,
+                      ApiResultHandler<VideoStream> handler) override;
 
 private:
+  void RequestActions(const QList<DeviceActionsObject>& actions, QObject* context,
+                      ApiResultHandler<DeviceActionResponse> handler);
   const QString kInfoEndpoint = "https://api.iot.yandex.net/v1.0/user/info";
   const QString kExecuteScenarioEndpoint = "https://api.iot.yandex.net/v1.0/scenarios/%1/actions";
   const QString kDeviceInfoEndpoint = "https://api.iot.yandex.net/v1.0/devices/%1";

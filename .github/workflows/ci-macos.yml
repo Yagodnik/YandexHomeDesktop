@@ -43,7 +43,7 @@ jobs:
           host: mac
           target: desktop
           arch: clang_64
-          modules: qt5compat qtnetworkauth qtsvg qttools qthttpserver qtwebsockets
+          modules: qt5compat qtnetworkauth qtsvg qttools qthttpserver qtwebsockets qtmultimedia
           cache: true
 
       - name: Build, test, and package macOS installer

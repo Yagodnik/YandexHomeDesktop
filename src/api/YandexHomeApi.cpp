@@ -3,9 +3,11 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QUrl>
 
 #include "RequestFactory.h"
 #include "model/Response.h"
+#include "serialization/Serialization.h"
 
 namespace {
 template<typename T>
@@ -89,6 +91,56 @@ void YandexHomeApi::ExecuteScenario(const QString& id, QObject* context,
 
 void YandexHomeApi::PerformActions(const QList<DeviceActionsObject>& actions, QObject* context,
                                     ApiResultHandler<void> handler) {
+  RequestActions(actions, context,
+                 [handler = std::move(handler)](ApiResult<DeviceActionResponse> result) {
+                   handler(result ? ApiResult<void>{} : std::unexpected(result.error()));
+                 });
+}
+
+void YandexHomeApi::GetVideoStream(const QString& device_id, QObject* context,
+                                   ApiResultHandler<VideoStream> handler) {
+  const CapabilityObject action{
+      .type = CapabilityType::VideoStream,
+      .state = {{"instance", "get_stream"},
+                {"value", QVariantMap{{"protocols", QStringList{"hls"}}}}}};
+  RequestActions({DeviceActionsObject{.id = device_id, .actions = {action}}}, context,
+                 [device_id, handler = std::move(handler)](ApiResult<DeviceActionResponse> result) {
+                   if (!result) {
+                     handler(std::unexpected(result.error()));
+                     return;
+                   }
+                   std::optional<VideoStream> stream;
+                   for (const auto& device : result->devices) {
+                     if (device.id != device_id)
+                       continue;
+                     for (const auto& capability : device.capabilities) {
+                       if (capability.type != "devices.capabilities.video_stream" ||
+                           capability.state.instance != "get_stream")
+                         continue;
+                       const auto value = Serialization::TryFrom<VideoStream>(
+                           QJsonObject::fromVariantMap(capability.state.value));
+                       const QUrl url(value ? value->stream_url : QString{}, QUrl::StrictMode);
+                       if (stream || !value || value->protocol != "hls" || !url.isValid() ||
+                           url.host().isEmpty() ||
+                           (url.scheme() != "https" && url.scheme() != "http")) {
+                         handler(std::unexpected(ApiError{ApiErrorKind::InvalidResponse,
+                                                          "Invalid video stream response"}));
+                         return;
+                       }
+                       stream = *value;
+                     }
+                   }
+                   if (!stream) {
+                     handler(std::unexpected(
+                         ApiError{ApiErrorKind::InvalidResponse, "Missing video stream response"}));
+                     return;
+                   }
+                   handler(*stream);
+                 });
+}
+
+void YandexHomeApi::RequestActions(const QList<DeviceActionsObject>& actions, QObject* context,
+                                   ApiResultHandler<DeviceActionResponse> handler) {
   const auto request = RequestFactory::CreateAuthorizedBearer(kDevicesActionsEndpoint, token_provider_());
   if (!request) { handler(std::unexpected(request.error())); return; }
   QJsonArray json_actions;
@@ -117,6 +169,6 @@ void YandexHomeApi::PerformActions(const QList<DeviceActionsObject>& actions, QO
         }
       }
     }
-    handler({});
+    handler(std::move(result));
   });
 }

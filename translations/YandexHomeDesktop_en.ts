@@ -46,6 +46,37 @@ your devices</translation>
     </message>
 </context>
 <context>
+    <name>CameraSnapshotDialog</name>
+    <message>
+        <location filename="../src/qml/components/CameraSnapshotDialog.qml" line="28"/>
+        <source>Сохранить снимок камеры</source>
+        <translation>Save camera snapshot</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/components/CameraSnapshotDialog.qml" line="31"/>
+        <source>Изображение PNG (*.png)</source>
+        <translation>PNG image (*.png)</translation>
+    </message>
+</context>
+<context>
+    <name>CameraSnapshotModel</name>
+    <message>
+        <location filename="../src/models/DeviceModel/CameraSnapshotModel.cpp" line="13"/>
+        <source>Не удалось сделать снимок</source>
+        <translation>Unable to capture a snapshot</translation>
+    </message>
+    <message>
+        <location filename="../src/models/DeviceModel/CameraSnapshotModel.cpp" line="28"/>
+        <source>Снимок сохранён</source>
+        <translation>Snapshot saved</translation>
+    </message>
+    <message>
+        <location filename="../src/models/DeviceModel/CameraSnapshotModel.cpp" line="28"/>
+        <source>Не удалось сохранить снимок</source>
+        <translation>Unable to save the snapshot</translation>
+    </message>
+</context>
+<context>
     <name>CapabilitiesModel</name>
     <message>
         <location filename="../src/models/DeviceModel/CapabilitiesModel.cpp" line="33"/>
@@ -333,12 +364,12 @@ your devices</translation>
 <context>
     <name>ColorSetting</name>
     <message>
-        <location filename="../src/qml/controls/ColorSetting.qml" line="43"/>
+        <location filename="../src/qml/controls/ColorSetting.qml" line="46"/>
         <source>Цвета</source>
         <translation>Colors</translation>
     </message>
     <message>
-        <location filename="../src/qml/controls/ColorSetting.qml" line="44"/>
+        <location filename="../src/qml/controls/ColorSetting.qml" line="47"/>
         <source>Режимы</source>
         <translation>Modes</translation>
     </message>
@@ -1765,32 +1796,32 @@ your devices</translation>
 <context>
     <name>DevicePage</name>
     <message>
-        <location filename="../src/qml/pages/DevicePage.qml" line="13"/>
+        <location filename="../src/qml/pages/DevicePage.qml" line="22"/>
         <source>Ошибка</source>
         <translation>Error</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/DevicePage.qml" line="24"/>
+        <location filename="../src/qml/pages/DevicePage.qml" line="35"/>
         <source>Произошла ошибка!</source>
         <translation>An error occurred!</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/DevicePage.qml" line="62"/>
+        <location filename="../src/qml/pages/DevicePage.qml" line="73"/>
         <source>Нет связи с устройством</source>
         <translation>No connection to the device</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/DevicePage.qml" line="63"/>
+        <location filename="../src/qml/pages/DevicePage.qml" line="74"/>
         <source>Попробовать снова</source>
         <translation>Try again</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/DevicePage.qml" line="76"/>
+        <location filename="../src/qml/pages/DevicePage.qml" line="93"/>
         <source>Умения</source>
         <translation>Capabilities</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/DevicePage.qml" line="77"/>
+        <location filename="../src/qml/pages/DevicePage.qml" line="94"/>
         <source>Свойства</source>
         <translation>Properties</translation>
     </message>
@@ -2039,7 +2070,7 @@ Email: %2
 <context>
     <name>MainPage</name>
     <message>
-        <location filename="../src/qml/pages/MainPage.qml" line="37"/>
+        <location filename="../src/qml/pages/MainPage.qml" line="38"/>
         <source>Выберите Дом</source>
         <translation>Select a home</translation>
     </message>
@@ -2047,7 +2078,7 @@ Email: %2
 <context>
     <name>Mode</name>
     <message>
-        <location filename="../src/qml/controls/Mode.qml" line="129"/>
+        <location filename="../src/qml/controls/Mode.qml" line="123"/>
         <source>%1: %2</source>
         <translation>%1: %2</translation>
     </message>
@@ -2465,81 +2496,81 @@ Email: %2
 <context>
     <name>SettingsPage</name>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="18"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="19"/>
         <source>Настройки</source>
         <translation>Settings</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="27"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="28"/>
         <source>Tray-режим</source>
         <translation>Tray mode</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="28"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="29"/>
         <source>Приложение будет отображаться
 как иконка на панели задач</source>
         <translation>The app will appear as an icon
 in the system tray</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="30"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="31"/>
         <source>Тема</source>
         <translation>Theme</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="31"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="32"/>
         <source>Светлая</source>
         <translation>Light</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="31"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="32"/>
         <source>Тёмная</source>
         <translation>Dark</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="33"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="34"/>
         <source>Сочетания клавиш</source>
         <translation>Keyboard shortcuts</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="34"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="35"/>
         <source>Показывать кнопки назначения
 рядом с умениями устройств</source>
         <translation>Show shortcut buttons
 next to device capabilities</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="36"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="37"/>
         <source>GitHub</source>
         <translation>GitHub</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="59"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="60"/>
         <source>Перенос настроек</source>
         <translation>Settings backup</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="74"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="75"/>
         <source>Дополнительно</source>
         <translation>Advanced</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="93"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="94"/>
         <source>REST API</source>
         <translation>REST API</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="94"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="95"/>
         <source>Локальный доступ для скриптов</source>
         <translation>Local access for scripts</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="97"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="98"/>
         <source>Подождите…</source>
         <translation>Please wait…</translation>
     </message>
     <message>
-        <location filename="../src/qml/pages/SettingsPage.qml" line="99"/>
+        <location filename="../src/qml/pages/SettingsPage.qml" line="100"/>
         <source>Сервер остановлен</source>
         <translation>Server stopped</translation>
     </message>
@@ -2601,34 +2632,34 @@ next to device capabilities</translation>
 <context>
     <name>SettingsTransferDialogs</name>
     <message>
-        <location filename="../src/qml/components/SettingsTransferDialogs.qml" line="16"/>
+        <location filename="../src/qml/components/SettingsTransferDialogs.qml" line="28"/>
         <source>Сохранить настройки</source>
         <translation>Export settings</translation>
     </message>
     <message>
-        <location filename="../src/qml/components/SettingsTransferDialogs.qml" line="19"/>
-        <location filename="../src/qml/components/SettingsTransferDialogs.qml" line="27"/>
+        <location filename="../src/qml/components/SettingsTransferDialogs.qml" line="31"/>
+        <location filename="../src/qml/components/SettingsTransferDialogs.qml" line="39"/>
         <source>Настройки JSON (*.json)</source>
         <translation>JSON settings (*.json)</translation>
     </message>
     <message>
-        <location filename="../src/qml/components/SettingsTransferDialogs.qml" line="25"/>
-        <location filename="../src/qml/components/SettingsTransferDialogs.qml" line="70"/>
+        <location filename="../src/qml/components/SettingsTransferDialogs.qml" line="37"/>
+        <location filename="../src/qml/components/SettingsTransferDialogs.qml" line="82"/>
         <source>Загрузить настройки</source>
         <translation>Import settings</translation>
     </message>
     <message>
-        <location filename="../src/qml/components/SettingsTransferDialogs.qml" line="57"/>
+        <location filename="../src/qml/components/SettingsTransferDialogs.qml" line="69"/>
         <source>Заменить настройки?</source>
         <translation>Replace settings?</translation>
     </message>
     <message>
-        <location filename="../src/qml/components/SettingsTransferDialogs.qml" line="63"/>
+        <location filename="../src/qml/components/SettingsTransferDialogs.qml" line="75"/>
         <source>Тема, tray-режим, сочетания клавиш и настройки избранного и комнат будут заменены данными из файла.</source>
         <translation>Theme, tray mode, keybinds, and Favorites and room preferences will be replaced with settings from the file.</translation>
     </message>
     <message>
-        <location filename="../src/qml/components/SettingsTransferDialogs.qml" line="76"/>
+        <location filename="../src/qml/components/SettingsTransferDialogs.qml" line="88"/>
         <source>Отмена</source>
         <translation>Cancel</translation>
     </message>
@@ -2674,7 +2705,7 @@ next to device capabilities</translation>
 <context>
     <name>ShortcutSettingsCard</name>
     <message>
-        <location filename="../src/qml/components/ShortcutSettingsCard.qml" line="24"/>
+        <location filename="../src/qml/components/ShortcutSettingsCard.qml" line="21"/>
         <source>Глобальные сочетания</source>
         <translation>Global shortcuts</translation>
     </message>
@@ -2685,19 +2716,19 @@ next to device capabilities</translation>
 application is focused</translation>
     </message>
     <message>
-        <location filename="../src/qml/components/ShortcutSettingsCard.qml" line="25"/>
+        <location filename="../src/qml/components/ShortcutSettingsCard.qml" line="22"/>
         <source>Управлять устройствами и запускать сценарии,
 даже когда другое приложение в фокусе</source>
         <translation>Control devices and run scenarios,
 even while another application is focused</translation>
     </message>
     <message>
-        <location filename="../src/qml/components/ShortcutSettingsCard.qml" line="33"/>
+        <location filename="../src/qml/components/ShortcutSettingsCard.qml" line="30"/>
         <source>После закрытия приложения</source>
         <translation>After closing the application</translation>
     </message>
     <message>
-        <location filename="../src/qml/components/ShortcutSettingsCard.qml" line="34"/>
+        <location filename="../src/qml/components/ShortcutSettingsCard.qml" line="31"/>
         <source>Оставлять службу сочетаний работающей
 без окна и иконки в трее</source>
         <translation>Keep shortcuts running without
@@ -2812,17 +2843,17 @@ a window or tray icon</translation>
 <context>
     <name>TopBar</name>
     <message>
-        <location filename="../src/qml/components/TopBar.qml" line="89"/>
+        <location filename="../src/qml/components/TopBar.qml" line="91"/>
         <source>Устройства</source>
         <translation>Devices</translation>
     </message>
     <message>
-        <location filename="../src/qml/components/TopBar.qml" line="96"/>
+        <location filename="../src/qml/components/TopBar.qml" line="99"/>
         <source>Сценарии</source>
         <translation>Scenarios</translation>
     </message>
     <message>
-        <location filename="../src/qml/components/TopBar.qml" line="103"/>
+        <location filename="../src/qml/components/TopBar.qml" line="107"/>
         <source>Настройки</source>
         <translation>Settings</translation>
     </message>
@@ -2833,6 +2864,49 @@ a window or tray icon</translation>
         <location filename="../src/qml/controls/Unsupported.qml" line="23"/>
         <source>Неподдерживаемое умение: %1</source>
         <translation>Unsupported capability: %1</translation>
+    </message>
+</context>
+<context>
+    <name>VideoStream</name>
+    <message>
+        <location filename="../src/qml/controls/VideoStream.qml" line="32"/>
+        <source>Видеопоток</source>
+        <translation>Video stream</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/controls/VideoStream.qml" line="62"/>
+        <source>Не удалось открыть видеопоток</source>
+        <translation>Unable to open the video stream</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/controls/VideoStream.qml" line="63"/>
+        <source>Подключение к камере…</source>
+        <translation>Connecting to camera…</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/controls/VideoStream.qml" line="64"/>
+        <source>Видео с камеры</source>
+        <translation>Camera video</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/controls/VideoStream.qml" line="86"/>
+        <source>Повторить</source>
+        <translation>Retry</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/controls/VideoStream.qml" line="86"/>
+        <source>Смотреть</source>
+        <translation>Watch</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/controls/VideoStream.qml" line="96"/>
+        <source>Остановить</source>
+        <translation>Stop</translation>
+    </message>
+    <message>
+        <location filename="../src/qml/controls/VideoStream.qml" line="109"/>
+        <source>Сделать снимок</source>
+        <translation>Take snapshot</translation>
     </message>
 </context>
 </TS>

@@ -3,6 +3,8 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QPointer>
+#include <QJsonDocument>
+#include <QJsonArray>
 #include <QtTest>
 
 #include "api/QtHttpTransport.h"
@@ -121,8 +123,9 @@ void ApiBoundaryTests::MissingCredentialsSkipTransport() {
   home.GetDeviceInfo("device", &context, reject);
   home.ExecuteScenario("scenario", &context, reject);
   home.PerformActions({}, &context, reject);
+  home.GetVideoStream("camera", &context, reject);
   account.LoadData(&context, reject);
-  QCOMPARE(rejected, 6);
+  QCOMPARE(rejected, 7);
   QVERIFY(transport.pending.isEmpty());
 
   token = "synthetic-session";
@@ -130,7 +133,7 @@ void ApiBoundaryTests::MissingCredentialsSkipTransport() {
   QCOMPARE(transport.pending.size(), 1);
   token.clear();
   home.GetUserInfo(&context, reject);
-  QCOMPARE(rejected, 7);
+  QCOMPARE(rejected, 8);
   QCOMPARE(transport.pending.size(), 1);
 }
 
@@ -221,6 +224,58 @@ void ApiBoundaryTests::AccountResults() {
   QCOMPARE(account.default_avatar_id, QString("avatar"));
   QCOMPARE(account.default_email, QString("ada@example.com"));
   QCOMPARE(account.id, QString("account-123"));
+}
+
+void ApiBoundaryTests::VideoStreamRequestAndResponse() {
+  FakeTransport transport;
+  YandexHomeApi api([] { return QString("token"); }, &transport);
+  QObject context;
+  std::optional<ApiResult<VideoStream>> response;
+  api.GetVideoStream("camera", &context, [&](auto result) { response = std::move(result); });
+  QCOMPARE(transport.pending.size(), 1);
+  const auto& request = transport.pending[0];
+  QCOMPARE(request.method, QByteArray("POST"));
+  QCOMPARE(request.request.url().path(), QString("/v1.0/devices/actions"));
+  const auto payload = QJsonDocument::fromJson(request.body).object()["devices"].toArray();
+  QCOMPARE(payload.size(), 1);
+  QCOMPARE(payload[0].toObject()["id"].toString(), QString("camera"));
+  const auto action = payload[0].toObject()["actions"].toArray()[0].toObject();
+  QCOMPARE(action["type"].toString(), QString("devices.capabilities.video_stream"));
+  QCOMPARE(action["state"].toObject(),
+           (QJsonObject{{"instance", "get_stream"},
+                        {"value", QJsonObject{{"protocols", QJsonArray{"hls"}}}}}));
+
+  const QByteArray valid =
+      R"({"status":"ok","devices":[{"id":"camera","capabilities":[{"type":"devices.capabilities.video_stream","state":{"instance":"get_stream","value":{"stream_url":"https://example.invalid/live.m3u8","protocol":"hls"},"action_result":{"status":"DONE"}}}]}]})";
+  transport.Reply(0, Json(valid));
+  QVERIFY(response && response->has_value());
+  QCOMPARE(response->value().stream_url, QString("https://example.invalid/live.m3u8"));
+  QCOMPARE(response->value().protocol, QString("hls"));
+  const QList<QPair<QByteArray, QByteArray>> invalid = {
+      {"\"camera\"", "\"other\""},
+      {"get_stream", "other"},
+      {"https://example.invalid/live.m3u8", "file:///tmp/video"},
+      {"https://example.invalid/live.m3u8", ""},
+      {"\"hls\"", "\"rtsp\""},
+      {"\"stream_url\"", "\"missing\""},
+      {"\"DONE\"", "\"ERROR\""}};
+  for (const auto& [before, after] : invalid) {
+    api.GetVideoStream("camera", &context, [&](auto result) { response = std::move(result); });
+    auto body = valid;
+    body.replace(before, after);
+    transport.Reply(transport.pending.size() - 1, Json(body));
+    QVERIFY(response && !response->has_value());
+  }
+  api.GetVideoStream("camera", &context, [&](auto result) { response = std::move(result); });
+  transport.Reply(transport.pending.size() - 1, Json(R"({"status":"ok","devices":[]})"));
+  QVERIFY(response && !response->has_value());
+  QCOMPARE(response->error().kind, ApiErrorKind::InvalidResponse);
+  auto* owner = new QObject;
+  bool called = false;
+  api.GetVideoStream("camera", owner, [&](auto) { called = true; });
+  delete owner;
+  transport.Reply(transport.pending.size() - 1, Json(valid));
+  QVERIFY(!called);
 }
 
 void ApiBoundaryTests::TimeoutReportsOnce() {

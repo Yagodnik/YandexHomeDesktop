@@ -52,3 +52,8 @@ add_library(Models STATIC
 )
 
 target_link_libraries(Models PUBLIC ApiContracts AuthContracts PRIVATE Qt6::Core Qt6::Gui Utils AppServices AppRestControl AppShortcuts)
+
+if(BUILD_DESKTOP_APP)
+  target_sources(Models PRIVATE DeviceModel/CameraSnapshotModel.h DeviceModel/CameraSnapshotModel.cpp)
+  target_link_libraries(Models PRIVATE Qt6::Multimedia)
+endif()

@@ -61,6 +61,7 @@ target_link_libraries(HomeTests PRIVATE Qt6::Test Models)
 yh_add_test(NAME Home COMMAND HomeTests)
 
 add_executable(ApiFixtureTests ApiFixtureTests.cpp)
+target_sources(ApiFixtureTests PRIVATE ${DEBUG_FIXTURE_RESOURCES})
 target_link_libraries(ApiFixtureTests PRIVATE Qt6::Test FixtureApi AppStartup Utils)
 target_compile_definitions(ApiFixtureTests PRIVATE FIXTURE_PATH="${CMAKE_SOURCE_DIR}/resources/debug/api.json")
 yh_add_test(NAME ApiFixture COMMAND ApiFixtureTests)

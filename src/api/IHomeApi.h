@@ -17,4 +17,9 @@ public:
   virtual void ExecuteScenario(const QString& id, QObject* context, ApiResultHandler<void> handler) = 0;
   virtual void PerformActions(const QList<DeviceActionsObject>& actions, QObject* context,
                               ApiResultHandler<void> handler) = 0;
+  // Optional for adapters without camera support. Stream URLs may be short-lived
+  // credentials and must not be logged or persisted.
+  virtual void GetVideoStream(const QString&, QObject*, ApiResultHandler<VideoStream> handler) {
+    handler(std::unexpected(ApiError{ApiErrorKind::Service, "Video streams are unavailable"}));
+  }
 };

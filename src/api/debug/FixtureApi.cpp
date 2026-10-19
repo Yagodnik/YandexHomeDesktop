@@ -5,6 +5,7 @@
 #include <QJsonDocument>
 #include <QSet>
 #include <QTimer>
+#include <QUrl>
 
 namespace {
 ApiError Invalid(const QString& message) {
@@ -96,6 +97,10 @@ ApiResult<QJsonObject> FixtureApi::ReadFixture() const {
       }
     }
   }
+  if (snapshot_ != fixture) {
+    snapshot_ = fixture;
+    states_.clear();
+  }
   return fixture;
 }
 
@@ -118,6 +123,10 @@ ApiResult<UserInfo> FixtureApi::DecodeHome(const QJsonObject& fixture) {
 void FixtureApi::GetUserInfo(QObject* context, ApiResultHandler<UserInfo> handler) {
   const auto fixture = ReadFixture();
   auto result = fixture ? DecodeHome(*fixture) : ApiResult<UserInfo>(std::unexpected(fixture.error()));
+  if (result) {
+    for (auto& device : result->devices)
+      ApplyStates(device.id, device.capabilities);
+  }
   Deliver(context, std::move(handler), std::move(result), fixture);
 }
 
@@ -144,6 +153,7 @@ void FixtureApi::GetDeviceInfo(const QString& id, QObject* context, ApiResultHan
         result = std::unexpected(ApiError{ApiErrorKind::Service, object.value("message").toString()});
       } else {
         result = Serialization::From<DeviceInfo>(object);
+        ApplyStates(id, result->capabilities);
       }
     }
   }
@@ -167,10 +177,104 @@ void FixtureApi::ExecuteScenario(const QString& id, QObject* context, ApiResultH
   Deliver(context, std::move(handler), std::move(result), fixture);
 }
 
-void FixtureApi::PerformActions(const QList<DeviceActionsObject>&, QObject* context, ApiResultHandler<void> handler) {
+void FixtureApi::ApplyStates(const QString& id, QList<CapabilityObject>& capabilities) const {
+  const auto states = states_.value(id);
+  for (auto it = states.cbegin(); it != states.cend(); ++it) {
+    if (it.key() < capabilities.size())
+      capabilities[it.key()].state = it.value();
+  }
+}
+
+void FixtureApi::PerformActions(const QList<DeviceActionsObject>& actions, QObject* context,
+                                ApiResultHandler<void> handler) {
   const auto fixture = ReadFixture();
-  ApiResult<void> result = std::unexpected(fixture
-    ? ApiError{ApiErrorKind::Service, "Fixture API does not simulate device actions"} : fixture.error());
+  ApiResult<void> result = fixture ? ApiResult<void>{} : std::unexpected(fixture.error());
+  auto next = states_;
+  if (fixture) {
+    for (const auto& device : actions) {
+      const auto info = fixture->value("device_info").toObject().value(device.id).toObject();
+      if (info.value("status") != "ok" || info.value("state") != "online") {
+        result = std::unexpected(Invalid("Unknown or unavailable device: " + device.id));
+        break;
+      }
+      const auto error = fixture->value("action_errors").toObject().value(device.id).toString();
+      if (!error.isEmpty()) {
+        result = std::unexpected(ApiError{ApiErrorKind::Service, error});
+        break;
+      }
+      auto capabilities = Serialization::From<DeviceInfo>(info).capabilities;
+      ApplyStates(device.id, capabilities);
+      for (const auto& action : device.actions) {
+        int match = -1;
+        for (qsizetype i = 0; i < capabilities.size(); ++i) {
+          const auto& capability = capabilities[i];
+          const auto instance =
+              capability.parameters.value("instance", capability.state.value("instance"));
+          if (capability.type == action.type && (capability.type == CapabilityType::ColorSetting ||
+                                                 instance == action.state.value("instance"))) {
+            match = i;
+            break;
+          }
+        }
+        if (match < 0 || action.type == CapabilityType::VideoStream) {
+          result = std::unexpected(Invalid("Unknown fixture capability"));
+          break;
+        }
+        auto state = action.state;
+        if (action.type == CapabilityType::Range && state.take("relative").toBool()) {
+          const auto range = capabilities[match].parameters.value("range").toMap();
+          double value =
+              capabilities[match].state.value("value").toDouble() + state.value("value").toDouble();
+          if (range.contains("min"))
+            value = qMax(value, range.value("min").toDouble());
+          if (range.contains("max"))
+            value = qMin(value, range.value("max").toDouble());
+          state["value"] = value;
+        }
+        capabilities[match].state = state;
+        next[device.id][match] = state;
+      }
+      if (!result)
+        break;
+    }
+    if (result)
+      states_ = std::move(next);
+  }
+  Deliver(context, std::move(handler), std::move(result), fixture);
+}
+
+void FixtureApi::GetVideoStream(const QString& device_id, QObject* context,
+                                ApiResultHandler<VideoStream> handler) {
+  const auto fixture = ReadFixture();
+  ApiResult<VideoStream> result =
+      std::unexpected(fixture ? Invalid("No fixture video stream") : fixture.error());
+  if (fixture) {
+    const auto value = fixture->value("video_streams").toObject().value(device_id).toObject();
+    const auto info = fixture->value("device_info").toObject().value(device_id).toObject();
+    if (info.value("status") == "ok" && info.value("state") == "online" &&
+        value.value("stream_url").isString() && !value.value("stream_url").toString().isEmpty() &&
+        value.value("protocol") == "hls") {
+      result = VideoStream{.stream_url = value.value("stream_url").toString(), .protocol = "hls"};
+      // HLS demuxers resolve segment URLs themselves, outside Qt's resource I/O.
+      // Copy the bundled playlist and segment together for entirely local playback.
+      if (result->stream_url == "qrc:/debug/camera.m3u8") {
+        if (!video_directory_) {
+          video_directory_ = std::make_unique<QTemporaryDir>();
+          for (const auto* name : {"camera.m3u8", "camera.ts"}) {
+            if (!QFile::copy(QString(":/debug/") + name, video_directory_->filePath(name))) {
+              video_directory_.reset();
+              break;
+            }
+          }
+        }
+        if (video_directory_)
+          result->stream_url =
+              QUrl::fromLocalFile(video_directory_->filePath("camera.m3u8")).toString();
+        else
+          result = std::unexpected(Invalid("Cannot prepare fixture video"));
+      }
+    }
+  }
   Deliver(context, std::move(handler), std::move(result), fixture);
 }
 

@@ -19,6 +19,8 @@ class QmlTestDeviceApi final : public QObject, public IHomeApi {
   Q_PROPERTY(int actionCount MEMBER action_count_ NOTIFY actionSent)
   Q_PROPERTY(QString actionDeviceId MEMBER action_device_id_ NOTIFY actionSent)
   Q_PROPERTY(QVariantMap actionState MEMBER action_state_ NOTIFY actionSent)
+  Q_PROPERTY(int streamRequestCount MEMBER stream_request_count_ NOTIFY streamRequested)
+  Q_PROPERTY(QString streamDeviceId MEMBER stream_device_id_ NOTIFY streamRequested)
 public:
   using QObject::QObject;
   void GetDeviceInfo(const QString& id, QObject* context, ApiResultHandler<DeviceInfo> handler) override {
@@ -41,12 +43,31 @@ public:
   void GetUserInfo(QObject*, ApiResultHandler<UserInfo>) override { qFatal("Unexpected user request"); }
   void GetScenarios(QObject*, ApiResultHandler<QList<ScenarioObject>>) override { qFatal("Unexpected scenarios request"); }
   void ExecuteScenario(const QString&, QObject*, ApiResultHandler<void>) override { qFatal("Unexpected scenario action"); }
+  void GetVideoStream(const QString& id, QObject* context,
+                      ApiResultHandler<VideoStream> handler) override {
+    stream_device_id_ = id;
+    stream_context_ = context;
+    stream_handler_ = std::move(handler);
+    ++stream_request_count_;
+    emit streamRequested();
+  }
+  Q_INVOKABLE void ReplyVideoStream(const QString& url, bool success) {
+    if (!stream_context_ || !stream_handler_)
+      qFatal("No pending video stream request");
+    auto handler = std::move(stream_handler_);
+    if (success)
+      handler(VideoStream{.stream_url = url, .protocol = "hls"});
+    else
+      handler(std::unexpected(ApiError{ApiErrorKind::Timeout, "TIMEOUT"}));
+  }
 
   Q_INVOKABLE void SetCapability(const QString& kind, const QVariantMap& state, const QVariantMap& parameters) {
     CapabilityObject capability{};
     if (kind == "range") capability.type = CapabilityType::Range;
     else if (kind == "color") capability.type = CapabilityType::ColorSetting;
     else if (kind == "mode") capability.type = CapabilityType::Mode;
+    else if (kind == "video")
+      capability.type = CapabilityType::VideoStream;
     else qFatal("Unexpected test capability kind");
     capability.retrievable = true;
     capability.state = state;
@@ -85,6 +106,10 @@ public:
     handler(info);
   }
   Q_INVOKABLE void reset() {
+    stream_request_count_ = 0;
+    stream_device_id_.clear();
+    stream_handler_ = {};
+    stream_context_.clear();
     handler_ = {};
     context_.clear();
     request_count_ = 0;
@@ -98,13 +123,20 @@ public:
     emit requested();
     emit actionSent();
     emit fixtureReset();
+    emit streamRequested();
   }
 signals:
   void fixtureReset();
   void testAccountSelected(const QString& accountId);
   void requested();
   void actionSent();
+  void streamRequested();
+
 private:
+  int stream_request_count_ = 0;
+  QString stream_device_id_;
+  QPointer<QObject> stream_context_;
+  ApiResultHandler<VideoStream> stream_handler_;
   int request_count_ = 0;
   QString device_id_;
   QString device_name_ = "Test device";

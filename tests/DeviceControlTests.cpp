@@ -38,6 +38,19 @@ public:
   DeviceInfo remote{};
   QList<DeviceRequest> device_requests;
   QList<ActionRequest> action_requests;
+  QList<PendingReply<VideoStream>> stream_requests;
+  QString stream_device_id;
+  bool inline_stream = false;
+
+  void GetVideoStream(const QString& id, QObject* context,
+                      ApiResultHandler<VideoStream> handler) override {
+    stream_device_id = id;
+    if (inline_stream) {
+      handler(VideoStream{.stream_url = "https://example.invalid/live.m3u8", .protocol = "hls"});
+      return;
+    }
+    stream_requests.append({context, std::move(handler)});
+  }
 
   void GetDeviceInfo(const QString& id, QObject* context,
                      ApiResultHandler<DeviceInfo> handler) override {
@@ -256,6 +269,50 @@ void CapabilityCases(bool mobile_only = false) {
 class DeviceControlTests final : public QObject {
   Q_OBJECT
 private slots:
+  void VideoStreamLifecycle() {
+    DeviceFixture fixture;
+    QVERIFY(fixture.Load());
+    QSignalSpy errors(&fixture.controller, &DeviceViewModel::errorOccurred);
+    const VideoStream stream{.stream_url = "https://example.invalid/live.m3u8", .protocol = "hls"};
+    fixture.controller.RequestVideoStream();
+    fixture.controller.RequestVideoStream();
+    QVERIFY(fixture.controller.IsVideoStreamLoading());
+    QCOMPARE(fixture.api.stream_requests.size(), 1);
+    QCOMPARE(fixture.api.stream_device_id, fixture.api.remote.id);
+    QVERIFY(fixture.api.stream_requests[0].Reply(stream));
+    QVERIFY(!fixture.controller.IsVideoStreamLoading());
+    QCOMPARE(fixture.controller.GetVideoStreamUrl(), QUrl(stream.stream_url));
+    fixture.controller.StopVideoStream();
+    QVERIFY(fixture.controller.GetVideoStreamUrl().isEmpty());
+    fixture.controller.RequestVideoStream();
+    QVERIFY(fixture.api.stream_requests[1].Reply(
+        std::unexpected(ApiError{ApiErrorKind::Timeout, "TIMEOUT"})));
+    QVERIFY(fixture.controller.HasVideoStreamFailed());
+    QCOMPARE(errors.size(), 0); // Inline camera retry, no device error dialog.
+    fixture.controller.RequestVideoStream();
+    QVERIFY(!fixture.controller.HasVideoStreamFailed());
+    fixture.controller.StopVideoStream();
+    QVERIFY(fixture.api.stream_requests[2].Reply(stream));
+    QVERIFY(fixture.controller.GetVideoStreamUrl().isEmpty());
+    fixture.controller.RequestVideoStream();
+    fixture.controller.LoadDevice("another-camera");
+    QVERIFY(fixture.api.stream_requests[3].Reply(stream));
+    QVERIFY(fixture.controller.GetVideoStreamUrl().isEmpty());
+    fixture.controller.RequestVideoStream();
+    fixture.controller.ResetSession();
+    QVERIFY(fixture.api.stream_requests[4].Reply(stream));
+    QVERIFY(fixture.controller.GetVideoStreamUrl().isEmpty());
+    fixture.controller.RequestVideoStream();
+    QCOMPARE(fixture.api.stream_requests.size(), 5);
+    fixture.controller.LoadDevice("camera");
+    fixture.api.inline_stream = true;
+    fixture.controller.RequestVideoStream();
+    QVERIFY(!fixture.controller.IsVideoStreamLoading());
+    QCOMPARE(fixture.controller.GetVideoStreamUrl(), QUrl(stream.stream_url));
+    fixture.controller.ForgetDevice();
+    QVERIFY(fixture.controller.GetVideoStreamUrl().isEmpty());
+  }
+
   void ViewModelReadinessSurvivesRefreshFailureAndResetsForRetry() {
     DeviceFixture fixture;
     QCOMPARE(fixture.controller.GetState(), DeviceViewModel::Loading);

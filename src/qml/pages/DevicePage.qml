@@ -5,6 +5,15 @@ import YandexHomeDesktop.Components as Components
 
 UI.PageSurface {
   id: root
+  readonly property bool modalDialogOpen: snapshotDialog.dialogOpen
+
+  Components.CameraSnapshotDialog {
+    id: snapshotDialog
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.bottom: parent.bottom
+    height: implicitHeight
+  }
 
   UI.ErrorDialog {
     id: actionErrorDialog
@@ -16,6 +25,8 @@ UI.PageSurface {
 
   Connections {
     target: deviceViewModel
+
+    function onDeviceIdChanged() { snapshotDialog.clear(); }
 
     function onErrorOccurred(errorCode) {
       const error = errorCodes.GetDeviceError(errorCode);
@@ -47,7 +58,7 @@ UI.PageSurface {
     objectName: "deviceStates"
     width: parent.width
     anchors.top: topHeader.bottom
-    anchors.bottom: parent.bottom
+    anchors.bottom: snapshotDialog.top
 
     currentIndex: deviceViewModel.state
 
@@ -71,6 +82,12 @@ UI.PageSurface {
       keybindSettings: keybindSettingsModel
       deviceId: deviceViewModel.deviceId
       deviceName: deviceViewModel.deviceData.name
+      streamSource: deviceViewModel.videoStreamUrl
+      streamLoading: deviceViewModel.videoStreamLoading
+      streamFailed: deviceViewModel.videoStreamFailed
+      onStreamRequested: deviceViewModel.RequestVideoStream()
+      onStreamStopRequested: deviceViewModel.StopVideoStream()
+      onSnapshotRequested: function(videoSink) { snapshotDialog.capture(videoSink); }
       capabilitiesSourceModel: deviceViewModel.capabilities
       propertiesSourceModel: deviceViewModel.properties
       capabilitiesTitle: qsTr("Умения")

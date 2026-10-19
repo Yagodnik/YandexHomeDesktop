@@ -71,6 +71,10 @@ jobs:
       - name: Check committed translations
         run: just translations-check
 
+      - name: Install pinned NSIS
+        if: matrix.configuration == 'Release' && matrix.pch == 'ON'
+        run: choco install nsis --version=3.12.0 --no-progress -y
+
       - name: Configure
         shell: pwsh
         run: >-
@@ -80,13 +84,31 @@ jobs:
           -DCMAKE_CXX_COMPILER=g++.exe
 
       - name: Build GUI, CLI, REST, shortcuts, shared libraries, and tests
+        if: matrix.configuration != 'Release' || matrix.pch != 'ON'
         run: just build_dir=build config=${{ matrix.configuration }} build
+
+      - name: Build, test, and package Windows installer
+        if: matrix.configuration == 'Release' && matrix.pch == 'ON'
+        run: just package_build_dir=build package-windows -DCMAKE_CXX_COMPILER=g++.exe
+
+      - name: Smoke-check the silent installer
+        if: matrix.configuration == 'Release' && matrix.pch == 'ON'
+        shell: pwsh
+        run: |
+          $installers = @(Get-ChildItem build/dist -Filter '*.exe' -File)
+          if ($installers.Count -ne 1) { throw 'Expected one Windows installer' }
+          $installed = Join-Path $env:RUNNER_TEMP 'package installed'
+          $installer = Start-Process -FilePath $installers[0].FullName -ArgumentList '/S', "/D=$installed" -Wait -PassThru
+          if ($installer.ExitCode -ne 0) { throw 'Silent installer failed' }
+          cmake "-DPACKAGE_ROOT=$installed" -P build/CheckPackage.cmake
+          if ($LASTEXITCODE -ne 0) { throw 'Installed package verification failed' }
 
       - name: Analyze application startup code
         if: matrix.pch == 'OFF' && matrix.configuration == 'Debug'
         run: just build_dir=build config=Debug tidy
 
       - name: Run C++, QML, CLI, REST OpenAPI/JSON profiles, process, and Python example tests
+        if: matrix.configuration != 'Release' || matrix.pch != 'ON'
         run: just build_dir=build config=${{ matrix.configuration }} test
 
       - name: Exercise test catalog and concrete C++, QML, and process selection

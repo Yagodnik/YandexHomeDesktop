@@ -10,6 +10,12 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+      - uses: extractions/setup-just@v4
+        with:
+          just-version: '1.51.0'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
@@ -21,18 +27,10 @@ jobs:
           cache: true
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y libsecret-1-dev
-      - name: Configure
-        run: >-
-          cmake -S . -B build -G Ninja -DCMAKE_CXX_COMPILER=g++-13
-          -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR" -DCMAKE_BUILD_TYPE=Release
-          -DBUILD_DESKTOP_APP=OFF -DBUILD_TESTING=ON
-      - name: Build and test
-        run: |
-          cmake --build build --parallel 4
-          ctest --test-dir build --output-on-failure
-      - name: Stage shared libraries, headers, and console applications
-        run: cmake --install build --prefix stage
+      - name: Build, test, and package Linux archive
+        run: just package_build_dir=build package-linux -DCMAKE_CXX_COMPILER=g++-13
       - uses: actions/upload-artifact@v4
         with:
           name: yandex-home-linux
-          path: stage/
+          path: build/dist/*.tar.gz
+          if-no-files-found: error

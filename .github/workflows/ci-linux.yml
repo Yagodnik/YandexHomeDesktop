@@ -20,6 +20,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: extractions/setup-just@v4
+        with:
+          just-version: '1.51.0'
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
@@ -60,5 +64,5 @@ jobs:
       - name: Analyze application startup code
         run: python scripts/clang-tools.py tidy --build-dir build
 
-      - name: Run tests
-        run: ctest --test-dir build --output-on-failure
+      - name: Test and package Linux CLI and REST archive
+        run: just package_build_dir=build pch=OFF package-linux -DCMAKE_CXX_COMPILER=g++-13

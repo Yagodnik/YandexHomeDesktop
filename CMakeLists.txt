@@ -12,6 +12,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(YH_ENABLE_PCH "Use precompiled headers for C++ targets" ON)
+option(YH_ENABLE_PACKAGING "Configure the native release installer or archive" OFF)
 
 include(CTest)
 include(FetchContent)
@@ -308,14 +309,16 @@ if(BUILD_DESKTOP_APP)
 
   include(GNUInstallDirs)
   install(TARGETS appYandexHomeDesktop
-    BUNDLE DESTINATION .
+    BUNDLE DESTINATION . COMPONENT DesktopBundle
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
   )
   if(APPLE)
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE"
+      DESTINATION "YandexHomeDesktop.app/Contents/Resources/licenses" COMPONENT DesktopBundle)
     get_property(_bundle_libraries GLOBAL PROPERTY YH_SDK_TARGETS)
     install(TARGETS ${_bundle_libraries}
-      LIBRARY DESTINATION "YandexHomeDesktop.app/Contents/Frameworks")
+      LIBRARY DESTINATION "YandexHomeDesktop.app/Contents/Frameworks" COMPONENT DesktopBundle)
     set_target_properties(appYandexHomeDesktop PROPERTIES
       INSTALL_RPATH "@executable_path/../Frameworks")
     set(_deploy_executables)
@@ -323,7 +326,8 @@ if(BUILD_DESKTOP_APP)
       if(TARGET ${_console})
         set_target_properties(${_console} PROPERTIES
           INSTALL_RPATH "@executable_path/../Frameworks;@executable_path/../${CMAKE_INSTALL_LIBDIR}")
-        install(TARGETS ${_console} RUNTIME DESTINATION "YandexHomeDesktop.app/Contents/MacOS")
+        install(TARGETS ${_console} RUNTIME DESTINATION "YandexHomeDesktop.app/Contents/MacOS"
+          COMPONENT DesktopBundle)
         # Qt runs macdeployqt from the install prefix, also with --prefix.
         list(APPEND _deploy_executables "-executable=YandexHomeDesktop.app/Contents/MacOS/${_console}")
       endif()
@@ -341,7 +345,11 @@ if(BUILD_DESKTOP_APP)
       OUTPUT_SCRIPT deploy_script
     )
   endif()
-  install(SCRIPT ${deploy_script})
+  if(APPLE)
+    install(SCRIPT ${deploy_script} COMPONENT DesktopBundle)
+  else()
+    install(SCRIPT ${deploy_script})
+  endif()
   # The deploy tool can print errors while returning success. Verify that all
   # packaged entry points can actually load their dependencies.
   set(YH_INSTALLED_CONSOLE_DIR "${CMAKE_INSTALL_BINDIR}")
@@ -358,21 +366,7 @@ if(BUILD_DESKTOP_APP)
     "${CMAKE_CURRENT_BINARY_DIR}/CheckConsoleInstall.cmake" @ONLY)
   # Windows console deployment runs below, after the GUI deployment.
   if(APPLE)
-    install(SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/CheckConsoleInstall.cmake")
-  endif()
-
-  if(WIN32)
-    set(CPACK_GENERATOR NSIS)
-    set(CPACK_PACKAGE_NAME YandexHomeDesktop)
-    set(CPACK_PACKAGE_VENDOR Yagodnik)
-    set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
-    set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Yandex smart home desktop application")
-    set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
-    set(CPACK_PACKAGE_EXECUTABLES "YandexHomeDesktop" "Yandex Home Desktop")
-    set(CPACK_PACKAGE_FILE_NAME "YandexHomeDesktop-${PROJECT_VERSION}-windows-x64")
-    set(CPACK_PACKAGE_INSTALL_DIRECTORY YandexHomeDesktop)
-    set(CPACK_NSIS_DISPLAY_NAME "Yandex Home Desktop")
-    include(CPack)
+    install(SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/CheckConsoleInstall.cmake" COMPONENT DesktopBundle)
   endif()
 endif()
 
@@ -420,6 +414,10 @@ if(_translation_targets)
     RESOURCE_PREFIX "/i18n")
 endif()
 yh_install_sdk()
+
+if(YH_ENABLE_PACKAGING)
+  include(cmake/Packaging.cmake)
+endif()
 
 if(YH_ENABLE_PCH)
   foreach(_pch_target YandexApiAdapter Models Utils Iot appYandexHomeDesktop

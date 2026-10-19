@@ -12,4 +12,10 @@
 12) Fix positioning issues
 13) ~Adding REST api~
 14) Adding MCP server
-15) Installer
+~15) Installer~
+16) Fix bug, save/load doesn't work
+~17) Keybings~
+18) Make current color/mode highlighted
+19) Inconsistent settings UI design (different paddings & margins)
+20) Turn shortcuts by default on
+21) When I launch rest server it starts GUI app which is weird...

@@ -28,6 +28,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: extractions/setup-just@v4
+        with:
+          just-version: '1.51.0'
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
@@ -42,18 +46,7 @@ jobs:
           modules: qt5compat qtnetworkauth qtsvg qttools qthttpserver qtwebsockets
           cache: true
 
-      - name: Configure
+      - name: Build, test, and package macOS installer
         run: >-
-          cmake -S . -B build -G Ninja
-          -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR"
-          -DCMAKE_BUILD_TYPE=Release
+          just package_build_dir=build jobs=2 package-macos
           -DCMAKE_OSX_ARCHITECTURES=${{ matrix.architecture }}
-          -DBUILD_DESKTOP_APP=ON
-          -DBUILD_TESTING=ON
-          -DYH_AUTH_CONFIG_FILE=resources/auth/example.json
-
-      - name: Build application and tests
-        run: cmake --build build --parallel 2
-
-      - name: Run C++ and QML tests
-        run: ctest --test-dir build --output-on-failure

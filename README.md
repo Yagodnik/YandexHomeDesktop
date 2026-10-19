@@ -42,7 +42,18 @@ just test
 
 Для работающего входа создайте свою конфигурацию OAuth и передайте `-DYH_AUTH_CONFIG_FILE=/path/to/oauth.json` (или `-DAUTH_CONFIG_FILE=...`). Файл встраивается в приложение. Инструкции и вариант для Linux-тестов приведены в [docs/build.md](docs/build.md).
 
-CI собирает и тестирует приложение на macOS и Windows, а на Linux запускает переносимые тесты. Сборки CI используют тестовую OAuth-конфигурацию. Для релизов используется тег `vMAJOR.MINOR.PATCH`; шаги описаны в [release workflow](.github/workflows/release.yml).
+Для сборки установщика запустите `just package` на целевой ОС: Windows создаёт
+NSIS `.exe`, macOS — `.dmg`, Linux — архив `.tar.gz` с CLI/REST и SDK.
+Также доступны `just package-windows`, `just package-macos` и `just package-linux`.
+Результат находится в `build-package/<os>/dist/`. Команды используют Release,
+запускают тесты и проверяют пакет. Для Windows нужен NSIS 3.12; Linux-архиву
+нужен установленный совместимый Qt runtime. Параметры и зависимости описаны в
+[docs/build.md](docs/build.md#release-packages).
+
+CI собирает, тестирует и упаковывает приложение на macOS и Windows, а на Linux —
+консольные приложения. Сборки CI используют тестовую OAuth-конфигурацию.
+Для релизов используется тег `vMAJOR.MINOR.PATCH`; все три пакета публикуются
+через [release workflow](.github/workflows/release.yml).
 
 # CLI
 

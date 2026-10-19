@@ -200,6 +200,71 @@ authoring tool (separate from the build):
 uvx --from openapi-spec-validator==0.7.2 openapi-spec-validator resources/rest/openapi.json
 ```
 
+## Release packages
+
+The packaging commands configure a separate Release profile, check translations,
+build all applications and tests, run CTest, create a native package with CPack,
+and verify its deployed executables. Run each command on its target OS:
+
+```sh
+just package                                  # Select the current OS
+just package-windows                          # Windows NSIS .exe installer
+just package-macos                            # macOS drag-to-Applications .dmg
+just package-linux                            # Linux CLI/REST .tar.gz archive
+just package-macos '-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64'
+just qt_prefix=/path/to/Qt/kit package
+just package_build_dir='build-package/custom profile' package
+```
+
+`package_build_dir` defaults to `build-package/<os>`; its `dist/` directory
+contains `YandexHomeDesktop-<version>-<platform>-<architecture>` with the native
+extension. Version comes from the CMake project. macOS uses the configured
+architecture, or `universal` for `arm64;x86_64`. Packaging always selects Release,
+CLI, and REST, plus the desktop and shortcut worker on Windows/macOS. Extra
+arguments go to CMake configuration; `qt_prefix`, `auth_config`, `pch`, `jobs`,
+and `generator` work as with other recipes. An explicit `package_build_dir` can
+reuse a Release build; the normal Debug profile is untouched.
+
+Windows packaging requires [NSIS 3.12](https://nsis.sourceforge.io/Docs/AppendixF.html)
+in addition to the normal matching Qt/compiler kit. CI installs the pinned
+Chocolatey package with `choco install nsis --version=3.12.0 --no-progress -y`.
+macOS uses CPack's DragNDrop generator and Apple's `hdiutil`; Linux uses CPack's
+TGZ generator. No `create-dmg` or extra archive dependency is needed. CPack and
+the verification scripts write only inside the package build directory.
+
+By default, desktop packages embed `resources/auth/example.json` and cannot
+sign in. Supply `YH_AUTH_CONFIG_FILE` or `auth_config` for a private runnable
+build, following the OAuth guidance above. Tag releases use the existing
+validated `RELEASE_OAUTH_CONFIG_JSON` public-client configuration. No credentials
+are needed for package verification.
+
+The DMG contains the deployed app bundle, CLI, REST, shortcut worker, and their
+runtime dependencies, with an Applications link. It is ad-hoc signed by the
+existing Qt deployment step; Developer ID signing and notarization are not
+configured. Windows includes the installed applications, SDK, and deployed Qt
+and compiler runtime. Linux includes CLI/REST, project shared libraries, and
+SDK, with a [runtime requirements README](linux-package.md). It requires a
+matching shared Qt runtime and compatible system libraries; it is not a
+self-contained Linux desktop application. Debian packaging is deferred.
+
+Verification mounts the finished DMG or extracts the finished tar archive and
+runs console help without credentials. macOS also checks every application and
+QtCore for the requested architectures. Windows checks CPack's deployed payload;
+Windows CI additionally silently installs the generated installer into a
+temporary directory and verifies the installed executables and runtimes.
+The Windows Release/PCH-ON job, both macOS architecture jobs, and Linux CI
+exercise these same `just` commands with example OAuth data. The manual Linux
+build workflow uploads the `.tar.gz`. Tag releases build and verify all three
+formats before publishing them together.
+
+For direct CMake usage, configure with `-DYH_ENABLE_PACKAGING=ON` and the same
+application options, then build/test and run:
+
+```sh
+cpack --config <build-dir>/CPackConfig.cmake -C Release
+cmake -P <build-dir>/CheckPackage.cmake
+```
+
 ## C++ formatting and analysis
 
 `.clang-format` uses LLVM style with two-space indentation, 100-column wrapping,

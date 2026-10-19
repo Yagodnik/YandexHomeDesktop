@@ -35,4 +35,9 @@ function(yh_add_qhotkey)
   endif()
   install(FILES "${qhotkey_SOURCE_DIR}/LICENSE"
     DESTINATION "${CMAKE_INSTALL_DATADIR}/YandexHome/licenses/QHotkey")
+  if(APPLE AND BUILD_DESKTOP_APP)
+    install(FILES "${qhotkey_SOURCE_DIR}/LICENSE"
+      DESTINATION "YandexHomeDesktop.app/Contents/Resources/licenses/QHotkey"
+      COMPONENT DesktopBundle)
+  endif()
 endfunction()

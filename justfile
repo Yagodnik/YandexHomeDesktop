@@ -15,6 +15,7 @@ auth_config := env('YH_JUST_AUTH_CONFIG', env('YH_AUTH_CONFIG_FILE', 'resources/
 pch := env('YH_JUST_PCH', 'ON')
 jobs := env('YH_JUST_JOBS', '4')
 generator := env('YH_JUST_GENERATOR', 'Ninja')
+package_build_dir := env('YH_JUST_PACKAGE_BUILD_DIR', 'build-package' / os())
 
 # Propagate overrides when a recipe invokes another recipe through just.
 export YH_JUST_CONFIG := config
@@ -27,6 +28,7 @@ export YH_JUST_AUTH_CONFIG := auth_config
 export YH_JUST_PCH := pch
 export YH_JUST_JOBS := jobs
 export YH_JUST_GENERATOR := generator
+export YH_JUST_PACKAGE_BUILD_DIR := package_build_dir
 
 # List available commands (also the default for just).
 help:
@@ -123,6 +125,38 @@ build-rest: _configure-if-needed
 # Build and install under the build directory; accepts --prefix and other flags.
 install *args: build
     cmake --install "$YH_JUST_BUILD_DIR" --config "$YH_JUST_CONFIG" --prefix "$(cd "$YH_JUST_BUILD_DIR" && pwd)/stage" "$@"
+
+# Build, test, and package a Release distribution for the current operating system.
+package *args:
+    just 'package-{{ os() }}' "$@"
+
+# Build a Windows NSIS .exe installer (requires NSIS on Windows).
+[windows]
+package-windows *args:
+    just _package ON ON "$@"
+
+# Build a macOS .dmg; pass -DCMAKE_OSX_ARCHITECTURES=arm64;x86_64 for universal.
+[macos]
+package-macos *args:
+    just _package ON ON "$@"
+
+# Build a Linux CLI/REST .tar.gz archive (requires a matching Qt runtime to run).
+[linux]
+package-linux *args:
+    just _package OFF OFF "$@"
+
+[script]
+_package desktop_profile shortcuts *args:
+    desktop_profile=$1
+    shortcuts=$2
+    shift 2
+    profile=("build_dir=$YH_JUST_PACKAGE_BUILD_DIR" config=Release
+        "desktop=$desktop_profile" cli_app=ON rest_app=ON)
+    just "${profile[@]}" configure -DYH_ENABLE_PACKAGING=ON "-DBUILD_SHORTCUTS_APP=$shortcuts" "$@"
+    just translations-check
+    just "${profile[@]}" test --no-tests=error
+    cpack --config "$YH_JUST_PACKAGE_BUILD_DIR/CPackConfig.cmake" -C Release
+    cmake -P "$YH_JUST_PACKAGE_BUILD_DIR/CheckPackage.cmake"
 
 # Remove compiled outputs with CMake's clean target, retaining configuration.
 clean:

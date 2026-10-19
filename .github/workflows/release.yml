@@ -29,6 +29,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: extractions/setup-just@v4
+        with:
+          just-version: '1.51.0'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Select Git Bash for recipes
+        shell: pwsh
+        run: |
+          (Join-Path $env:ProgramFiles 'Git\bin') >> $env:GITHUB_PATH
+
       - name: Install Qt and matching MinGW
         uses: jurplel/install-qt-action@v4
         with:
@@ -40,8 +53,8 @@ jobs:
           tools: tools_mingw1310,qt.tools.win64_mingw1310
           cache: true
 
-      - name: Install NSIS
-        run: choco install nsis --no-progress -y
+      - name: Install pinned NSIS
+        run: choco install nsis --version=3.12.0 --no-progress -y
 
       - name: Create release OAuth config
         shell: pwsh
@@ -49,59 +62,27 @@ jobs:
           RELEASE_OAUTH_CONFIG_JSON: ${{ secrets.RELEASE_OAUTH_CONFIG_JSON }}
         run: python scripts/write-oauth-config.py --from-env --output "$env:RUNNER_TEMP\oauth.json"
 
-      - name: Configure
+      - name: Build, test, and package Windows installer
         shell: pwsh
-        run: >-
-          cmake -S . -B build -G Ninja
-          -DCMAKE_CXX_COMPILER=g++.exe
-          -DCMAKE_PREFIX_PATH="$env:QT_ROOT_DIR"
-          -DCMAKE_BUILD_TYPE=Release
-          -DBUILD_DESKTOP_APP=ON
-          -DBUILD_TESTING=ON
-          -DAUTH_CONFIG_FILE="$env:RUNNER_TEMP\oauth.json"
+        env:
+          YH_AUTH_CONFIG_FILE: ${{ runner.temp }}/oauth.json
+        run: just package_build_dir=build package-windows -DCMAKE_CXX_COMPILER=g++.exe
 
-      - name: Build and test
+      - name: Smoke-check the silent installer
         shell: pwsh
         run: |
-          cmake --build build --parallel 4
-          if ($LASTEXITCODE -ne 0) { throw 'Windows build failed' }
-          ctest --test-dir build -C Release --output-on-failure
-          if ($LASTEXITCODE -ne 0) { throw 'Windows tests failed' }
-
-      - name: Stage and smoke-check installed files
-        shell: pwsh
-        run: |
-          $stage = Join-Path $env:RUNNER_TEMP 'stage'
-          cmake --install build --prefix "$stage"
-          if ($LASTEXITCODE -ne 0) { throw 'Windows deployment failed' }
-          foreach ($file in @('YandexHomeDesktop.exe', 'YandexHomeCli.exe', 'YandexHomeRest.exe', 'Qt6Core.dll', 'qwindows.dll', 'libstdc++-6.dll', 'libgcc_s_seh-1.dll', 'libwinpthread-1.dll')) {
-            if (-not (Get-ChildItem $stage -Recurse -File -Filter $file)) {
-              throw "Missing deployed file: $file"
-            }
-          }
-
-      - name: Create installer
-        shell: pwsh
-        run: |
-          cpack --config build/CPackConfig.cmake -G NSIS -B dist
-          if ($LASTEXITCODE -ne 0) { throw 'NSIS packaging failed' }
-          $installers = @(Get-ChildItem dist -Filter '*.exe' -File)
-          if ($installers.Count -ne 1 -or $installers[0].Length -eq 0) {
-            throw 'Expected one nonempty Windows installer'
-          }
-          $installed = Join-Path $env:RUNNER_TEMP 'installed'
+          $installers = @(Get-ChildItem build/dist -Filter '*.exe' -File)
+          if ($installers.Count -ne 1) { throw 'Expected one Windows installer' }
+          $installed = Join-Path $env:RUNNER_TEMP 'package installed'
           $installer = Start-Process -FilePath $installers[0].FullName -ArgumentList '/S', "/D=$installed" -Wait -PassThru
-          if ($installer.ExitCode -ne 0) { throw 'Silent installer smoke test failed' }
-          foreach ($file in @('YandexHomeDesktop.exe', 'YandexHomeCli.exe', 'YandexHomeRest.exe', 'Qt6Core.dll', 'qwindows.dll', 'libstdc++-6.dll', 'libgcc_s_seh-1.dll', 'libwinpthread-1.dll')) {
-            if (-not (Get-ChildItem $installed -Recurse -File -Filter $file)) {
-              throw "Missing packaged file: $file"
-            }
-          }
+          if ($installer.ExitCode -ne 0) { throw 'Silent installer failed' }
+          cmake "-DPACKAGE_ROOT=$installed" -P build/CheckPackage.cmake
+          if ($LASTEXITCODE -ne 0) { throw 'Installed package verification failed' }
 
       - uses: actions/upload-artifact@v4
         with:
           name: release-windows
-          path: dist/*.exe
+          path: build/dist/*.exe
           if-no-files-found: error
           retention-days: 1
 
@@ -112,6 +93,14 @@ jobs:
       DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
     steps:
       - uses: actions/checkout@v4
+
+      - uses: extractions/setup-just@v4
+        with:
+          just-version: '1.51.0'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
@@ -128,67 +117,61 @@ jobs:
           RELEASE_OAUTH_CONFIG_JSON: ${{ secrets.RELEASE_OAUTH_CONFIG_JSON }}
         run: python3 scripts/write-oauth-config.py --from-env --output "$RUNNER_TEMP/oauth.json"
 
-      - name: Configure universal build
+      - name: Build, test, and package universal macOS installer
+        env:
+          YH_AUTH_CONFIG_FILE: ${{ runner.temp }}/oauth.json
         run: >-
-          cmake -S . -B build -G Ninja
-          -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR"
-          -DCMAKE_BUILD_TYPE=Release
-          -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
-          -DBUILD_DESKTOP_APP=ON
-          -DBUILD_TESTING=ON
-          -DAUTH_CONFIG_FILE="$RUNNER_TEMP/oauth.json"
-
-      - name: Build and test
-        run: |
-          cmake --build build --parallel 2
-          ctest --test-dir build --output-on-failure
-
-      - name: Stage and verify universal app
-        run: |
-          cmake --install build --prefix "$RUNNER_TEMP/stage"
-          app="$RUNNER_TEMP/stage/YandexHomeDesktop.app"
-          test -f "$app/Contents/MacOS/YandexHomeDesktop"
-          test -d "$app/Contents/PlugIns"
-          "$app/Contents/MacOS/YandexHomeCli" --help --json
-          "$app/Contents/MacOS/YandexHomeRest" --help --json
-          for arch in arm64 x86_64; do
-            for binary in YandexHomeDesktop YandexHomeCli YandexHomeRest; do
-              lipo -verify_arch "$arch" "$app/Contents/MacOS/$binary"
-            done
-            lipo -verify_arch "$arch" "$app/Contents/Frameworks/QtCore.framework/QtCore"
-          done
-
-      - name: Create and smoke-check DMG
-        run: |
-          mkdir -p dist "$RUNNER_TEMP/dmg-mount"
-          hdiutil create -volname YandexHomeDesktop \
-            -srcfolder "$RUNNER_TEMP/stage/YandexHomeDesktop.app" \
-            -format UDZO -ov \
-            "dist/YandexHomeDesktop-${GITHUB_REF_NAME#v}-macos-universal.dmg"
-          dmg="dist/YandexHomeDesktop-${GITHUB_REF_NAME#v}-macos-universal.dmg"
-          hdiutil attach "$dmg" -mountpoint "$RUNNER_TEMP/dmg-mount" -nobrowse -readonly
-          packaged="$RUNNER_TEMP/dmg-mount/YandexHomeDesktop.app/Contents"
-          test -f "$packaged/MacOS/YandexHomeDesktop"
-          test -d "$packaged/PlugIns"
-          "$packaged/MacOS/YandexHomeCli" --help --json
-          "$packaged/MacOS/YandexHomeRest" --help --json
-          for arch in arm64 x86_64; do
-            for binary in YandexHomeDesktop YandexHomeCli YandexHomeRest; do
-              lipo -verify_arch "$arch" "$packaged/MacOS/$binary"
-            done
-            lipo -verify_arch "$arch" "$packaged/Frameworks/QtCore.framework/QtCore"
-          done
-          hdiutil detach "$RUNNER_TEMP/dmg-mount"
+          just package_build_dir=build jobs=2 package-macos
+          '-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64'
 
       - uses: actions/upload-artifact@v4
         with:
           name: release-macos
-          path: dist/*.dmg
+          path: build/dist/*.dmg
+          if-no-files-found: error
+          retention-days: 1
+
+  linux-archive:
+    needs: verify-tag
+    runs-on: ubuntu-24.04
+    env:
+      QT_QPA_PLATFORM: offscreen
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: extractions/setup-just@v4
+        with:
+          just-version: '1.51.0'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.9.1'
+          host: linux
+          target: desktop
+          arch: linux_gcc_64
+          modules: qttools qthttpserver qtwebsockets
+          cache: true
+
+      - name: Install credential-store development dependency
+        run: sudo apt-get update && sudo apt-get install -y libsecret-1-dev
+
+      - name: Build, test, and package Linux archive
+        run: just package_build_dir=build package-linux -DCMAKE_CXX_COMPILER=g++-13
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-linux
+          path: build/dist/*.tar.gz
           if-no-files-found: error
           retention-days: 1
 
   publish:
-    needs: [windows-installer, macos-dmg]
+    needs: [windows-installer, macos-dmg, linux-archive]
     runs-on: ubuntu-24.04
     permissions:
       contents: write
@@ -205,7 +188,9 @@ jobs:
         run: |
           test -f "dist/YandexHomeDesktop-${GITHUB_REF_NAME#v}-windows-x64.exe"
           test -f "dist/YandexHomeDesktop-${GITHUB_REF_NAME#v}-macos-universal.dmg"
+          test -f "dist/YandexHomeDesktop-${GITHUB_REF_NAME#v}-linux-x64.tar.gz"
           gh release create "$GITHUB_REF_NAME" \
             "dist/YandexHomeDesktop-${GITHUB_REF_NAME#v}-windows-x64.exe" \
             "dist/YandexHomeDesktop-${GITHUB_REF_NAME#v}-macos-universal.dmg" \
+            "dist/YandexHomeDesktop-${GITHUB_REF_NAME#v}-linux-x64.tar.gz" \
             --repo "$GITHUB_REPOSITORY" --verify-tag --generate-notes

@@ -15,7 +15,9 @@ foreach(_target appYandexHomeDesktop YandexHomeCli YandexHomeRest YandexHomeShor
 endforeach()
 foreach(_qt_test Qt6::Test Qt6::QuickTest)
   if(BUILD_TESTING AND TARGET ${_qt_test})
-    list(APPEND _runtime_dlls "$<TARGET_FILE:${_qt_test}>" "$<TARGET_RUNTIME_DLLS:${_qt_test}>")
+    # Imported Qt targets have no linker language for TARGET_RUNTIME_DLLS.
+    # The application graphs above supply their shared Qt dependencies.
+    list(APPEND _runtime_dlls "$<TARGET_FILE:${_qt_test}>")
   endif()
 endforeach()
 

@@ -12,7 +12,10 @@ if(BUILD_TESTING)
   find_package(Qt6 6.9 REQUIRED COMPONENTS Test)
 endif()
 if(BUILD_DESKTOP_APP)
-  find_package(Qt6 6.9 REQUIRED COMPONENTS Quick NetworkAuth QuickControls2 Widgets Svg LinguistTools Multimedia)
+  # GraphicalEffects imports need ShaderTools at runtime, even without a C++ link.
+  find_package(Qt6 6.9 REQUIRED COMPONENTS
+    Quick NetworkAuth QuickControls2 Widgets Svg LinguistTools Multimedia
+    Core5Compat ShaderTools)
   if(BUILD_TESTING)
     find_package(Qt6 6.9 REQUIRED COMPONENTS QuickTest)
   endif()
@@ -34,7 +37,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 # Keep QtKeychain's install rules and tests out of this application's package.
 FetchContent_Declare(qtkeychain
   GIT_REPOSITORY https://github.com/frankosterfeld/qtkeychain.git
-  GIT_TAG 0.15.0
+  # 0.16.0 guards MSVC's /utf-8 and uses GCC-compatible flags for MinGW.
+  GIT_TAG 0.16.0
   GIT_SHALLOW TRUE
   EXCLUDE_FROM_ALL
 )

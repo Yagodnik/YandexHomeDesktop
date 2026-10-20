@@ -21,7 +21,7 @@ runs:
         arch: ${{ inputs.host == 'windows' && 'win64_mingw' || inputs.host == 'mac' && 'clang_64' || 'linux_gcc_64' }}
         # qttools (including LinguistTools) and qtsvg are in the base kit.
         # Only separately distributed add-ons belong in the modules list.
-        modules: ${{ inputs.host == 'linux' && 'qthttpserver qtwebsockets' || 'qt5compat qtnetworkauth qthttpserver qtwebsockets qtmultimedia' }}
+        modules: ${{ inputs.host == 'linux' && 'qthttpserver qtwebsockets' || 'qt5compat qtshadertools qtnetworkauth qthttpserver qtwebsockets qtmultimedia' }}
         tools: ${{ inputs.host == 'windows' && 'tools_mingw1310,qt.tools.win64_mingw1310' || '' }}
         setup-python: false
         aqtversion: '==3.3.0'

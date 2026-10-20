@@ -33,8 +33,11 @@ Tag builds use the validated `RELEASE_OAUTH_CONFIG_JSON` public-client config.
 It pins Qt 6.9.1, Python 3.13, aqtinstall 3.3.0, and py7zr 1.1.0, and retains the
 Qt download cache. The Qt action uses the selected Python instead of installing
 its own default version. Linux requests the `qthttpserver` and `qtwebsockets`
-add-ons; Windows/macOS also request `qt5compat`, `qtnetworkauth`, and
-`qtmultimedia`. `qttools` (including LinguistTools) and `qtsvg` are installed by the
+add-ons; Windows/macOS also request `qt5compat`, `qtshadertools`, `qtnetworkauth`,
+and `qtmultimedia`. ShaderTools is a runtime dependency of
+`Qt5Compat.GraphicalEffects`; desktop configuration requires both modules so an
+incomplete Qt kit fails before building or running QML tests.
+`qttools` (including LinguistTools) and `qtsvg` are installed by the
 base kit, so they must not appear in the add-on list. `.gitattributes` keeps
 `justfile` and Bash scripts in LF format on Windows so `just --fmt --check` sees
 the same contents on every platform.
@@ -45,7 +48,11 @@ machine-specific CMake file is required. Debug fixtures, builds with PCH disable
 standalone CLI/REST profiles, and clang-tidy analysis remain available locally;
 regular CI uses the single Release profile above.
 
-For a local desktop build, install Qt 6.9 or newer with HttpServer, WebSockets, Quick, QuickTest, Multimedia, NetworkAuth, Widgets, Svg, Qt5Compat, LinguistTools, and Test, plus a C++23 compiler and CMake 3.28 or newer. Configure Qt through the standard CMake prefix path:
+QtKeychain is pinned to 0.16.0. Its Windows build applies `/utf-8` only to MSVC
+and uses GCC-compatible UTF-8 flags for MinGW. CI and local builds use the same
+declared dependency without editing downloaded sources.
+
+For a local desktop build, install Qt 6.9 or newer with HttpServer, WebSockets, Quick, QuickTest, Multimedia, NetworkAuth, Widgets, Svg, Qt5Compat, ShaderTools, LinguistTools, and Test, plus a C++23 compiler and CMake 3.28 or newer. Configure Qt through the standard CMake prefix path:
 
 ```sh
 cmake -S . -B build -G Ninja -DCMAKE_PREFIX_PATH=/path/to/Qt/6.x/<kit> -DBUILD_DESKTOP_APP=ON

@@ -18,7 +18,7 @@ ctest --test-dir build --output-on-failure
 
 Precompiled headers are enabled by default for the main C++ targets. Configure with `-DYH_ENABLE_PCH=OFF` to build without them; Windows CI checks both modes. PCH uses the declared Qt, C++ standard library, and pinned Boost.Hana headers and writes generated files only under the build directory. Shared API model codecs are compiled in `YandexApiAdapter`; custom serializable types still include `serialization/Serialization.h` where their codecs are instantiated.
 
-On Windows, use the compiler kit that matches the Qt binaries and add `--config Release` to build and `-C Release` to CTest if using a multi-config generator. CMake downloads the pinned sources on the first configure. `FETCHCONTENT_SOURCE_DIR_HANA` and `FETCHCONTENT_SOURCE_DIR_QTKEYCHAIN` (and `FETCHCONTENT_SOURCE_DIR_QHOTKEY` for desktop builds) can point at already downloaded copies when working offline; use the revisions in `CMakeLists.txt`. All test builds require Python 3.9+ for catalog validation and tooling tests (CI pins Python 3.13). Portable tests also require the Qt HttpServer and WebSockets modules (the CI kit is pinned to Qt 6.9.1). On Linux, install `libsecret-1-dev` for QtKeychain and configure with `-DBUILD_DESKTOP_APP=OFF -DBUILD_TESTING=ON`. This builds CLI, REST, and the portable tests. Headless applications require Qt Core, Network, and LinguistTools; REST also requires HttpServer/WebSockets. Qt Gui is needed only for the desktop or the existing presentation-model tests.
+On Windows, use the compiler kit that matches the Qt binaries and add `--config Release` to build and `-C Release` to CTest if using a multi-config generator. CMake downloads the pinned sources on the first configure. `FETCHCONTENT_SOURCE_DIR_HANA` and `FETCHCONTENT_SOURCE_DIR_QTKEYCHAIN` (and `FETCHCONTENT_SOURCE_DIR_QHOTKEY` for desktop builds) can point at already downloaded copies when working offline; use the revisions in `cmake/Dependencies.cmake` and `cmake/QHotkey.cmake`. All test builds require Python 3.9+ for catalog validation and tooling tests (CI pins Python 3.13). Portable tests also require the Qt HttpServer and WebSockets modules (the CI kit is pinned to Qt 6.9.1). On Linux, install `libsecret-1-dev` for QtKeychain and configure with `-DBUILD_DESKTOP_APP=OFF -DBUILD_TESTING=ON`. This builds CLI, REST, and the portable tests. Headless applications require Qt Core, Network, and LinguistTools; REST also requires HttpServer/WebSockets. Qt Gui is needed only for the desktop or the existing presentation-model tests.
 
 Desktop CTest runs the C++ suite, creates all nine QML pages with local test models, and runs Qt Quick layout and interaction tests. The QML tests use the offscreen platform, software renderer, and bundled font/assets; they need no sign-in or live API access and run in both Windows and macOS CI. No OAuth configuration is included in the QML test executables.
 
@@ -231,6 +231,14 @@ arguments go to CMake configuration; `qt_prefix`, `auth_config`, `pch`, `jobs`,
 and `generator` work as with other recipes. An explicit `package_build_dir` can
 reuse a Release build; the normal Debug profile is untouched.
 
+`just configure` and the packaging recipes clear cached
+`FETCHCONTENT_SOURCE_DIR_*` overrides whose absolute directories no longer
+exist, then let CMake fetch the pinned dependencies into the build directory.
+Existing offline source directories are preserved. An override passed explicitly
+on the command line takes precedence and must point to an existing directory.
+For direct CMake usage, clear a stale override with, for example,
+`cmake -S . -B build-package/macos -U FETCHCONTENT_SOURCE_DIR_QHOTKEY`.
+
 Windows packaging requires [NSIS 3.12](https://nsis.sourceforge.io/Docs/AppendixF.html)
 in addition to the normal matching Qt/compiler kit. CI installs the pinned
 Chocolatey package with `choco install nsis --version=3.12.0 --no-progress -y`.
@@ -262,6 +270,10 @@ The Windows Release/PCH-ON job, both macOS architecture jobs, and Linux CI
 exercise these same `just` commands with example OAuth data. The manual Linux
 build workflow uploads the `.tar.gz`. Tag releases build and verify all three
 formats before publishing them together.
+The Windows and macOS CI jobs seed a missing QHotkey source override before
+configuration to check recovery from a stale local dependency cache.
+The installed SDK consumer check inherits an explicitly configured
+`CMAKE_OSX_SYSROOT` so its separate build uses the selected macOS SDK.
 
 For direct CMake usage, configure with `-DYH_ENABLE_PACKAGING=ON` and the same
 application options, then build/test and run:
@@ -310,6 +322,35 @@ uses the configured GCC or Clang compiler's system header paths. Windows CI
 checks formatting and validates the clang-tidy configuration in every build job,
 then runs analysis in the Debug/PCH-OFF job. Linux CI runs analysis on the
 headless startup sources.
+
+## CMake layout
+
+The root `CMakeLists.txt` declares the project and orders the build. Library
+targets stay in their existing `src/*/CMakeLists.txt` files. Shared build concerns
+are grouped by responsibility:
+
+| File | Responsibility |
+| --- | --- |
+| `cmake/ProjectOptions.cmake` | Compiler settings, build options, validation, and output directories |
+| `cmake/Dependencies.cmake` | Qt components, pinned Hana/QtKeychain sources, and test tooling |
+| `cmake/Applications.cmake` | Shared bootstraps and CLI, REST, and shortcut executable targets |
+| `cmake/DesktopApplication.cmake` | Desktop target, QML modules, OAuth resource, icon, and plist |
+| `tests/CMakeLists.txt`, `tests/DesktopTests.cmake` | Portable suites and desktop QML test setup |
+| `cmake/Deployment.cmake` | Application installation, Qt runtime deployment, and installed entry-point checks |
+| `cmake/Translations.cmake` | Translation extraction and resources for enabled executables |
+| `cmake/PrecompiledHeaders.cmake` | Optional PCH setup for existing targets |
+| `cmake/YandexHomeLibraries.cmake` | Shared-library exports and the installed SDK |
+| `cmake/QHotkey.cmake` | Pinned shortcut backend and its macOS compatibility patch |
+| `cmake/Packaging.cmake` | Native CPack configuration and finished-package verification |
+
+The included modules execute in the root directory scope, preserving executable,
+generated-resource, and QML import paths. Desktop tests are included after their
+QML modules and portable test targets exist. The Windows Debug/Release/PCH matrix
+and its desktop, CLI-only, REST-only, and packaging commands use this same layout.
+The fixture test generates its own resources in the test build directory so
+portable Release builds work without generated files from a desktop build.
+Windows CI also builds and runs `ApiFixture` from a fresh portable Release
+profile with PCH disabled; Linux CI builds and runs all portable suites.
 
 ## Separate executables and shared SDK
 

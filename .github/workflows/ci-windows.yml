@@ -75,6 +75,12 @@ jobs:
         if: matrix.configuration == 'Release' && matrix.pch == 'ON'
         run: choco install nsis --version=3.12.0 --no-progress -y
 
+      - name: Exercise recovery from a stale dependency source override
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path build -Force | Out-Null
+          Set-Content build/CMakeCache.txt "FETCHCONTENT_SOURCE_DIR_QHOTKEY:PATH=$env:RUNNER_TEMP/missing-qhotkey-source"
+
       - name: Configure
         shell: pwsh
         run: >-
@@ -160,6 +166,17 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Installed REST worker failed' }
           cmake "-DAPP_PATH=$($cli.FullName)" -DCONFIGURATION=Release -P tests/CliSmoke.cmake
           if ($LASTEXITCODE -ne 0) { throw 'Installed console CLI failed' }
+
+      - name: Check portable fixture resources from a clean build
+        if: matrix.configuration == 'Release' && matrix.pch == 'ON'
+        shell: pwsh
+        run: |
+          just build_dir=build-portable config=Release desktop=OFF pch=OFF configure -DCMAKE_CXX_COMPILER=g++.exe -DBUILD_SHORTCUTS_APP=OFF
+          if ($LASTEXITCODE -ne 0) { throw 'Portable test configuration failed' }
+          cmake --build build-portable --config Release --parallel 2 --target ApiFixtureTests
+          if ($LASTEXITCODE -ne 0) { throw 'Portable fixture build failed' }
+          ctest --test-dir build-portable -C Release -R '^ApiFixture$' --output-on-failure --no-tests=error
+          if ($LASTEXITCODE -ne 0) { throw 'Portable fixture tests failed' }
 
       - name: Build CLI independently of desktop and REST
         run: >-

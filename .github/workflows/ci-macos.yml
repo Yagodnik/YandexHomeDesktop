@@ -46,6 +46,11 @@ jobs:
           modules: qt5compat qtnetworkauth qtsvg qttools qthttpserver qtwebsockets qtmultimedia
           cache: true
 
+      - name: Exercise recovery from a stale dependency source override
+        run: |
+          mkdir -p build
+          printf 'FETCHCONTENT_SOURCE_DIR_QHOTKEY:PATH=%s/missing-qhotkey-source\n' "$RUNNER_TEMP" > build/CMakeCache.txt
+
       - name: Build, test, and package macOS installer
         run: >-
           just package_build_dir=build jobs=2 package-macos

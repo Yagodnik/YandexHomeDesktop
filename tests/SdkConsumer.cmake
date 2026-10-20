@@ -8,12 +8,18 @@ endfunction()
 
 set(prefix "${BUILD_PATH}/sdk-test/${CONFIGURATION}/stage")
 set(consumer "${BUILD_PATH}/sdk-test/${CONFIGURATION}/consumer")
+# Keep an explicitly selected macOS SDK when configuring the independent build.
+load_cache("${BUILD_PATH}" READ_WITH_PREFIX parent_ CMAKE_OSX_SYSROOT)
+set(platform_options)
+if(parent_CMAKE_OSX_SYSROOT)
+  list(APPEND platform_options "-DCMAKE_OSX_SYSROOT=${parent_CMAKE_OSX_SYSROOT}")
+endif()
 run_checked("${CMAKE_COMMAND}" --install "${BUILD_PATH}" --config "${CONFIGURATION}"
   --prefix "${prefix}" --component SDK)
 run_checked("${CMAKE_COMMAND}" --fresh -S "${SOURCE_PATH}/examples/sdk" -B "${consumer}"
   -G "${GENERATOR}" "-DCMAKE_CXX_COMPILER=${COMPILER}"
   "-DCMAKE_BUILD_TYPE=${CONFIGURATION}" "-DCMAKE_PREFIX_PATH=${prefix}"
-  "-DQt6_DIR=${QT_PACKAGE_PATH}")
+  "-DQt6_DIR=${QT_PACKAGE_PATH}" ${platform_options})
 run_checked("${CMAKE_COMMAND}" --build "${consumer}" --config "${CONFIGURATION}" --parallel 2)
 if(WIN32)
   # Installed SDK DLLs must be available to the independent executable.

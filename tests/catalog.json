@@ -975,7 +975,7 @@
     },
     {
       "id": "InstalledSdkConsumer",
-      "description": "Install the SDK, build an independent consumer, and run it without live API access.",
+      "description": "Install the SDK, build an independent consumer using the parent's selected macOS SDK, and run it without live API access.",
       "features": [
         "sdk"
       ],

@@ -52,6 +52,24 @@ configure *args:
         "-DBUILD_DESKTOP_APP=$YH_JUST_DESKTOP"
         "-DBUILD_CLI_APP=$YH_JUST_CLI_APP" "-DBUILD_REST_APP=$YH_JUST_REST_APP"
         "-DYH_BUILD_REST_ADAPTER=$YH_JUST_REST_APP" "-DYH_ENABLE_PCH=$YH_JUST_PCH")
+    # Offline source overrides can outlive temporary checkouts. Clear only missing
+    # absolute paths from the old cache; explicit arguments below still win.
+    if [[ -f "$YH_JUST_BUILD_DIR/CMakeCache.txt" ]]; then
+        while IFS='=' read -r entry source_path; do
+            case "$entry" in
+                FETCHCONTENT_SOURCE_DIR_*:*)
+                    source_path=${source_path%$'\r'}
+                    case "$source_path" in
+                        /*|[A-Za-z]:[\\/]*)
+                            if [[ ! -d "$source_path" ]]; then
+                                cache_key=${entry%%:*}
+                                echo "Clearing stale $cache_key: $source_path" >&2
+                                options+=("-U$cache_key")
+                            fi ;;
+                    esac ;;
+            esac
+        done < "$YH_JUST_BUILD_DIR/CMakeCache.txt"
+    fi
     if [[ -n "$YH_JUST_QT_PREFIX" ]]; then
         options+=("-DCMAKE_PREFIX_PATH=$YH_JUST_QT_PREFIX")
     fi

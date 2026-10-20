@@ -1,13 +1,12 @@
 2) Making everything testable
 3) Linux support
 5) Improve UI
-6) Add more devices
 7) Fix authorization
 8) Integration testing
 11) Make apps signed
 12) Fix positioning issues
 14) Adding MCP server
-22) Add video streams support
+6) Add video streams support
 
 1) ~Refactoring API module~
 4) ~Improve building speed~

@@ -118,6 +118,24 @@ class CatalogTests(unittest.TestCase):
         with self.assertRaisesRegex(catalog.CatalogError, "uncatalogued"):
             catalog.check_inventory([suite()], {"Unexpected": test_record("Unexpected")}, {})
 
+    def test_discovery_preserves_execution_logs(self):
+        with tempfile.TemporaryDirectory(prefix="catalog logging ") as temp:
+            directory = Path(temp)
+            log = directory / "worker output.txt"
+            log.write_text("Existing execution output\n")
+            script = directory / "fake qt.py"
+            script.write_text(
+                "import pathlib, sys\n"
+                "for index, arg in enumerate(sys.argv):\n"
+                "    if arg == '-o' and sys.argv[index + 1] != '-,txt':\n"
+                "        pathlib.Path(sys.argv[index + 1].rsplit(',', 1)[0]).write_text('')\n"
+                "print('First()')\n"
+            )
+            record = test_record(command=[sys.executable, str(script),
+                                          "-o", "-,txt", "-o", str(log) + ",txt"])
+            self.assertEqual(catalog.discover_cases(record), {"First"})
+            self.assertEqual(log.read_text(), "Existing execution output\n")
+
     def test_qt_quick_discovery_accepts_function_names_on_stderr(self):
         record = test_record(command=[sys.executable, "-c", "import sys; print('Page::test_click()', file=sys.stderr)"])
         self.assertEqual(catalog.discover_cases(record), {"Page::test_click"})

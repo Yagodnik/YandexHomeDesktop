@@ -11,8 +11,12 @@ if(DEFINED PACKAGE_ROOT)
         message(FATAL_ERROR "Missing packaged file or directory: ${_contents}/${_required}")
       endif()
     endforeach()
-    execute_process(COMMAND codesign --verify --deep --strict
-      "${PACKAGE_ROOT}/YandexHomeDesktop.app" COMMAND_ERROR_IS_FATAL ANY)
+    execute_process(COMMAND codesign --verify --deep --strict --verbose=2
+      "${PACKAGE_ROOT}/YandexHomeDesktop.app"
+      RESULT_VARIABLE _result OUTPUT_VARIABLE _output ERROR_VARIABLE _error)
+    if(NOT "${_result}" STREQUAL "0")
+      message(FATAL_ERROR "Packaged app signature is invalid: ${_result}\n${_output}${_error}")
+    endif()
     foreach(_arch IN ITEMS @_package_archs@)
       foreach(_binary YandexHomeDesktop YandexHomeCli YandexHomeRest YandexHomeShortcuts)
         execute_process(COMMAND lipo "${_bin}/${_binary}" -verify_arch "${_arch}"

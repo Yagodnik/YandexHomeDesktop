@@ -33,6 +33,7 @@ if(BUILD_TESTING)
   endif()
 endif()
 
+include(cmake/WindowsRuntime.cmake)
 include(cmake/Deployment.cmake)
 include(cmake/Translations.cmake)
 yh_install_sdk()

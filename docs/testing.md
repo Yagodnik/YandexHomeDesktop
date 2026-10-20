@@ -109,6 +109,8 @@ catalog and supplies a default 30-second timeout. Override properties with
 `set_tests_properties` when needed. Custom Qt runners must forward `-functions`
 and case selectors after consuming their own startup arguments, as
 `RestProcessTests` does. Case discovery uses the registered test environment.
+It omits Qt `-o` output options so discovery cannot truncate a concurrently
+running suite's saved execution log.
 
 ```sh
 just tests-check

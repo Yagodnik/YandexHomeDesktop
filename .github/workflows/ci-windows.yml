@@ -16,6 +16,8 @@ jobs:
   test:
     name: Windows Release
     runs-on: windows-2022
+    env:
+      QT_FORCE_STDERR_LOGGING: '1'
     steps:
       - uses: actions/checkout@v4
 
@@ -51,7 +53,7 @@ jobs:
       - name: Build, test, and package Windows installer
         run: >-
           just package_build_dir=build generator=Ninja pch=ON
-          package-windows -DCMAKE_CXX_COMPILER=g++.exe
+          package-windows '-DCMAKE_CXX_COMPILER=g++.exe'
 
       - name: Smoke-check the silent installer
         shell: pwsh
@@ -80,5 +82,6 @@ jobs:
           name: windows-build-logs
           path: |
             build/Testing/Temporary/*.log
+            build/Testing/*.txt
             build/CMakeFiles/CMakeConfigureLog.yaml
           retention-days: 7

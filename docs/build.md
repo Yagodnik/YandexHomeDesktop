@@ -52,6 +52,15 @@ QtKeychain is pinned to 0.16.0. Its Windows build applies `/utf-8` only to MSVC
 and uses GCC-compatible UTF-8 flags for MinGW. CI and local builds use the same
 declared dependency without editing downloaded sources.
 
+Windows builds copy the applications' declared Qt DLLs and the selected MinGW
+compiler's runtime beside the executables before CTest. This gives the build-tree
+apps and tests a matching runtime even when other tools add DLLs to `PATH`.
+QML tests import the generated modules from the build directory and Qt modules
+from the selected kit; manually copying QML sources beside an executable is not
+part of the build. Windows CI forces Qt diagnostics to stderr. Failure artifacts
+include `Testing/WindowsRuntime.txt` with DLL source paths and
+`Testing/WorkerControl.txt` with the worker test's output.
+
 For a local desktop build, install Qt 6.9 or newer with HttpServer, WebSockets, Quick, QuickTest, Multimedia, NetworkAuth, Widgets, Svg, Qt5Compat, ShaderTools, LinguistTools, and Test, plus a C++23 compiler and CMake 3.28 or newer. Configure Qt through the standard CMake prefix path:
 
 ```sh
@@ -298,8 +307,10 @@ validated `RELEASE_OAUTH_CONFIG_JSON` public-client configuration. No credential
 are needed for package verification.
 
 The DMG contains the deployed app bundle, CLI, REST, shortcut worker, and their
-runtime dependencies, with an Applications link. It is ad-hoc signed by the
-existing Qt deployment step; Developer ID signing and notarization are not
+runtime dependencies, with an Applications link. After Qt deployment, a final
+step ad-hoc signs the nested Mach-O code and frameworks, then signs the app
+bundle last and verifies it. This avoids invalidating the bundle seal when a
+helper is signed later. Developer ID signing and notarization are not
 configured. Windows includes the installed applications, SDK, and deployed Qt
 and compiler runtime. Linux includes CLI/REST, project shared libraries, and
 SDK, with a [runtime requirements README](linux-package.md). It requires a

@@ -26,6 +26,8 @@ jobs:
   windows-installer:
     needs: verify-tag
     runs-on: windows-2022
+    env:
+      QT_FORCE_STDERR_LOGGING: '1'
     steps:
       - uses: actions/checkout@v4
 
@@ -56,7 +58,7 @@ jobs:
         shell: pwsh
         env:
           YH_AUTH_CONFIG_FILE: ${{ runner.temp }}/oauth.json
-        run: just package_build_dir=build package-windows -DCMAKE_CXX_COMPILER=g++.exe
+        run: just package_build_dir=build package-windows '-DCMAKE_CXX_COMPILER=g++.exe'
 
       - name: Smoke-check the silent installer
         shell: pwsh
@@ -68,6 +70,17 @@ jobs:
           if ($installer.ExitCode -ne 0) { throw 'Silent installer failed' }
           cmake "-DPACKAGE_ROOT=$installed" -P build/CheckPackage.cmake
           if ($LASTEXITCODE -ne 0) { throw 'Installed package verification failed' }
+
+      - name: Upload Windows failure logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-windows-logs
+          path: |
+            build/Testing/Temporary/*.log
+            build/Testing/*.txt
+            build/CMakeFiles/CMakeConfigureLog.yaml
+          retention-days: 7
 
       - uses: actions/upload-artifact@v4
         with:

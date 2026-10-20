@@ -176,8 +176,18 @@ def discover_cases(test):
         raise CatalogError(f"{test['name']} executable is missing; build the tests first")
     if props.get("ENVIRONMENT_MODIFICATION"):
         raise CatalogError("Qt discovery needs support for ENVIRONMENT_MODIFICATION before using this property")
+    # Qt opens -o files even for -functions. Discovery can run beside the suite,
+    # so it must not truncate the execution log collected as a CI artifact.
+    discovery_command = [command[0]]
+    arguments = iter(command[1:])
+    for argument in arguments:
+        if argument == "-o":
+            if next(arguments, None) is None:
+                raise CatalogError(f"{test['name']} has an incomplete Qt output option")
+        else:
+            discovery_command.append(argument)
     completed = subprocess.run(
-        command + ["-functions"], env=environment,
+        discovery_command + ["-functions"], env=environment,
         cwd=props.get("WORKING_DIRECTORY"), capture_output=True, text=True,
         timeout=props.get("TIMEOUT", 30),
     )

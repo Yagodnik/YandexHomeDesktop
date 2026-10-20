@@ -35,7 +35,8 @@ yh_add_test(NAME Shortcuts COMMAND ShortcutTests)
 
 add_executable(WorkerControlTests WorkerControlTests.cpp)
 target_link_libraries(WorkerControlTests PRIVATE Qt6::Test WorkerControl)
-yh_add_test(NAME WorkerControl COMMAND WorkerControlTests)
+yh_add_test(NAME WorkerControl COMMAND WorkerControlTests
+  -o -,txt -o "${PROJECT_BINARY_DIR}/Testing/WorkerControl.txt,txt")
 set_tests_properties(WorkerControl PROPERTIES TIMEOUT 90)
 
 add_executable(AuthorizationTests AuthorizationTests.cpp)

@@ -29,7 +29,7 @@ if(BUILD_DESKTOP_APP)
     qt_generate_deploy_qml_app_script(
       TARGET appYandexHomeDesktop
       OUTPUT_SCRIPT deploy_script
-      DEPLOY_TOOL_OPTIONS "-codesign=-" ${_deploy_executables}
+      DEPLOY_TOOL_OPTIONS ${_deploy_executables}
     )
   else()
     qt_generate_deploy_qml_app_script(
@@ -39,6 +39,10 @@ if(BUILD_DESKTOP_APP)
   endif()
   if(APPLE)
     install(SCRIPT ${deploy_script} COMPONENT DesktopBundle)
+    # Qt 6.9's deploy tool can seal the app before signing the remaining helpers.
+    # Sign the complete payload inside out, after all deployment mutations.
+    install(SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/cmake/SignMacBundle.cmake"
+      COMPONENT DesktopBundle)
   else()
     install(SCRIPT ${deploy_script})
   endif()

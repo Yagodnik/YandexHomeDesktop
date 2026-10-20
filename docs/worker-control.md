@@ -71,6 +71,8 @@ One connection carries one request and response. Both directions are bounded to
 64 KiB; partial requests have a five-second read deadline. Malformed requests do
 not reach application handlers. Custom Send operations are not replayed after an
 ambiguous disconnect, because an application mutation may already have happened.
+An unanswered Send completes with `control_error` when the peer disconnects,
+including when the platform emits no socket error alongside the disconnect.
 Readiness probes and idempotent stop requests can be retried within one deadline.
 
 ## Verification

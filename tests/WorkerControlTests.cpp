@@ -350,7 +350,14 @@ private slots:
     QVERIFY(Result(results)["ok"].toBool());
   }
 
+  void GenericMutationIsNotRetriedAfterDisconnect_data() {
+    QTest::addColumn<bool>("report_socket_errors");
+    QTest::newRow("socket-error") << true;
+    QTest::newRow("disconnect-only") << false;
+  }
+
   void GenericMutationIsNotRetriedAfterDisconnect() {
+    QFETCH(bool, report_socket_errors);
     QTemporaryDir directory;
     const auto name = Endpoint(directory);
     Peer peer(name);
@@ -358,6 +365,12 @@ private slots:
     WorkerControlClient client({name, {}, {}});
     QSignalSpy results(&client, &WorkerControlClient::finished);
     client.Request(Command::Send, {{"command", "mutate"}}, {}, 1000);
+    if (!report_socket_errors) {
+      // Exercise Windows' disconnect-only notification on every platform.
+      auto* socket = client.findChild<QLocalSocket*>();
+      QVERIFY(socket);
+      QVERIFY(disconnect(socket, &QLocalSocket::errorOccurred, nullptr, nullptr));
+    }
     QTRY_COMPARE(results.size(), 1);
     QCOMPARE(Code(results), QString("control_error"));
     QCOMPARE(peer.requests, 1);

@@ -23,7 +23,7 @@ foreach(_qml_page AuthPage AuthCanceledPage ErrorPage LoadingPage MainPage
     "${CMAKE_CURRENT_SOURCE_DIR}/src/qml/pages/${_qml_page}.qml"
     "${CMAKE_CURRENT_BINARY_DIR}")
   set_tests_properties(${_qml_page}Loads PROPERTIES
-    ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software;QT_QUICK_CONTROLS_STYLE=Basic")
+    ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software;QT_QUICK_CONTROLS_STYLE=Basic;QT_QPA_FONTDIR=${PROJECT_SOURCE_DIR}/resources/fonts")
 endforeach()
 
 add_executable(QmlLayoutTests tests/QmlLayoutTests.cpp
@@ -36,7 +36,7 @@ yh_add_test(NAME QmlLayouts COMMAND QmlLayoutTests
   -import "${CMAKE_CURRENT_BINARY_DIR}")
 set_tests_properties(QmlLayouts PROPERTIES
   TIMEOUT 90
-  ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software;QT_QUICK_CONTROLS_STYLE=Basic")
+  ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software;QT_QUICK_CONTROLS_STYLE=Basic;QT_QPA_FONTDIR=${PROJECT_SOURCE_DIR}/resources/fonts")
 
 target_sources(QmlPageLoadTest PRIVATE ${DESKTOP_RESOURCES})
 target_sources(QmlLayoutTests PRIVATE ${DESKTOP_RESOURCES} ${DEBUG_FIXTURE_RESOURCES})

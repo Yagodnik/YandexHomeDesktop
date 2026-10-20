@@ -568,7 +568,7 @@
         },
         {
           "name": "ExpandingLargeSectionKeepsItsHeadingInPlace",
-          "description": "Keep a large section's heading and scroll position stable during expansion/collapse.",
+          "description": "Keep a large section's heading and scroll position stable during expansion/collapse, and its last device reachable after layout settles.",
           "requires": [
             "BUILD_DESKTOP_APP"
           ]
@@ -1507,7 +1507,7 @@
         },
         {
           "name": "GenericMutationIsNotRetriedAfterDisconnect",
-          "description": "Do not replay an application command when its delivery outcome is ambiguous."
+          "description": "Report control_error without replaying an ambiguous application command, including disconnects without a socket error."
         },
         {
           "name": "SupersededSocketCannotCompleteReplacement",

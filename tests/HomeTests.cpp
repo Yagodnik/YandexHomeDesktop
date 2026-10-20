@@ -423,6 +423,9 @@ private slots:
     QTest::mouseClick(&window, Qt::LeftButton, Qt::NoModifier,
       heading->mapToScene(QPointF(heading->width() / 2, heading->height() / 2)).toPoint());
     QTRY_COMPARE(body->height(), body->property("expandedHeight").toDouble());
+    // The enclosing Column updates its scroll extent during polish, after the
+    // height animation reaches its final value.
+    QVERIFY(QQuickTest::qWaitForPolish(&window));
     QVERIFY(body->height() > list->height());
     QVERIFY2(maximum_shift < 1, qPrintable(QString("Heading moved by %1 pixels during expansion").arg(maximum_shift)));
     QVERIFY(qAbs(heading->mapToItem(list, QPointF()).y() - initial_y) < 1);
@@ -434,7 +437,10 @@ private slots:
     QVERIFY(QQuickTest::qWaitForPolish(&window));
     auto* last_device = FindItem(body, "device-lamp-19"); QVERIFY(last_device);
     const auto last_y = last_device->mapToItem(list, QPointF()).y();
-    QVERIFY(last_y >= 0 && last_y + last_device->height() <= list->height());
+    QVERIFY2(last_y >= 0 && last_y + last_device->height() <= list->height(),
+      qPrintable(QString("Last device y=%1, height=%2, viewport=%3, contentY=%4, contentHeight=%5")
+        .arg(last_y).arg(last_device->height()).arg(list->height())
+        .arg(list->property("contentY").toDouble()).arg(list->property("contentHeight").toDouble())));
     QVERIFY(list->setProperty("contentY", initial_scroll));
     maximum_shift = 0;
     const auto collapse_tracking = connect(&window, &QQuickWindow::afterAnimating, &window, track_heading);

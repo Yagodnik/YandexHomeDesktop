@@ -6,6 +6,7 @@
 #include <QJsonDocument>
 #include <QLocalSocket>
 #include <QLockFile>
+#include <QPointer>
 #include <QProcess>
 #include <QSaveFile>
 #include <QTimer>
@@ -137,6 +138,25 @@ void WorkerControlClient::Probe(Operation* operation) {
                              '\n');
   });
   connect(socket, &QLocalSocket::readyRead, operation, [this, operation] { Receive(operation); });
+  connect(socket, &QLocalSocket::disconnected, operation, [this, operation] {
+    if (operation != operation_) {
+      return;
+    }
+    // Windows named pipes can disconnect without emitting errorOccurred.
+    // Consume any final frame before treating an unanswered request as lost.
+    QPointer<WorkerControlClient> alive(this);
+    if (operation->socket->bytesAvailable() > 0) {
+      Receive(operation);
+    }
+    if (!alive || operation != operation_ || operation->retry.isActive()) {
+      return;
+    }
+    if (operation->command == Command::Send) {
+      Finish(operation, Error("control_error"));
+    } else {
+      Unavailable(operation);
+    }
+  });
   connect(socket, &QLocalSocket::errorOccurred, operation,
           [this, operation](QLocalSocket::LocalSocketError error) {
             if (operation != operation_) {

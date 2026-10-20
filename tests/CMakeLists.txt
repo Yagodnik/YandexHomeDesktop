@@ -81,7 +81,7 @@ target_link_libraries(ScenariosTests PRIVATE Qt6::Test Models)
 yh_add_test(NAME Scenarios COMMAND ScenariosTests)
 if(BUILD_DESKTOP_APP)
   set_tests_properties(Scenarios Home PROPERTIES
-    ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software;QT_QUICK_CONTROLS_STYLE=Basic")
+    ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software;QT_QUICK_CONTROLS_STYLE=Basic;QT_QPA_FONTDIR=${PROJECT_SOURCE_DIR}/resources/fonts")
 endif()
 
 add_executable(CliTests CliTests.cpp)

@@ -57,9 +57,11 @@ compiler's runtime beside the executables before CTest. This gives the build-tre
 apps and tests a matching runtime even when other tools add DLLs to `PATH`.
 QML tests import the generated modules from the build directory and Qt modules
 from the selected kit; manually copying QML sources beside an executable is not
-part of the build. Windows CI forces Qt diagnostics to stderr. Failure artifacts
-include `Testing/WindowsRuntime.txt` with DLL source paths and
-`Testing/WorkerControl.txt` with the worker test's output.
+part of the build. Offscreen QML tests set `QT_QPA_FONTDIR` to the committed
+`resources/fonts` directory so Windows' FreeType backend can discover fonts
+without relying on a system font installation. Windows CI forces Qt diagnostics
+to stderr. Failure artifacts include `Testing/WindowsRuntime.txt` with DLL source
+paths and `Testing/WorkerControl.txt` with the worker test's output.
 
 For a local desktop build, install Qt 6.9 or newer with HttpServer, WebSockets, Quick, QuickTest, Multimedia, NetworkAuth, Widgets, Svg, Qt5Compat, ShaderTools, LinguistTools, and Test, plus a C++23 compiler and CMake 3.28 or newer. Configure Qt through the standard CMake prefix path:
 

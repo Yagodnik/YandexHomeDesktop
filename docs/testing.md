@@ -122,8 +122,10 @@ uncatalogued cases, stale entries, and mismatched labels fail validation.
 Reconfigure after suite/label changes; CMake tracks the catalog as a configure
 dependency. `TestTooling` checks exact selection, profile filtering, error
 handling, argument/environment preservation, and real CTest timeouts/failures.
-Windows CI additionally exercises concrete C++, QML, and REST process selections
-through the `just` recipes; desktop and portable CI both run catalog validation.
+Each CI platform runs the full enabled CTest suite once in Release, including
+catalog validation and `TestTooling`. Windows/macOS cover desktop/QML suites;
+Linux covers portable suites. Debug-only fixture process cases require a local
+Debug profile. Use the selection recipes above for focused local verification.
 
 ## Choose verification for a feature
 

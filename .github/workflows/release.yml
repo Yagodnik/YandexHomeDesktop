@@ -33,25 +33,15 @@ jobs:
         with:
           just-version: '1.51.0'
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-
       - name: Select Git Bash for recipes
         shell: pwsh
         run: |
           (Join-Path $env:ProgramFiles 'Git\bin') >> $env:GITHUB_PATH
 
       - name: Install Qt and matching MinGW
-        uses: jurplel/install-qt-action@v4
+        uses: ./.github/actions/setup-qt
         with:
-          version: '6.9.1'
           host: windows
-          target: desktop
-          arch: win64_mingw
-          modules: qt5compat qtnetworkauth qtsvg qttools qthttpserver qtwebsockets qtmultimedia
-          tools: tools_mingw1310,qt.tools.win64_mingw1310
-          cache: true
 
       - name: Install pinned NSIS
         run: choco install nsis --version=3.12.0 --no-progress -y
@@ -98,19 +88,10 @@ jobs:
         with:
           just-version: '1.51.0'
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-
       - name: Install Qt
-        uses: jurplel/install-qt-action@v4
+        uses: ./.github/actions/setup-qt
         with:
-          version: '6.9.1'
           host: mac
-          target: desktop
-          arch: clang_64
-          modules: qt5compat qtnetworkauth qtsvg qttools qthttpserver qtwebsockets qtmultimedia
-          cache: true
 
       - name: Create release OAuth config
         env:
@@ -143,19 +124,10 @@ jobs:
         with:
           just-version: '1.51.0'
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-
       - name: Install Qt
-        uses: jurplel/install-qt-action@v4
+        uses: ./.github/actions/setup-qt
         with:
-          version: '6.9.1'
           host: linux
-          target: desktop
-          arch: linux_gcc_64
-          modules: qttools qthttpserver qtwebsockets
-          cache: true
 
       - name: Install credential-store development dependency
         run: sudo apt-get update && sudo apt-get install -y libsecret-1-dev

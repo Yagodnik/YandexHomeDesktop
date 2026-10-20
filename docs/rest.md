@@ -238,7 +238,7 @@ overrides, host conflicts, token redaction, and shutdown with a missing config f
 Those workers also serve OpenAPI from a separate working directory and advertise
 the configured listener address without exposing a supplied token.
 `QmlLayouts` clicks the settings toggle through the real model and
-controller with a scripted local daemon. These run in the Windows
-Debug/Release/PCH matrix and existing macOS/portable CTest paths. Process tests also run the
+controller with a scripted local daemon. These run in the Windows and macOS
+Release jobs and portable CTest. Process tests also run the
 committed Python example against the fixture server and verify simultaneous
 starts, foreground shutdown, and reset. Headless builds with both executables enabled also run these tests and require Python 3.9+.

@@ -6,7 +6,44 @@ and keeps REST startup out of the Dock. No external plist installation is needed
 The REST process test asks CoreFoundation to read that identity from the built
 executable and runs the worker with an invalid GUI platform to check headless startup.
 
-The CI builds are `.github/workflows/ci-windows.yml`, `ci-macos.yml`, and `ci-linux.yml`. They run for pull requests targeting `main`, `dev`, or `refactoring`, or when started manually; ordinary branch pushes do not trigger them. Windows and macOS build the desktop app and run CTest; Linux builds the headless CLI/REST applications and runs the portable tests using the Qt 6.9.1 `linux_gcc_64` kit. CMake fetches pinned Boost.Hana, QtKeychain, and (for the shortcut worker) QHotkey sources into the build directory. No ignored `libs/` directory or machine-specific CMake file is required.
+The CI workflows are `.github/workflows/ci-windows.yml`, `ci-macos.yml`, and
+`ci-linux.yml`. They run for pull requests targeting `main`, `dev`, or
+`refactoring`, or when started manually. Each workflow runs one Release build
+using Ninja and precompiled headers, then runs CTest and verifies its package.
+Ordinary branch pushes do not trigger CI.
+
+| Workflow | Build profile | Actions artifact |
+| --- | --- | --- |
+| Windows | x86_64, MinGW 13.1, desktop/CLI/REST/shortcuts | `yandex-home-windows-x86_64` (`.exe`) |
+| macOS | native arm64, desktop/CLI/REST/shortcuts | `yandex-home-macos-arm64` (`.dmg`) |
+| Linux | x86_64, GCC 13, headless CLI/REST and portable tests | `yandex-home-linux-x86_64` (`.tar.gz`) |
+
+Download packages from the **Artifacts** section of the workflow run. They are
+retained for seven days, use `resources/auth/example.json`, and cannot sign in.
+Failed builds also upload available CMake/CTest logs for seven days. PR and manual
+runs have read-only repository permissions and do not publish GitHub Releases.
+The manual `build-linux.yml` entry point reuses the Linux CI workflow.
+
+Version tags matching `v*.*.*` still run `release.yml`: it verifies the version and
+`main` ancestry, builds all three packages (including universal arm64/x86_64
+macOS), and publishes a GitHub Release after every package passes verification.
+Tag builds use the validated `RELEASE_OAUTH_CONFIG_JSON` public-client config.
+
+`.github/actions/setup-qt/action.yml` shares Qt setup between CI and tag builds.
+It pins Qt 6.9.1, Python 3.13, aqtinstall 3.3.0, and py7zr 1.1.0, and retains the
+Qt download cache. The Qt action uses the selected Python instead of installing
+its own default version. Linux requests the `qthttpserver` and `qtwebsockets`
+add-ons; Windows/macOS also request `qt5compat`, `qtnetworkauth`, and
+`qtmultimedia`. `qttools` (including LinguistTools) and `qtsvg` are installed by the
+base kit, so they must not appear in the add-on list. `.gitattributes` keeps
+`justfile` and Bash scripts in LF format on Windows so `just --fmt --check` sees
+the same contents on every platform.
+
+CMake fetches pinned Boost.Hana, QtKeychain, and (for the shortcut worker) QHotkey
+sources into the build directory. No ignored `libs/` directory or
+machine-specific CMake file is required. Debug fixtures, builds with PCH disabled,
+standalone CLI/REST profiles, and clang-tidy analysis remain available locally;
+regular CI uses the single Release profile above.
 
 For a local desktop build, install Qt 6.9 or newer with HttpServer, WebSockets, Quick, QuickTest, Multimedia, NetworkAuth, Widgets, Svg, Qt5Compat, LinguistTools, and Test, plus a C++23 compiler and CMake 3.28 or newer. Configure Qt through the standard CMake prefix path:
 
@@ -16,7 +53,7 @@ cmake --build build --parallel
 ctest --test-dir build --output-on-failure
 ```
 
-Precompiled headers are enabled by default for the main C++ targets. Configure with `-DYH_ENABLE_PCH=OFF` to build without them; Windows CI checks both modes. PCH uses the declared Qt, C++ standard library, and pinned Boost.Hana headers and writes generated files only under the build directory. Shared API model codecs are compiled in `YandexApiAdapter`; custom serializable types still include `serialization/Serialization.h` where their codecs are instantiated.
+Precompiled headers are enabled by default for the main C++ targets. Configure with `-DYH_ENABLE_PCH=OFF` to build without them; regular CI uses PCH enabled. PCH uses the declared Qt, C++ standard library, and pinned Boost.Hana headers and writes generated files only under the build directory. Shared API model codecs are compiled in `YandexApiAdapter`; custom serializable types still include `serialization/Serialization.h` where their codecs are instantiated.
 
 On Windows, use the compiler kit that matches the Qt binaries and add `--config Release` to build and `-C Release` to CTest if using a multi-config generator. CMake downloads the pinned sources on the first configure. `FETCHCONTENT_SOURCE_DIR_HANA` and `FETCHCONTENT_SOURCE_DIR_QTKEYCHAIN` (and `FETCHCONTENT_SOURCE_DIR_QHOTKEY` for desktop builds) can point at already downloaded copies when working offline; use the revisions in `cmake/Dependencies.cmake` and `cmake/QHotkey.cmake`. All test builds require Python 3.9+ for catalog validation and tooling tests (CI pins Python 3.13). Portable tests also require the Qt HttpServer and WebSockets modules (the CI kit is pinned to Qt 6.9.1). On Linux, install `libsecret-1-dev` for QtKeychain and configure with `-DBUILD_DESKTOP_APP=OFF -DBUILD_TESTING=ON`. This builds CLI, REST, and the portable tests. Headless applications require Qt Core, Network, and LinguistTools; REST also requires HttpServer/WebSockets. Qt Gui is needed only for the desktop or the existing presentation-model tests.
 
@@ -28,7 +65,7 @@ device action dispatch, attachment spacing, and the settings visibility toggle.
 `KeybindSettings` checks disk persistence, stable action identities, normalized
 combinations, duplicate prevention, invalid data, write failures, and demo
 isolation. `ApiFixture` checks persistence/reset and fixture isolation for the
-visibility preference. These run in the existing Windows CTest matrix;
+visibility preference. These run in the Windows Release CTest job;
 saved binding storage uses the existing dependencies.
 The same QML suite checks independent range decrease/increase assignments and
 per-color, temperature, scene, and mode assignments through the real controls,
@@ -49,8 +86,8 @@ atomic file export, storage failures, and immediate home preference updates.
 `QmlLayouts::SettingsTransfer` exercises the real file-dialog wiring with local
 temporary JSON files and checks the card and confirmation at narrow widths in
 both themes. Native OS pickers are replaced by Qt's file picker in automated
-tests. Windows CI runs these suites and concrete selections in every existing
-Debug/Release/PCH job. The pickers use Qt Quick Dialogs from the existing desktop
+tests. Windows CI runs these suites once in its Release job.
+The pickers use Qt Quick Dialogs from the existing desktop
 Qt installation, without additional external dependencies.
 
 Settings use the serialization engine's `TryFrom<T>` for checked decoding:
@@ -65,15 +102,15 @@ settings validation.
 
 The `Scenarios` test covers loading, execution, refresh, and session reset through a fake `IHomeApi`. Desktop builds also exercise the scenarios page with real mouse clicks; portable builds run the same service and view model checks without Qt Quick.
 
-`Home` checks the shared home snapshot, list models, household selection, filtering, and stale responses after logout. Desktop builds also exercise refresh and household selection through QML. `ApiFixture` checks fixture playback, startup flags, callback lifetimes, and temporary settings. Debug builds additionally test fixture commands through `YandexHomeCli --fake-api --list-devices`. Desktop builds also check local fixture sign-in. Windows CI builds and tests both Debug and Release with PCH on and off.
+`Home` checks the shared home snapshot, list models, household selection, filtering, and stale responses after logout. Desktop builds also exercise refresh and household selection through QML. `ApiFixture` checks fixture playback, startup flags, callback lifetimes, and temporary settings. Debug builds additionally test fixture commands through `YandexHomeCli --fake-api --list-devices`. Desktop builds also check local fixture sign-in. Windows CI builds and tests Release with PCH enabled; Debug fixture commands can be checked locally.
 
-The same `Home` target checks room/Favorites collapse, favorite addition order, lexicographic room sorting (including duplicate names and shuffled snapshots), household filtering, persistence using temporary settings files, account switching, and late account responses after logout. Its desktop checks use the already required Qt QuickTest library to wait for layout updates before clicking headings and both room/favorite star buttons through the real QML page. `QmlLayouts` also checks arrow spacing, long-title elision, empty Favorites, animated intermediate states, and reversing an animation before it completes. Windows CI runs these targets in its existing CTest matrix and checks the English translations for the new controls; no credentials or live API requests are needed.
+The same `Home` target checks room/Favorites collapse, favorite addition order, lexicographic room sorting (including duplicate names and shuffled snapshots), household filtering, persistence using temporary settings files, account switching, and late account responses after logout. Its desktop checks use the already required Qt QuickTest library to wait for layout updates before clicking headings and both room/favorite star buttons through the real QML page. `QmlLayouts` also checks arrow spacing, long-title elision, empty Favorites, animated intermediate states, and reversing an animation before it completes. Windows CI runs these targets in its Release job and checks the English translations for the new controls; no credentials or live API requests are needed.
 
-`DeviceControl` characterizes concurrent desktop actions and external device changes through the real device view model, session, and QML-facing models, using a scripted API and controlled clock. It covers polling suppression, action failures, repeated commands, out-of-order reads, and the exact 800 ms boundaries without sleeps or live API access. Its current-behavior contract, including known surprising outcomes, is in [device-control-behavior.md](device-control-behavior.md). `DeviceService` tests explicit-ID commands, independent sessions, structured errors, and callback lifetimes using only Qt Core/Test and `AppServices`. Desktop QML tests also click through a real device capability delegate and exercise load failure/retry. The QML test executables declare their Qt Test and existing `Iot` dependencies in CMake, and the Windows Debug/Release/PCH matrix builds and runs this same path.
+`DeviceControl` characterizes concurrent desktop actions and external device changes through the real device view model, session, and QML-facing models, using a scripted API and controlled clock. It covers polling suppression, action failures, repeated commands, out-of-order reads, and the exact 800 ms boundaries without sleeps or live API access. Its current-behavior contract, including known surprising outcomes, is in [device-control-behavior.md](device-control-behavior.md). `DeviceService` tests explicit-ID commands, independent sessions, structured errors, and callback lifetimes using only Qt Core/Test and `AppServices`. Desktop QML tests also click through a real device capability delegate and exercise load failure/retry. The QML test executables declare their Qt Test and existing `Iot` dependencies in CMake, and the Windows Release job builds and runs this same path.
 
-`Cli` checks the command and capability input registries, selectors, typed actions, device metadata validation, output/errors, timeout cancellation, and callback lifetimes using `AppCli`, `IotCore`, Qt Core/Test, and scripted APIs. `CapabilityRules` verifies typed validation and device metadata independently of the CLI and GUI, linking only `IotCore` and Qt Core/Test. The `Capabilities` suite also verifies that QML capability wrappers preserve their payloads and defaults when delegating to the shared core. It runs in portable builds too. The `YandexHomeCli` executable builds independently of the desktop. `CliProcess_YandexHomeCli` verifies its entry point without live credentials: Debug uses committed fixture data, and Release checks fixture rejection. These targets are built and tested by the Windows Debug/Release/PCH matrix; its Release jobs also install and smoke-test the deployed console CLI. See [cli.md](cli.md) for usage, installation paths, and extension points.
+`Cli` checks the command and capability input registries, selectors, typed actions, device metadata validation, output/errors, timeout cancellation, and callback lifetimes using `AppCli`, `IotCore`, Qt Core/Test, and scripted APIs. `CapabilityRules` verifies typed validation and device metadata independently of the CLI and GUI, linking only `IotCore` and Qt Core/Test. The `Capabilities` suite also verifies that QML capability wrappers preserve their payloads and defaults when delegating to the shared core. It runs in portable builds too. The `YandexHomeCli` executable builds independently of the desktop. `CliProcess_YandexHomeCli` verifies its entry point without live credentials: Debug uses committed fixture data, and Release checks fixture rejection. These targets are built and tested by the Windows Release job, which also silently installs the package and smoke-tests the deployed console CLI. See [cli.md](cli.md) for usage, installation paths, and extension points.
 
-The `Cli` suite also verifies that progress clears before success, failure, and timeout output, and that `--no-progress`, JSON mode, and redirected stderr suppress the indicator. On macOS it verifies native main-queue callback delivery without reading Keychain credentials. Both executable entry points configure this native event loop. The same CLI and process checks run in the Windows Debug/Release/PCH matrix; only the macOS-specific callback check is skipped there.
+The `Cli` suite also verifies that progress clears before success, failure, and timeout output, and that `--no-progress`, JSON mode, and redirected stderr suppress the indicator. On macOS it verifies native main-queue callback delivery without reading Keychain credentials. Both executable entry points configure this native event loop. The same CLI and process checks run in the Windows Release job; only the macOS-specific callback check is skipped there.
 
 ## Debug fixture API
 
@@ -107,7 +144,7 @@ readings. Home-list attributes and device-detail responses contain the same data
 consistency. `QmlLayouts::DemoDevices::test_demoDevicePages` bundles the same JSON
 into its test executable and opens every device at 320/350 px in both themes,
 including mode lists, scene tabs, camera controls, and scrolling to readings.
-These run in the existing Windows Debug/Release CTest matrix; the regular app
+These run in the Windows Release CTest job; the regular app
 continues to bundle demo data only in Debug builds.
 
 Capability and property entries use the API fields, including `type`, `retrievable`, and `last_updated`. Omit the arrays or use empty arrays when those attributes are not needed.
@@ -164,7 +201,7 @@ just translations-update                    # Then translate new English message
 
 Set variables before the recipe name. `config` defaults to `Debug`; desktop profiles use `build-just/debug`, `build-just/release`, etc. `desktop=OFF` uses separate `build-just/portable/<configuration>` directories and is the default on Linux. `qt_prefix` falls back to `CMAKE_PREFIX_PATH` and then `QT_ROOT_DIR`. `auth_config` falls back to `YH_AUTH_CONFIG_FILE` and then the credential-free example. For local browser sign-in, run `just auth_config=/absolute/path/to/oauth.json configure`. `cli_app=ON`, `rest_app=ON`, `pch=ON`, `jobs=4`, and `generator=Ninja` are the defaults; `build_dir=/path/to/build` selects an existing or custom build directory. Multi-config generators are supported through `--config`/`-C`, and the launch recipes search the configuration subdirectory too.
 
-`build` configures only when its directory has no `CMakeCache.txt`. Subsequent builds, launches, and tests preserve configured Qt paths, credentials, and CMake flags. Run `configure` explicitly when changing these settings; append additional CMake options there, for example `just configure -DYH_ENABLE_PCH=OFF`. `build`, `test`, `run`, `cli`, `rest`, `demo`, and `install` forward extra arguments to their corresponding tools. `demo` requires a Debug desktop profile. `clean` invokes CMake's clean target and retains the build configuration. The Windows Debug/Release/PCH matrix installs pinned just and exercises configuration, builds, tests, formatting, and a credential-free CLI invocation through these recipes.
+`build` configures only when its directory has no `CMakeCache.txt`. Subsequent builds, launches, and tests preserve configured Qt paths, credentials, and CMake flags. Run `configure` explicitly when changing these settings; append additional CMake options there, for example `just configure -DYH_ENABLE_PCH=OFF`. `build`, `test`, `run`, `cli`, `rest`, `demo`, and `install` forward extra arguments to their corresponding tools. `demo` requires a Debug desktop profile. `clean` invokes CMake's clean target and retains the build configuration. The Release CI jobs install pinned just and exercise configuration, builds, translations, tests, and package verification through these recipes. Linux checks C++ formatting; Windows and Linux check justfile formatting.
 
 When switching Qt installations, refresh the CMake cache so cached `Qt6*_DIR` entries do not keep selecting the previous kit:
 
@@ -182,23 +219,24 @@ Network modules. It is built and installed with the existing SDK targets and
 requires no new dependency or generated source. `WorkerControl` tests exercise
 independent controller processes, startup/stop races, crash recovery, malformed
 messages, callback lifetime, and workers that do not exit. Windows runs these
-checks in every Debug/Release/PCH job and repeats the race suite five times;
-portable builds run the same Qt Core/Network suite. See
+checks once in its Release job; portable builds run the same Qt Core/Network
+suite. For repeated local race checks, run
+`ctest --test-dir <build-dir> -C Release -R '^(WorkerControl|Shortcuts)$' --repeat until-fail:5 --output-on-failure`. See
 [worker-control.md](worker-control.md) for its ownership contract.
 
 The REST adapter uses the declared Qt HTTP Server module and its WebSockets dependency. Windows, macOS, Linux, and release workflows install these modules with their pinned Qt 6.9.1 kit. `Rest` tests run in portable builds; CTest runs the CLI/REST process integration test and the settings toggle interaction test. See [rest.md](rest.md) for the background controls and credential-free Python example.
 
 Runtime REST profiles need no additional dependency or embedded credential. The
 committed `resources/rest/example.json` contains only a host and port; pass a private
-file with `--rest-config` for a supplied OAuth token. The existing Windows
-Debug/Release/PCH CTest matrix exercises JSON validation, configured listeners,
+file with `--rest-config` for a supplied OAuth token. The Windows Release
+CTest job exercises JSON validation, configured listeners,
 and synthetic-token worker startup without secret storage or live upstream calls.
 
 `resources/rest/openapi.json` is committed source, bundled by the `AppRest`
 CMake resource target and installed under `share/YandexHome/rest/`. It needs no
 generator or runtime schema dependency. `Rest` checks resource/source equality,
 router coverage, internal references, and the documented action examples; the
-Windows matrix and portable CTest runs exercise the same resource path.
+Windows Release job and portable CTest runs exercise the same resource path.
 For optional full OpenAPI validation while editing the document, use a pinned
 authoring tool (separate from the build):
 
@@ -266,10 +304,10 @@ runs console help without credentials. macOS also checks every application and
 QtCore for the requested architectures. Windows checks CPack's deployed payload;
 Windows CI additionally silently installs the generated installer into a
 temporary directory and verifies the installed executables and runtimes.
-The Windows Release/PCH-ON job, both macOS architecture jobs, and Linux CI
-exercise these same `just` commands with example OAuth data. The manual Linux
-build workflow uploads the `.tar.gz`. Tag releases build and verify all three
-formats before publishing them together.
+The Windows, native arm64 macOS, and Linux Release CI jobs exercise these same
+`just` commands with example OAuth data and upload their packages as Actions
+artifacts for seven days. Tag releases build and verify all three formats,
+including universal macOS, before publishing them together.
 The Windows and macOS CI jobs seed a missing QHotkey source override before
 configuration to check recovery from a stale local dependency cache.
 The installed SDK consumer check inherits an explicitly configured
@@ -318,10 +356,10 @@ just tidy src/services
 
 `just tidy` builds first so generated Qt headers are available. It checks only
 selected sources compiled in that profile, without applying fixes. The runner
-uses the configured GCC or Clang compiler's system header paths. Windows CI
-checks formatting and validates the clang-tidy configuration in every build job,
-then runs analysis in the Debug/PCH-OFF job. Linux CI runs analysis on the
-headless startup sources.
+uses the configured GCC or Clang compiler's system header paths. Linux CI
+checks C++ formatting and validates the clang-tidy configuration once. Run
+analysis locally with the PCH-OFF profile above; regular CI keeps PCH enabled
+to reduce build time.
 
 ## CMake layout
 
@@ -345,12 +383,11 @@ are grouped by responsibility:
 
 The included modules execute in the root directory scope, preserving executable,
 generated-resource, and QML import paths. Desktop tests are included after their
-QML modules and portable test targets exist. The Windows Debug/Release/PCH matrix
-and its desktop, CLI-only, REST-only, and packaging commands use this same layout.
+QML modules and portable test targets exist. The Release CI jobs and the local
+desktop, CLI-only, REST-only, and packaging commands use this same layout.
 The fixture test generates its own resources in the test build directory so
 portable Release builds work without generated files from a desktop build.
-Windows CI also builds and runs `ApiFixture` from a fresh portable Release
-profile with PCH disabled; Linux CI builds and runs all portable suites.
+Linux CI builds and runs `ApiFixture` with all other portable suites.
 
 ## Separate executables and shared SDK
 
@@ -395,8 +432,9 @@ executables do not link Qt Gui, Quick, Widgets, or NetworkAuth.
 and a relocatable `YandexHome` CMake package. `--component SDK` installs only
 the reusable SDK. `InstalledSdkConsumer` stages that component, configures and
 builds `examples/sdk` as an independent project, then runs it without network
-or credentials. Windows CI runs it in every Debug/Release/PCH job and also
-builds CLI-only and REST-only profiles. See [sdk.md](sdk.md) for consumption
+or credentials. Release CI runs this check on every platform. Standalone
+CLI-only and REST-only profiles can be built locally using the commands above.
+See [sdk.md](sdk.md) for consumption
 and compatibility requirements.
 
 Windows installation deploys Qt dependencies for all three executables. macOS
@@ -428,5 +466,5 @@ fixture-worker integration, native registration conflicts/release, and QML edito
 settings interactions. Release runs reject fixture flags and skip fixture process
 scenarios. Native checks use a rarely used modifier/F19 combination briefly and
 skip if the current desktop cannot register it; they do not inject keyboard input.
-Windows CI builds/deploys the worker, tests it in every Debug/Release/PCH job,
+Windows CI builds/deploys the worker, runs its Release tests once,
 and checks installed help. See [shortcuts.md](shortcuts.md) for runtime behavior.

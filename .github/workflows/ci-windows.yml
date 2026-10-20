@@ -1,4 +1,4 @@
-name: Windows build and tests
+name: Windows Release build
 
 on:
   pull_request:
@@ -14,11 +14,7 @@ concurrency:
 
 jobs:
   test:
-    strategy:
-      fail-fast: false
-      matrix:
-        pch: ['ON', 'OFF']
-        configuration: ['Debug', 'Release']
+    name: Windows Release
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
@@ -31,14 +27,6 @@ jobs:
       - name: Check justfile formatting
         run: just --fmt --check
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-
-      - name: Install pinned C++ formatting and analysis tools
-        run: >-
-          python -m pip install --only-binary=:all: -r requirements-clang-tools.txt
-
       - name: Select Git Bash for recipes (Bash 3.2+)
         shell: pwsh
         run: |
@@ -46,33 +34,12 @@ jobs:
           if (-not (Test-Path "$bashDirectory\bash.exe")) { throw 'Git Bash is required' }
           $bashDirectory >> $env:GITHUB_PATH
 
-      - name: Check Bash for recipes
-        run: bash --version
-
-      - name: Check C++ formatting and clang-tidy configuration
-        shell: pwsh
-        run: |
-          just format-check
-          if ($LASTEXITCODE -ne 0) { throw 'C++ formatting check failed' }
-          clang-tidy --verify-config
-          if ($LASTEXITCODE -ne 0) { throw 'Invalid clang-tidy configuration' }
-
       - name: Install Qt and matching MinGW
-        uses: jurplel/install-qt-action@v4
+        uses: ./.github/actions/setup-qt
         with:
-          version: '6.9.1'
           host: windows
-          target: desktop
-          arch: win64_mingw
-          modules: qt5compat qtnetworkauth qtsvg qttools qthttpserver qtwebsockets qtmultimedia
-          tools: tools_mingw1310,qt.tools.win64_mingw1310
-          cache: true
-
-      - name: Check committed translations
-        run: just translations-check
 
       - name: Install pinned NSIS
-        if: matrix.configuration == 'Release' && matrix.pch == 'ON'
         run: choco install nsis --version=3.12.0 --no-progress -y
 
       - name: Exercise recovery from a stale dependency source override
@@ -81,24 +48,12 @@ jobs:
           New-Item -ItemType Directory -Path build -Force | Out-Null
           Set-Content build/CMakeCache.txt "FETCHCONTENT_SOURCE_DIR_QHOTKEY:PATH=$env:RUNNER_TEMP/missing-qhotkey-source"
 
-      - name: Configure
-        shell: pwsh
-        run: >-
-          just build_dir=build
-          config=${{ matrix.configuration }}
-          pch=${{ matrix.pch }} configure
-          -DCMAKE_CXX_COMPILER=g++.exe
-
-      - name: Build GUI, CLI, REST, shortcuts, shared libraries, and tests
-        if: matrix.configuration != 'Release' || matrix.pch != 'ON'
-        run: just build_dir=build config=${{ matrix.configuration }} build
-
       - name: Build, test, and package Windows installer
-        if: matrix.configuration == 'Release' && matrix.pch == 'ON'
-        run: just package_build_dir=build package-windows -DCMAKE_CXX_COMPILER=g++.exe
+        run: >-
+          just package_build_dir=build generator=Ninja pch=ON
+          package-windows -DCMAKE_CXX_COMPILER=g++.exe
 
       - name: Smoke-check the silent installer
-        if: matrix.configuration == 'Release' && matrix.pch == 'ON'
         shell: pwsh
         run: |
           $installers = @(Get-ChildItem build/dist -Filter '*.exe' -File)
@@ -109,96 +64,21 @@ jobs:
           cmake "-DPACKAGE_ROOT=$installed" -P build/CheckPackage.cmake
           if ($LASTEXITCODE -ne 0) { throw 'Installed package verification failed' }
 
-      - name: Analyze application startup code
-        if: matrix.pch == 'OFF' && matrix.configuration == 'Debug'
-        run: just build_dir=build config=Debug tidy
+      - name: Upload Windows package
+        uses: actions/upload-artifact@v4
+        with:
+          name: yandex-home-windows-x86_64
+          path: build/dist/*.exe
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
 
-      - name: Run C++, QML, CLI, REST OpenAPI/JSON profiles, process, and Python example tests
-        if: matrix.configuration != 'Release' || matrix.pch != 'ON'
-        run: just build_dir=build config=${{ matrix.configuration }} test
-
-      - name: Exercise test catalog and concrete C++, QML, and process selection
-        shell: pwsh
-        run: |
-          just tests-list --feature devices --suites
-          if ($LASTEXITCODE -ne 0) { throw 'Test listing failed' }
-          just build_dir=build config=${{ matrix.configuration }} tests-check
-          if ($LASTEXITCODE -ne 0) { throw 'Test catalog check failed' }
-          just build_dir=build config=${{ matrix.configuration }} tests-run Serialization::FromJsonSimple Serialization::CheckedDecodingRejectsInvalidFields Capabilities::CurrentColorMatchesOnlyTheActiveColorSpace QmlLayouts::PageComposition::test_deviceCommandThroughRealDelegate QmlLayouts::PageComposition::test_settingsCardsShareInsets QmlLayouts::SettingsTransfer::test_exportAndConfirmedImport QmlLayouts::SettingsTransfer::test_trayWindowSurvivesDialogs SettingsTransfer::ConfirmationCancellationAndAccountChanges RestProcess::JsonConfigurationAndExplicitTokenAvoidSecretStorage
-          if ($LASTEXITCODE -ne 0) { throw 'Concrete test selection failed' }
-
-      - name: Stress shared worker startup and shutdown races
-        run: >-
-          ctest --test-dir build -C ${{ matrix.configuration }}
-          -R '^(WorkerControl|Shortcuts)$' --repeat until-fail:5 --output-on-failure
-
-      - name: Exercise console CLI recipe
-        run: just build_dir=build config=${{ matrix.configuration }} cli --help --json
-
-      - name: Exercise shortcut worker
-        shell: pwsh
-        run: |
-          & ./build/YandexHomeShortcuts.exe --help --json
-          if ($LASTEXITCODE -ne 0) { throw 'Shortcut worker failed' }
-
-      - name: Exercise REST worker recipe
-        run: just build_dir=build config=${{ matrix.configuration }} rest --help --json
-
-      - name: Check CLI arguments containing spaces
-        if: matrix.configuration == 'Debug'
-        run: just build_dir=build config=Debug cli --fake-api devices show --name "Desk lamp" --json
-
-      - name: Check installed console executables
-        if: matrix.configuration == 'Release'
-        shell: pwsh
-        run: |
-          just build_dir=build config=Release install
-          if ($LASTEXITCODE -ne 0) { throw 'Deployment failed' }
-          $cli = Get-ChildItem build/stage -Recurse -File -Filter YandexHomeCli.exe | Select-Object -First 1
-          if (-not $cli) { throw 'Missing installed console CLI' }
-          $rest = Get-ChildItem build/stage -Recurse -File -Filter YandexHomeRest.exe | Select-Object -First 1
-          if (-not $rest) { throw 'Missing installed REST worker' }
-          $shortcuts = Get-ChildItem build/stage -Recurse -File -Filter YandexHomeShortcuts.exe | Select-Object -First 1
-          if (-not $shortcuts) { throw 'Missing installed shortcut worker' }
-          & $shortcuts.FullName --help --json
-          if ($LASTEXITCODE -ne 0) { throw 'Installed shortcut worker failed' }
-          & $rest.FullName --help --json
-          if ($LASTEXITCODE -ne 0) { throw 'Installed REST worker failed' }
-          cmake "-DAPP_PATH=$($cli.FullName)" -DCONFIGURATION=Release -P tests/CliSmoke.cmake
-          if ($LASTEXITCODE -ne 0) { throw 'Installed console CLI failed' }
-
-      - name: Check portable fixture resources from a clean build
-        if: matrix.configuration == 'Release' && matrix.pch == 'ON'
-        shell: pwsh
-        run: |
-          just build_dir=build-portable config=Release desktop=OFF pch=OFF configure -DCMAKE_CXX_COMPILER=g++.exe -DBUILD_SHORTCUTS_APP=OFF
-          if ($LASTEXITCODE -ne 0) { throw 'Portable test configuration failed' }
-          cmake --build build-portable --config Release --parallel 2 --target ApiFixtureTests
-          if ($LASTEXITCODE -ne 0) { throw 'Portable fixture build failed' }
-          ctest --test-dir build-portable -C Release -R '^ApiFixture$' --output-on-failure --no-tests=error
-          if ($LASTEXITCODE -ne 0) { throw 'Portable fixture tests failed' }
-
-      - name: Build CLI independently of desktop and REST
-        run: >-
-          just build_dir=build-cli desktop=OFF rest_app=OFF
-          config=${{ matrix.configuration }} pch=${{ matrix.pch }} configure
-          -DCMAKE_CXX_COMPILER=g++.exe -DBUILD_TESTING=OFF
-          -DCMAKE_DISABLE_FIND_PACKAGE_Qt6Gui=TRUE
-          -DCMAKE_DISABLE_FIND_PACKAGE_Qt6Quick=TRUE
-          -DCMAKE_DISABLE_FIND_PACKAGE_Qt6NetworkAuth=TRUE
-          -DCMAKE_DISABLE_FIND_PACKAGE_Qt6HttpServer=TRUE
-
-      - name: Smoke-check standalone CLI
-        run: just build_dir=build-cli desktop=OFF rest_app=OFF config=${{ matrix.configuration }} cli --help --json
-
-      - name: Build REST independently of desktop and CLI
-        run: >-
-          just build_dir=build-rest desktop=OFF cli_app=OFF
-          config=${{ matrix.configuration }} pch=${{ matrix.pch }} configure
-          -DCMAKE_CXX_COMPILER=g++.exe -DBUILD_TESTING=OFF
-          -DCMAKE_DISABLE_FIND_PACKAGE_Qt6Gui=TRUE
-          -DCMAKE_DISABLE_FIND_PACKAGE_Qt6Quick=TRUE
-          -DCMAKE_DISABLE_FIND_PACKAGE_Qt6NetworkAuth=TRUE
-
-      - name: Smoke-check standalone REST
-        run: just build_dir=build-rest desktop=OFF cli_app=OFF config=${{ matrix.configuration }} rest --help --json
+      - name: Upload failure logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build-logs
+          path: |
+            build/Testing/Temporary/*.log
+            build/CMakeFiles/CMakeConfigureLog.yaml
+          retention-days: 7

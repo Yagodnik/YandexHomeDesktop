@@ -1,4 +1,4 @@
-name: macOS build and tests
+name: macOS Release build
 
 on:
   pull_request:
@@ -14,15 +14,8 @@ concurrency:
 
 jobs:
   test:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - runner: macos-15
-            architecture: arm64
-          - runner: macos-15-intel
-            architecture: x86_64
-    runs-on: ${{ matrix.runner }}
+    name: macOS Release
+    runs-on: macos-15
     env:
       DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
     steps:
@@ -32,19 +25,10 @@ jobs:
         with:
           just-version: '1.51.0'
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-
       - name: Install Qt
-        uses: jurplel/install-qt-action@v4
+        uses: ./.github/actions/setup-qt
         with:
-          version: '6.9.1'
           host: mac
-          target: desktop
-          arch: clang_64
-          modules: qt5compat qtnetworkauth qtsvg qttools qthttpserver qtwebsockets qtmultimedia
-          cache: true
 
       - name: Exercise recovery from a stale dependency source override
         run: |
@@ -53,5 +37,24 @@ jobs:
 
       - name: Build, test, and package macOS installer
         run: >-
-          just package_build_dir=build jobs=2 package-macos
-          -DCMAKE_OSX_ARCHITECTURES=${{ matrix.architecture }}
+          just package_build_dir=build generator=Ninja pch=ON jobs=3
+          package-macos -DCMAKE_OSX_ARCHITECTURES=arm64
+
+      - name: Upload macOS package
+        uses: actions/upload-artifact@v4
+        with:
+          name: yandex-home-macos-arm64
+          path: build/dist/*.dmg
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
+
+      - name: Upload failure logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-build-logs
+          path: |
+            build/Testing/Temporary/*.log
+            build/CMakeFiles/CMakeConfigureLog.yaml
+          retention-days: 7

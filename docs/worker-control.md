@@ -89,5 +89,5 @@ ctest --test-dir build-just/debug -R '^WorkerControl$' --repeat until-fail:10 --
 
 `Rest`, `RestProcess`, and the existing QML settings interaction tests verify the
 production REST adapter over the extracted implementation. `InstalledSdkConsumer`
-checks installation/export of the shared libraries. Windows CI repeats the
-worker suite in every existing build configuration.
+checks installation/export of the shared libraries. Each CI platform runs the
+worker suite once in Release; use the command above for repeated local checks.

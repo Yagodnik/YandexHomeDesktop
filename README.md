@@ -51,9 +51,11 @@ NSIS `.exe`, macOS — `.dmg`, Linux — архив `.tar.gz` с CLI/REST и SDK
 [docs/build.md](docs/build.md#release-packages).
 
 CI собирает, тестирует и упаковывает приложение на macOS и Windows, а на Linux —
-консольные приложения. Сборки CI используют тестовую OAuth-конфигурацию.
+консольные приложения. Для каждой ОС выполняется одна Release-сборка с Ninja и PCH;
+macOS собирается для arm64. Пакеты доступны в Artifacts запуска в течение 7 дней.
+Сборки CI используют тестовую OAuth-конфигурацию.
 Для релизов используется тег `vMAJOR.MINOR.PATCH`; все три пакета публикуются
-через [release workflow](.github/workflows/release.yml).
+через [release workflow](.github/workflows/release.yml), включая универсальный macOS-пакет.
 
 # CLI
 

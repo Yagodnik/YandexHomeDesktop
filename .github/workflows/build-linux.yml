@@ -1,4 +1,5 @@
 name: Linux build
+
 on:
   workflow_dispatch:
 
@@ -7,30 +8,4 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-      - uses: extractions/setup-just@v4
-        with:
-          just-version: '1.51.0'
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v4
-        with:
-          version: '6.9.1'
-          host: linux
-          target: desktop
-          arch: linux_gcc_64
-          modules: qttools qthttpserver qtwebsockets
-          cache: true
-      - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y libsecret-1-dev
-      - name: Build, test, and package Linux archive
-        run: just package_build_dir=build package-linux -DCMAKE_CXX_COMPILER=g++-13
-      - uses: actions/upload-artifact@v4
-        with:
-          name: yandex-home-linux
-          path: build/dist/*.tar.gz
-          if-no-files-found: error
+    uses: ./.github/workflows/ci-linux.yml

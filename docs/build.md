@@ -314,7 +314,10 @@ step ad-hoc signs the nested Mach-O code and frameworks, then signs the app
 bundle last and verifies it. This avoids invalidating the bundle seal when a
 helper is signed later. Developer ID signing and notarization are not
 configured. Windows includes the installed applications, SDK, and deployed Qt
-and compiler runtime. Linux includes CLI/REST, project shared libraries, and
+and compiler runtime in one installer. CPack stages these together so the
+installed entry-point checks can load the SDK DLLs before creating the installer.
+SDK-only installation remains available with `cmake --install <build-dir> --component SDK`.
+Linux includes CLI/REST, project shared libraries, and
 SDK, with a [runtime requirements README](linux-package.md). It requires a
 matching shared Qt runtime and compatible system libraries; it is not a
 self-contained Linux desktop application. Debian packaging is deferred.

@@ -22,6 +22,9 @@ elseif(_package_arch STREQUAL "aarch64")
 endif()
 if(WIN32)
   set(CPACK_GENERATOR NSIS)
+  # Stage applications and SDK DLLs together before deployment and startup checks.
+  # NSIS otherwise stages each install component in a separate directory.
+  set(CPACK_MONOLITHIC_INSTALL ON)
   set(_package_platform "windows-${_package_arch}")
   set(YH_PACKAGE_EXTENSION .exe)
   set(CPACK_PACKAGE_EXECUTABLES "YandexHomeDesktop" "Yandex Home Desktop")

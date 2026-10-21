@@ -3,7 +3,7 @@
 #include <QObject>
 #include <QColor>
 
-#include "../serialization/Serialization.h"
+#include "../serialization/SerializationTypes.h"
 
 class Themes : public QObject {
   Q_OBJECT

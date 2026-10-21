@@ -1,0 +1,9 @@
+{
+  "auth_url": "",
+  "access_token_url": "",
+  "client_id": "",
+  "client_secret": "",
+  "redirect_base": "http://127.0.0.1",
+  "redirect_port": 1337,
+  "scopes": []
+}

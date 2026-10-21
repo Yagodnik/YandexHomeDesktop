@@ -8,6 +8,9 @@ class CapabilitiesTests final : public QObject {
 private slots:
   static void TestOnOff();
   static void TestColorSetting();
+  static void CurrentColorMatchesOnlyTheActiveColorSpace();
   static void TestRange();
   static void TestToggle();
+  static void SharedBuildersPreserveDesktopPayloads();
+  static void SharedParametersPreserveDesktopDefaults();
 };

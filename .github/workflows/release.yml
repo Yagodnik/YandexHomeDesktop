@@ -1,0 +1,181 @@
+name: Publish release
+
+on:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify-tag:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify version and main ancestry
+        run: |
+          git fetch --no-tags origin main:refs/remotes/origin/main
+          python3 scripts/verify-release-tag.py "$GITHUB_REF_NAME"
+
+  windows-installer:
+    needs: verify-tag
+    runs-on: windows-2022
+    env:
+      QT_FORCE_STDERR_LOGGING: '1'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: extractions/setup-just@v4
+        with:
+          just-version: '1.51.0'
+
+      - name: Select Git Bash for recipes
+        shell: pwsh
+        run: |
+          (Join-Path $env:ProgramFiles 'Git\bin') >> $env:GITHUB_PATH
+
+      - name: Install Qt and matching MinGW
+        uses: ./.github/actions/setup-qt
+        with:
+          host: windows
+
+      - name: Install pinned NSIS
+        run: choco install nsis --version=3.12.0 --no-progress -y
+
+      - name: Create release OAuth config
+        shell: pwsh
+        env:
+          RELEASE_OAUTH_CONFIG_JSON: ${{ secrets.RELEASE_OAUTH_CONFIG_JSON }}
+        run: python scripts/write-oauth-config.py --from-env --output "$env:RUNNER_TEMP\oauth.json"
+
+      - name: Build, test, and package Windows installer
+        shell: pwsh
+        env:
+          YH_AUTH_CONFIG_FILE: ${{ runner.temp }}/oauth.json
+        run: just package_build_dir=build package-windows '-DCMAKE_CXX_COMPILER=g++.exe'
+
+      - name: Smoke-check the silent installer
+        shell: pwsh
+        run: |
+          $installers = @(Get-ChildItem build/dist -Filter '*.exe' -File)
+          if ($installers.Count -ne 1) { throw 'Expected one Windows installer' }
+          $installed = Join-Path $env:RUNNER_TEMP 'package installed'
+          $installer = Start-Process -FilePath $installers[0].FullName -ArgumentList '/S', "/D=$installed" -Wait -PassThru
+          if ($installer.ExitCode -ne 0) { throw 'Silent installer failed' }
+          cmake "-DPACKAGE_ROOT=$installed" -P build/CheckPackage.cmake
+          if ($LASTEXITCODE -ne 0) { throw 'Installed package verification failed' }
+
+      - name: Upload Windows failure logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-windows-logs
+          path: |
+            build/Testing/Temporary/*.log
+            build/Testing/*.txt
+            build/CMakeFiles/CMakeConfigureLog.yaml
+          retention-days: 7
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-windows
+          path: build/dist/*.exe
+          if-no-files-found: error
+          retention-days: 1
+
+  macos-dmg:
+    needs: verify-tag
+    runs-on: macos-15
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: extractions/setup-just@v4
+        with:
+          just-version: '1.51.0'
+
+      - name: Install Qt
+        uses: ./.github/actions/setup-qt
+        with:
+          host: mac
+
+      - name: Create release OAuth config
+        env:
+          RELEASE_OAUTH_CONFIG_JSON: ${{ secrets.RELEASE_OAUTH_CONFIG_JSON }}
+        run: python3 scripts/write-oauth-config.py --from-env --output "$RUNNER_TEMP/oauth.json"
+
+      - name: Build, test, and package universal macOS installer
+        env:
+          YH_AUTH_CONFIG_FILE: ${{ runner.temp }}/oauth.json
+        run: >-
+          just package_build_dir=build jobs=2 package-macos
+          '-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64'
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-macos
+          path: build/dist/*.dmg
+          if-no-files-found: error
+          retention-days: 1
+
+  linux-archive:
+    needs: verify-tag
+    runs-on: ubuntu-24.04
+    env:
+      QT_QPA_PLATFORM: offscreen
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: extractions/setup-just@v4
+        with:
+          just-version: '1.51.0'
+
+      - name: Install Qt
+        uses: ./.github/actions/setup-qt
+        with:
+          host: linux
+
+      - name: Install credential-store development dependency
+        run: sudo apt-get update && sudo apt-get install -y libsecret-1-dev
+
+      - name: Build, test, and package Linux archive
+        run: just package_build_dir=build package-linux -DCMAKE_CXX_COMPILER=g++-13
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-linux
+          path: build/dist/*.tar.gz
+          if-no-files-found: error
+          retention-days: 1
+
+  publish:
+    needs: [windows-installer, macos-dmg, linux-archive]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          path: dist
+          merge-multiple: true
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          test -f "dist/YandexHomeDesktop-${GITHUB_REF_NAME#v}-windows-x64.exe"
+          test -f "dist/YandexHomeDesktop-${GITHUB_REF_NAME#v}-macos-universal.dmg"
+          test -f "dist/YandexHomeDesktop-${GITHUB_REF_NAME#v}-linux-x64.tar.gz"
+          gh release create "$GITHUB_REF_NAME" \
+            "dist/YandexHomeDesktop-${GITHUB_REF_NAME#v}-windows-x64.exe" \
+            "dist/YandexHomeDesktop-${GITHUB_REF_NAME#v}-macos-universal.dmg" \
+            "dist/YandexHomeDesktop-${GITHUB_REF_NAME#v}-linux-x64.tar.gz" \
+            --repo "$GITHUB_REPOSITORY" --verify-tag --generate-notes

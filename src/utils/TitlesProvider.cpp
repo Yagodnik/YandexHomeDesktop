@@ -1,6 +1,11 @@
 #include "TitlesProvider.h"
+#include "TranslateCatalog.h"
+#include "JsonLoaderRaw.h"
 
-TitlesProvider::TitlesProvider(const QString& path, QObject *parent) : QObject(parent) {
+#include <QDebug>
+
+TitlesProvider::TitlesProvider(const QString& path, const char *translationContext, QObject *parent)
+  : QObject(parent), translation_context_(translationContext) {
   const auto temp = JsonLoader::LoadRaw(path);
 
   if (!temp.has_value()) {
@@ -24,5 +29,5 @@ QString TitlesProvider::GetTitle(const QString &name, const QString &instance) c
     return "???";
   }
 
-  return group.value(instance).toString();
+  return TranslateCatalog(translation_context_.constData(), group.value(instance).toString());
 }

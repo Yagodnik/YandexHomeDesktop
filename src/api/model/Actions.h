@@ -1,8 +1,10 @@
 #pragma once
 
+#include "yh/yandexapiadapter_export.h"
+
 #include "Capabilites.h"
 #include "Status.h"
-#include "serialization/Serialization.h"
+#include "serialization/SerializationTypes.h"
 
 JSON_STRUCT(DeviceActionsObject,
   (QString, id),
@@ -19,10 +21,10 @@ JSON_STRUCT(ActionResult,
   (QString, error_message)
 );
 
-JSON_STRUCT(CapabilityResponseState,
-  (QString, instance),
-  (ActionResult, action_result)
-);
+JSON_STRUCT(CapabilityResponseState, (QString, instance), (QVariantMap, value),
+            (ActionResult, action_result));
+
+JSON_STRUCT(VideoStream, (QString, stream_url), (QString, protocol));
 
 JSON_STRUCT(CapabilityResponse,
   (QString, type),
@@ -40,3 +42,11 @@ JSON_STRUCT(DeviceActionResponse,
   (QString, request_id),
   (QList<DeviceActionsResponse>, devices)
 );
+
+// Shared codecs are instantiated once in Serialization.cpp.
+extern template YANDEXAPIADAPTER_EXPORT ActionResult Serialization::From<ActionResult>(const QJsonObject&);
+extern template YANDEXAPIADAPTER_EXPORT CapabilityResponseState Serialization::From<CapabilityResponseState>(const QJsonObject&);
+extern template YANDEXAPIADAPTER_EXPORT CapabilityResponse Serialization::From<CapabilityResponse>(const QJsonObject&);
+extern template YANDEXAPIADAPTER_EXPORT DeviceActionsResponse Serialization::From<DeviceActionsResponse>(const QJsonObject&);
+extern template YANDEXAPIADAPTER_EXPORT DeviceActionResponse Serialization::From<DeviceActionResponse>(const QJsonObject&);
+extern template YANDEXAPIADAPTER_EXPORT QJsonObject Serialization::To<DeviceActionsObject>(const DeviceActionsObject&);

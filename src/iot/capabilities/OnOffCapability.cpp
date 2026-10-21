@@ -1,4 +1,5 @@
 #include "OnOffCapability.h"
+#include "iot/core/CapabilityState.h"
 
 #include <QVariant>
 
@@ -21,8 +22,5 @@ QVariant OnOffCapability::GetValue() const {
 }
 
 QVariantMap OnOffCapability::Create(const bool value) {
-  return {
-    { "instance", "on" },
-    { "value", value }
-  };
+  return Iot::State::OnOff(value);
 }

@@ -1,0 +1,87 @@
+name: Windows Release build
+
+on:
+  pull_request:
+    branches: [main, dev, refactoring]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Windows Release
+    runs-on: windows-2022
+    env:
+      QT_FORCE_STDERR_LOGGING: '1'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install just
+        uses: extractions/setup-just@v4
+        with:
+          just-version: '1.51.0'
+
+      - name: Check justfile formatting
+        run: just --fmt --check
+
+      - name: Select Git Bash for recipes (Bash 3.2+)
+        shell: pwsh
+        run: |
+          $bashDirectory = Join-Path $env:ProgramFiles 'Git\bin'
+          if (-not (Test-Path "$bashDirectory\bash.exe")) { throw 'Git Bash is required' }
+          $bashDirectory >> $env:GITHUB_PATH
+
+      - name: Install Qt and matching MinGW
+        uses: ./.github/actions/setup-qt
+        with:
+          host: windows
+
+      - name: Install pinned NSIS
+        run: choco install nsis --version=3.12.0 --no-progress -y
+
+      - name: Exercise recovery from a stale dependency source override
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path build -Force | Out-Null
+          Set-Content build/CMakeCache.txt "FETCHCONTENT_SOURCE_DIR_QHOTKEY:PATH=$env:RUNNER_TEMP/missing-qhotkey-source"
+
+      - name: Build, test, and package Windows installer
+        run: >-
+          just package_build_dir=build generator=Ninja pch=ON
+          package-windows '-DCMAKE_CXX_COMPILER=g++.exe'
+
+      - name: Smoke-check the silent installer
+        shell: pwsh
+        run: |
+          $installers = @(Get-ChildItem build/dist -Filter '*.exe' -File)
+          if ($installers.Count -ne 1) { throw 'Expected one Windows installer' }
+          $installed = Join-Path $env:RUNNER_TEMP 'package installed'
+          $installer = Start-Process -FilePath $installers[0].FullName -ArgumentList '/S', "/D=$installed" -Wait -PassThru
+          if ($installer.ExitCode -ne 0) { throw 'Silent installer failed' }
+          cmake "-DPACKAGE_ROOT=$installed" -P build/CheckPackage.cmake
+          if ($LASTEXITCODE -ne 0) { throw 'Installed package verification failed' }
+
+      - name: Upload Windows package
+        uses: actions/upload-artifact@v4
+        with:
+          name: yandex-home-windows-x86_64
+          path: build/dist/*.exe
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
+
+      - name: Upload failure logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build-logs
+          path: |
+            build/Testing/Temporary/*.log
+            build/Testing/*.txt
+            build/CMakeFiles/CMakeConfigureLog.yaml
+          retention-days: 7

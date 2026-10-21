@@ -15,6 +15,8 @@ Item {
   }
 
   property int activeTab: 0
+  property string householdName
+  signal householdSelectRequested()
 
   Column {
     id: layout
@@ -38,9 +40,7 @@ Item {
 
         UI.HeadingText {
           id: heading
-          text: householdsModel.currentHouseholdName
-          font.pointSize: 24
-          font.bold: true
+          text: topBar.householdName
           anchors.left: parent.left
           anchors.verticalCenter: parent.verticalCenter
         }
@@ -67,10 +67,12 @@ Item {
         }
 
         MouseArea {
+          objectName: "householdSelector"
           anchors.fill: parent
+          cursorShape: Qt.PointingHandCursor
 
           onClicked: {
-            householdSelectDialog.open();
+            topBar.householdSelectRequested();
           }
         }
       }
@@ -85,21 +87,24 @@ Item {
       width: parent.width
 
       UI.MyTab {
-        text: "Устройства"
+        objectName: "devicesTab"
+        text: qsTr("Устройства")
         leftCorner: true
         active: topBar.activeTab === 0
         onClicked: topBar.activeTab = 0
       }
 
       UI.MyTab {
-        text: "Сценарии"
+        objectName: "scenariosTab"
+        text: qsTr("Сценарии")
         leftCorner: true
         active: topBar.activeTab === 1
         onClicked: topBar.activeTab = 1
       }
 
       UI.MyTab {
-        text: "Настройки"
+        objectName: "settingsTab"
+        text: qsTr("Настройки")
         leftCorner: true
         active: topBar.activeTab === 2
         onClicked: topBar.activeTab = 2

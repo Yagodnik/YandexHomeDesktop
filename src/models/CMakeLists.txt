@@ -3,10 +3,24 @@ cmake_minimum_required(VERSION 3.16)
 find_package(Qt6 COMPONENTS Core Network Gui REQUIRED)
 
 add_library(Models STATIC
+        AuthorizationModel.cpp
+        AuthorizationModel.h
+        RestViewModel.h RestViewModel.cpp
+        ShortcutViewModel.h ShortcutViewModel.cpp
+        AccountModel.cpp
+        AccountModel.h
+        KeybindSettingsModel.h KeybindSettingsModel.cpp
+        SettingsTransferModel.h SettingsTransferModel.cpp
+        HomeViewModel.cpp
+        HomeViewModel.h
         DeviceModel/DeviceController.cpp
         DeviceModel/DeviceController.h
+        DeviceModel/DeviceViewModel.h
+        DeviceModel/DeviceViewModel.cpp
         ScenariosModel/ScenariosModel.cpp
         ScenariosModel/ScenariosModel.h
+        ScenariosModel/ScenariosViewModel.h
+        ScenariosModel/ScenariosViewModel.cpp
         DevicesModel/DevicesModel.cpp
         DevicesModel/DevicesModel.h
         DevicesModel/DevicesFilterModel.cpp
@@ -27,8 +41,6 @@ add_library(Models STATIC
         ColorsModel/ColorModesFilterModel.h
         HouseholdsModel/HouseholdsModel.cpp
         HouseholdsModel/HouseholdsModel.h
-        DeviceModel/DeviceAttribute.h
-        DeviceModel/DeviceAttribute.cpp
         DeviceModel/PropertiesModel.cpp
         DeviceModel/PropertiesModel.h
         ModesModel/ModesModel.cpp
@@ -39,4 +51,9 @@ add_library(Models STATIC
         DeviceModel/DeviceDataModel.h
 )
 
-target_link_libraries(Models PRIVATE Qt6::Core Qt6::Network Qt6::Gui YandexHomeApi Utils)
+target_link_libraries(Models PUBLIC ApiContracts AuthContracts PRIVATE Qt6::Core Qt6::Gui Utils AppServices AppRestControl AppShortcuts)
+
+if(BUILD_DESKTOP_APP)
+  target_sources(Models PRIVATE DeviceModel/CameraSnapshotModel.h DeviceModel/CameraSnapshotModel.cpp)
+  target_link_libraries(Models PRIVATE Qt6::Multimedia)
+endif()

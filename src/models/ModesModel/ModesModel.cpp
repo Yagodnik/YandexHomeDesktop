@@ -1,5 +1,6 @@
 #include "ModesModel.h"
 #include "utils/JsonLoader.h"
+#include "utils/TranslateCatalog.h"
 
 ModesModel::ModesModel(QObject *parent) : QAbstractListModel(parent) {
   const auto modes_list_opt = JsonLoader::Load<ModesList>(kModesListFile);
@@ -26,7 +27,7 @@ QVariant ModesModel::data(const QModelIndex &index, int role) const {
     case IdRole:
       return mode.id;
     case NameRole:
-      return mode.name;
+      return TranslateCatalog("DataModes", mode.name);
     default:
       return {};
   }
@@ -44,5 +45,7 @@ QVariant ModesModel::getItem(int index) const {
     return {};
   }
 
-  return QVariant::fromValue(modes_.at(index));
+  Mode mode = modes_.at(index);
+  mode.name = TranslateCatalog("DataModes", mode.name);
+  return QVariant::fromValue(mode);
 }

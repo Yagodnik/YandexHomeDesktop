@@ -12,73 +12,74 @@ Windows            |  MacOS
 В отличии от [предыдущей версии](https://github.com/Yagodnik/YandexHomeWidgets) теперь поддерживаются все устройства, умения (исключением является умение ```devices.capabilities.video_stream```) и свойства. Однако, далеко не все из них протестированны полноценно.
 
 # Сборка
-| Build Status         | Branch |
-|---------------------|---------|
-| [![Main Windows build](https://github.com/Yagodnik/YandexHomeDesktop/actions/workflows/build-windows.yml/badge.svg?branch=main)](https://github.com/Yagodnik/YandexHomeDesktop/actions/workflows/build-windows.yml) | main |
-| [![Dev Windows build](https://github.com/Yagodnik/YandexHomeDesktop/actions/workflows/build-windows.yml/badge.svg?branch=dev)](https://github.com/Yagodnik/YandexHomeDesktop/actions/workflows/build-windows.yml) | dev |
 
-Если вы очень хотите собрать проект самостоятельно:
+Для сборки на macOS и Windows нужны CMake 3.28+, Ninja, Qt 6.9+ (Quick, NetworkAuth, Widgets, Svg, Qt5Compat и LinguistTools) и компилятор C++23. CMake загрузит закреплённые версии Boost.Hana и QtKeychain. По умолчанию в приложение включается тестовая OAuth-конфигурация `resources/auth/example.json`: приложение соберётся, но вход в аккаунт с ней не работает.
 
-Создайте файл ```cmake/qt6-config.cmake``` и поместите туда вот это:
-```
-set(
-    CMAKE_PREFIX_PATH
-    "(тут будет ваш пусть до qt)/(версия, желательно 6.9)/lib/cmake"
-    CACHE STRING "Qt installation path"
-)
-
+```sh
+cmake -S . -B build -G Ninja -DCMAKE_PREFIX_PATH=/path/to/Qt/6.x/macos -DBUILD_DESKTOP_APP=ON
+cmake --build build --parallel 4
+ctest --test-dir build --output-on-failure
 ```
 
-Ну и стоит понимать, что для полноценной работы необходимо будет сгенерировать необходимые токены.
-Сгенерировать необходимые файлы можно с помощью скрипта (см workflow для Windows, этап сборки ```Generate secrets.json```)
-Однако сам client id вам нужно будет сделать самостоятельно. Вот как это сделать:
-1) Создайте веб приложение в https://oauth.yandex.ru/client/new
-2) Укажите redirect-url: http://127.0.0.1:1337
+В корне проекта есть `justfile` с командами для сборки, запуска GUI и CLI, тестов и переводов. Нужны just 1.51.0 и Python 3.9+; список команд покажет `just`. Например:
 
-Заполняете всё остальное и получаете все необходимые данные, копируете client_id.
-
-### Windows
-Следуйте пунктам из workflow, вероятно там будет самый актуальный способ сборки. 
-Советую использовать Qt версии 6.9 и MinGW 13.10, я пробовал собирать на компиляторах старых версий, но там возникают проблемы из-за C++23.
-
-### MacOS
-Установите Qt 6.9, разместите необходимые библиотеки аналогично с workflow для Windows. Если хотите universal build, то 
-нужно будет собрать qtkeychain так же universal build. 
-То как примерно должна выглядит папка с либами:
-```
-find libs -maxdepth 2 -print 
-libs
-libs/qtkeychain
-libs/qtkeychain/include/...
-libs/qtkeychain/lib/libqt6keychain.dylib
-libs/boost
-libs/boost/hana.hpp
-libs/boost/hana/...
+```sh
+just qt_prefix=/path/to/Qt/6.x/macos configure
+just demo
+just cli --fake-api devices list --json
+just rest --fake-api
+just config=Release qt_prefix=/path/to/Qt/6.x/macos build
+just test
 ```
 
-Дальше можете воспользоваться специальным скриптом ```scripts/macos-build.sh``` из корневой папки проекта
+Профили Debug, Release и переносимые тесты используют отдельные каталоги сборки. Параметры и дополнительные флаги описаны в [docs/build.md](docs/build.md#just-commands).
 
-### Linux
-А под линукс может быть потом билд сделаю =)
-В целом работать наверное будет, но tray режим будет требовать доработки, ~~а ещё возможно его нужно будет подгонять под каждое DE отдельно~~
+Для ускорения сборки по умолчанию включены предкомпилированные заголовки (PCH).
+Их можно отключить при конфигурации CMake с помощью `-DYH_ENABLE_PCH=OFF`.
+Объявления сериализуемых типов находятся в `serialization/SerializationTypes.h`;
+полный `serialization/Serialization.h` нужен для инстанцирования сериализаторов.
+Используемые сериализаторы общих API-моделей компилируются один раз в библиотеке `YandexApiAdapter`.
 
-# Аргументы CLI
+Для работающего входа создайте свою конфигурацию OAuth и передайте `-DYH_AUTH_CONFIG_FILE=/path/to/oauth.json` (или `-DAUTH_CONFIG_FILE=...`). Файл встраивается в приложение. Инструкции и вариант для Linux-тестов приведены в [docs/build.md](docs/build.md).
 
-В этой версии я реализовал способ работы с приложением через командную строку.
-Например, если у вас что-то *багнулось* с аккаунтом (а такое может быть вполне), вы можете сбросить его через CLI. 
-Для этого открываете путь, куда вы установили приложение и выполняете его с аргументами: --reset --i-know-what-i-am-doing.
+Для сборки установщика запустите `just package` на целевой ОС: Windows создаёт
+NSIS `.exe`, macOS — `.dmg`, Linux — архив `.tar.gz` с CLI/REST и SDK.
+Также доступны `just package-windows`, `just package-macos` и `just package-linux`.
+Результат находится в `build-package/<os>/dist/`. Команды используют Release,
+запускают тесты и проверяют пакет. Для Windows нужен NSIS 3.12; Linux-архиву
+нужен установленный совместимый Qt runtime. Параметры и зависимости описаны в
+[docs/build.md](docs/build.md#release-packages).
 
-Примерно так: ```YandexHomeDesktop.exe --reset --i-know-what-i-am-doing``` (Для Windows)
+CI собирает, тестирует и упаковывает приложение на macOS и Windows, а на Linux —
+консольные приложения. Для каждой ОС выполняется одна Release-сборка с Ninja и PCH;
+macOS собирается для arm64. Пакеты доступны в Artifacts запуска в течение 7 дней.
+Сборки CI используют тестовую OAuth-конфигурацию.
+Для релизов используется тег `vMAJOR.MINOR.PATCH`; все три пакета публикуются
+через [release workflow](.github/workflows/release.yml), включая универсальный macOS-пакет.
 
-Для MacOS ```./Applications/YandexHomeDesktop.app/Contents/MacOS/YandexHomeDesktop --reset --i-know-what-i-am-doing```
+# CLI
 
-Примечание: Если вы увидите в консоли что-то такое ```Mon Sep 1 16:01:15 2025 GMT [DEBUG] AuthorizationService: Token: тут будет ваш токен```
-то вы ошиблись в наборе команды и ПОЖАЛУЙСТА не присылайте мне ваш токен в комменты, если хотите что-то спросить. 
-По этому токену можно управлять вашим умным домом.
+Для Windows, macOS и Linux собирается отдельный консольный `YandexHomeCli`. Сначала войдите в аккаунт через desktop-приложение; CLI использует сохранённый вход. На macOS установленный CLI находится в `YandexHomeDesktop.app/Contents/MacOS/YandexHomeCli`, на Windows — рядом с `YandexHomeDesktop.exe`.
 
-Список аргументов можно посмотреть прописав ```--help```
+```sh
+YandexHomeCli devices list --json
+YandexHomeCli devices show --id lamp
+YandexHomeCli devices set --id lamp --capability on_off --value on
+YandexHomeCli scenarios run --id evening
+YandexHomeCli --help
+```
 
-Пример как включить устройство из CLI: ``` --on_off "имя в ковычках" --value on ```
+Поддерживаются range, mode, toggle и color_setting, поиск по ID или точному имени, фильтр дома, JSON и коды завершения для автоматизации. Старые аргументы (`--list-devices`, `--on_off`, `--account-info`, `--reset`) сохранены в CLI; GUI запускается отдельно. Сброс требует `reset --i-know-what-i-am-doing`.
+
+Примеры всех команд, формат ошибок и устройство расширяемых команд описаны в [docs/cli.md](docs/cli.md).
+
+Локальный REST API включается командой `YandexHomeCli --enable-rest`, выключается
+через `--disable-rest`; состояние показывает `--status-rest`. Сервер работает
+в фоне и управляется также в разделе «Настройки → Дополнительно». В Debug можно
+добавить `--fake-api`. Отдельный процесс `YandexHomeRest` можно запустить через `just rest`; локальный API не требует токена. Маршруты и запуск Python-примера из
+`examples/rest_client.py` описаны в [docs/rest.md](docs/rest.md).
+
+GUI, CLI и REST используют общие динамические библиотеки. Пример внешнего CMake-проекта — [examples/sdk](examples/sdk); установка и публичные цели описаны в [docs/sdk.md](docs/sdk.md).
 
 # Credits
 Список изображений, которые я использовал: 

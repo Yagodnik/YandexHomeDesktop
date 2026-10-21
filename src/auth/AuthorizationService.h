@@ -1,68 +1,35 @@
 #pragma once
 
-#include <QObject>
-#include <QtNetworkAuth/QOAuthHttpServerReplyHandler>
-#include <QtNetworkAuth/QOAuth2AuthorizationCodeFlow>
-#include "serialization/Serialization.h"
-#include "qtkeychain/keychain.h"
+#include "yh/authcore_export.h"
 
-class AuthorizationService : public QObject {
+#include "IAuthorizationService.h"
+#include "IAuthorizationFlow.h"
+#include "ITokenStore.h"
+
+// Dependencies outlive the service and deliver each result once, only while its
+// QObject context is alive. The service owns session and operation ordering.
+class AUTHCORE_EXPORT AuthorizationService final : public IAuthorizationService {
   Q_OBJECT
 public:
-  explicit AuthorizationService(QObject *parent = nullptr);
-
-  Q_INVOKABLE void AttemptLocalAuthorization();
-  Q_INVOKABLE [[nodiscard]] bool IsAuthorized() const;
-  Q_INVOKABLE void AttemptAuthorization();
-  Q_INVOKABLE void Logout();
-  Q_INVOKABLE QString GetLastErrorCode() const;
-  [[nodiscard]] std::optional<QString> GetToken() const;
-
-signals:
-  void authorized();
-  void unauthorized();
-  void logout();
-  void logoutFinished();
-  void logoutFailed(const QString &error);
-  void authorizationFailed();
-  void initializationFailed();
-  void authorizationCanceled();
+  explicit AuthorizationService(ITokenStore* store, IAuthorizationFlow* flow = nullptr,
+                                QObject* parent = nullptr);
+  void AttemptLocalAuthorization() override;
+  void AttemptAuthorization() override;
+  void Logout() override;
+  [[nodiscard]] bool IsAuthorized() const override;
+  [[nodiscard]] QString GetLastErrorCode() const override;
+  [[nodiscard]] std::optional<QString> GetToken() const override;
 
 private:
-  const QString kAppName = "com.artemyagodnik.YandexHomeDesktop_Test";
-  const QString kSecureKey = "test_secret";
+  enum class Operation { Idle, Reading, Authorizing, Writing, Deleting };
+  void Fail(const AuthError& error);
+  void DeleteToken();
 
-  static constexpr int kDefaultPort = 1337;
-  const QString kAuthSecretsPath = ":/auth/secrets.json";
-  const QString kCallbackPath = ":/callback/index.html";
-
-  JSON_STRUCT(AuthSecrets,
-    (QString, auth_url),
-    (QString, access_token_url),
-    (QString, client_id),
-    (QString, redirect_base),
-    (int, redirect_port),
-    (QStringList, scopes)
-  );
-
-  void TryWrite(const QString& key);
-  void TryRead();
-  void TryDelete();
-
-  [[nodiscard]] std::optional<QJsonObject> GetAuthSecrets() const;
-  [[nodiscard]] static QSet<QByteArray> GetScopes(const QStringList& list);
-  [[nodiscard]] bool PrepareCallbackPage();
-
-  void ReadTokenHandler(QKeychain::ReadPasswordJob *job);
-  void WriteTokenHandler(QKeychain::WritePasswordJob *job);
-  void DeleteTokenHandler(QKeychain::DeletePasswordJob *job);
-
-  QOAuth2AuthorizationCodeFlow oauth2_;
-  QOAuthHttpServerReplyHandler reply_handler_;
-  int last_error_code_{0};
+  ITokenStore* store_;
+  IAuthorizationFlow* flow_;
+  Operation operation_ = Operation::Idle;
+  quint64 generation_ = 0;
+  bool logout_requested_ = false;
+  quint32 last_error_code_ = 0;
   std::optional<QString> token_;
-
-private slots:
-  void HandleAuthorizationStatus(QAbstractOAuth::Status status);
-  static void AuthorizeWithBrowser(QUrl url);
 };

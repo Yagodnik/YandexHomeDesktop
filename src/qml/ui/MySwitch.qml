@@ -1,7 +1,7 @@
+import YandexHomeDesktop.Ui as UI
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import Qt5Compat.GraphicalEffects
 
 Item {
   id: root
@@ -35,8 +35,8 @@ Item {
     anchors.verticalCenter: parent.verticalCenter
     x: internalChecked ? root.width - width : 0
     Behavior on x { NumberAnimation { duration: 200; easing.type: Easing.InOutQuad } }
-    layer.enabled: true
-    layer.effect: DropShadow {
+    layer.enabled: GraphicsInfo.api !== GraphicsInfo.Unknown && GraphicsInfo.api !== GraphicsInfo.Software
+    layer.effect: UI.Shadow {
       source: thumb
       radius: 5
       samples: 16

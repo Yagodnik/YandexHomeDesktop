@@ -10,18 +10,18 @@ if(APPLE)
   set_source_files_properties(macos/MacOSIntegration.mm PROPERTIES COMPILE_FLAGS "-x objective-c++")
   set(PLATFORM_SPECIFIC_FRAMEWORKS "-framework Cocoa")
 
-  add_library(PlatformService
+  add_library(PlatformService STATIC
           PlatformService.cpp
           PlatformServiceMac.cpp
           ${PLATFORM_SPECIFIC_SRC}
   )
 elseif(UNIX)
-  add_library(PlatformService
+  add_library(PlatformService STATIC
           PlatformService.cpp
           PlatformServiceLinux.cpp
   )
 elseif(WIN32)
-  add_library(PlatformService
+  add_library(PlatformService STATIC
           PlatformService.cpp
           PlatformServiceWin.cpp
   )

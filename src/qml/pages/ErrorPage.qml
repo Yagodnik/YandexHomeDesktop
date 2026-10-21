@@ -1,51 +1,14 @@
 import QtQuick
 import YandexHomeDesktop.Ui as UI
 
-Item {
-  Rectangle {
+UI.PageSurface {
+  UI.MessageActionsPane {
     anchors.fill: parent
-    color: themes.background
-  }
-
-  Column {
-    id: col
-    anchors.centerIn: parent
-    spacing: 15
-
-    UI.AnimatedText {
-      text: "Что-то пошло не так! " + authorizationService.GetLastErrorCode();
-      color: themes.inactive
-      pixelSize: 24
-
-      anchors.horizontalCenter: col.horizontalCenter
-    }
-
-    Column {
-      spacing: 8
-      anchors.horizontalCenter: col.horizontalCenter
-
-      UI.MyButton {
-        width: col.width
-        text: "Попробовать ещё раз"
-
-        anchors.horizontalCenter: col.horizontalCenter
-
-        onClicked: {
-          router.navigateTo("loading");
-        }
-      }
-
-      UI.MyButton {
-        width: col.width
-        text: "Выйти из аккаунта"
-
-        anchors.horizontalCenter: col.horizontalCenter
-
-        onClicked: {
-          authorizationService.Logout();
-          router.navigateTo("auth");
-        }
-      }
-    }
+    message: qsTr("Что-то пошло не так! %1").arg(authorizationService.GetLastErrorCode())
+    primaryButtonText: qsTr("Попробовать ещё раз")
+    secondaryButtonText: qsTr("Выйти из аккаунта")
+    equalButtonWidths: true
+    onPrimaryClicked: router.navigateTo("loading")
+    onSecondaryClicked: authorizationService.Logout()
   }
 }

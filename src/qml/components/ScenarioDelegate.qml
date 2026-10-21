@@ -1,10 +1,19 @@
 import QtQuick
-import Qt5Compat.GraphicalEffects
 import YandexHomeDesktop.Ui as UI
+import YandexHomeDesktop.Components as Components
+import YandexHomeDesktop.ViewModels
 
 Item {
   id: delegateItem
   height: 48
+  objectName: "scenarioDelegate_" + scenario_id
+  required property string scenario_id
+  required property string name
+  required property bool is_active
+  required property bool is_waiting_response
+  property KeybindSettingsModel keybindSettings: null
+  property bool showKeybinds: true
+  signal executeRequested()
 
   opacity: 0
 
@@ -23,7 +32,7 @@ Item {
     id: darkOverlay
     anchors.fill: parent
     color: Qt.rgba(0, 0, 0, 0.1)
-    visible: !is_active
+    visible: !delegateItem.is_active
     radius: 16
     z: 100
 
@@ -41,7 +50,7 @@ Item {
     opacity: visible ? 1 : 0
   }
 
-  DropShadow {
+  UI.Shadow {
     anchors.fill: background
     source: background
     horizontalOffset: 0
@@ -52,21 +61,39 @@ Item {
     color: themes.shadowColor
   }
 
-  Rectangle {
+  UI.CardSurface {
     id: background
     anchors.fill: parent
-    color: themes.headerBackground
-    radius: 16
   }
 
   UI.DefaultText {
-    text: name
+    objectName: "scenarioName"
+    text: delegateItem.name
     anchors.verticalCenter: parent.verticalCenter
     anchors.left: parent.left
     anchors.leftMargin: 16
+    anchors.right: shortcut.visible ? shortcut.left : startButton.left
+    anchors.rightMargin: 8
+    elide: Text.ElideRight
   }
 
-  property var show: false
+  Components.CapabilityKeybind {
+    id: shortcut
+    objectName: "scenarioKeybind"
+    anchors.verticalCenter: parent.verticalCenter
+    anchors.right: startButton.left
+    anchors.rightMargin: 8
+    width: Math.min(implicitWidth, delegateItem.width * 0.45)
+    visible: delegateItem.showKeybinds && delegateItem.keybindSettings !== null
+    z: 101 // Inactive scenarios still allow editing their assignment.
+    compact: true
+    capabilityTitle: delegateItem.name
+    bindingDescription: qsTr("Запуск сценария")
+    deviceName: delegateItem.name
+    keybindSettings: delegateItem.keybindSettings
+    bindingTarget: ({ scenario_id: delegateItem.scenario_id, device_id: "", capability_type: "",
+                      instance: "", action: "run", value: "" })
+  }
 
   UI.MyProgressIndicator {
     width: 30
@@ -75,7 +102,7 @@ Item {
     anchors.right: parent.right
     anchors.rightMargin: 9
     anchors.verticalCenter: parent.verticalCenter
-    opacity: is_waiting_response ? 1 : 0
+    opacity: delegateItem.is_waiting_response ? 1 : 0
     visible: opacity > 0
 
     Behavior on opacity {
@@ -88,9 +115,10 @@ Item {
 
   Image {
     id: startButton
+    objectName: "scenarioStart"
     source: "qrc:/images/play.svg"
 
-    opacity: is_waiting_response ? 0 : 1
+    opacity: delegateItem.is_waiting_response ? 0 : 1
     visible: opacity > 0
 
     Behavior on opacity {
@@ -115,11 +143,9 @@ Item {
     MouseArea {
       anchors.fill: parent
       cursorShape: Qt.PointingHandCursor
+      enabled: delegateItem.is_active && !delegateItem.is_waiting_response
 
-      onClicked: {
-        console.log("Executing " + scenario_id);
-        scenariosModel.ExecuteScenario(index);
-      }
+      onClicked: delegateItem.executeRequested()
     }
   }
 }

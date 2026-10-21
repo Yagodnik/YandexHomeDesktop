@@ -1,0 +1,1828 @@
+{
+  "openapi": "3.1.0",
+  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
+  "info": {
+    "title": "Yandex Home REST API",
+    "version": "1.0.0",
+    "description": "Headless REST adapter for Yandex Home devices, scenarios, and account data. The default listener is http://127.0.0.1:8765 (Debug fixtures use 8766). Host and port can be configured. Clients send no REST key or OAuth Authorization header: Yandex OAuth is configured on the server through a saved login or an oauth_token JSON profile. Browser Origin requests are rejected and CORS is disabled. Request bodies are limited to 65536 bytes. The default response deadline is 30000 ms and can be changed with the worker --timeout option. All responses use Cache-Control: no-store."
+  },
+  "servers": [
+    {
+      "url": "http://{host}:{port}",
+      "description": "Default listener or manually selected host and port",
+      "variables": {
+        "host": {
+          "default": "127.0.0.1",
+          "description": "Listener address; include brackets around IPv6 literals."
+        },
+        "port": {
+          "default": "8765",
+          "description": "Use the port from the CLI status URL; fixture default is 8766."
+        }
+      }
+    }
+  ],
+  "security": [],
+  "tags": [
+    {
+      "name": "System"
+    },
+    {
+      "name": "Devices"
+    },
+    {
+      "name": "Scenarios"
+    },
+    {
+      "name": "Account"
+    }
+  ],
+  "paths": {
+    "/v1/openapi.json": {
+      "get": {
+        "operationId": "getOpenApi",
+        "tags": [
+          "System"
+        ],
+        "summary": "Download this OpenAPI specification",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "headers": {
+              "Cache-Control": {
+                "description": "Responses are not cacheable.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpenApiDocument"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "405": {
+            "$ref": "#/components/responses/MethodNotAllowed"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          },
+          "500": {
+            "$ref": "#/components/responses/SpecUnavailable"
+          }
+        }
+      }
+    },
+    "/v1/status": {
+      "get": {
+        "operationId": "getStatus",
+        "tags": [
+          "System"
+        ],
+        "summary": "Get REST protocol status",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "headers": {
+              "Cache-Control": {
+                "description": "Responses are not cacheable.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Status"
+                },
+                "example": {
+                  "ok": true,
+                  "running": true,
+                  "version": 1
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "405": {
+            "$ref": "#/components/responses/MethodNotAllowed"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        },
+        "description": "This is HTTP listener/protocol status. CLI control status additionally reports host, port, URL, PID, enabled preference, and fixture state."
+      }
+    },
+    "/v1/devices": {
+      "get": {
+        "operationId": "listDevices",
+        "tags": [
+          "Devices"
+        ],
+        "summary": "List devices, rooms, and households",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "headers": {
+              "Cache-Control": {
+                "description": "Responses are not cacheable.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevicesResponse"
+                },
+                "example": {
+                  "ok": true,
+                  "devices": [
+                    {
+                      "id": "lamp",
+                      "name": "Desk lamp",
+                      "type": "devices.types.light",
+                      "room": "office",
+                      "household_id": "home"
+                    }
+                  ],
+                  "rooms": [
+                    {
+                      "id": "office",
+                      "name": "Office",
+                      "household_id": "home"
+                    }
+                  ],
+                  "households": [
+                    {
+                      "id": "home",
+                      "name": "Home"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "405": {
+            "$ref": "#/components/responses/MethodNotAllowed"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGateway"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        }
+      }
+    },
+    "/v1/devices/{device_id}": {
+      "get": {
+        "operationId": "getDevice",
+        "tags": [
+          "Devices"
+        ],
+        "summary": "Read device state and capability metadata",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "headers": {
+              "Cache-Control": {
+                "description": "Responses are not cacheable.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceResponse"
+                },
+                "example": {
+                  "ok": true,
+                  "device": {
+                    "id": "lamp",
+                    "name": "Desk lamp",
+                    "type": "devices.types.light",
+                    "state": "online",
+                    "capabilities": [
+                      {
+                        "type": "devices.capabilities.on_off",
+                        "retrievable": true,
+                        "parameters": {},
+                        "state": {
+                          "instance": "on",
+                          "value": false
+                        },
+                        "last_updated": 0
+                      }
+                    ],
+                    "properties": []
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "405": {
+            "$ref": "#/components/responses/MethodNotAllowed"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGateway"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "device_id",
+          "in": "path",
+          "required": true,
+          "description": "Exact entity ID. URL-encode reserved characters, including slashes, as one path segment.",
+          "schema": {
+            "type": "string",
+            "minLength": 1
+          },
+          "example": "lamp"
+        }
+      ]
+    },
+    "/v1/devices/{device_id}/actions": {
+      "post": {
+        "operationId": "applyDeviceAction",
+        "tags": [
+          "Devices"
+        ],
+        "summary": "Apply one validated capability action",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "headers": {
+              "Cache-Control": {
+                "description": "Responses are not cacheable.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionResponse"
+                },
+                "example": {
+                  "ok": true,
+                  "device_id": "lamp",
+                  "capability": "devices.capabilities.on_off",
+                  "state": {
+                    "instance": "on",
+                    "value": true
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "405": {
+            "$ref": "#/components/responses/MethodNotAllowed"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "415": {
+            "$ref": "#/components/responses/UnsupportedMediaType"
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGateway"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        },
+        "description": "Capabilities, instances, ranges, modes, and color models are checked against fresh device metadata. Success means Yandex accepted the action; there is no polling, physical-state confirmation, or automatic retry. Canceling response delivery cannot undo an already submitted action.",
+        "requestBody": {
+          "required": true,
+          "description": "JSON body, at most 65536 bytes.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceAction"
+              },
+              "examples": {
+                "on": {
+                  "summary": "Turn a device on",
+                  "value": {
+                    "capability": "on_off",
+                    "state": {
+                      "instance": "on",
+                      "value": true
+                    }
+                  }
+                },
+                "brightness": {
+                  "summary": "Set absolute brightness",
+                  "value": {
+                    "capability": "range",
+                    "state": {
+                      "instance": "brightness",
+                      "value": 50
+                    }
+                  }
+                },
+                "volumeDelta": {
+                  "summary": "Decrease volume by five",
+                  "value": {
+                    "capability": "range",
+                    "state": {
+                      "instance": "volume",
+                      "value": -5,
+                      "relative": true
+                    }
+                  }
+                },
+                "mute": {
+                  "summary": "Enable mute",
+                  "value": {
+                    "capability": "toggle",
+                    "state": {
+                      "instance": "mute",
+                      "value": true
+                    }
+                  }
+                },
+                "mode": {
+                  "summary": "Select a work-speed mode",
+                  "value": {
+                    "capability": "mode",
+                    "state": {
+                      "instance": "work_speed",
+                      "value": "auto"
+                    }
+                  }
+                },
+                "rgb": {
+                  "summary": "Set a packed RGB color",
+                  "value": {
+                    "capability": "color_setting",
+                    "state": {
+                      "instance": "rgb",
+                      "value": 3386094
+                    }
+                  }
+                },
+                "hsv": {
+                  "summary": "Set an HSV color",
+                  "value": {
+                    "capability": "color_setting",
+                    "state": {
+                      "instance": "hsv",
+                      "value": {
+                        "h": 120,
+                        "s": 80,
+                        "v": 50
+                      }
+                    }
+                  }
+                },
+                "temperature": {
+                  "summary": "Set color temperature",
+                  "value": {
+                    "capability": "color_setting",
+                    "state": {
+                      "instance": "temperature_k",
+                      "value": 3000
+                    }
+                  }
+                },
+                "scene": {
+                  "summary": "Select a device color scene",
+                  "value": {
+                    "capability": "color_setting",
+                    "state": {
+                      "instance": "scene",
+                      "value": "sunrise"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "device_id",
+          "in": "path",
+          "required": true,
+          "description": "Exact entity ID. URL-encode reserved characters, including slashes, as one path segment.",
+          "schema": {
+            "type": "string",
+            "minLength": 1
+          },
+          "example": "lamp"
+        }
+      ]
+    },
+    "/v1/scenarios": {
+      "get": {
+        "operationId": "listScenarios",
+        "tags": [
+          "Scenarios"
+        ],
+        "summary": "List scenarios and their active state",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "headers": {
+              "Cache-Control": {
+                "description": "Responses are not cacheable.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScenariosResponse"
+                },
+                "example": {
+                  "ok": true,
+                  "scenarios": [
+                    {
+                      "id": "evening",
+                      "name": "Evening",
+                      "is_active": true
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "405": {
+            "$ref": "#/components/responses/MethodNotAllowed"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGateway"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        }
+      }
+    },
+    "/v1/scenarios/{scenario_id}/run": {
+      "post": {
+        "operationId": "runScenario",
+        "tags": [
+          "Scenarios"
+        ],
+        "summary": "Run an active scenario",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "headers": {
+              "Cache-Control": {
+                "description": "Responses are not cacheable.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScenarioRunResponse"
+                },
+                "example": {
+                  "ok": true,
+                  "scenario_id": "evening"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "405": {
+            "$ref": "#/components/responses/MethodNotAllowed"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "415": {
+            "$ref": "#/components/responses/UnsupportedMediaType"
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGateway"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        },
+        "description": "The scenario must exist and be active. Content-Type: application/json is required even when no body is sent. The body is ignored; an empty body or {} is recommended. Success acknowledges upstream execution and does not confirm physical device state.",
+        "requestBody": {
+          "required": false,
+          "description": "Optional ignored JSON body; application/json is still required without a body.",
+          "content": {
+            "application/json": {
+              "schema": {},
+              "example": {}
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "scenario_id",
+          "in": "path",
+          "required": true,
+          "description": "Exact entity ID. URL-encode reserved characters, including slashes, as one path segment.",
+          "schema": {
+            "type": "string",
+            "minLength": 1
+          },
+          "example": "evening"
+        }
+      ]
+    },
+    "/v1/account": {
+      "get": {
+        "operationId": "getAccount",
+        "tags": [
+          "Account"
+        ],
+        "summary": "Get account identity and default email",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "headers": {
+              "Cache-Control": {
+                "description": "Responses are not cacheable.",
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountResponse"
+                },
+                "example": {
+                  "ok": true,
+                  "account": {
+                    "id": "user",
+                    "name": "Demo User",
+                    "email": "user@example.invalid"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "405": {
+            "$ref": "#/components/responses/MethodNotAllowed"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLarge"
+          },
+          "502": {
+            "$ref": "#/components/responses/BadGateway"
+          },
+          "503": {
+            "$ref": "#/components/responses/ServiceUnavailable"
+          },
+          "504": {
+            "$ref": "#/components/responses/GatewayTimeout"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "required": [
+          "ok",
+          "error"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "const": false
+          },
+          "error": {
+            "type": "object",
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string",
+                "description": "Stable error code; see each response description."
+              },
+              "message": {
+                "type": "string",
+                "description": "Human-readable message in the server UI language."
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      "Status": {
+        "type": "object",
+        "required": [
+          "ok",
+          "running",
+          "version"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "const": true
+          },
+          "running": {
+            "type": "boolean",
+            "const": true
+          },
+          "version": {
+            "type": "integer",
+            "const": 1,
+            "description": "REST protocol version."
+          }
+        },
+        "additionalProperties": false
+      },
+      "DeviceSummary": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "type",
+          "room",
+          "household_id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "room": {
+            "type": "string"
+          },
+          "household_id": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Room": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "household_id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "household_id": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Household": {
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DevicesResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "devices",
+          "rooms",
+          "households"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "const": true
+          },
+          "devices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeviceSummary"
+            }
+          },
+          "rooms": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Room"
+            }
+          },
+          "households": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Household"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "Capability": {
+        "type": "object",
+        "required": [
+          "type",
+          "retrievable",
+          "parameters",
+          "state",
+          "last_updated"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Full Yandex capability type, such as devices.capabilities.on_off."
+          },
+          "retrievable": {
+            "type": "boolean"
+          },
+          "parameters": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Yandex metadata: supported instances, ranges, modes, and color models."
+          },
+          "state": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Current capability state; may be empty."
+          },
+          "last_updated": {
+            "type": "number",
+            "description": "Upstream timestamp in seconds; may be zero when absent upstream."
+          }
+        },
+        "additionalProperties": false
+      },
+      "Property": {
+        "type": "object",
+        "required": [
+          "type",
+          "retrievable",
+          "parameters",
+          "state",
+          "last_updated"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Full Yandex property type, such as devices.properties.float."
+          },
+          "retrievable": {
+            "type": "boolean"
+          },
+          "parameters": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "state": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Current property state; may be empty."
+          },
+          "last_updated": {
+            "type": "number",
+            "description": "Upstream timestamp in seconds; may be zero when absent upstream."
+          }
+        },
+        "additionalProperties": false
+      },
+      "Device": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "type",
+          "state",
+          "capabilities",
+          "properties"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "online",
+              "offline"
+            ]
+          },
+          "capabilities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Capability"
+            }
+          },
+          "properties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Property"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "DeviceResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "device"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "const": true
+          },
+          "device": {
+            "$ref": "#/components/schemas/Device"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Scenario": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "is_active"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "is_active": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ScenariosResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "scenarios"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "const": true
+          },
+          "scenarios": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Scenario"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "ScenarioRunResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "scenario_id"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "const": true
+          },
+          "scenario_id": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Account": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "email"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "description": "Default account email; an empty string is possible."
+          }
+        },
+        "additionalProperties": false
+      },
+      "AccountResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "account"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "const": true
+          },
+          "account": {
+            "$ref": "#/components/schemas/Account"
+          }
+        },
+        "additionalProperties": false
+      },
+      "OnOffState": {
+        "type": "object",
+        "required": [
+          "instance",
+          "value"
+        ],
+        "properties": {
+          "instance": {
+            "type": "string",
+            "const": "on"
+          },
+          "value": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ToggleState": {
+        "type": "object",
+        "required": [
+          "instance",
+          "value"
+        ],
+        "properties": {
+          "instance": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A toggle instance supported by this device, such as mute."
+          },
+          "value": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RangeState": {
+        "type": "object",
+        "required": [
+          "instance",
+          "value"
+        ],
+        "properties": {
+          "instance": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A range instance supported by this device, such as brightness or volume."
+          },
+          "value": {
+            "type": "number",
+            "description": "Finite absolute value or delta. Device-specific bounds apply to absolute values."
+          },
+          "relative": {
+            "type": "boolean",
+            "default": false,
+            "description": "Apply a relative delta instead of an absolute value."
+          }
+        },
+        "additionalProperties": false
+      },
+      "ModeState": {
+        "type": "object",
+        "required": [
+          "instance",
+          "value"
+        ],
+        "properties": {
+          "instance": {
+            "type": "string",
+            "minLength": 1
+          },
+          "value": {
+            "type": "string",
+            "minLength": 1,
+            "description": "One of the values advertised in the device capability parameters."
+          }
+        },
+        "additionalProperties": false
+      },
+      "Hsv": {
+        "type": "object",
+        "required": [
+          "h",
+          "s",
+          "v"
+        ],
+        "properties": {
+          "h": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 360
+          },
+          "s": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "v": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          }
+        },
+        "additionalProperties": false
+      },
+      "RgbState": {
+        "type": "object",
+        "required": [
+          "instance",
+          "value"
+        ],
+        "properties": {
+          "instance": {
+            "type": "string",
+            "const": "rgb"
+          },
+          "value": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 16777215,
+            "description": "Packed RGB integer (0xRRGGBB); hexadecimal strings are not accepted by REST."
+          }
+        },
+        "additionalProperties": false
+      },
+      "HsvState": {
+        "type": "object",
+        "required": [
+          "instance",
+          "value"
+        ],
+        "properties": {
+          "instance": {
+            "type": "string",
+            "const": "hsv"
+          },
+          "value": {
+            "$ref": "#/components/schemas/Hsv"
+          }
+        },
+        "additionalProperties": false
+      },
+      "TemperatureState": {
+        "type": "object",
+        "required": [
+          "instance",
+          "value"
+        ],
+        "properties": {
+          "instance": {
+            "type": "string",
+            "const": "temperature_k"
+          },
+          "value": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Color temperature in Kelvin, within device-advertised bounds."
+          }
+        },
+        "additionalProperties": false
+      },
+      "SceneState": {
+        "type": "object",
+        "required": [
+          "instance",
+          "value"
+        ],
+        "properties": {
+          "instance": {
+            "type": "string",
+            "const": "scene"
+          },
+          "value": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Scene ID advertised by the device."
+          }
+        },
+        "additionalProperties": false
+      },
+      "ColorState": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/RgbState"
+          },
+          {
+            "$ref": "#/components/schemas/HsvState"
+          },
+          {
+            "$ref": "#/components/schemas/TemperatureState"
+          },
+          {
+            "$ref": "#/components/schemas/SceneState"
+          }
+        ]
+      },
+      "OnOffAction": {
+        "type": "object",
+        "required": [
+          "capability",
+          "state"
+        ],
+        "properties": {
+          "capability": {
+            "type": "string",
+            "enum": [
+              "on_off",
+              "devices.capabilities.on_off"
+            ]
+          },
+          "state": {
+            "$ref": "#/components/schemas/OnOffState"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ToggleAction": {
+        "type": "object",
+        "required": [
+          "capability",
+          "state"
+        ],
+        "properties": {
+          "capability": {
+            "type": "string",
+            "enum": [
+              "toggle",
+              "devices.capabilities.toggle"
+            ]
+          },
+          "state": {
+            "$ref": "#/components/schemas/ToggleState"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RangeAction": {
+        "type": "object",
+        "required": [
+          "capability",
+          "state"
+        ],
+        "properties": {
+          "capability": {
+            "type": "string",
+            "enum": [
+              "range",
+              "devices.capabilities.range"
+            ]
+          },
+          "state": {
+            "$ref": "#/components/schemas/RangeState"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ModeAction": {
+        "type": "object",
+        "required": [
+          "capability",
+          "state"
+        ],
+        "properties": {
+          "capability": {
+            "type": "string",
+            "enum": [
+              "mode",
+              "devices.capabilities.mode"
+            ]
+          },
+          "state": {
+            "$ref": "#/components/schemas/ModeState"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ColorAction": {
+        "type": "object",
+        "required": [
+          "capability",
+          "state"
+        ],
+        "properties": {
+          "capability": {
+            "type": "string",
+            "enum": [
+              "color_setting",
+              "devices.capabilities.color_setting"
+            ]
+          },
+          "state": {
+            "$ref": "#/components/schemas/ColorState"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DeviceAction": {
+        "description": "Send exactly one capability action. Short and full capability names are accepted. Only range accepts the relative field, including relative=false.",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/OnOffAction"
+          },
+          {
+            "$ref": "#/components/schemas/ToggleAction"
+          },
+          {
+            "$ref": "#/components/schemas/RangeAction"
+          },
+          {
+            "$ref": "#/components/schemas/ModeAction"
+          },
+          {
+            "$ref": "#/components/schemas/ColorAction"
+          }
+        ]
+      },
+      "ActionResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "device_id",
+          "capability",
+          "state"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "const": true
+          },
+          "device_id": {
+            "type": "string"
+          },
+          "capability": {
+            "type": "string",
+            "enum": [
+              "devices.capabilities.on_off",
+              "devices.capabilities.toggle",
+              "devices.capabilities.range",
+              "devices.capabilities.mode",
+              "devices.capabilities.color_setting"
+            ]
+          },
+          "state": {
+            "type": "object",
+            "required": [
+              "instance",
+              "value"
+            ],
+            "properties": {
+              "instance": {
+                "type": "string",
+                "minLength": 1
+              },
+              "value": {
+                "oneOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Hsv"
+                  }
+                ]
+              },
+              "relative": {
+                "type": "boolean",
+                "default": false,
+                "description": "Apply a relative delta instead of an absolute value."
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      },
+      "OpenApiDocument": {
+        "type": "object",
+        "required": [
+          "openapi",
+          "info",
+          "servers",
+          "paths",
+          "components"
+        ],
+        "properties": {
+          "openapi": {
+            "type": "string",
+            "const": "3.1.0"
+          },
+          "info": {
+            "type": "object"
+          },
+          "servers": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "paths": {
+            "type": "object"
+          },
+          "components": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": true,
+        "description": "The raw OpenAPI document. It has no ok success envelope. The first server URL identifies the listener that served it."
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Invalid JSON, action shape, typed value, or device-specific bounds. Codes: invalid_json, invalid_action, invalid_value.",
+        "headers": {
+          "Cache-Control": {
+            "description": "Responses are not cacheable.",
+            "schema": {
+              "type": "string",
+              "const": "no-store"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "ok": false,
+              "error": {
+                "code": "invalid_value",
+                "message": "Human-readable error message"
+              }
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "The upstream Yandex API rejected or lacks the server OAuth session. Code: authorization_required. This is not a client REST authentication challenge.",
+        "headers": {
+          "Cache-Control": {
+            "description": "Responses are not cacheable.",
+            "schema": {
+              "type": "string",
+              "const": "no-store"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "ok": false,
+              "error": {
+                "code": "authorization_required",
+                "message": "Human-readable error message"
+              }
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Host or browser Origin is not permitted, or the upstream Yandex API denied access. Codes: host_forbidden, origin_forbidden, authorization_required.",
+        "headers": {
+          "Cache-Control": {
+            "description": "Responses are not cacheable.",
+            "schema": {
+              "type": "string",
+              "const": "no-store"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "ok": false,
+              "error": {
+                "code": "origin_forbidden",
+                "message": "Human-readable error message"
+              }
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Route, device, scenario, or matching capability was not found. Codes: not_found, scenario_not_found, capability_not_found.",
+        "headers": {
+          "Cache-Control": {
+            "description": "Responses are not cacheable.",
+            "schema": {
+              "type": "string",
+              "const": "no-store"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "ok": false,
+              "error": {
+                "code": "not_found",
+                "message": "Human-readable error message"
+              }
+            }
+          }
+        }
+      },
+      "MethodNotAllowed": {
+        "description": "The path exists but does not accept this HTTP method. Code: method_not_allowed.",
+        "headers": {
+          "Cache-Control": {
+            "description": "Responses are not cacheable.",
+            "schema": {
+              "type": "string",
+              "const": "no-store"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "ok": false,
+              "error": {
+                "code": "method_not_allowed",
+                "message": "Human-readable error message"
+              }
+            }
+          }
+        }
+      },
+      "Conflict": {
+        "description": "A scenario is inactive or multiple capabilities match. Codes: inactive_scenario, ambiguous_capability.",
+        "headers": {
+          "Cache-Control": {
+            "description": "Responses are not cacheable.",
+            "schema": {
+              "type": "string",
+              "const": "no-store"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "ok": false,
+              "error": {
+                "code": "inactive_scenario",
+                "message": "Human-readable error message"
+              }
+            }
+          }
+        }
+      },
+      "PayloadTooLarge": {
+        "description": "Request body exceeds 65536 bytes. Code: body_too_large.",
+        "headers": {
+          "Cache-Control": {
+            "description": "Responses are not cacheable.",
+            "schema": {
+              "type": "string",
+              "const": "no-store"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "ok": false,
+              "error": {
+                "code": "body_too_large",
+                "message": "Human-readable error message"
+              }
+            }
+          }
+        }
+      },
+      "UnsupportedMediaType": {
+        "description": "Every POST requires Content-Type: application/json, including an empty scenario request. Code: content_type.",
+        "headers": {
+          "Cache-Control": {
+            "description": "Responses are not cacheable.",
+            "schema": {
+              "type": "string",
+              "const": "no-store"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "ok": false,
+              "error": {
+                "code": "content_type",
+                "message": "Human-readable error message"
+              }
+            }
+          }
+        }
+      },
+      "SpecUnavailable": {
+        "description": "The bundled OpenAPI document is unavailable. Code: spec_unavailable.",
+        "headers": {
+          "Cache-Control": {
+            "description": "Responses are not cacheable.",
+            "schema": {
+              "type": "string",
+              "const": "no-store"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "ok": false,
+              "error": {
+                "code": "spec_unavailable",
+                "message": "Human-readable error message"
+              }
+            }
+          }
+        }
+      },
+      "BadGateway": {
+        "description": "An upstream transport, service, or malformed-response failure. Code: api_error.",
+        "headers": {
+          "Cache-Control": {
+            "description": "Responses are not cacheable.",
+            "schema": {
+              "type": "string",
+              "const": "no-store"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "ok": false,
+              "error": {
+                "code": "api_error",
+                "message": "Human-readable error message"
+              }
+            }
+          }
+        }
+      },
+      "ServiceUnavailable": {
+        "description": "The REST listener is stopping. Code: disabled.",
+        "headers": {
+          "Cache-Control": {
+            "description": "Responses are not cacheable.",
+            "schema": {
+              "type": "string",
+              "const": "no-store"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "ok": false,
+              "error": {
+                "code": "disabled",
+                "message": "Human-readable error message"
+              }
+            }
+          }
+        }
+      },
+      "GatewayTimeout": {
+        "description": "The upstream operation or response deadline expired. Code: timeout.",
+        "headers": {
+          "Cache-Control": {
+            "description": "Responses are not cacheable.",
+            "schema": {
+              "type": "string",
+              "const": "no-store"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "ok": false,
+              "error": {
+                "code": "timeout",
+                "message": "Human-readable error message"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

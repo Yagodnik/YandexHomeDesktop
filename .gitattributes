@@ -1,0 +1,3 @@
+# just's formatter and Bash recipes require consistent line endings on Windows.
+justfile text eol=lf
+*.sh text eol=lf

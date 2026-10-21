@@ -1,0 +1,71 @@
+name: Linux Release build
+
+on:
+  pull_request:
+    branches: [main, dev, refactoring]
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: linux-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Linux Release
+    runs-on: ubuntu-24.04
+    env:
+      QT_QPA_PLATFORM: offscreen
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: extractions/setup-just@v4
+        with:
+          just-version: '1.51.0'
+
+      - name: Check justfile formatting
+        run: just --fmt --check
+
+      - name: Install Qt
+        uses: ./.github/actions/setup-qt
+        with:
+          host: linux
+
+      - name: Install pinned C++ formatting and analysis tools
+        run: >-
+          python -m pip install --only-binary=:all: -r requirements-clang-tools.txt
+
+      - name: Check C++ formatting and clang-tidy configuration
+        run: |
+          just format-check
+          clang-tidy --verify-config
+
+      - name: Install credential-store development dependency
+        run: sudo apt-get update && sudo apt-get install -y libsecret-1-dev
+
+      - name: Build, test, and package Linux CLI and REST archive
+        run: >-
+          just package_build_dir=build generator=Ninja pch=ON
+          package-linux -DCMAKE_CXX_COMPILER=g++-13
+
+      - name: Upload Linux package
+        uses: actions/upload-artifact@v4
+        with:
+          name: yandex-home-linux-x86_64
+          path: build/dist/*.tar.gz
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
+
+      - name: Upload failure logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-build-logs
+          path: |
+            build/Testing/Temporary/*.log
+            build/CMakeFiles/CMakeConfigureLog.yaml
+          retention-days: 7

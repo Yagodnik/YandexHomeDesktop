@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QtTest>
-#include "serialization/Serialization.h"
+#include "serialization/SerializationTypes.h"
 
 JSON_STRUCT(TestStruct,
   (int, a),
@@ -73,6 +73,8 @@ class SerializationTests final : public QObject {
   Q_OBJECT
 private slots:
   static void FromJsonSimple();
+  static void CheckedDecodingRejectsInvalidFields();
+  static void CheckedDecodingSupportsNestedTypesAndIntegerBoundaries();
   static void FromJsonSubObject();
   static void ToJsonSimple();
   static void ToJsonSubObject();

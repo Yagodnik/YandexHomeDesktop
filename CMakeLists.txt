@@ -1,132 +1,45 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.28)
 
-include(cmake/qt6-config.cmake OPTIONAL)
+project(YandexHomeDesktop VERSION 0.1.0 LANGUAGES CXX)
 
-project(YandexHomeDesktop VERSION 0.1 LANGUAGES CXX)
-
-if(APPLE)
-  set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64")
-endif()
-
-set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-
-find_package(Qt6 REQUIRED COMPONENTS Quick Network NetworkAuth Gui QuickControls2)
-
-qt_standard_project_setup(REQUIRES 6.8)
-qt_add_resources(RESOURCES resources/resources.qrc)
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libs)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/app)
+include(cmake/ProjectOptions.cmake)
+include(cmake/YandexHomeLibraries.cmake)
+include(cmake/Dependencies.cmake)
 
 add_subdirectory(src/api)
-add_subdirectory(src/auth)
-add_subdirectory(src/models)
-add_subdirectory(src/platform)
-add_subdirectory(src/utils)
 add_subdirectory(src/iot)
-
-qt_add_executable(appYandexHomeDesktop
-        src/main.cpp
-        src/utils/Router.cpp
-        src/utils/Router.h
-
-        ${RESOURCES}
-        src/cli/CLI.cpp
-        src/cli/CLI.h
-        src/cli/OnOffExecutor.cpp
-        src/cli/OnOffExecutor.h
-        src/cli/IExecutor.cpp
-        src/cli/IExecutor.h
-        src/cli/ListDevicesCommand.cpp
-        src/cli/ListDevicesCommand.h
-        src/cli/ResetCommand.cpp
-        src/cli/ResetCommand.h
-        src/cli/ICommand.h
-        src/app/AppContext.h
-        src/app/AppContext.cpp
-        src/cli/AccountInfoCommand.cpp
-        src/cli/AccountInfoCommand.h
-        src/app/CliApp.cpp
-        src/app/CliApp.h
-        src/app/GuiApp.cpp
-        src/app/GuiApp.h
-)
-
-if (APPLE)
-  set_target_properties(appYandexHomeDesktop PROPERTIES
-          MACOSX_BUNDLE TRUE
-          MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/macos/Info.plist"
-          MACOSX_BUNDLE_ICON_FILE "YandexHomeDesktop.icns"
-  )
-
-  set_source_files_properties(resources/YandexHomeDesktop.icns PROPERTIES
-          MACOSX_PACKAGE_LOCATION "Resources"
-  )
-
-  target_sources(appYandexHomeDesktop PRIVATE resources/YandexHomeDesktop.icns)
-endif ()
-
-add_subdirectory(src/qml/)
-
-qt_add_qml_module(appYandexHomeDesktop
-        URI YandexHomeDesktop
-        VERSION 1.0
-        QML_FILES
-        src/qml/Main.qml
-)
-
-# Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
-# If you are developing for iOS or macOS you should consider setting an
-# explicit, fixed bundle identifier manually though.
-set_target_properties(appYandexHomeDesktop PROPERTIES
-        #    MACOSX_BUNDLE_GUI_IDENTIFIER com.example.appYandexHomeDesktop
-        MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
-        MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
-        MACOSX_BUNDLE TRUE
-        WIN32_EXECUTABLE TRUE
-)
-
-target_link_libraries(appYandexHomeDesktop PRIVATE
-        Qt6::Quick
-        Qt6::Core
-        Qt6::NetworkAuth
-        Qt6::Gui
-        Qt6::QuickControls2
-
-        YandexHomeDesktopUi
-        YandexHomeDesktopPages
-        YandexHomeDesktopComponents
-
-        YandexHomeApi
-        YandexAuth
-        Models
-        PlatformService
-        Utils
-        Iot
-)
-
-include(GNUInstallDirs)
-install(TARGETS appYandexHomeDesktop
-        BUNDLE DESTINATION .
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-)
-
-if(WIN32)
-  set(APP_ICON_RESOURCE "${CMAKE_CURRENT_SOURCE_DIR}/resources/app.rc")
-  target_sources(appYandexHomeDesktop PRIVATE ${APP_ICON_RESOURCE})
+add_subdirectory(src/worker)
+add_subdirectory(src/services)
+if(YH_BUILD_REST_ADAPTER)
+  add_subdirectory(src/rest)
+endif()
+add_subdirectory(src/cli)
+add_subdirectory(src/auth)
+add_subdirectory(src/utils)
+if(BUILD_DESKTOP_APP OR BUILD_TESTING)
+  add_subdirectory(src/models)
 endif()
 
-if(UNIX AND NOT APPLE)
-else()
-  set_target_properties(appYandexHomeDesktop PROPERTIES
-          OUTPUT_NAME "YandexHomeDesktop"
-          MACOSX_BUNDLE TRUE
-  )
+include(cmake/Applications.cmake)
+if(BUILD_DESKTOP_APP)
+  include(cmake/DesktopApplication.cmake)
 endif()
 
-add_subdirectory(tests)
+if(BUILD_TESTING)
+  include(tests/TestCatalog.cmake)
+  add_subdirectory(tests)
+  if(BUILD_DESKTOP_APP)
+    include(tests/DesktopTests.cmake)
+  endif()
+endif()
+
+include(cmake/WindowsRuntime.cmake)
+include(cmake/Deployment.cmake)
+include(cmake/Translations.cmake)
+yh_install_sdk()
+
+if(YH_ENABLE_PACKAGING)
+  include(cmake/Packaging.cmake)
+endif()
+
+include(cmake/PrecompiledHeaders.cmake)

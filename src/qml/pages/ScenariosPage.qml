@@ -1,194 +1,75 @@
 import QtQuick
-import QtQuick.Layouts 2.15
-import QtQuick.Dialogs
-import QtQuick.Controls
 import YandexHomeDesktop.Ui as UI
 import YandexHomeDesktop.Components as Components
+import YandexHomeDesktop.ViewModels as ViewModels
 
-Item {
+UI.PageSurface {
   id: root
 
-  Component.onCompleted: {
-    isLoading = true;
-    scenariosModel.RequestData();
-  }
+  required property ViewModels.ScenariosViewModel viewModel
+  required property ViewModels.KeybindSettingsModel keybindSettings
+  property bool showKeybinds: true
+
+  Component.onCompleted: viewModel.EnsureLoaded()
 
   UI.ErrorDialog {
     id: scenarioErrorDialog
+    objectName: "scenarioErrorDialog"
 
-    dialogTitle: "Ошибка"
-    dialogMessage: "Не удалось выполнить сценарий"
+    dialogTitle: qsTr("Ошибка")
+    dialogMessage: qsTr("Не удалось выполнить сценарий")
   }
 
-  property var isLoading: false
-
   Connections {
-    target: scenariosModel
+    target: root.viewModel
 
-    function onDataLoadingFailed() {
-      root.isLoading = false;
-      console.log("Scenarios Model: Data Load - FAIL");
-      scenariosStack.currentIndex = 1;
-    }
-
-    function onDataLoaded() {
-      root.isLoading = false;
-      console.log("Scenarios Model: Data Load - OK");
-      scenariosStack.currentIndex = 2;
-    }
-
-    function onScenarioExecutionFailed() {
+    function onExecutionFailed(message) {
+      scenarioErrorDialog.dialogMessage = message;
       scenarioErrorDialog.openDialog();
     }
   }
 
-  Item {
+  UI.RefreshHeader {
     id: heading
     width: parent.width
-    height: 32
+    title: qsTr("Все сценарии")
 
-    UI.HeadingText {
-      id: headingTitle
-      text: "Все сценарии"
-      anchors.left: parent.left
-      anchors.verticalCenter: parent.verticalCenter
-    }
+    objectName: "scenarioRefreshButton"
+    enabled: !root.viewModel.loading
 
-    UI.ImageButton {
-      id: reloadButton
-      source: "qrc:/images/reload.svg"
-
-      property real rotationAngle: 0
-
-      transform: Rotation {
-        id: rot
-        origin.x: reloadButton.width / 2
-        origin.y: reloadButton.height / 2
-        angle: reloadButton.rotationAngle
-      }
-
-      anchors.verticalCenter: parent.verticalCenter
-      anchors.right: parent.right
-      anchors.rightMargin: 8
-
-      onClicked: {
-        if (root.isLoading) {
-          return;
-        }
-
-        root.isLoading = true;
-        scenariosStack.currentIndex = 0;
-        scenariosModel.RequestData();
-
-        reloadButton.rotationAngle += 360;
-      }
-
-      Behavior on rotationAngle {
-        NumberAnimation {
-          duration: 500
-          easing.type: Easing.InOutCubic
-        }
-      }
+    onRefreshClicked: {
+      root.viewModel.Refresh();
+      heading.rotationAngle += 360;
     }
   }
 
-  StackLayout {
+  UI.PageStates {
     id: scenariosStack
+    objectName: "scenariosStack"
 
     width: parent.width
     anchors.top: heading.bottom
     anchors.topMargin: 4
     anchors.bottom: parent.bottom
 
-    currentIndex: 0
+    currentIndex: root.viewModel.state === ViewModels.ScenariosViewModel.Ready ? 2
+                : root.viewModel.state === ViewModels.ScenariosViewModel.Error ? 1 : 0
 
-    Item {
-      UI.MyProgressIndicator {
-        id: loadingProgress
-
-        anchors.centerIn: parent
-        width: 30
-        height: 30
-        strokeWidth: 2
-        opacity: (scenariosStack.currentIndex === 0) ? 1 : 0
-        visible: opacity > 0
-
-        Behavior on opacity {
-          NumberAnimation {
-            duration: 200
-            easing.type: Easing.InOutQuad
-          }
-        }
-      }
+    UI.LoadingPane {
+      active: scenariosStack.currentIndex === 0
     }
 
-    Item {
-      opacity: (scenariosStack.currentIndex === 1) ? 1 : 0
-      visible: opacity > 0
-
-      Behavior on opacity {
-        NumberAnimation {
-          duration: 200
-          easing.type: Easing.InOutQuad
-        }
-      }
-
-      Column {
-        id: errorMessage
-        anchors.centerIn: parent
-        spacing: 15
-
-        UI.DefaultText {
-          text: qsTr("Что-то пошло не так!")
-          color: themes.inactive
-
-          anchors.horizontalCenter: errorMessage.horizontalCenter
-        }
-      }
+    UI.LoadErrorPane {
+      active: scenariosStack.currentIndex === 1
+      message: qsTr("Что-то пошло не так!")
     }
 
-    Item {
-      clip: true
-
-      UI.DefaultText {
-        anchors.centerIn: parent
-        text: "Пока что у вас нет сценариев"
-
-        visible: scenariosModel.count === 0
-      }
-
-      Flickable {
-        id: flickable
-        anchors.fill: parent
-        contentWidth: parent.width
-        contentHeight: scenariosList.implicitHeight
-        visible: scenariosModel.count !== 0
-
-        interactive: true
-        flickableDirection: Flickable.VerticalFlick
-
-        Components.ScenariosList {
-          id: scenariosList
-        }
-      }
-
-      ScrollBar {
-        id: scrollBar
-
-        width: 10
-        height: flickable.height
-        anchors.left: flickable.right
-        anchors.leftMargin: 4
-        policy: flickable.contentHeight > flickable.height ? ScrollBar.AlwaysOn : ScrollBar.AlwaysOff
-
-        contentItem: Rectangle {
-          implicitWidth: 10
-          radius: 4
-          color: themes.headerBackground
-        }
-
-        background: Item {}
-      }
+    Components.ScenariosPane {
+      sourceModel: root.viewModel.scenarios
+      keybindSettings: root.keybindSettings
+      showKeybinds: root.showKeybinds
+      emptyMessage: qsTr("Пока что у вас нет сценариев")
+      onScenarioRequested: function(scenarioId) { root.viewModel.ExecuteScenario(scenarioId); }
     }
   }
 }

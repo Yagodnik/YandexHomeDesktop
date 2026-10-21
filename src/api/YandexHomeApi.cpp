@@ -1,178 +1,174 @@
 #include "YandexHomeApi.h"
 
-#include <QDebug>
-#include <QNetworkReply>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QUrl>
 
-#include "model/Response.h"
 #include "RequestFactory.h"
-#include "model/Actions.h"
+#include "model/Response.h"
+#include "serialization/Serialization.h"
 
-YandexHomeApi::YandexHomeApi(TokenProvider token_provider, QObject *parent)
-  : QObject(parent), token_provider_(std::move(token_provider)) {}
+namespace {
+template<typename T>
+ApiResult<T> DecodeResponse(const HttpResponse& response) {
+  QJsonParseError parse_error;
+  const auto document = QJsonDocument::fromJson(response.body, &parse_error);
+  if (parse_error.error != QJsonParseError::NoError || !document.isObject()) {
+    const QString message = parse_error.error == QJsonParseError::NoError
+      ? "Expected a JSON object" : parse_error.errorString();
+    return std::unexpected(ApiError{ApiErrorKind::InvalidResponse, message});
+  }
 
-void YandexHomeApi::GetUserInfo() {
-  auto ok_callback = [this](auto& user_info) {
-    if (user_info.status == Status::Ok) {
-      emit userInfoReceived(user_info);
-    } else {
-      emit userInfoReceivingFailed(user_info.message);
-    }
-
-    qDebug() << "User info:";
-    qDebug() << "Status:" << (user_info.status == Status::Ok ? "Ok" : "Error");
-    qDebug() << "Request ID:" << user_info.request_id;
-  };
-
-  auto error_callback = [this](const QString& message) {
-    qCritical() << "YandexHomeApi: Internal error: " << message;
-
-    emit userInfoReceivingFailed(message);
-  };
-
-  MakeGetRequest<UserInfo>(
-    kInfoEndpoint,
-    ok_callback,
-    error_callback
-  );
+  const T result = Serialization::From<T>(document.object());
+  if (result.status != Status::Ok) {
+    return std::unexpected(ApiError{ApiErrorKind::Service, result.message});
+  }
+  return result;
 }
 
-void YandexHomeApi::GetScenarios() {
-  auto ok_callback = [this](auto& user_info) {
-    if (user_info.status == Status::Ok) {
-      qDebug() << "YandexHomeApi: Received " << user_info.scenarios.length() << " scenarios";
-
-      emit scenariosReceivedSuccessfully(user_info.scenarios);
-    } else {
-      qCritical() << "YandexHomeApi: Error getting during getting scenarios";
-
-      emit scenariosReceivingFailed(user_info.message);
-    }
-  };
-
-  auto error_callback = [this](const QString& message) {
-    qCritical() << "YandexHomeApi: Internal error: " << message;
-
-    emit scenariosReceivingFailed(message);
-  };
-
-  MakeGetRequest<UserInfo>(
-    kInfoEndpoint,
-    ok_callback,
-    error_callback
-  );
+template<typename T>
+ApiResult<T> DecodeResult(ApiResult<HttpResponse> response) {
+  if (!response) {
+    return std::unexpected(response.error());
+  }
+  return DecodeResponse<T>(*response);
+}
 }
 
-void YandexHomeApi::GetDeviceInfo(const QString &id) {
-  const auto url = kDeviceInfoEndpoint.arg(id);
+YandexHomeApi::YandexHomeApi(TokenProvider token_provider, IHttpTransport* transport,
+                             QObject* parent)
+  : QObject(parent), token_provider_(std::move(token_provider)), transport_(transport) {}
 
-  auto ok_callback = [this](auto& info) {
-    if (info.status == Status::Ok) {
-      qInfo() << "YandexHomeApi: Received device info";
-
-      emit deviceInfoReceived(info);
-    } else {
-      qCritical() << "YandexHomeApi: Error getting during getting scenarios";
-
-      emit deviceInfoReceivingFailed(info.message);
-    }
-  };
-
-  auto error_callback = [this](const QString& message) {
-    qCritical() << "YandexHomeApi: Internal error: " << message;
-
-    emit deviceInfoReceivingFailed(message);
-  };
-
-  MakeGetRequest<DeviceInfo>(
-    url,
-    ok_callback,
-    error_callback
-  );
+void YandexHomeApi::GetUserInfo(QObject* context, ApiResultHandler<UserInfo> handler) {
+  const auto request = RequestFactory::CreateAuthorizedBearer(kInfoEndpoint, token_provider_());
+  if (!request) { handler(std::unexpected(request.error())); return; }
+  transport_->Get(*request, context,
+                  [handler = std::move(handler)](ApiResult<HttpResponse> response) {
+    handler(DecodeResult<UserInfo>(std::move(response)));
+  });
 }
 
-void YandexHomeApi::ExecuteScenario(const QString &scenario_id, const QVariant& user_data) {
-  const QString url = kExecuteScenarioEndpoint.arg(scenario_id);
-
-  auto ok_callback = [this, scenario_id, user_data](auto& response) {
-    if (response.status == Status::Ok) {
-      qInfo() << "YandexHomeApi: Scenario" << scenario_id << "executing finished";
-      emit scenarioExecutionFinishedSuccessfully(scenario_id, user_data);
+void YandexHomeApi::GetScenarios(QObject* context,
+                                  ApiResultHandler<QList<ScenarioObject>> handler) {
+  const auto request = RequestFactory::CreateAuthorizedBearer(kInfoEndpoint, token_provider_());
+  if (!request) { handler(std::unexpected(request.error())); return; }
+  transport_->Get(*request, context,
+                  [handler = std::move(handler)](ApiResult<HttpResponse> response) {
+    auto result = DecodeResult<UserInfo>(std::move(response));
+    if (!result) {
+      handler(std::unexpected(result.error()));
     } else {
-      emit scenarioExecutionFailed(response.message, user_data);
+      handler(result->scenarios);
     }
-  };
-
-  auto error_callback = [this, user_data](const QString& message) {
-    qCritical() << "YandexHomeApi: Internal error: " << message;
-    emit scenarioExecutionFailed(message, user_data);
-  };
-
-  MakePostRequest<Response>(
-    url,
-    ok_callback,
-    error_callback
-  );
+  });
 }
 
-void YandexHomeApi::PerformActions(const QList<DeviceActionsObject> &actions, const QVariant& user_data) {
-  auto ok_callback = [this, user_data](const DeviceActionResponse& response) {
-    if (response.status == Status::Error) {
-      qCritical() << "YandexHomeApi: Action " << response.request_id << "executing failed";
+void YandexHomeApi::GetDeviceInfo(const QString& id, QObject* context,
+                                   ApiResultHandler<DeviceInfo> handler) {
+  const auto request = RequestFactory::CreateAuthorizedBearer(kDeviceInfoEndpoint.arg(id), token_provider_());
+  if (!request) { handler(std::unexpected(request.error())); return; }
+  transport_->Get(*request,
+                  context, [handler = std::move(handler)](ApiResult<HttpResponse> response) {
+    handler(DecodeResult<DeviceInfo>(std::move(response)));
+  });
+}
 
-      emit actionExecutingFailed(response.message, user_data);
+void YandexHomeApi::ExecuteScenario(const QString& id, QObject* context,
+                                     ApiResultHandler<void> handler) {
+  const auto request = RequestFactory::CreateAuthorizedBearer(kExecuteScenarioEndpoint.arg(id), token_provider_());
+  if (!request) { handler(std::unexpected(request.error())); return; }
+  transport_->Post(*request,
+                   {}, context, [handler = std::move(handler)](ApiResult<HttpResponse> response) {
+    auto result = DecodeResult<Response>(std::move(response));
+    if (!result) {
+      handler(std::unexpected(result.error()));
+    } else {
+      handler({});
+    }
+  });
+}
+
+void YandexHomeApi::PerformActions(const QList<DeviceActionsObject>& actions, QObject* context,
+                                    ApiResultHandler<void> handler) {
+  RequestActions(actions, context,
+                 [handler = std::move(handler)](ApiResult<DeviceActionResponse> result) {
+                   handler(result ? ApiResult<void>{} : std::unexpected(result.error()));
+                 });
+}
+
+void YandexHomeApi::GetVideoStream(const QString& device_id, QObject* context,
+                                   ApiResultHandler<VideoStream> handler) {
+  const CapabilityObject action{
+      .type = CapabilityType::VideoStream,
+      .state = {{"instance", "get_stream"},
+                {"value", QVariantMap{{"protocols", QStringList{"hls"}}}}}};
+  RequestActions({DeviceActionsObject{.id = device_id, .actions = {action}}}, context,
+                 [device_id, handler = std::move(handler)](ApiResult<DeviceActionResponse> result) {
+                   if (!result) {
+                     handler(std::unexpected(result.error()));
+                     return;
+                   }
+                   std::optional<VideoStream> stream;
+                   for (const auto& device : result->devices) {
+                     if (device.id != device_id)
+                       continue;
+                     for (const auto& capability : device.capabilities) {
+                       if (capability.type != "devices.capabilities.video_stream" ||
+                           capability.state.instance != "get_stream")
+                         continue;
+                       const auto value = Serialization::TryFrom<VideoStream>(
+                           QJsonObject::fromVariantMap(capability.state.value));
+                       const QUrl url(value ? value->stream_url : QString{}, QUrl::StrictMode);
+                       if (stream || !value || value->protocol != "hls" || !url.isValid() ||
+                           url.host().isEmpty() ||
+                           (url.scheme() != "https" && url.scheme() != "http")) {
+                         handler(std::unexpected(ApiError{ApiErrorKind::InvalidResponse,
+                                                          "Invalid video stream response"}));
+                         return;
+                       }
+                       stream = *value;
+                     }
+                   }
+                   if (!stream) {
+                     handler(std::unexpected(
+                         ApiError{ApiErrorKind::InvalidResponse, "Missing video stream response"}));
+                     return;
+                   }
+                   handler(*stream);
+                 });
+}
+
+void YandexHomeApi::RequestActions(const QList<DeviceActionsObject>& actions, QObject* context,
+                                   ApiResultHandler<DeviceActionResponse> handler) {
+  const auto request = RequestFactory::CreateAuthorizedBearer(kDevicesActionsEndpoint, token_provider_());
+  if (!request) { handler(std::unexpected(request.error())); return; }
+  QJsonArray json_actions;
+  for (const auto& action : actions) {
+    json_actions.push_back(Serialization::To(action));
+  }
+  QJsonObject payload;
+  payload["devices"] = json_actions;
+
+  transport_->Post(*request,
+                   QJsonDocument(payload).toJson(), context,
+                   [handler = std::move(handler)](ApiResult<HttpResponse> response) {
+    auto result = DecodeResult<DeviceActionResponse>(std::move(response));
+    if (!result) {
+      handler(std::unexpected(result.error()));
       return;
     }
 
-    qInfo() << "YandexHomeApi: Action " << response.request_id << "executing finished";
-
-    for (const auto& device : response.devices) {
+    for (const auto& device : result->devices) {
       for (const auto& capability : device.capabilities) {
-        const auto& state = capability.state;
-        const auto& action_result = state.action_result;
-
-        if (action_result.status == "DONE") {
-          emit actionExecutingFinishedSuccessfully(user_data);
-        } else {
-          qCritical() << "YandexHomeApi: Action " << response.request_id << "executing failed with:";
-          qCritical() << "YandexHomeApi: Code:" << action_result.error_code;
-          qCritical() << "YandexHomeApi: Message:" << action_result.error_message;
-          emit actionExecutingFailed(action_result.error_code, user_data);
+        const auto& action_result = capability.state.action_result;
+        if (action_result.status != "DONE") {
+          handler(std::unexpected(ApiError{ApiErrorKind::Service,
+                                           action_result.error_code}));
+          return;
         }
       }
     }
-  };
-
-  auto error_callback = [this, user_data](const QString& message) {
-    qCritical() << "YandexHomeApi: Internal error: " << message;
-    emit actionExecutingFailed(message, user_data);
-  };
-
-  QJsonArray json_actions;
-  for (const auto& action : actions) {
-    json_actions.push_back(Serialization::To<DeviceActionsObject>(action));
-  }
-
-  QJsonObject json_payload;
-  json_payload["devices"] = json_actions;
-
-  const QByteArray payload = QJsonDocument(json_payload).toJson();
-
-  MakePostRequest<DeviceActionResponse>(
-    kDevicesActionsEndpoint,
-    ok_callback,
-    error_callback,
-    payload
-  );
-}
-
-std::expected<QJsonObject, QString> YandexHomeApi::ParseResponseAsObject(const QByteArray &response) {
-  QJsonParseError json_error;
-  const QJsonDocument json_response = QJsonDocument::fromJson(
-    response, &json_error);
-
-  if (json_error.error != QJsonParseError::NoError) {
-    return std::unexpected(json_error.errorString());
-  }
-
-  return json_response.object();
+    handler(std::move(result));
+  });
 }

@@ -1,4 +1,9 @@
 #include <QFile>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QTimer>
+#include <QUrlQuery>
+#include "auth/DeviceAuthorizationFlow.h"
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -9,6 +14,38 @@
 #include "auth/AuthorizationFactory.h"
 #include "auth/OAuthConfiguration.h"
 #include "auth/QtOAuthAuthorizationFlow.h"
+
+class FakeReply final : public QNetworkReply {
+public:
+  FakeReply(const QNetworkRequest& request, int status, QByteArray body, QObject* parent)
+      : QNetworkReply(parent), body_(std::move(body)) {
+    setRequest(request); setUrl(request.url()); open(QIODevice::ReadOnly | QIODevice::Unbuffered);
+    setAttribute(QNetworkRequest::HttpStatusCodeAttribute, status);
+    QTimer::singleShot(0, this, [this] { setFinished(true); emit readyRead(); emit finished(); });
+  }
+  void abort() override { close(); }
+  qint64 bytesAvailable() const override { return body_.size() + QNetworkReply::bytesAvailable(); }
+protected:
+  qint64 readData(char* data, qint64 max) override {
+    const auto length = qMin(max, qint64(body_.size()));
+    if (!length) return -1;
+    memcpy(data, body_.constData(), size_t(length)); body_.remove(0, int(length)); return length;
+  }
+private:
+  QByteArray body_;
+};
+class FakeNetwork final : public QNetworkAccessManager {
+public:
+  QList<QPair<int, QByteArray>> responses;
+  QList<QUrl> urls;
+  QList<QByteArray> bodies;
+protected:
+  QNetworkReply* createRequest(Operation, const QNetworkRequest& request, QIODevice* outgoing) override {
+    urls << request.url(); bodies << (outgoing ? outgoing->readAll() : QByteArray{});
+    const auto response = responses.takeFirst();
+    return new FakeReply(request, response.first, response.second, this);
+  }
+};
 
 class OAuthAdapterTests final : public QObject {
   Q_OBJECT
@@ -24,6 +61,52 @@ private:
     return OAuthConfiguration::Parse(QJsonDocument(object).toJson());
   }
 private slots:
+  void DeviceCodePollingAndCancellation() {
+    QTemporaryDir dir;
+    QFile config(dir.filePath("auth.json"));
+    QVERIFY(config.open(QIODevice::WriteOnly));
+    config.write(QJsonDocument(Configuration()).toJson()); config.close();
+    FakeNetwork network;
+    network.responses = {{200, "{\"device_code\":\"private-code\",\"user_code\":\"ABCD\",\"verification_url\":\"https://example.invalid/device\",\"interval\":1,\"expires_in\":10}"},
+                         {400, "{\"error\":\"authorization_pending\"}"},
+                         {200, "{\"access_token\":\"synthetic-token\"}"}};
+    DeviceAuthorizationFlow flow(nullptr, config.fileName(), &network);
+    QObject context; QString code, url, token;
+    flow.SetPromptHandler([&](const QString& c, const QString& u) { code = c; url = u; });
+    flow.Start(&context, [&](AuthResult<QString> result) { QVERIFY(result); token = *result; });
+    QTRY_COMPARE(code, QString("ABCD"));
+    QCOMPARE(url, QString("https://example.invalid/device"));
+    QTRY_COMPARE_WITH_TIMEOUT(token, QString("synthetic-token"), 5000);
+    QCOMPARE(network.urls.size(), 3);
+    QCOMPARE(network.urls[0].path(), QString("/device/code"));
+    QCOMPARE(network.urls[1].path(), QString("/token"));
+    QVERIFY(network.bodies[1].contains("grant_type=device_code"));
+    QVERIFY(network.bodies[1].contains("code=private-code"));
+    network.responses = {{200, "{\"device_code\":\"private-code\",\"user_code\":\"EFGH\",\"verification_url\":\"https://example.invalid/device\",\"interval\":1,\"expires_in\":10}"}};
+    token.clear(); code.clear();
+    flow.Start(&context, [&](auto) { token = "unexpected"; });
+    QTRY_COMPARE(code, QString("EFGH"));
+    flow.Cancel();
+    QTest::qWait(1100);
+    QVERIFY(token.isEmpty());
+    QCOMPARE(network.urls.size(), 4);
+  }
+  void DeviceCodeExpiresAndRejectsInvalidPrompt() {
+    QTemporaryDir dir;
+    QFile config(dir.filePath("auth.json"));
+    QVERIFY(config.open(QIODevice::WriteOnly));
+    config.write(QJsonDocument(Configuration()).toJson()); config.close();
+    FakeNetwork network;
+    network.responses = {{200, "{\"device_code\":\"private\",\"user_code\":\"ABCD\",\"verification_url\":\"https://example.invalid/device\",\"interval\":3,\"expires_in\":1}"}};
+    DeviceAuthorizationFlow flow(nullptr, config.fileName(), &network);
+    QObject context; int completed = 0;
+    flow.Start(&context, [&](AuthResult<QString> result) { QVERIFY(!result); QCOMPARE(result.error().kind, AuthErrorKind::Authorization); ++completed; });
+    QTRY_COMPARE_WITH_TIMEOUT(completed, 1, 3000);
+    QCOMPARE(network.urls.size(), 1);
+    network.responses = {{200, "{\"device_code\":\"private\",\"user_code\":\"ABCD\",\"verification_url\":\"https://other.invalid/device\",\"interval\":1,\"expires_in\":10}"}};
+    flow.Start(&context, [&](AuthResult<QString> result) { QVERIFY(!result); ++completed; });
+    QTRY_COMPARE(completed, 2);
+  }
   void ParsesConfiguredRedirectAndScopes() {
     const auto config = Parse(Configuration());
     QVERIFY(config);

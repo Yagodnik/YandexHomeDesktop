@@ -29,6 +29,11 @@ UI.PageSurface {
       trayTitle: qsTr("Tray-режим")
       trayDescription: qsTr("Приложение будет отображаться\nкак иконка на панели задач")
       trayModeEnabled: settings.trayModeEnabled
+      notchAvailable: platformService.notchSupported
+      notchEnabled: settings.notchEnabled
+      notchTitle: qsTr("Открывать у выреза экрана")
+      notchDescription: qsTr("Показывать приложение при наведении\nна вырез экрана")
+      onNotchToggled: function(enabled) { settings.notchEnabled = enabled; }
       themeTitle: qsTr("Тема")
       themeNames: [qsTr("Светлая"), qsTr("Тёмная")]
       currentTheme: settings.currentTheme
@@ -37,14 +42,7 @@ UI.PageSurface {
       showKeybinds: settings.showKeybinds
       projectLinkText: qsTr("GitHub")
 
-      onTrayModeToggled: function(enabled) {
-        settings.trayModeEnabled = enabled;
-        if (enabled) {
-          platformService.ShowOnlyInTray();
-        } else {
-          platformService.ShowAsApp();
-        }
-      }
+      onTrayModeToggled: function(enabled) { settings.trayModeEnabled = enabled; }
 
       onThemeSelected: function(index) {
         settings.currentTheme = index;

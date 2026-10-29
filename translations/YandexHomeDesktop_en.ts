@@ -20,7 +20,20 @@
     </message>
 </context>
 <context>
+    <name>FixtureAuthPage</name>
+    <message><source>Готово. Вернитесь в приложение.</source><translation>Done. Return to the app.</translation></message>
+    <message><source>Демонстрационная авторизация</source><translation>Demo authorization</translation></message>
+    <message><source>Введите код из приложения. Данные никуда не отправляются.</source><translation>Enter the code from the app. No data is sent outside this computer.</translation></message>
+    <message><source>Подтвердить</source><translation>Confirm</translation></message>
+</context>
+<context>
     <name>AuthPage</name>
+    <message><source>Откройте %1
+и введите код: %2</source><translation>Open %1
+and enter the code: %2</translation></message>
+    <message><source>Получение кода авторизации…</source><translation>Getting an authorization code…</translation></message>
+    <message><source>Открыть страницу</source><translation>Open page</translation></message>
+    <message><source>Отмена</source><translation>Cancel</translation></message>
     <message>
         <location filename="../src/qml/pages/AuthPage.qml" line="8"/>
         <source>Yandex Home Desktop</source>
@@ -236,6 +249,11 @@ your devices</translation>
         <source>HSV: h должен быть 0–360; s и v — 0–100.</source>
         <translation>HSV: h must be 0–360; s and v must be 0–100.</translation>
     </message>
+</context>
+<context>
+    <name>AdvancedSettingsCard</name>
+    <message><source>Порт</source><translation>Port</translation></message>
+    <message><source>Остановите сервер, чтобы изменить порт.</source><translation>Stop the server to change the port.</translation></message>
 </context>
 <context>
     <name>CliApp</name>
@@ -2501,11 +2519,6 @@ Email: %2
     </message>
 </context>
 <context>
-    <name>AdvancedSettingsCard</name>
-    <message><source>Порт</source><translation>Port</translation></message>
-    <message><source>Остановите сервер, чтобы изменить порт.</source><translation>Stop the server to change the port.</translation></message>
-</context>
-<context>
     <name>McpViewModel</name>
     <message>
         <source>Не удалось управлять MCP-сервером. Проверьте вход и доступность порта.</source>
@@ -2521,6 +2534,16 @@ Email: %2
     <message>
         <source>Доступ для AI-агентов</source>
         <translation>Access for AI agents</translation>
+    </message>
+    <message>
+        <source>Открывать у выреза экрана</source>
+        <translation>Open at the screen notch</translation>
+    </message>
+    <message>
+        <source>Показывать приложение при наведении
+на вырез экрана</source>
+        <translation>Show the app when hovering over
+the screen notch</translation>
     </message>
     <message>
         <location filename="../src/qml/pages/SettingsPage.qml" line="19"/>
@@ -2940,6 +2963,13 @@ a window or tray icon</translation>
         <location filename="../src/qml/controls/VideoStream.qml" line="109"/>
         <source>Сделать снимок</source>
         <translation>Take snapshot</translation>
+    </message>
+</context>
+<context>
+    <name>TrayWindow</name>
+    <message>
+        <source>Выйти из приложения</source>
+        <translation>Quit application</translation>
     </message>
 </context>
 </TS>

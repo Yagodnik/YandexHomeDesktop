@@ -169,7 +169,7 @@ Capability and property entries use the API fields, including `type`, `retrievab
 
 The file is read for each request, so editing a custom fixture and refreshing the page shows the updated data. Invalid files produce explicit errors; the app does not fall back to the real API. Fixture mode uses local sign-in, a bundled avatar, and in-memory UI settings. It does not access OAuth credentials, keychain tokens, or the HTTP transport. Device actions succeed locally and update in-memory capability state, including relative ranges. Refreshing preserves those values; editing the fixture file or restarting clears them. `action_errors` optionally maps device IDs to deliberate action failures. The bundled failure scenario remains available for error testing. `video_streams` maps camera IDs to `{ "stream_url": "...", "protocol": "hls" }`; the bundled camera plays a local HLS test pattern copied from resources to a temporary directory. No camera or media network access is needed. Desktop builds require Qt Multimedia; the Windows/macOS CI and release kits install `qtmultimedia`, and the standard QML deployment step includes its plugin and runtime libraries. `QmlLayouts::VideoStream` verifies actual local HLS decoding, retry, stop, and cancellation through the real device page.
 
-The default embedded OAuth JSON is `resources/auth/example.json`. It contains no usable credentials, so the resulting binary is suitable for build and test verification but cannot sign in. To build a runnable app, place your JSON outside Git (for example at ignored `resources/auth/secrets.json`) and configure with `-DYH_AUTH_CONFIG_FILE=/path/to/secrets.json` or `-DAUTH_CONFIG_FILE=/path/to/secrets.json`. This JSON is embedded in the binary, so keep binaries built with real credentials private. The file must supply `auth_url`, `access_token_url`, `client_id`, `client_secret`, `redirect_base`, `redirect_port`, and `scopes`. Authorization and token URLs must use HTTPS. `redirect_base` is an HTTP loopback URL (`127.0.0.1`, `localhost`, or `::1`), optionally with a callback path; put the port in `redirect_port` (1–65535). Public clients use an empty `client_secret`. Configuration is validated only when browser sign-in starts; saved-token restoration and the console CLI do not load it or bind a callback port.
+The default embedded OAuth JSON is `resources/auth/example.json`. It contains no usable credentials, so the resulting binary is suitable for build and test verification but cannot sign in. To build a runnable app, place your JSON outside Git (for example at ignored `resources/auth/secrets.json`) and configure with `-DYH_AUTH_CONFIG_FILE=/path/to/secrets.json` or `-DAUTH_CONFIG_FILE=/path/to/secrets.json`. This JSON is embedded in the binary, so keep binaries built with real credentials private. The file must supply `access_token_url`, `client_id`, `client_secret`, and `scopes`. The token URL must use HTTPS; the device-code endpoint is derived from its origin. Public clients use an empty `client_secret`. Existing configuration files may retain their old redirect fields; they are ignored by desktop sign-in. Configuration is validated when sign-in starts; saved-token restoration and the console CLI do not load it. Device authorization uses no local callback listener.
 
 Before committing translation changes, run:
 
@@ -192,6 +192,7 @@ The root `justfile` provides shortcuts for the same CMake and CTest commands. In
 just qt_prefix=/path/to/Qt/6.x/macos configure
 just build
 just demo                                    # Debug GUI with bundled fixture data
+just demo-auth                               # Debug GUI with local mock sign-in and fixture data
 just demo --fake-api-data "/path/to/my fixture.json"
 just run                                     # GUI using saved sign-in / real OAuth
 just cli --fake-api devices list --json
@@ -219,7 +220,7 @@ just translations-update                    # Then translate new English message
 
 Set variables before the recipe name. `config` defaults to `Debug`; desktop profiles use `build-just/debug`, `build-just/release`, etc. `desktop=OFF` uses separate `build-just/portable/<configuration>` directories and is the default on Linux. `qt_prefix` falls back to `CMAKE_PREFIX_PATH` and then `QT_ROOT_DIR`. `auth_config` falls back to `YH_AUTH_CONFIG_FILE` and then the credential-free example. For local browser sign-in, run `just auth_config=/absolute/path/to/oauth.json configure`. `cli_app=ON`, `rest_app=ON`, `pch=ON`, `jobs=4`, and `generator=Ninja` are the defaults; `build_dir=/path/to/build` selects an existing or custom build directory. Multi-config generators are supported through `--config`/`-C`, and the launch recipes search the configuration subdirectory too.
 
-`build` configures only when its directory has no `CMakeCache.txt`. Subsequent builds, launches, and tests preserve configured Qt paths, credentials, and CMake flags. Run `configure` explicitly when changing these settings; append additional CMake options there, for example `just configure -DYH_ENABLE_PCH=OFF`. `build`, `test`, `run`, `cli`, `rest`, `demo`, and `install` forward extra arguments to their corresponding tools. `demo` requires a Debug desktop profile. `clean` invokes CMake's clean target and retains the build configuration. The Release CI jobs install pinned just and exercise configuration, builds, translations, tests, and package verification through these recipes. Linux checks C++ formatting; Windows and Linux check justfile formatting.
+`build` configures only when its directory has no `CMakeCache.txt`. Subsequent builds, launches, and tests preserve configured Qt paths, credentials, and CMake flags. Run `configure` explicitly when changing these settings; append additional CMake options there, for example `just configure -DYH_ENABLE_PCH=OFF`. `build`, `test`, `run`, `cli`, `rest`, `demo`, and `install` forward extra arguments to their corresponding tools. `demo` and `demo-auth` require a Debug desktop profile. `demo` starts signed in; `demo-auth` starts at sign-in and uses a temporary loopback page to confirm the displayed demo code. Both use fixture data and in-memory settings, with no real OAuth or Keychain access. `clean` invokes CMake's clean target and retains the build configuration. The Release CI jobs install pinned just and exercise configuration, builds, translations, tests, and package verification through these recipes. Linux checks C++ formatting; Windows and Linux check justfile formatting.
 
 When switching Qt installations, refresh the CMake cache so cached `Qt6*_DIR` entries do not keep selecting the previous kit:
 
@@ -230,7 +231,7 @@ just build
 
 If a macOS build fails with `ld: framework 'AGL' not found`, check the cached Qt kit and selected Xcode SDK. Older Qt kits can reference AGL even when the selected SDK no longer supplies it. Use a compatible Qt/SDK combination and configure with `--fresh` as above.
 
-`build-gui`, `build-cli`, and `build-rest` build individual executables and their dependencies. `run`/`demo`, `cli`, and `rest` use those targets, respectively. A CLI or GUI target also builds its REST worker when `rest_app=ON`. When changing executable options in an existing profile, run `configure` explicitly.
+`build-gui`, `build-cli`, and `build-rest` build individual executables and their dependencies. `run`/`demo`/`demo-auth`, `cli`, and `rest` use those targets, respectively. A CLI or GUI target also builds its REST worker when `rest_app=ON`. When changing executable options in an existing profile, run `configure` explicitly.
 
 The shared `WorkerControl` target uses only the already declared Qt Core and
 Network modules. It is built and installed with the existing SDK targets and
@@ -491,3 +492,18 @@ scenarios. Native checks use a rarely used modifier/F19 combination briefly and
 skip if the current desktop cannot register it; they do not inject keyboard input.
 Windows CI builds/deploys the worker, runs its Release tests once,
 and checks installed help. See [shortcuts.md](shortcuts.md) for runtime behavior.
+
+Tray window placement uses Qt screen coordinates and the screen's available area.
+On Linux, the desktop environment must provide a system tray and its icon geometry;
+when it does not, placement falls back to the cursor's screen. Wayland compositors
+may ignore requests to position top-level windows. On macOS, the optional notch
+hover setting provides an alternative to tray mode on displays that report a notch through
+macOS 12 or later; it is off by default.
+
+To recover from a tray window that cannot be opened, exit any running copy of the
+app and invoke the GUI executable with `--disable-tray`. The command writes the
+normal user preference and exits without starting the GUI; launch the app again
+without the flag. On macOS, invoke the executable inside the app bundle, for
+example `YandexHomeDesktop.app/Contents/MacOS/YandexHomeDesktop --disable-tray`.
+On Windows, run `YandexHomeDesktop.exe --disable-tray`; on Linux, run the
+installed GUI executable with the same flag. The flag must be used alone.

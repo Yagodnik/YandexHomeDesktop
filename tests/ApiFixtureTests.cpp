@@ -9,10 +9,14 @@
 #include <optional>
 #include "api/debug/FixtureApi.h"
 #include "app/common/StartupOptions.h"
+#include "app/gui/TrayRecovery.h"
 #include "utils/Settings.h"
 #ifdef YH_DEBUG_FAKE_API
 #include "auth/AuthorizationFactory.h"
 #include <memory>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QUrlQuery>
 #endif
 
 class ApiFixtureTests final : public QObject {
@@ -31,6 +35,46 @@ private:
       file.write(QJsonDocument(fixture).toJson()) != -1;
   }
 private slots:
+  void TrayRecoveryOnlyChangesTraySetting() {
+    QVERIFY(IsTrayRecoveryRequest({"app", "--disable-tray"}));
+    QVERIFY(!IsTrayRecoveryRequest({"app"}));
+    QVERIFY(!IsTrayRecoveryRequest({"app", "--disable-tray", "--fake-api"}));
+    QVERIFY(!IsTrayRecoveryRequest({"app", "--", "--disable-tray"}));
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    const QString path = directory.filePath("settings.ini");
+    QSettings settings(path, QSettings::IniFormat);
+    settings.setValue("trayModeEnabled", true);
+    settings.setValue("currentTheme", 1);
+    QVERIFY(DisableTrayForRecovery(settings));
+    QSettings reloaded(path, QSettings::IniFormat);
+    QCOMPARE(reloaded.value("trayModeEnabled").toBool(), false);
+    QCOMPARE(reloaded.value("currentTheme").toInt(), 1);
+  }
+
+  void PopupModesAreExclusiveAndPersisted() {
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    const auto path = directory.filePath("settings.ini");
+    Settings settings(path);
+    QSignalSpy tray(&settings, &Settings::trayModeEnabledChanged);
+    QSignalSpy notch(&settings, &Settings::notchEnabledChanged);
+    settings.SetNotchEnabled(true);
+    QVERIFY(settings.GetNotchEnabled());
+    QVERIFY(!settings.GetTrayModeEnabled());
+    settings.SetTrayModeEnabled(true);
+    QVERIFY(!settings.GetNotchEnabled());
+    QVERIFY(settings.GetTrayModeEnabled());
+    settings.SetNotchEnabled(true);
+    QVERIFY(settings.GetNotchEnabled());
+    QVERIFY(!settings.GetTrayModeEnabled());
+    QCOMPARE(tray.count(), 2);
+    QCOMPARE(notch.count(), 3);
+    Settings reloaded(path);
+    QVERIFY(reloaded.GetNotchEnabled());
+    QVERIFY(!reloaded.GetTrayModeEnabled());
+  }
+
   void SharedSettingsPreserveTheGuiExecutable() {
     QTemporaryDir directory;
     QVERIFY(directory.isValid());
@@ -59,6 +103,12 @@ private slots:
     QCOMPARE(options->cli_arguments, (QStringList{"app", "--list-devices"}));
     options = ParseStartupOptions({"app", "--fake-api", "--fake-api-data=fixture.json"}, true);
     QVERIFY(options); QCOMPARE(options->fixture_path, QString("fixture.json"));
+    options = ParseStartupOptions({"app", "--fake-api", "--fake-auth"}, true, false, true);
+    QVERIFY(options); QVERIFY(options->use_fake_api); QVERIFY(options->use_fake_auth);
+    QCOMPARE(options->cli_arguments, QStringList{"app"});
+    QVERIFY(!ParseStartupOptions({"app", "--fake-auth"}, true, false, true));
+    QVERIFY(!ParseStartupOptions({"app", "--fake-api", "--fake-auth"}, true));
+    QVERIFY(!ParseStartupOptions({"app", "--fake-api", "--fake-auth"}, false, false, true));
     QVERIFY(!ParseStartupOptions({"app", "--fake-api"}, false));
     QVERIFY(!ParseStartupOptions({"app", "--fake-api-data=x"}, false));
     QVERIFY(!ParseStartupOptions({"app", "--fake-api-data=x"}, true));
@@ -359,6 +409,53 @@ private slots:
   }
 
 #ifdef YH_DEBUG_FAKE_API
+  void InteractiveFixtureSignInUsesLocalConfirmation() {
+    std::unique_ptr<IAuthorizationService> auth(CreateAuthorizationService(AuthorizationMode::FixtureInteractive, nullptr));
+    QSignalSpy unauthorized(auth.get(), &IAuthorizationService::unauthorized);
+    QSignalSpy authorized(auth.get(), &IAuthorizationService::authorized);
+    QSignalSpy finished(auth.get(), &IAuthorizationService::logoutFinished);
+    auth->AttemptLocalAuthorization();
+    QTRY_COMPARE(unauthorized.size(), 1);
+    QVERIFY(!auth->IsAuthorized());
+    QVERIFY(!auth->GetToken());
+    auth->AttemptAuthorization();
+    QVERIFY(auth->AuthorizationPending());
+    QCOMPARE(auth->AuthorizationCode(), QString("DEMO-1234"));
+    const QUrl url(auth->AuthorizationUrl());
+    QCOMPARE(url.host(), QString("127.0.0.1"));
+    QVERIFY(url.port() > 0);
+    QNetworkAccessManager network;
+    auto* page = network.get(QNetworkRequest(url));
+    QTRY_VERIFY(page->isFinished());
+    QCOMPARE(page->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(), 200);
+    QVERIFY(page->readAll().contains("/confirm"));
+    page->deleteLater();
+    QUrl wrong(url); wrong.setPath("/confirm"); wrong.setQuery("code=wrong");
+    auto* rejected = network.get(QNetworkRequest(wrong));
+    QTRY_VERIFY(rejected->isFinished());
+    QVERIFY(!auth->IsAuthorized());
+    QVERIFY(auth->AuthorizationPending());
+    rejected->deleteLater();
+    auth->CancelAuthorization();
+    QVERIFY(!auth->AuthorizationPending());
+    QVERIFY(auth->AuthorizationUrl().isEmpty());
+    auth->AttemptAuthorization();
+    QUrl confirm(auth->AuthorizationUrl()); confirm.setPath("/confirm");
+    QUrlQuery query; query.addQueryItem("code", auth->AuthorizationCode()); confirm.setQuery(query);
+    auto* accepted = network.get(QNetworkRequest(confirm));
+    QTRY_VERIFY(accepted->isFinished());
+    QCOMPARE(accepted->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(), 200);
+    QTRY_COMPARE(authorized.size(), 1);
+    QVERIFY(auth->IsAuthorized());
+    QVERIFY(!auth->AuthorizationPending());
+    QVERIFY(!auth->GetToken());
+    accepted->deleteLater();
+    auth->Logout();
+    QTRY_COMPARE(finished.size(), 1);
+    QVERIFY(!auth->IsAuthorized());
+    auth->AttemptLocalAuthorization();
+    QTRY_COMPARE(unauthorized.size(), 2);
+  }
   void FixtureSignInAndLogoutStayLocal() {
     std::unique_ptr<IAuthorizationService> auth(CreateAuthorizationService(AuthorizationMode::Fixture, nullptr));
     QSignalSpy authorized(auth.get(), &IAuthorizationService::authorized);

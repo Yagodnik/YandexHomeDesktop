@@ -1,7 +1,6 @@
 #pragma once
 
 #include "PlatformServiceImpl.h"
-#include <windows.h>
 
 class PlatformServiceWin final : public PlatformServiceImpl {
 public:
@@ -9,6 +8,4 @@ public:
   void ShowAsApp() override;
   void ShowOnlyInTray() override;
 
-private:
-  RECT GetTaskbarRectUnderCursor();
 };

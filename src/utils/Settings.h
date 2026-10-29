@@ -11,12 +11,14 @@ class APPRUNTIME_EXPORT Settings : public QObject {
   Q_OBJECT
   Q_PROPERTY(int currentTheme READ GetCurrentTheme WRITE SetCurrentTheme NOTIFY currentThemeChanged)
   Q_PROPERTY(bool trayModeEnabled READ GetTrayModeEnabled WRITE SetTrayModeEnabled NOTIFY trayModeEnabledChanged)
+  Q_PROPERTY(bool notchEnabled READ GetNotchEnabled WRITE SetNotchEnabled NOTIFY notchEnabledChanged)
   Q_PROPERTY(bool showKeybinds READ GetShowKeybinds WRITE SetShowKeybinds NOTIFY showKeybindsChanged)
 public:
   explicit Settings(QObject *parent = nullptr, bool temporary = false);
   explicit Settings(const QString& fileName, QObject* parent = nullptr);
 
   [[nodiscard]] bool GetTrayModeEnabled() const;
+  [[nodiscard]] bool GetNotchEnabled() const;
   [[nodiscard]] int GetCurrentTheme() const;
   [[nodiscard]] bool GetShowKeybinds() const;
   [[nodiscard]] bool GetRestEnabled() const;
@@ -51,6 +53,7 @@ public:
 
 signals:
   void trayModeEnabledChanged();
+  void notchEnabledChanged();
   void currentThemeChanged();
   void showKeybindsChanged();
   void keybindsChanged(const QString& accountId);
@@ -59,6 +62,7 @@ signals:
 public slots:
   void SetCurrentTheme(int theme);
   void SetTrayModeEnabled(bool enabled);
+  void SetNotchEnabled(bool enabled);
   void SetShowKeybinds(bool visible);
 
 private:
@@ -69,6 +73,7 @@ private:
   bool temporary_ = false;
   int temporary_theme_ = 0;
   bool temporary_tray_ = false;
+  bool temporary_notch_ = false;
   bool temporary_show_keybinds_ = true;
   bool temporary_rest_ = false;
   quint16 temporary_rest_port_ = 8766;

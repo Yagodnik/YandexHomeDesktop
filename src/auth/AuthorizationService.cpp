@@ -6,7 +6,13 @@ AuthorizationService::AuthorizationService(ITokenStore* store, IAuthorizationFlo
                                            QObject* parent)
   : IAuthorizationService(parent), store_(store), flow_(flow) {
   Q_ASSERT(store_);
+  if (flow_) flow_->SetPromptHandler([this](const QString& code, const QString& url) {
+    if (operation_ != Operation::Authorizing) return;
+    code_ = code; url_ = url; emit authorizationStateChanged();
+  });
 }
+
+AuthorizationService::~AuthorizationService() { if (flow_) { flow_->Cancel(); flow_->SetPromptHandler({}); } }
 
 void AuthorizationService::AttemptLocalAuthorization() {
   if (operation_ != Operation::Idle || logout_requested_) { return; }
@@ -35,14 +41,19 @@ void AuthorizationService::AttemptAuthorization() {
   token_.reset();
   last_error_code_ = 0;
   operation_ = Operation::Authorizing;
+  ClearPrompt();
+  emit authorizationStateChanged();
   if (!flow_) {
     operation_ = Operation::Idle;
+    emit authorizationStateChanged();
     Fail({AuthErrorKind::Authorization, 0x80000002u, {}});
     return;
   }
   flow_->Start(this, [this, generation](AuthResult<QString> result) {
     if (generation != generation_ || operation_ != Operation::Authorizing) { return; }
     operation_ = Operation::Idle;
+    ClearPrompt();
+    emit authorizationStateChanged();
     if (!result) {
       Fail(result.error());
       return;
@@ -75,6 +86,8 @@ void AuthorizationService::Logout() {
   last_error_code_ = 0;
   logout_requested_ = true;
   if (flow_) { flow_->Cancel(); }
+  ClearPrompt();
+  emit authorizationStateChanged();
   emit logout();
   if (logout_requested_ && operation_ != Operation::Writing && operation_ != Operation::Deleting) {
     DeleteToken();
@@ -110,4 +123,14 @@ void AuthorizationService::Fail(const AuthError& error) {
     case AuthErrorKind::Initialization: emit initializationFailed(); break;
     default: emit authorizationFailed(); break;
   }
+}
+
+void AuthorizationService::ClearPrompt() { code_.clear(); url_.clear(); }
+void AuthorizationService::CancelAuthorization() {
+  if (operation_ != Operation::Authorizing) return;
+  ++generation_;
+  operation_ = Operation::Idle;
+  if (flow_) flow_->Cancel();
+  ClearPrompt();
+  emit authorizationStateChanged();
 }

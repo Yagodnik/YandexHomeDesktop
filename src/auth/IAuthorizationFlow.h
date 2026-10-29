@@ -6,6 +6,8 @@ class QObject;
 
 class IAuthorizationFlow {
 public:
+  using PromptHandler = std::function<void(const QString&, const QString&)>;
+  virtual void SetPromptHandler(PromptHandler) {}
   virtual ~IAuthorizationFlow() = default;
   // Deliver once while context is alive. Cancel releases browser-flow resources
   // and suppresses completion of the canceled attempt.

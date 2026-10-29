@@ -13,9 +13,14 @@ class AUTHCORE_EXPORT AuthorizationService final : public IAuthorizationService 
 public:
   explicit AuthorizationService(ITokenStore* store, IAuthorizationFlow* flow = nullptr,
                                 QObject* parent = nullptr);
+  ~AuthorizationService() override;
   void AttemptLocalAuthorization() override;
   void AttemptAuthorization() override;
   void Logout() override;
+  void CancelAuthorization() override;
+  bool AuthorizationPending() const override { return operation_ == Operation::Authorizing; }
+  QString AuthorizationCode() const override { return code_; }
+  QString AuthorizationUrl() const override { return url_; }
   [[nodiscard]] bool IsAuthorized() const override;
   [[nodiscard]] QString GetLastErrorCode() const override;
   [[nodiscard]] std::optional<QString> GetToken() const override;
@@ -32,4 +37,7 @@ private:
   bool logout_requested_ = false;
   quint32 last_error_code_ = 0;
   std::optional<QString> token_;
+  QString code_;
+  QString url_;
+  void ClearPrompt();
 };

@@ -120,6 +120,16 @@ demo *args:
     just build-gui
     exec bash scripts/launch.sh '{{ if os() == "macos" { "YandexHomeDesktop.app/Contents/MacOS/YandexHomeDesktop" } else { "YandexHomeDesktop.exe" } }}' --fake-api "$@"
 
+# Launch the Debug GUI with fixture data and interactive local sign-in.
+[script]
+demo-auth *args:
+    if [[ "$YH_JUST_CONFIG" != Debug || "$YH_JUST_DESKTOP" != ON ]]; then
+        echo 'Fixture mode requires config=Debug and desktop=ON' >&2
+        exit 2
+    fi
+    just build-gui
+    exec bash scripts/launch.sh '{{ if os() == "macos" { "YandexHomeDesktop.app/Contents/MacOS/YandexHomeDesktop" } else { "YandexHomeDesktop.exe" } }}' --fake-api --fake-auth "$@"
+
 # Build and run the console CLI, e.g. cli --fake-api devices list --json.
 cli *args: build-cli
     bash scripts/launch.sh '{{ if os() == "windows" { "YandexHomeCli.exe" } else { "YandexHomeCli" } }}' "$@"

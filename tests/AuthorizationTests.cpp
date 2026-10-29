@@ -36,6 +36,8 @@ class ScriptedFlow final : public IAuthorizationFlow {
 public:
   QList<Pending<QString>> attempts;
   int canceled = 0;
+  PromptHandler prompt;
+  void SetPromptHandler(PromptHandler handler) override { prompt = std::move(handler); }
   void Start(QObject* context, AuthResultHandler<QString> handler) override {
     attempts.append({context, std::move(handler)});
   }
@@ -59,6 +61,28 @@ public:
 class AuthorizationTests final : public QObject {
   Q_OBJECT
 private slots:
+  void DevicePromptAndCancellation() {
+    ScriptedStore store;
+    ScriptedFlow flow;
+    AuthorizationService auth(&store, &flow);
+    AuthorizationModel model(&auth);
+    QSignalSpy changes(&model, &AuthorizationModel::authorizationStateChanged);
+    model.AttemptAuthorization();
+    QVERIFY(model.authorizationPending());
+    flow.prompt("ABCD", "https://oauth.yandex.ru/device");
+    QCOMPARE(model.authorizationCode(), QString("ABCD"));
+    QCOMPARE(model.authorizationUrl(), QString("https://oauth.yandex.ru/device"));
+    model.CancelAuthorization();
+    QVERIFY(!model.authorizationPending());
+    QVERIFY(model.authorizationCode().isEmpty());
+    QCOMPARE(flow.canceled, 1);
+    flow.attempts.first().Send(QString("stale-token"));
+    QVERIFY(!auth.IsAuthorized());
+    QVERIFY(store.writes.isEmpty());
+    QVERIFY(changes.size() >= 3);
+    model.AttemptAuthorization();
+    QVERIFY(model.authorizationPending());
+  }
   void SavedSessionUsesOnlyStorage() {
     ScriptedStore store;
     ScriptedFlow flow;

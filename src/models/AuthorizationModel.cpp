@@ -2,6 +2,7 @@
 
 AuthorizationModel::AuthorizationModel(IAuthorizationService* service, QObject* parent)
   : QObject(parent), service_(service) {
+  connect(service_, &IAuthorizationService::authorizationStateChanged, this, &AuthorizationModel::authorizationStateChanged);
   connect(service_, &IAuthorizationService::authorized, this, &AuthorizationModel::authorized);
   connect(service_, &IAuthorizationService::unauthorized, this, &AuthorizationModel::unauthorized);
   connect(service_, &IAuthorizationService::logout, this, &AuthorizationModel::logout);
@@ -17,3 +18,5 @@ void AuthorizationModel::AttemptAuthorization() { service_->AttemptAuthorization
 void AuthorizationModel::Logout() { service_->Logout(); }
 bool AuthorizationModel::IsAuthorized() const { return service_->IsAuthorized(); }
 QString AuthorizationModel::GetLastErrorCode() const { return service_->GetLastErrorCode(); }
+
+void AuthorizationModel::CancelAuthorization() { service_->CancelAuthorization(); }

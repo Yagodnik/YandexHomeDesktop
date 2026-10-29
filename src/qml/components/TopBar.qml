@@ -25,7 +25,7 @@ Item {
 
     Item {
       id: householdSelect
-      width: parent.width
+      width: parent.width - 32
       height: 28
 
       anchors.left: parent.left
@@ -41,6 +41,8 @@ Item {
         UI.HeadingText {
           id: heading
           text: topBar.householdName
+          width: Math.min(implicitWidth, Math.max(0, householdSelect.width - 56))
+          elide: Text.ElideRight
           anchors.left: parent.left
           anchors.verticalCenter: parent.verticalCenter
         }

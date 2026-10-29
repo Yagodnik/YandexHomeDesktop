@@ -1,6 +1,6 @@
 #include "AppContext.h"
 #include "auth/AuthorizationFactory.h"
-#include "auth/QtOAuthAuthorizationFlow.h"
+#include "auth/DeviceAuthorizationFlow.h"
 #include <QDir>
 #include <stdexcept>
 #ifdef YH_DEBUG_FAKE_API
@@ -12,8 +12,10 @@ AppContext::AppContext(QGuiApplication* app, const StartupOptions& options)
       cli_arguments(options.cli_arguments.isEmpty() ? app->arguments() : options.cli_arguments),
       startup_options(options) {
   authorization_service = CreateAuthorizationService(
-      options.use_fake_api ? AuthorizationMode::Fixture : AuthorizationMode::Interactive, app_,
-      options.use_fake_api ? nullptr : new QtOAuthAuthorizationFlow);
+      options.use_fake_api ? (options.use_fake_auth ? AuthorizationMode::FixtureInteractive
+                                                    : AuthorizationMode::Fixture)
+                           : AuthorizationMode::Interactive,
+      app_, options.use_fake_api ? nullptr : new DeviceAuthorizationFlow);
   platform_service = new PlatformService(app_);
 
   token_provider = [service = authorization_service] {

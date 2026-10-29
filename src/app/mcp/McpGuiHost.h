@@ -12,7 +12,6 @@ public:
              QObject* parent = nullptr);
   bool Start();
   void Reset();
-
 private:
   QString endpoint_;
   McpBridge bridge_;

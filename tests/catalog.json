@@ -294,6 +294,18 @@
         {
           "name": "TestColors",
           "description": "Filter color/temperature presets and choose the nearest supported fixed temperature."
+        },
+        {
+          "name": "NotchActivationWindowStates",
+          "description": "A notch entry activates once, and leaving the target rearms the trigger."
+        },
+        {
+          "name": "NotchActivationArea",
+          "description": "A reachable strip below the notch activates only within its horizontal bounds."
+        },
+        {
+          "name": "WindowPlacementEdges",
+          "description": "Clamp tray placement on negative-coordinate screens, panel edges, missing anchors and oversized windows."
         }
       ]
     },
@@ -307,6 +319,10 @@
       "kind": "qt",
       "source": "tests/AuthorizationTests.cpp",
       "cases": [
+        {
+          "name": "DevicePromptAndCancellation",
+          "description": "Expose the device prompt, cancel sign-in, and reject a late grant."
+        },
         {
           "name": "SavedSessionUsesOnlyStorage",
           "description": "Restore a saved session without starting an interactive authorization flow."
@@ -386,6 +402,14 @@
         "BUILD_DESKTOP_APP"
       ],
       "cases": [
+        {
+          "name": "DeviceCodePollingAndCancellation",
+          "description": "Request and poll device authorization with scripted network replies and suppress polling after cancellation."
+        },
+        {
+          "name": "DeviceCodeExpiresAndRejectsInvalidPrompt",
+          "description": "Expire a device prompt without polling and reject a verification URL on another host."
+        },
         {
           "name": "ParsesConfiguredRedirectAndScopes",
           "description": "Parse the configured redirect path, port, and authorization scopes."
@@ -631,6 +655,14 @@
       "source": "tests/ApiFixtureTests.cpp",
       "cases": [
         {
+          "name": "PopupModesAreExclusiveAndPersisted",
+          "description": "Enabling tray or notch mode disables the other and persists the selected mode."
+        },
+        {
+          "name": "TrayRecoveryOnlyChangesTraySetting",
+          "description": "The GUI recovery flag disables persisted tray mode without changing other settings."
+        },
+        {
           "name": "SharedSettingsPreserveTheGuiExecutable",
           "description": "Keep the saved GUI executable path when headless settings update REST preferences."
         },
@@ -657,6 +689,14 @@
         {
           "name": "KeybindVisibilityPersistsAndResets",
           "description": "Persist the keybind attachment visibility preference, notify once per change, and restore the visible default on reset."
+        },
+        {
+          "name": "InteractiveFixtureSignInUsesLocalConfirmation",
+          "description": "Exercise the loopback demo verification page, wrong code, cancellation, confirmation, and logout without real credentials.",
+          "requires": [
+            "BUILD_DESKTOP_APP",
+            "Debug"
+          ]
         },
         {
           "name": "FixtureSignInAndLogoutStayLocal",
@@ -1093,6 +1133,10 @@
           "source": "tests/qml/tst_PageComposition.qml"
         },
         {
+          "name": "PageComposition::test_notchSettingIndependentOfTray",
+          "description": "The notch and tray settings switch between mutually exclusive popup modes."
+        },
+        {
           "name": "PageComposition::test_settingsScrollingAndActions",
           "description": "Keep settings controls reachable by scrolling and forward their user actions.",
           "source": "tests/qml/tst_PageComposition.qml"
@@ -1213,6 +1257,18 @@
           "source": "tests/qml/tst_ScenarioKeybinds.qml"
         },
         {
+          "name": "SettingsTransfer::test_popupMenuAlignedWithHomeSwitcher",
+          "description": "The popup quit button aligns with the home selector without overlapping it."
+        },
+        {
+          "name": "SettingsTransfer::test_popupModesQuitAndHide",
+          "description": "Tray and notch popup modes expose quit intent and hide on deactivation while respecting modal dialogs."
+        },
+        {
+          "name": "SettingsTransfer::test_popupQuitHiddenInNormalMode",
+          "description": "The popup quit button is hidden in normal window mode."
+        },
+        {
           "name": "SettingsTransfer::test_trayWindowSurvivesDialogs",
           "description": "Keep the actual tray window visible through settings file pickers and import confirmation, then restore focus-loss dismissal.",
           "source": "tests/qml/tst_SettingsTransfer.qml"
@@ -1226,6 +1282,10 @@
           "name": "CapabilityKeybinds::test_reportedColorSelection",
           "description": "Highlight the reported RGB, temperature, or scene value on initial load and select the scene tab for active scenes without dispatching actions.",
           "source": "tests/qml/tst_CapabilityKeybinds.qml"
+        },
+        {
+          "name": "SharedControls::test_settingSwitchReflectsOwner",
+          "description": "A settings switch emits intent while its appearance stays synchronized with the owning setting."
         },
         {
           "name": "SharedControls::test_actionCursors",
@@ -1256,6 +1316,11 @@
           "name": "VideoStream::test_snapshotCancelAndFailure",
           "description": "Handle missing frames and failed PNG writes, preserve playback when cancelling, and close a pending snapshot picker when leaving the device.",
           "source": "tests/qml/tst_VideoStream.qml"
+        },
+        {
+          "name": "PageComposition::test_authCancellation",
+          "description": "Route cancellation from the sign-in page to the authorization model.",
+          "source": "tests/qml/tst_PageComposition.qml"
         }
       ]
     },

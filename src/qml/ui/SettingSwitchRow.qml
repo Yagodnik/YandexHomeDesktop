@@ -37,6 +37,7 @@ Item {
     anchors.rightMargin: 10
     anchors.verticalCenter: parent.verticalCenter
     checked: root.checked
+    optimistic: false
     onToggled: function(checked) { root.toggled(checked); }
   }
 }

@@ -44,14 +44,10 @@ void Write(const QByteArray& text, bool error) {
 int RunCli(QCoreApplication& app, const StartupOptions& options) {
   if (options.mcp_command != StartupOptions::McpCommand::None) {
 #ifdef YH_MCP_ENABLED
-    const bool json =
-        options.cli_arguments.contains("--json") || options.cli_arguments.contains("-j");
+    const bool json = options.cli_arguments.contains("--json") || options.cli_arguments.contains("-j");
     for (const auto& arg : options.cli_arguments.mid(1)) {
       if (arg != "--json" && arg != "-j") {
-        Write(CliRunner::FormatError(
-                  json, "usage",
-                  QCoreApplication::translate("CliApp", "MCP-команды допускают только --json.")),
-              true);
+        Write(CliRunner::FormatError(json, "usage", QCoreApplication::translate("CliApp", "MCP-команды допускают только --json.")), true);
         return CliRunner::Usage;
       }
     }
@@ -61,13 +57,7 @@ int RunCli(QCoreApplication& app, const StartupOptions& options) {
     bool checking_port = options.mcp_port.has_value();
     QObject::connect(&gui, &WorkerControlClient::finished, &app, [&](const QJsonObject& result) {
       if (!result.value("ok").toBool()) {
-        Write(
-            CliRunner::FormatError(
-                json, "control_error",
-                QCoreApplication::translate(
-                    "CliApp",
-                    "Не удалось управлять MCP-сервером. Откройте приложение и войдите в аккаунт.")),
-            true);
+        Write(CliRunner::FormatError(json, "control_error", QCoreApplication::translate("CliApp", "Не удалось управлять MCP-сервером. Откройте приложение и войдите в аккаунт.")), true);
         app.exit(CliRunner::RequestFailed);
         return;
       }
@@ -76,50 +66,32 @@ int RunCli(QCoreApplication& app, const StartupOptions& options) {
     QObject::connect(&worker, &WorkerControlClient::finished, &app, [&](const QJsonObject& result) {
       if (checking_port && result.value("ok").toBool() && !result.value("running").toBool()) {
         checking_port = false;
-        gui.Request(WorkerControlClient::Command::Send,
-                    {{"command", "set_port"}, {"port", *options.mcp_port}});
+        gui.Request(WorkerControlClient::Command::Send, {{"command", "set_port"}, {"port", *options.mcp_port}});
         return;
       }
       checking_port = false;
       if (!result.value("ok").toBool()) {
-        Write(
-            CliRunner::FormatError(
-                json, result.value("error").toObject().value("code").toString(),
-                QCoreApplication::translate(
-                    "CliApp",
-                    "Не удалось управлять MCP-сервером. Откройте приложение и войдите в аккаунт.")),
-            true);
+        Write(CliRunner::FormatError(json, result.value("error").toObject().value("code").toString(),
+                                     QCoreApplication::translate("CliApp", "Не удалось управлять MCP-сервером. Откройте приложение и войдите в аккаунт.")), true);
         app.exit(CliRunner::RequestFailed);
       } else if (options.mcp_port && result.value("port").toInt() != *options.mcp_port) {
-        Write(CliRunner::FormatError(json, "port_conflict",
-                                     QCoreApplication::translate(
-                                         "CliApp", "MCP-сервер уже работает на другом порту.")),
-              true);
+        Write(CliRunner::FormatError(json, "port_conflict", QCoreApplication::translate("CliApp", "MCP-сервер уже работает на другом порту.")), true);
         app.exit(CliRunner::RequestFailed);
       } else {
         Write(json ? QJsonDocument(result).toJson(QJsonDocument::Compact) + '\n'
-                   : (result.value("running").toBool()
-                          ? result.value("url").toString().toUtf8() + '\n'
-                          : QCoreApplication::translate("CliApp", "MCP-сервер остановлен.\n")
-                                .toUtf8()),
-              false);
+                   : (result.value("running").toBool() ? result.value("url").toString().toUtf8() + '\n' : QCoreApplication::translate("CliApp", "MCP-сервер остановлен.\n").toUtf8()), false);
         app.exit(CliRunner::Success);
       }
     });
     QTimer::singleShot(0, &app, [&] {
       worker.Request(checking_port ? WorkerControlClient::Command::Status
-                     : options.mcp_command == StartupOptions::McpCommand::Enable
-                         ? WorkerControlClient::Command::Start
-                     : options.mcp_command == StartupOptions::McpCommand::Disable
-                         ? WorkerControlClient::Command::Stop
-                         : WorkerControlClient::Command::Status);
+                   : options.mcp_command == StartupOptions::McpCommand::Enable ? WorkerControlClient::Command::Start
+                   : options.mcp_command == StartupOptions::McpCommand::Disable ? WorkerControlClient::Command::Stop
+                                                                                : WorkerControlClient::Command::Status);
     });
     return app.exec();
 #else
-    Write(CliRunner::FormatError(
-              false, "unavailable",
-              QCoreApplication::translate("CliApp", "MCP-сервер не включён в эту сборку.")),
-          true);
+    Write(CliRunner::FormatError(false, "unavailable", QCoreApplication::translate("CliApp", "MCP-сервер не включён в эту сборку.")), true);
     return CliRunner::Usage;
 #endif
   }

@@ -7,8 +7,10 @@ Item {
   implicitHeight: content.implicitHeight + 40
   property string title
   property string message
+  property string secondaryButtonText
   property string buttonText
   signal signInRequested()
+  signal cancelRequested()
 
   UI.CardSurface {
     id: background
@@ -29,6 +31,7 @@ Item {
 
     UI.AnimatedText {
       text: root.message
+      wrapWidth: 300
       color: themes.inactive
       pixelSize: 16
       anchors.horizontalCenter: parent.horizontalCenter
@@ -36,9 +39,18 @@ Item {
 
     UI.MyButton {
       objectName: "signInAction"
+      visible: root.buttonText.length > 0
       text: root.buttonText
       anchors.horizontalCenter: parent.horizontalCenter
       onClicked: root.signInRequested()
+    }
+
+    UI.MyButton {
+      objectName: "cancelSignInAction"
+      visible: root.secondaryButtonText.length > 0
+      text: root.secondaryButtonText
+      anchors.horizontalCenter: parent.horizontalCenter
+      onClicked: root.cancelRequested()
     }
   }
 

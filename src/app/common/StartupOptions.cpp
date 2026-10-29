@@ -7,7 +7,8 @@ class StartupMessages {
 };
 
 std::expected<StartupOptions, QString> ParseStartupOptions(const QStringList& arguments,
-                                                           bool allow_fake_api, bool rest_worker) {
+                                                           bool allow_fake_api, bool rest_worker,
+                                                           bool allow_fake_auth) {
   StartupOptions options;
   bool custom_fixture = false;
   if (!arguments.isEmpty()) {
@@ -18,23 +19,21 @@ std::expected<StartupOptions, QString> ParseStartupOptions(const QStringList& ar
     if (argument == "--") {
       options.cli_arguments.append(arguments.mid(i));
       break;
+    } else if (argument == "--fake-auth") {
+      options.use_fake_auth = true;
     } else if (argument == "--fake-api") {
       options.use_fake_api = true;
     } else if (argument == "--mcp-port" || argument.startsWith("--mcp-port=")) {
-      if (options.mcp_port)
-        return std::unexpected(StartupMessages::tr("Повторяющийся параметр: --mcp-port."));
-      const auto value = argument == "--mcp-port" ? arguments.value(++i)
-                                                  : argument.mid(QString("--mcp-port=").size());
+      if (options.mcp_port) return std::unexpected(StartupMessages::tr("Повторяющийся параметр: --mcp-port."));
+      const auto value = argument == "--mcp-port" ? arguments.value(++i) : argument.mid(QString("--mcp-port=").size());
       bool valid = false;
       const auto port = value.toUInt(&valid);
-      if (!valid || port == 0 || port > 65535)
-        return std::unexpected(StartupMessages::tr("--mcp-port должен быть от 1 до 65535."));
+      if (!valid || port == 0 || port > 65535) return std::unexpected(StartupMessages::tr("--mcp-port должен быть от 1 до 65535."));
       options.mcp_port = static_cast<quint16>(port);
-    } else if (argument == "--enable-mcp" || argument == "--disable-mcp" ||
-               argument == "--status-mcp") {
+    } else if (argument == "--enable-mcp" || argument == "--disable-mcp" || argument == "--status-mcp") {
       if (options.mcp_command != StartupOptions::McpCommand::None)
         return std::unexpected(StartupMessages::tr("Укажите только одну MCP-команду."));
-      options.mcp_command = argument == "--enable-mcp"    ? StartupOptions::McpCommand::Enable
+      options.mcp_command = argument == "--enable-mcp" ? StartupOptions::McpCommand::Enable
                             : argument == "--disable-mcp" ? StartupOptions::McpCommand::Disable
                                                           : StartupOptions::McpCommand::Status;
     } else if (argument == "--enable-rest" || argument == "--disable-rest" ||
@@ -90,8 +89,14 @@ std::expected<StartupOptions, QString> ParseStartupOptions(const QStringList& ar
       options.cli_arguments.append(argument);
     }
   }
-  if ((options.use_fake_api || custom_fixture) && !allow_fake_api) {
+  if ((options.use_fake_api || options.use_fake_auth || custom_fixture) && !allow_fake_api) {
     return std::unexpected("The fake API is available only in Debug builds");
+  }
+  if (options.use_fake_auth && !allow_fake_auth) {
+    return std::unexpected("--fake-auth is available only in the desktop app");
+  }
+  if (options.use_fake_auth && !options.use_fake_api) {
+    return std::unexpected("--fake-auth requires --fake-api");
   }
   if (custom_fixture && !options.use_fake_api) {
     return std::unexpected("--fake-api-data requires --fake-api");

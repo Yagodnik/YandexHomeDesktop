@@ -15,6 +15,8 @@ TestCase {
   Component { id: button; UI.MyButton { text: "Action" } }
   Component { id: imageButton; UI.ImageButton { width: 32; height: 32; source: "qrc:/images/arrow.svg" } }
   Component { id: toggle; UI.MySwitch {} }
+  Component { id: controlledSetting; UI.SettingSwitchRow { width: 250; title: "Controlled"; checked: false } }
+  SignalSpy { id: settingToggleSpy; signalName: "toggled" }
   Component { id: tab; UI.MyTab { text: "Tab" } }
   Component { id: link; UI.LinkLabel { text: "Link" } }
   Component { id: favorite; UI.FavoriteButton {} }
@@ -41,6 +43,21 @@ TestCase {
     tryVerify(function() {
       return uiTestHelper.cursorShape(testCase.Window.window) === Qt.PointingHandCursor;
     }, 1000, "Hovering an action must show the pointing hand");
+  }
+
+  function test_settingSwitchReflectsOwner() {
+    const row = createTemporaryObject(controlledSetting, testCase);
+    const control = findChild(row, "settingSwitch");
+    settingToggleSpy.target = row;
+    settingToggleSpy.clear();
+    waitForRendering(control);
+    mouseClick(control);
+    compare(settingToggleSpy.count, 1);
+    compare(settingToggleSpy.signalArguments[0][0], true);
+    compare(control.displayedChecked, false);
+    row.checked = true;
+    compare(control.displayedChecked, true);
+    settingToggleSpy.target = null;
   }
 
   function test_actionCursors_data() {

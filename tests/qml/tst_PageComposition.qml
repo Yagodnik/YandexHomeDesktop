@@ -58,12 +58,17 @@ TestCase {
 
   function init() {
     failOnWarning(/.?/);
+    authorizationService.authorizationPending = false;
+    authorizationService.authorizationCode = "";
+    authorizationService.authorizationUrl = "";
     authorizationService.resetCalls();
     deviceViewModel.StopPolling();
     deviceTestApi.reset();
     deviceViewModel.LoadDevice("test-device");
     platformService.resetCalls();
     settings.trayModeEnabled = false;
+    settings.notchEnabled = false;
+    platformService.notchSupported = false;
     settings.currentTheme = 0;
     settings.showKeybinds = true;
     themes.SetTheme(0);
@@ -87,6 +92,18 @@ TestCase {
     mouseClick(action);
     compare(authorizationService.lastCall, "AttemptAuthorization");
     compare(authorizationService.callCount, 1);
+  }
+
+  function test_authCancellation() {
+    authorizationService.authorizationPending = true;
+    authorizationService.authorizationCode = "ABCD";
+    authorizationService.authorizationUrl = "https://oauth.yandex.ru/device";
+    const page = createTemporaryObject(authPage, testCase);
+    verify(page !== null);
+    const action = findChild(page, "cancelSignInAction");
+    verify(action !== null);
+    mouseClick(action);
+    compare(authorizationService.lastCall, "CancelAuthorization");
   }
 
   function test_deviceRetryAndInitialization() {
@@ -316,6 +333,34 @@ TestCase {
     compare(householdSpy.signalArguments[0][0], "two");
   }
 
+  function test_notchSettingIndependentOfTray() {
+    platformService.notchSupported = true;
+    const page = createTemporaryObject(settingsPage, testCase, { height: 600 });
+    const notchRow = findChild(page, "notchSettingRow");
+    const notch = findChild(notchRow, "settingSwitch");
+    const tray = findChild(findChild(page, "traySettingRow"), "settingSwitch");
+    verify(notchRow.visible);
+    waitForRendering(notch);
+    mouseClick(notch);
+    compare(settings.notchEnabled, true);
+    compare(settings.trayModeEnabled, false);
+    mouseClick(tray);
+    compare(settings.notchEnabled, false);
+    compare(settings.trayModeEnabled, true);
+    tryCompare(notch, "displayedChecked", false);
+    tryCompare(tray, "displayedChecked", true);
+    mouseClick(notch);
+    compare(settings.notchEnabled, true);
+    compare(settings.trayModeEnabled, false);
+    tryCompare(notch, "displayedChecked", true);
+    tryCompare(tray, "displayedChecked", false);
+    mouseClick(tray);
+    compare(settings.notchEnabled, false);
+    compare(settings.trayModeEnabled, true);
+    tryCompare(notch, "displayedChecked", false);
+    tryCompare(tray, "displayedChecked", true);
+  }
+
   function test_settingsScrollingAndActions() {
     const page = createTemporaryObject(settingsPage, testCase, { height: 120 });
     verify(page !== null);
@@ -332,10 +377,8 @@ TestCase {
     const traySwitch = findChild(page, "settingSwitch");
     mouseClick(traySwitch);
     compare(settings.trayModeEnabled, true);
-    compare(platformService.lastCall, "ShowOnlyInTray");
     mouseClick(traySwitch);
     compare(settings.trayModeEnabled, false);
-    compare(platformService.lastCall, "ShowAsApp");
 
     const choice = findChild(page, "settingChoice");
     mouseClick(choice);

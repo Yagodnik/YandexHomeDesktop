@@ -23,10 +23,8 @@ int main(int argc, char* argv[]) {
     return RestConsole::Usage;
   }
   if (options->mcp_command != StartupOptions::McpCommand::None) {
-    RestPrint(RestError(json, "usage",
-                        QCoreApplication::translate(
-                            "StartupMessages", "Для управления MCP используйте YandexHomeCli.")),
-              true);
+    RestPrint(RestError(json, "usage", QCoreApplication::translate(
+        "StartupMessages", "Для управления MCP используйте YandexHomeCli.")), true);
     return RestConsole::Usage;
   }
   if (options->rest_command == StartupOptions::RestCommand::None)

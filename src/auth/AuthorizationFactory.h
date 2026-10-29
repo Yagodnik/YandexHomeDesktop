@@ -5,7 +5,7 @@
 #include "IAuthorizationService.h"
 #include "IAuthorizationFlow.h"
 
-enum class AuthorizationMode { Interactive, SavedTokenOnly, Fixture };
+enum class AuthorizationMode { Interactive, SavedTokenOnly, Fixture, FixtureInteractive };
 
 // Application composition only. The core service and models use contracts.
 YANDEXAUTH_EXPORT IAuthorizationService* CreateAuthorizationService(AuthorizationMode mode, QObject* parent, IAuthorizationFlow* flow = nullptr);

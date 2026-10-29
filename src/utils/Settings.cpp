@@ -14,13 +14,16 @@ Settings::Settings(QObject *parent, bool temporary)
     return;
   }
 
+  if (GetTrayModeEnabled() && GetNotchEnabled()) settings_.setValue("notchEnabled", false);
   qInfo() << "Settings: CurrentTheme = " << GetCurrentTheme();
   qInfo() << "Settings: Stored at" << settings_.fileName();
 
 }
 
 Settings::Settings(const QString& fileName, QObject* parent)
-  : QObject(parent), settings_(fileName, QSettings::IniFormat) {}
+  : QObject(parent), settings_(fileName, QSettings::IniFormat) {
+  if (GetTrayModeEnabled() && GetNotchEnabled()) settings_.setValue("notchEnabled", false);
+}
 
 namespace {
 constexpr int KeybindFormatVersion = 2;
@@ -289,6 +292,7 @@ Settings::ImportResult Settings::ImportSettings(const QString& accountId, const 
   const auto serialized = QString::fromUtf8(QJsonDocument(Serialization::To(keybinds)).toJson(QJsonDocument::Compact));
   const auto oldTheme = GetCurrentTheme();
   const auto oldTray = GetTrayModeEnabled();
+  const auto oldNotch = GetNotchEnabled();
   const auto oldShow = GetShowKeybinds();
   QHash<QString, QVariant> values{
     {AccountKey(accountId, "favoriteDevices"), backup->account.favorite_devices},
@@ -300,10 +304,12 @@ Settings::ImportResult Settings::ImportSettings(const QString& accountId, const 
     for (auto it = values.cbegin(); it != values.cend(); ++it) temporary_account_values_.insert(it.key(), it.value());
     temporary_theme_ = backup->app.theme;
     temporary_tray_ = backup->app.tray_mode;
+    if (backup->app.tray_mode) temporary_notch_ = false;
     temporary_show_keybinds_ = backup->app.show_keybinds;
   } else {
     values.insert("currentTheme", backup->app.theme);
     values.insert("trayModeEnabled", backup->app.tray_mode);
+    if (backup->app.tray_mode) values.insert("notchEnabled", false);
     values.insert("showKeybinds", backup->app.show_keybinds);
     QHash<QString, QVariant> previous;
     for (auto it = values.cbegin(); it != values.cend(); ++it) {
@@ -321,6 +327,7 @@ Settings::ImportResult Settings::ImportSettings(const QString& accountId, const 
     }
   }
   if (oldTheme != backup->app.theme) emit currentThemeChanged();
+  if (oldNotch && backup->app.tray_mode) emit notchEnabledChanged();
   if (oldTray != backup->app.tray_mode) emit trayModeEnabledChanged();
   if (oldShow != backup->app.show_keybinds) emit showKeybindsChanged();
   emit keybindsChanged(accountId);
@@ -330,6 +337,25 @@ Settings::ImportResult Settings::ImportSettings(const QString& accountId, const 
 
 bool Settings::GetTrayModeEnabled() const {
   return temporary_ ? temporary_tray_ : settings_.value("trayModeEnabled", false).toBool();
+}
+
+bool Settings::GetNotchEnabled() const {
+  return temporary_ ? temporary_notch_ : settings_.value("notchEnabled", false).toBool();
+}
+
+void Settings::SetNotchEnabled(bool enabled) {
+  const bool oldNotch = GetNotchEnabled();
+  const bool oldTray = GetTrayModeEnabled();
+  if (oldNotch == enabled && !(enabled && oldTray)) return;
+  if (temporary_) {
+    temporary_notch_ = enabled;
+    if (enabled) temporary_tray_ = false;
+  } else {
+    settings_.setValue("notchEnabled", enabled);
+    if (enabled) settings_.setValue("trayModeEnabled", false);
+  }
+  if (oldTray && enabled) emit trayModeEnabledChanged();
+  if (oldNotch != enabled) emit notchEnabledChanged();
 }
 
 int Settings::GetCurrentTheme() const {
@@ -402,10 +428,13 @@ void Settings::Reset() {
     temporary_account_values_.clear();
     SetCurrentTheme(0);
     SetTrayModeEnabled(false);
+    SetNotchEnabled(false);
     SetShowKeybinds(true);
     emit keybindsChanged({});
     return;
   }
+  SetNotchEnabled(false);
+  settings_.remove("notchEnabled");
   settings_.remove("trayModeEnabled");
   settings_.remove("currentTheme");
   SetShowKeybinds(true);
@@ -416,6 +445,7 @@ void Settings::Reset() {
 
 void Settings::ResetStoredSettings() {
   QSettings settings("ArtemYagodnik", "YandexHomeDesktop");
+  settings.remove("notchEnabled");
   settings.remove("trayModeEnabled");
   settings.remove("currentTheme");
   settings.remove("showKeybinds");
@@ -433,14 +463,18 @@ void Settings::SetCurrentTheme(const int theme) {
 }
 
 void Settings::SetTrayModeEnabled(bool enabled) {
-  if (GetTrayModeEnabled() == enabled) {
-    return;
+  const bool oldTray = GetTrayModeEnabled();
+  const bool oldNotch = GetNotchEnabled();
+  if (oldTray == enabled && !(enabled && oldNotch)) return;
+  if (temporary_) {
+    temporary_tray_ = enabled;
+    if (enabled) temporary_notch_ = false;
+  } else {
+    settings_.setValue("trayModeEnabled", enabled);
+    if (enabled) settings_.setValue("notchEnabled", false);
   }
-
-  qInfo() << "Settings: SetTrayModeEnabled" << enabled;
-
-  if (temporary_) { temporary_tray_ = enabled; } else { settings_.setValue("trayModeEnabled", enabled); }
-  emit trayModeEnabledChanged();
+  if (oldNotch && enabled) emit notchEnabledChanged();
+  if (oldTray != enabled) emit trayModeEnabledChanged();
 }
 
 void Settings::SetShowKeybinds(bool visible) {

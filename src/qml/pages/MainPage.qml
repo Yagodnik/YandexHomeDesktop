@@ -4,6 +4,7 @@ import YandexHomeDesktop.Pages as Pages
 import YandexHomeDesktop.Components as Components
 
 UI.PageSurface {
+  popupMenuInHeader: true
   modalDialogOpen: settingsPage.modalDialogOpen
   Components.TopBar {
     id: topBar

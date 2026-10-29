@@ -9,8 +9,10 @@ Item {
   height: 12
 
   property bool checked: false
+  property bool optimistic: true
 
   property bool internalChecked: checked
+  readonly property bool displayedChecked: optimistic ? internalChecked : checked
 
   signal toggled(bool checked)
 
@@ -22,7 +24,7 @@ Item {
     id: track
     anchors.fill: parent
     radius: height / 2
-    color: internalChecked ? themes.switchActive : themes.switchInactive
+    color: displayedChecked ? themes.switchActive : themes.switchInactive
     Behavior on color { ColorAnimation { duration: 200 } }
   }
 
@@ -33,7 +35,7 @@ Item {
     radius: 12
     color: themes.switchThumb
     anchors.verticalCenter: parent.verticalCenter
-    x: internalChecked ? root.width - width : 0
+    x: displayedChecked ? root.width - width : 0
     Behavior on x { NumberAnimation { duration: 200; easing.type: Easing.InOutQuad } }
     layer.enabled: GraphicsInfo.api !== GraphicsInfo.Unknown && GraphicsInfo.api !== GraphicsInfo.Software
     layer.effect: UI.Shadow {
@@ -51,8 +53,9 @@ Item {
     cursorShape: Qt.PointingHandCursor
 
     onClicked: {
-      internalChecked = !internalChecked
-      toggled(internalChecked)
+      const next = !displayedChecked
+      if (optimistic) internalChecked = next
+      toggled(next)
     }
   }
 }

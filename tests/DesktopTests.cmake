@@ -1,6 +1,6 @@
 # Included from the project root to retain executable and QML import paths.
 target_compile_definitions(ApiFixtureTests PRIVATE "$<$<CONFIG:Debug>:YH_DEBUG_FAKE_API>")
-target_link_libraries(ApiFixtureTests PRIVATE "$<$<CONFIG:Debug>:YandexAuth>")
+target_link_libraries(ApiFixtureTests PRIVATE "$<$<CONFIG:Debug>:YandexAuth>" "$<$<CONFIG:Debug>:Qt6::Network>")
 target_sources(HomeTests PRIVATE tests/QmlTestEnvironment.cpp tests/QmlTestEnvironment.h)
 target_compile_definitions(HomeTests PRIVATE
   HOME_QML_TESTS HOME_IMPORT_PATH="${CMAKE_CURRENT_BINARY_DIR}")

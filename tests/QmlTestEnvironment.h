@@ -192,6 +192,7 @@ class QmlTestModel : public QStandardItemModel {
   Q_PROPERTY(bool isOnline MEMBER isOnline CONSTANT)
   Q_PROPERTY(QString currentHousehold MEMBER currentHousehold NOTIFY currentHouseholdChanged)
   Q_PROPERTY(QString currentHouseholdName MEMBER currentHouseholdName CONSTANT)
+  Q_PROPERTY(bool notchSupported MEMBER notchSupported NOTIFY notchSupportedChanged)
   Q_PROPERTY(bool trayModeEnabled MEMBER trayModeEnabled NOTIFY trayModeEnabledChanged)
   Q_PROPERTY(int currentTheme MEMBER currentTheme NOTIFY currentThemeChanged)
   Q_PROPERTY(int callCount MEMBER callCount NOTIFY called)
@@ -205,13 +206,21 @@ public:
   QString currentHousehold = "test-household";
   QString currentHouseholdName = "Test home";
   bool trayModeEnabled = false;
+  bool notchSupported = false;
   int currentTheme = 0;
   int callCount = 0;
+  Q_PROPERTY(bool authorizationPending MEMBER authorizationPending NOTIFY called)
+  Q_PROPERTY(QString authorizationCode MEMBER authorizationCode NOTIFY called)
+  Q_PROPERTY(QString authorizationUrl MEMBER authorizationUrl NOTIFY called)
+  bool authorizationPending = false;
+  QString authorizationCode;
+  QString authorizationUrl;
   QString lastCall;
   QString lastRoute;
 
   Q_INVOKABLE void RequestData() { record("RequestData"); }
   Q_INVOKABLE void LoadData() { record("LoadData"); }
+  Q_INVOKABLE void CancelAuthorization() { record("CancelAuthorization"); }
   Q_INVOKABLE void AttemptAuthorization() { record("AttemptAuthorization"); }
   Q_INVOKABLE void AttemptLocalAuthorization() { record("AttemptLocalAuthorization"); }
   Q_INVOKABLE void Logout() { record("Logout"); }
@@ -247,6 +256,7 @@ signals:
   void authorized();
   void currentHouseholdChanged();
   void trayModeEnabledChanged();
+  void notchSupportedChanged();
   void currentThemeChanged();
   void called();
 

@@ -1,4 +1,6 @@
 #include "ModelsTests.h"
+#include "platform/WindowPlacement.h"
+#include "platform/NotchActivation.h"
 
 #include "models/ColorsModel/ColorsFilterModel.h"
 #include "models/ColorsModel/ColorsModel.h"
@@ -104,4 +106,30 @@ void ModelsTests::TestColors() {
     // 5 - number of available temperatures for this case (min 200, max 7000)
     QCOMPARE(filter_model.rowCount(), 5 + colors_file.colors.size());
   }
+}
+
+void ModelsTests::WindowPlacementEdges() {
+  const QRect screen(-1920, 0, 1920, 1080);
+  const QRect area(-1920, 24, 1920, 1016);
+  const QSize size(350, 460);
+  QCOMPARE(WindowPlacementInArea(QRect(-20, 0, 20, 24), size, screen, area, {}), QPoint(-350, 29));
+  QCOMPARE(WindowPlacementInArea(QRect(-1920, 1000, 24, 20), size, screen, area, {}), QPoint(-1891, 580));
+  QCOMPARE(WindowPlacementInArea({}, size, screen, area, QPoint(-10, 1070)), QPoint(-350, 580));
+  QCOMPARE(WindowPlacementInArea(QRect(-1000, 0, 20, 24), QSize(3000, 2000), screen, area, {}), area.topLeft());
+}
+
+void ModelsTests::NotchActivationArea() {
+  const QRectF notch(664, 0, 184, 32);
+  QVERIFY(IsNotchActivationPoint(notch, QPointF(756, 32)));
+  QVERIFY(IsNotchActivationPoint(notch, QPointF(756, 43)));
+  QVERIFY(!IsNotchActivationPoint(notch, QPointF(756, 45)));
+  QVERIFY(!IsNotchActivationPoint(notch, QPointF(650, 35)));
+  QVERIFY(!IsNotchActivationPoint({}, QPointF(0, 0)));
+}
+
+void ModelsTests::NotchActivationWindowStates() {
+  QVERIFY(ShouldActivateFromNotch(true, false));
+  QVERIFY(!ShouldActivateFromNotch(true, true));
+  QVERIFY(!ShouldActivateFromNotch(false, false));
+  QVERIFY(!ShouldActivateFromNotch(false, true));
 }

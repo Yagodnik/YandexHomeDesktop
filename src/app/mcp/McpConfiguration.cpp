@@ -8,18 +8,14 @@
 McpConfiguration MakeMcpConfiguration(const StartupOptions& options) {
   QString identity = QDir::homePath() + "/live";
   if (options.use_fake_api) {
-    const auto path = options.fixture_path.startsWith(":")
-                          ? options.fixture_path
-                          : QFileInfo(options.fixture_path).absoluteFilePath();
+    const auto path = options.fixture_path.startsWith(":") ? options.fixture_path : QFileInfo(options.fixture_path).absoluteFilePath();
     identity = QDir::homePath() + "/fixture/" + path;
   }
-  const auto digest = QString::fromLatin1(
-      QCryptographicHash::hash(identity.toUtf8(), QCryptographicHash::Sha256).toHex().left(32));
+  const auto digest = QString::fromLatin1(QCryptographicHash::hash(identity.toUtf8(), QCryptographicHash::Sha256).toHex().left(32));
   const auto endpoint = [&digest](const QString& prefix) {
     const auto name = prefix + digest;
 #ifdef Q_OS_UNIX
-    return QDir(QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation))
-        .filePath("YandexHome/run/" + name);
+    return QDir(QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation)).filePath("YandexHome/run/" + name);
 #else
     return name;
 #endif
@@ -38,9 +34,7 @@ McpConfiguration MakeMcpConfiguration(const StartupOptions& options) {
     result.worker.executable = QDir(dir).filePath("../../../" + executable);
 #endif
   if (options.use_fake_api) {
-    const auto path = options.fixture_path.startsWith(":")
-                          ? options.fixture_path
-                          : QFileInfo(options.fixture_path).absoluteFilePath();
+    const auto path = options.fixture_path.startsWith(":") ? options.fixture_path : QFileInfo(options.fixture_path).absoluteFilePath();
     result.worker.arguments = {"--fake-api", "--fake-api-data", path};
   }
   return result;

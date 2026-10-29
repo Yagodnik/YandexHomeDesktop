@@ -36,6 +36,27 @@ TestCase {
       }
     }
   }
+  Component {
+    id: popupWindow
+    UI.TrayWindow {
+      width: 350
+      height: 460
+      visible: true
+    }
+  }
+  Component {
+    id: popupMainWindow
+    UI.TrayWindow {
+      width: 350
+      height: 460
+      visible: true
+      notchModeEnabled: true
+      popupMenuInHeader: main.popupMenuInHeader
+      Pages.MainPage { id: main; objectName: "popupMainPage"; anchors.fill: parent }
+    }
+  }
+  SignalSpy { id: quitSpy; signalName: "quitRequested" }
+
   function init() {
     failOnWarning(/.?/);
     deviceTestApi.reset();
@@ -124,6 +145,59 @@ TestCase {
     compare(settingsTransferModel.PrepareImport(settingsTransferTestFile + ".missing"), false);
     compare(settingsTransferModel.failed, true);
     verify(findChild(page, "settingsTransferStatus").text.length > 0);
+  }
+
+  function test_popupMenuAlignedWithHomeSwitcher() {
+    const window = createTemporaryObject(popupMainWindow, null);
+    verify(window !== null);
+    const menu = findChild(window.contentItem, "popupQuitButton");
+    const selector = findChild(window.contentItem, "householdSelector");
+    verify(menu.visible);
+    compare(menu.contentItem.text, "×");
+    compare(menu.foregroundColor.toString(), themes.inactive.toString());
+    tryCompare(window.contentItem, "width", 350);
+    const menuPosition = menu.mapToItem(window.contentItem, 0, 0);
+    const selectorPosition = selector.mapToItem(window.contentItem, 0, 0);
+    compare(menuPosition.y + menu.height / 2, selectorPosition.y + selector.height / 2);
+    verify(selectorPosition.x + selector.width < menuPosition.x, `selector ${selectorPosition.x} + ${selector.width}, menu ${menuPosition.x}`);
+    compare(menuPosition.x + menu.width, window.width - 12);
+  }
+
+  function test_popupModesQuitAndHide_data() {
+    return [{ tag: "tray", tray: true, notch: false },
+            { tag: "notch", tray: false, notch: true },
+            { tag: "notch-and-tray-fallback", tray: true, notch: true }];
+  }
+
+  function test_popupModesQuitAndHide(data) {
+    const window = createTemporaryObject(popupWindow, null, {
+      trayModeEnabled: data.tray, notchModeEnabled: data.notch
+    });
+    verify(window !== null);
+    quitSpy.target = window;
+    quitSpy.clear();
+    const button = findChild(window.contentItem, "popupQuitButton");
+    verify(button.visible);
+    window.requestActivate();
+    tryCompare(window, "active", true);
+    mouseClick(button);
+    compare(quitSpy.count, 1);
+    window.modalDialogOpen = true;
+    testCase.Window.window.requestActivate();
+    tryCompare(window, "active", false);
+    compare(window.visible, true);
+    window.modalDialogOpen = false;
+    window.requestActivate();
+    tryCompare(window, "active", true);
+    testCase.Window.window.requestActivate();
+    tryCompare(window, "visible", false);
+    quitSpy.target = null;
+  }
+
+  function test_popupQuitHiddenInNormalMode() {
+    const window = createTemporaryObject(popupWindow, null);
+    verify(window !== null);
+    compare(findChild(window.contentItem, "popupQuitButton").visible, false);
   }
 
   function test_trayWindowSurvivesDialogs() {

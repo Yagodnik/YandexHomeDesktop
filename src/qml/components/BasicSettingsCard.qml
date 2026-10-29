@@ -13,6 +13,11 @@ Item {
   property string keybindsTitle
   property string keybindsDescription
   property bool showKeybinds: true
+  property bool notchAvailable: false
+  property bool notchEnabled: false
+  property string notchTitle
+  property string notchDescription
+  signal notchToggled(bool enabled)
   property string projectLinkText
   signal trayModeToggled(bool enabled)
   signal themeSelected(int index)
@@ -26,11 +31,22 @@ Item {
     width: root.width
 
     UI.SettingSwitchRow {
+      objectName: "traySettingRow"
       width: parent.width
       title: root.trayTitle
       description: root.trayDescription
       checked: root.trayModeEnabled
       onToggled: function(checked) { root.trayModeToggled(checked); }
+    }
+
+    UI.SettingSwitchRow {
+      objectName: "notchSettingRow"
+      visible: root.notchAvailable
+      width: parent.width
+      title: root.notchTitle
+      description: root.notchDescription
+      checked: root.notchEnabled
+      onToggled: function(checked) { root.notchToggled(checked); }
     }
 
     UI.SettingChoiceRow {

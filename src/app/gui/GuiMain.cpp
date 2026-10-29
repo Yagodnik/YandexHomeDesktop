@@ -4,6 +4,7 @@
 #include <iostream>
 #include "app/common/AppTranslations.h"
 #include "GuiApp.h"
+#include "TrayRecovery.h"
 #include "app/common/StartupOptions.h"
 #include "utils/LogManager.h"
 
@@ -16,7 +17,16 @@ int main(int argc, char* argv[]) {
   QStringList arguments;
   for (int i = 0; i < argc; ++i)
     arguments.append(QString::fromLocal8Bit(argv[i]));
-  const auto options = ParseStartupOptions(arguments, allow_fake_api);
+  if (IsTrayRecoveryRequest(arguments)) {
+    QCoreApplication app(argc, argv);
+    QSettings settings("ArtemYagodnik", "YandexHomeDesktop");
+    if (!DisableTrayForRecovery(settings)) {
+      std::cerr << "Could not save the tray setting.\n";
+      return 1;
+    }
+    return 0;
+  }
+  const auto options = ParseStartupOptions(arguments, allow_fake_api, false, true);
   if (!options || options->cli_arguments.size() > 1 ||
       options->rest_command != StartupOptions::RestCommand::None ||
       options->mcp_command != StartupOptions::McpCommand::None) {

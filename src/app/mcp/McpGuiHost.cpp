@@ -2,7 +2,7 @@
 
 McpGuiHost::McpGuiHost(QString endpoint, HomeService* home, DeviceService* devices,
                        ScenarioService* scenarios, std::function<bool()> authorized,
-                       std::function<quint16()> port, std::function<void(quint16)> set_port, QObject* parent)
+                       std::function<quint16()> port, std::function<bool(quint16)> set_port, QObject* parent)
     : QObject(parent), endpoint_(std::move(endpoint)), bridge_(home, devices, scenarios),
       authorized_(std::move(authorized)), port_(std::move(port)), set_port_(std::move(set_port)) {
   server_.SetHandler([this](const QJsonObject& request) {
@@ -14,7 +14,8 @@ McpGuiHost::McpGuiHost(QString endpoint, HomeService* home, DeviceService* devic
       const auto port = value.toInt();
       if (!value.isDouble() || port < 1 || port > 65535 || value.toDouble() != port)
         return QJsonObject{{"ok", false}, {"error", "Invalid port."}};
-      set_port_(static_cast<quint16>(port));
+      if (!set_port_(static_cast<quint16>(port)))
+        return QJsonObject{{"ok", false}, {"error", "Port conflicts with REST API."}};
       return QJsonObject{{"ok", true}, {"port", port}};
     }
     return bridge_.Handle(request);

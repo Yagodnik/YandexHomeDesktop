@@ -66,7 +66,11 @@ GuiApp::GuiApp(AppContext& app_context, QObject* parent)
                                   app_context.device_service, app_context.scenario_service,
                                   [auth = app_context.authorization_service] { return auth->IsAuthorized(); },
                                   [settings = app_context.settings] { return settings->GetMcpPort(); },
-                                  [settings = app_context.settings](quint16 port) { settings->SetMcpPort(port); },
+                                  [settings = app_context.settings](quint16 port) {
+                                    if (port == settings->GetRestPort()) return false;
+                                    settings->SetMcpPort(port);
+                                    return true;
+                                  },
                                   app_context.app_);
   mcp_host->Start();
   auto* mcp_model = new McpViewModel(mcp_configuration.worker, app_context.settings, app_context.app_);
@@ -121,6 +125,8 @@ GuiApp::GuiApp(AppContext& app_context, QObject* parent)
   };
   connect(app_context.settings, &Settings::trayModeEnabledChanged, app_context.app_, update_window_mode);
   connect(app_context.settings, &Settings::notchEnabledChanged, app_context.app_, update_window_mode);
+  connect(app_context.platform_service, &PlatformService::notchSupportedChanged,
+          app_context.app_, update_window_mode);
   const auto router = new Router(app_context.app_);
   const auto scenarios_view_model =
       new ScenariosViewModel(app_context.scenario_service, app_context.app_);

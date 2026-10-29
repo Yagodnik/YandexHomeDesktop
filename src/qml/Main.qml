@@ -17,6 +17,7 @@ TrayWindow {
   trayModeEnabled: settings.trayModeEnabled
   notchModeEnabled: settings.notchEnabled && !settings.trayModeEnabled && platformService.notchSupported
   popupMenuInHeader: pages.currentItem ? pages.currentItem.popupMenuInHeader : false
+  popupQuitVisible: pages.currentItem ? pages.currentItem.popupQuitVisible : true
   onQuitRequested: Qt.quit()
   modalDialogOpen: pages.currentItem ? pages.currentItem.modalDialogOpen : false
 
@@ -53,6 +54,15 @@ TrayWindow {
     target: settings
     function onNotchEnabledChanged() { platformService.SetNotchEnabled(settings.notchEnabled && !settings.trayModeEnabled); }
     function onTrayModeEnabledChanged() { platformService.SetNotchEnabled(settings.notchEnabled && !settings.trayModeEnabled); }
+  }
+  Connections {
+    target: platformService
+    ignoreUnknownSignals: true
+    function onNotchSupportedChanged() {
+      platformService.SetNotchEnabled(settings.notchEnabled && !settings.trayModeEnabled);
+      if (!platformService.notchSupported && settings.notchEnabled && !settings.trayModeEnabled)
+        window.show();
+    }
   }
 
   onActiveChanged: {
@@ -126,7 +136,7 @@ TrayWindow {
   StackView {
     id: pages
     anchors.fill: parent
-    anchors.topMargin: window.popupModeEnabled && !window.popupMenuInHeader ? 28 : 0
+    anchors.topMargin: window.popupModeEnabled && window.popupQuitVisible && !window.popupMenuInHeader ? 28 : 0
 
     layer.enabled: window.popupModeEnabled
     layer.smooth: true

@@ -45,6 +45,12 @@ QString RestViewModel::GetError() const {
 int RestViewModel::GetPort() const { return service_->Port(); }
 void RestViewModel::SetPort(int port) {
   if (IsBusy() || IsRunning() || IsEnabled() || port < 1 || port > 65535) return;
+  if (service_->ConflictsWithMcp(static_cast<quint16>(port))) {
+    error_ = tr("Порты REST API и MCP-сервера должны различаться.");
+    emit changed();
+    return;
+  }
+  error_.clear();
   service_->SetPort(static_cast<quint16>(port));
   emit changed();
 }

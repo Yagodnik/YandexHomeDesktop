@@ -8,7 +8,7 @@ class McpGuiHost final : public QObject {
 public:
   McpGuiHost(QString endpoint, HomeService* home, DeviceService* devices,
              ScenarioService* scenarios, std::function<bool()> authorized,
-             std::function<quint16()> port, std::function<void(quint16)> set_port,
+             std::function<quint16()> port, std::function<bool(quint16)> set_port,
              QObject* parent = nullptr);
   bool Start();
   void Reset();
@@ -18,5 +18,5 @@ private:
   WorkerControlServer server_;
   std::function<bool()> authorized_;
   std::function<quint16()> port_;
-  std::function<void(quint16)> set_port_;
+  std::function<bool(quint16)> set_port_;
 };

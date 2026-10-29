@@ -6,6 +6,7 @@
 #endif
 
 namespace MacOSIntegration {
+  bool HasNotch();
   QRect NotchUnderCursor();
   void HideAppFromTheDock();
 

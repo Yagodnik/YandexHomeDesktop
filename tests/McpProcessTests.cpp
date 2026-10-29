@@ -86,8 +86,12 @@ private slots:
     QVERIFY(server.Start(endpoint));
     Settings settings(dir.filePath("settings.ini"));
     McpViewModel model({endpoint, {}, {}, "stop"}, &settings);
+    model.SetPort(settings.GetRestPort());
+    QCOMPARE(model.Port(), 8767);
+    QVERIFY(!model.Error().isEmpty());
     model.SetPort(9876);
     QCOMPARE(model.Port(), 9876);
+    QVERIFY(model.Error().isEmpty());
     model.SetPort(65536);
     QCOMPARE(model.Port(), 9876);
     running = true;
@@ -106,7 +110,10 @@ private slots:
     FakeApi api; HomeService home(&api); DeviceService devices(&api); ScenarioService scenarios(&api);
     quint16 port = 8767;
     McpGuiHost gui(configuration.gui_endpoint, &home, &devices, &scenarios, [] { return true; },
-                   [&] { return port; }, [&](quint16 value) { port = value; });
+                   [&] { return port; }, [&](quint16 value) {
+                     if (value == 8765) return false;
+                     port = value; return true;
+                   });
     QVERIFY(gui.Start());
     const auto run = [&](const QString& command) {
       QProcess process;
@@ -121,6 +128,11 @@ private slots:
       if (process.state() != QProcess::NotRunning || process.exitCode() != 0) return QJsonObject{};
       return QJsonDocument::fromJson(process.readAllStandardOutput()).object();
     };
+    const auto available_port = *options.mcp_port;
+    options.mcp_port = 8765;
+    QVERIFY(run("--enable-mcp").isEmpty());
+    QCOMPARE(port, quint16(8767));
+    options.mcp_port = available_port;
     QVERIFY(run("--enable-mcp")["running"].toBool());
     QCOMPARE(port, *options.mcp_port);
     QVERIFY(run("--status-mcp")["running"].toBool());
@@ -138,7 +150,7 @@ private slots:
     QTcpServer probe; QVERIFY(probe.listen(QHostAddress::LocalHost, 0));
     auto port = probe.serverPort(); probe.close();
     McpGuiHost gui(configuration.gui_endpoint, &home, &devices, &scenarios, [] { return true; },
-                   [&] { return port; }, [&](quint16 value) { port = value; });
+                   [&] { return port; }, [&](quint16 value) { port = value; return true; });
     QVERIFY(gui.Start());
     WorkerControlClient client(configuration.worker);
     QSignalSpy finished(&client, &WorkerControlClient::finished);
@@ -160,7 +172,7 @@ private slots:
     QTcpServer probe; QVERIFY(probe.listen(QHostAddress::LocalHost, 0));
     auto port = probe.serverPort(); probe.close();
     McpGuiHost gui(configuration.gui_endpoint, &home, &devices, &scenarios, [&] { return authorized; },
-                   [&] { return port; }, [&](quint16 value) { port = value; });
+                   [&] { return port; }, [&](quint16 value) { port = value; return true; });
     QVERIFY(gui.Start());
     QProcess process;
     process.start(worker_path, configuration.worker.arguments);

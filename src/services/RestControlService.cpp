@@ -62,6 +62,10 @@ void RestControlService::Request(Command command, std::optional<quint16> port, i
       !(command_ == Command::Status && command == Command::Enable)) {
     return;
   }
+  if (command == Command::Enable && ConflictsWithMcp(port.value_or(settings_->GetRestPort()))) {
+    emit finished(Error("port_conflict", tr("Порты REST API и MCP-сервера должны различаться.")));
+    return;
+  }
   command_ = command;
   requested_port_ = port;
   busy_ = true;

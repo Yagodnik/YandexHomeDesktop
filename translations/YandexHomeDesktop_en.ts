@@ -2281,6 +2281,10 @@ Email: %2
 <context>
     <name>RestControlService</name>
     <message>
+        <source>Порты REST API и MCP-сервера должны различаться.</source>
+        <translation>The REST API and MCP server ports must be different.</translation>
+    </message>
+    <message>
         <location filename="../src/services/RestControlService.cpp" line="22"/>
         <source>Время управления REST API истекло.</source>
         <translation>The REST API control command timed out.</translation>
@@ -2521,8 +2525,19 @@ Email: %2
 <context>
     <name>McpViewModel</name>
     <message>
+        <source>Порты REST API и MCP-сервера должны различаться.</source>
+        <translation>The REST API and MCP server ports must be different.</translation>
+    </message>
+    <message>
         <source>Не удалось управлять MCP-сервером. Проверьте вход и доступность порта.</source>
         <translation>Could not control the MCP server. Check your sign-in and whether the port is available.</translation>
+    </message>
+</context>
+<context>
+    <name>RestViewModel</name>
+    <message>
+        <source>Порты REST API и MCP-сервера должны различаться.</source>
+        <translation>The REST API and MCP server ports must be different.</translation>
     </message>
 </context>
 <context>

@@ -25,6 +25,7 @@ Item {
   }
 
   visible: true
+  enabled: myVisible
   anchors.left: parent.left
   anchors.right: parent.right
   z: 600

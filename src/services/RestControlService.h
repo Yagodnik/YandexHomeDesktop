@@ -27,6 +27,7 @@ public:
                int timeout_ms = DefaultTimeoutMs);
   bool IsBusy() const;
   quint16 Port() const { return settings_->GetRestPort(); }
+  bool ConflictsWithMcp(quint16 port) const { return port == settings_->GetMcpPort(); }
   void SetPort(quint16 port) { settings_->SetRestPort(port); }
 signals:
   void finished(const QJsonObject& result);

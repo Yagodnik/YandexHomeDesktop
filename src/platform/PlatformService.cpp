@@ -1,6 +1,7 @@
 #include "PlatformService.h"
 #include "PlatformServiceFactory.h"
 #include "NotchActivation.h"
+#include <QGuiApplication>
 #ifdef Q_OS_MACOS
 #include "macos/MacOSIntegration.h"
 #endif
@@ -8,6 +9,11 @@
 PlatformService::PlatformService(QObject *parent)
   : QObject(parent), impl_(PlatformServiceFactory::Create()) {
 #ifdef Q_OS_MACOS
+  const auto screensChanged = [this] {
+    QTimer::singleShot(0, this, [this] { emit notchSupportedChanged(); });
+  };
+  connect(qGuiApp, &QGuiApplication::screenAdded, this, screensChanged);
+  connect(qGuiApp, &QGuiApplication::screenRemoved, this, screensChanged);
   notch_timer_.setInterval(100);
   connect(&notch_timer_, &QTimer::timeout, this, [this] {
     const QRect notch = MacOSIntegration::NotchUnderCursor();
@@ -23,7 +29,7 @@ PlatformService::PlatformService(QObject *parent)
 
 bool PlatformService::NotchSupported() const {
 #ifdef Q_OS_MACOS
-  return true;
+  return MacOSIntegration::HasNotch();
 #else
   return false;
 #endif

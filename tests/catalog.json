@@ -12,7 +12,7 @@
       "cases": [
         {"name": "CliControlsWorker", "description": "Enable, inspect, and disable the worker using the CLI.", "requires": ["BUILD_CLI_APP", "Debug"]},
         {"name": "PortPreferencesPersist", "description": "Persist the configured MCP port independently of REST."},
-        {"name": "ModelRestrictsPortChangesWhileRunning", "description": "Reject invalid MCP ports and prevent editing while the worker runs."},
+        {"name": "ModelRestrictsPortChangesWhileRunning", "description": "Reject invalid or conflicting MCP ports and prevent editing while the worker runs."},
         {"name": "ManagedWorkerLifecycle", "description": "Start and stop the worker through the shared lifecycle client."},
         {"name": "WorkerServesToolsThroughGui", "description": "Connect to the worker, discover a room, control a lamp, and stop after logout."}
       ]
@@ -975,7 +975,7 @@
         },
         {
           "name": "ControllerAndViewModelReflectExternalChanges",
-          "description": "Reflect REST status and allow valid port changes only while stopped."
+          "description": "Reflect REST status, reject MCP port conflicts, and allow valid port changes only while stopped."
         },
         {
           "name": "DisableWaitsForWorkerExit",

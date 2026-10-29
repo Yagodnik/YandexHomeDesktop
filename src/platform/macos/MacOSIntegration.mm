@@ -4,6 +4,17 @@
 
 namespace MacOSIntegration {
 
+bool HasNotch() {
+    if (@available(macOS 12.0, *)) {
+        for (NSScreen *screen in [NSScreen screens]) {
+            if (screen.safeAreaInsets.top > 0 &&
+                NSMinX(screen.auxiliaryTopRightArea) > NSMaxX(screen.auxiliaryTopLeftArea))
+                return true;
+        }
+    }
+    return false;
+}
+
 QRect NotchUnderCursor() {
     if (@available(macOS 12.0, *)) {
         const NSPoint mouse = [NSEvent mouseLocation];

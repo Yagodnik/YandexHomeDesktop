@@ -21,11 +21,22 @@ McpViewModel::McpViewModel(WorkerLaunchConfiguration configuration, Settings* se
 int McpViewModel::Port() const { return settings_->GetMcpPort(); }
 void McpViewModel::SetPort(int port) {
   if (busy_ || running_ || port < 1 || port > 65535) return;
+  if (port == settings_->GetRestPort()) {
+    error_ = tr("Порты REST API и MCP-сервера должны различаться.");
+    emit changed();
+    return;
+  }
+  error_.clear();
   settings_->SetMcpPort(static_cast<quint16>(port));
   emit changed();
 }
 void McpViewModel::SetEnabled(bool enabled) {
   if (busy_ && enabled) return;
+  if (enabled && settings_->GetMcpPort() == settings_->GetRestPort()) {
+    error_ = tr("Порты REST API и MCP-сервера должны различаться.");
+    emit changed();
+    return;
+  }
   error_.clear();
   busy_ = true;
   worker_.Request(enabled ? WorkerControlClient::Command::Start : WorkerControlClient::Command::Stop);

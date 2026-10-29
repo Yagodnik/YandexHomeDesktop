@@ -12,11 +12,14 @@ public:
 
   Q_INVOKABLE void SetWindow(QQuickWindow *window);
   Q_INVOKABLE void SetNotchEnabled(bool enabled);
-  Q_PROPERTY(bool notchSupported READ NotchSupported CONSTANT)
+  Q_PROPERTY(bool notchSupported READ NotchSupported NOTIFY notchSupportedChanged)
   bool NotchSupported() const;
   Q_INVOKABLE void ShowWindow(const QRect& icon) const;
   Q_INVOKABLE void ShowAsApp() const;
   Q_INVOKABLE void ShowOnlyInTray() const;
+
+signals:
+  void notchSupportedChanged();
 
 private:
   std::unique_ptr<PlatformServiceImpl> impl_;

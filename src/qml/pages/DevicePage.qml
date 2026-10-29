@@ -5,6 +5,7 @@ import YandexHomeDesktop.Components as Components
 
 UI.PageSurface {
   id: root
+  popupQuitVisible: false
   readonly property bool modalDialogOpen: snapshotDialog.dialogOpen
 
   Components.CameraSnapshotDialog {

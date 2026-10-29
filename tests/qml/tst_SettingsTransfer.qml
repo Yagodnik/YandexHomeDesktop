@@ -55,6 +55,14 @@ TestCase {
       Pages.MainPage { id: main; objectName: "popupMainPage"; anchors.fill: parent }
     }
   }
+  Component {
+    id: popupDeviceWindow
+    UI.TrayWindow {
+      width: 350; height: 460; visible: true; trayModeEnabled: true
+      popupQuitVisible: device.popupQuitVisible
+      Pages.DevicePage { id: device; anchors.fill: parent }
+    }
+  }
   SignalSpy { id: quitSpy; signalName: "quitRequested" }
 
   function init() {
@@ -198,6 +206,9 @@ TestCase {
     const window = createTemporaryObject(popupWindow, null);
     verify(window !== null);
     compare(findChild(window.contentItem, "popupQuitButton").visible, false);
+    const deviceWindow = createTemporaryObject(popupDeviceWindow, null);
+    verify(deviceWindow !== null);
+    compare(findChild(deviceWindow.contentItem, "popupQuitButton").visible, false);
   }
 
   function test_trayWindowSurvivesDialogs() {

@@ -690,10 +690,18 @@ private slots:
     QTRY_COMPARE(disables, 1);
     QTRY_VERIFY(!model.IsEnabled());
     QVERIFY(!settings.GetRestEnabled());
+    model.SetPort(settings.GetMcpPort());
+    QCOMPARE(settings.GetRestPort(), quint16(9000));
+    QVERIFY(!model.GetError().isEmpty());
     model.SetPort(9100);
     QCOMPARE(settings.GetRestPort(), quint16(9100));
+    QVERIFY(model.GetError().isEmpty());
     model.SetPort(0);
     QCOMPARE(settings.GetRestPort(), quint16(9100));
+    QSignalSpy conflict(&service, &RestControlService::finished);
+    service.Request(RestControlService::Command::Enable, settings.GetMcpPort());
+    QCOMPARE(conflict.size(), 1);
+    QCOMPARE(conflict.takeFirst()[0].toJsonObject()["error"].toObject()["code"].toString(), QString("port_conflict"));
     daemon.close();
     QSignalSpy results(&service, &RestControlService::finished);
     service.Request(RestControlService::Command::Status);

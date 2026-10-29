@@ -7,6 +7,7 @@ Window {
   property bool trayModeEnabled: false
   property bool notchModeEnabled: false
   property bool popupMenuInHeader: false
+  property bool popupQuitVisible: true
   readonly property bool popupModeEnabled: trayModeEnabled || notchModeEnabled
   signal quitRequested()
 
@@ -20,7 +21,7 @@ Window {
     anchors.rightMargin: root.popupMenuInHeader ? 12 : 0
     width: 32
     height: 28
-    visible: root.popupModeEnabled
+    visible: root.popupModeEnabled && root.popupQuitVisible
     z: 1000
     text: qsTr("Выйти из приложения")
     Accessible.name: text

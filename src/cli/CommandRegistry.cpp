@@ -53,7 +53,8 @@ QString CommandRegistry::Help(const QString& program) const {
   return parser.helpText() + Describe() + "\n" + tr("REST API:") +
          "\n"
          "  --enable-rest [--rest-port <port>]\n  --disable-rest\n  --status-rest\n"
-         "  --rest-config <path>\n  YandexHomeRest [--rest-config <path>] [--rest-port <port>]\n";
+         "  --rest-config <path>\n  YandexHomeRest [--rest-config <path>] [--rest-port <port>]\n"
+         "\nMCP:\n  --enable-mcp [--mcp-port <port>]\n  --disable-mcp\n  --status-mcp [--json]\n";
 }
 std::expected<CommandRegistry::ResolvedCommand, QString>
 CommandRegistry::ResolveLegacy(QStringList path, CliArguments arguments) const {

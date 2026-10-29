@@ -35,6 +35,11 @@
 #include "utils/Settings.h"
 #include "app/rest/RestConfiguration.h"
 #include "models/RestViewModel.h"
+#ifdef YH_MCP_ENABLED
+#include "app/mcp/McpConfiguration.h"
+#include "app/mcp/McpGuiHost.h"
+#include "models/McpViewModel.h"
+#endif
 #include "iot/capabilities/OnOffCapability.h"
 #include "iot/capabilities/RangeCapability.h"
 #include "iot/capabilities/ToggleCapability.h"
@@ -55,6 +60,27 @@ GuiApp::GuiApp(AppContext& app_context, QObject* parent)
   QQuickStyle::setStyle("Basic");
 
   const auto root_context = engine.rootContext();
+#ifdef YH_MCP_ENABLED
+  const auto mcp_configuration = MakeMcpConfiguration(app_context.startup_options);
+  auto* mcp_host = new McpGuiHost(
+      mcp_configuration.gui_endpoint, app_context.home_service, app_context.device_service,
+      app_context.scenario_service,
+      [auth = app_context.authorization_service] { return auth->IsAuthorized(); },
+      [settings = app_context.settings] { return settings->GetMcpPort(); },
+      [settings = app_context.settings](quint16 port) { settings->SetMcpPort(port); },
+      app_context.app_);
+  mcp_host->Start();
+  auto* mcp_model =
+      new McpViewModel(mcp_configuration.worker, app_context.settings, app_context.app_);
+  root_context->setContextProperty("mcpViewModel", mcp_model);
+  connect(app_context.authorization_service, &IAuthorizationService::logout, mcp_model,
+          [mcp_model, mcp_host] {
+            mcp_host->Reset();
+            mcp_model->SetEnabled(false);
+          });
+#else
+  root_context->setContextProperty("mcpViewModel", QVariant{});
+#endif
   root_context->setContextProperty(
       "settingsTransferModel",
       new SettingsTransferModel(new SettingsTransferService(app_context.settings, app_context.app_),

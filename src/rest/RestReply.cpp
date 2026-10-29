@@ -37,3 +37,13 @@ void RestReply::SendDocument(const QJsonObject& document, StatusCode status) {
 void RestReply::Fail(StatusCode status, const QString& code, const QString& message) {
   Send({{"ok", false}, {"error", QJsonObject{{"code", code}, {"message", message}}}}, status);
 }
+
+void RestReply::SendEmpty(StatusCode status) {
+  if (finished_) return;
+  finished_ = true;
+  timer_.stop();
+  QHttpHeaders headers;
+  headers.append("Cache-Control", "no-store");
+  responder_.write(headers, status);
+  deleteLater();
+}

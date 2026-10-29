@@ -684,10 +684,16 @@ private slots:
     QTRY_VERIFY(!model.IsBusy());
     QVERIFY(settings.GetRestEnabled());
     QCOMPARE(settings.GetRestPort(), quint16(9000));
+    model.SetPort(9100);
+    QCOMPARE(settings.GetRestPort(), quint16(9000));
     model.SetEnabled(false);
     QTRY_COMPARE(disables, 1);
     QTRY_VERIFY(!model.IsEnabled());
     QVERIFY(!settings.GetRestEnabled());
+    model.SetPort(9100);
+    QCOMPARE(settings.GetRestPort(), quint16(9100));
+    model.SetPort(0);
+    QCOMPARE(settings.GetRestPort(), quint16(9100));
     daemon.close();
     QSignalSpy results(&service, &RestControlService::finished);
     service.Request(RestControlService::Command::Status);

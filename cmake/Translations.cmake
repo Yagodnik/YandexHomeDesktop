@@ -25,6 +25,7 @@ if(_translation_targets)
       src/models/KeybindSettingsModel.cpp src/models/ShortcutViewModel.cpp
       src/models/SettingsTransferModel.cpp
       src/models/DeviceModel/CameraSnapshotModel.cpp
+      src/models/McpViewModel.cpp
     SOURCE_TARGETS ${_translation_sources}
     RESOURCE_PREFIX "/i18n")
 endif()

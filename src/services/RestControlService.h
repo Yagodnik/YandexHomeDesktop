@@ -26,6 +26,8 @@ public:
   void Request(Command command, std::optional<quint16> port = {},
                int timeout_ms = DefaultTimeoutMs);
   bool IsBusy() const;
+  quint16 Port() const { return settings_->GetRestPort(); }
+  void SetPort(quint16 port) { settings_->SetRestPort(port); }
 signals:
   void finished(const QJsonObject& result);
 

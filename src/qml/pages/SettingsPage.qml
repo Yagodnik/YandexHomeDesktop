@@ -8,6 +8,7 @@ UI.PageSurface {
   required property RestViewModel restModel
   required property SettingsTransferModel transferModel
   required property ShortcutViewModel shortcutModel
+  property var mcpModel: null
   modalDialogOpen: transferDialogs.dialogOpen
   Components.SettingsTransferDialogs { id: transferDialogs; viewModel: root.transferModel }
   UI.ScrollColumn {
@@ -94,12 +95,32 @@ UI.PageSurface {
       title: qsTr("REST API")
       description: qsTr("Локальный доступ для скриптов")
       restEnabled: root.restModel.enabled
+      port: root.restModel.port
+      portEditable: !root.restModel.running
       busy: root.restModel.busy
       statusText: root.restModel.busy ? qsTr("Подождите…")
         : root.restModel.running ? root.restModel.url
         : qsTr("Сервер остановлен")
       errorText: root.restModel.error
       onRestToggled: function(enabled) { root.restModel.SetEnabled(enabled); }
+      onPortChangedByUser: function(port) { root.restModel.SetPort(port); }
+    }
+
+    Components.AdvancedSettingsCard {
+      objectName: "mcpSettings"
+      width: parent.width
+      visible: root.mcpModel !== null && root.mcpModel !== undefined
+      height: visible ? implicitHeight : 0
+      title: qsTr("MCP-сервер")
+      description: qsTr("Доступ для AI-агентов")
+      restEnabled: visible ? root.mcpModel.running : false
+      port: visible ? root.mcpModel.port : 8767
+      busy: visible ? root.mcpModel.busy : false
+      statusText: !visible ? "" : root.mcpModel.busy ? qsTr("Подождите…")
+        : root.mcpModel.running ? root.mcpModel.url : qsTr("Сервер остановлен")
+      errorText: visible ? root.mcpModel.error : ""
+      onRestToggled: function(enabled) { root.mcpModel.setEnabled(enabled); }
+      onPortChangedByUser: function(port) { root.mcpModel.setPort(port); }
     }
   }
 }

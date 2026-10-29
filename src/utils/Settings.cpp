@@ -363,6 +363,18 @@ void Settings::SetRestPort(quint16 port) {
   else { settings_.setValue("rest/port", port); settings_.sync(); }
 }
 
+quint16 Settings::GetMcpPort() const {
+  if (temporary_) return temporary_mcp_port_;
+  settings_.sync();
+  const auto port = settings_.value("mcp/port", 8767).toUInt();
+  return port > 0 && port <= 65535 ? static_cast<quint16>(port) : 8767;
+}
+
+void Settings::SetMcpPort(quint16 port) {
+  if (temporary_) temporary_mcp_port_ = port;
+  else { settings_.setValue("mcp/port", port); settings_.sync(); }
+}
+
 bool Settings::GetShortcutsEnabled() const {
   if (temporary_) return temporary_shortcuts_;
   settings_.sync();

@@ -1,0 +1,6 @@
+add_library(McpBridge STATIC McpBridge.cpp McpBridge.h McpCommand.cpp McpCommand.h)
+target_link_libraries(McpBridge PUBLIC AppServices Qt6::Core)
+if(YH_BUILD_REST_ADAPTER)
+  add_library(McpHttp STATIC McpHttpServer.cpp McpHttpServer.h)
+  target_link_libraries(McpHttp PUBLIC AppRest WorkerControl)
+endif()

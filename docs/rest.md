@@ -50,6 +50,8 @@ All fields are optional. `host` defaults to `127.0.0.1` and accepts IPv4/IPv6
 addresses or `localhost`; for example, `::1` binds IPv6 loopback. `port` is an
 integer from 1 to 65535. An explicit `--rest-port` overrides the JSON value.
 Without a port in the file, config profiles default to 8765 (8766 in fixture mode).
+The GUI also lets you change the saved REST port in Settings → Advanced while
+the REST server is stopped; the saved port is used on the next start.
 
 `oauth_token` is the Yandex OAuth access token, with the permissions needed for
 the requested upstream operations. Supplying it skips desktop sign-in and all

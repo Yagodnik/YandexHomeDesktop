@@ -18,7 +18,8 @@ int main(int argc, char* argv[]) {
     arguments.append(QString::fromLocal8Bit(argv[i]));
   const auto options = ParseStartupOptions(arguments, allow_fake_api);
   if (!options || options->cli_arguments.size() > 1 ||
-      options->rest_command != StartupOptions::RestCommand::None) {
+      options->rest_command != StartupOptions::RestCommand::None ||
+      options->mcp_command != StartupOptions::McpCommand::None) {
     QCoreApplication app(argc, argv);
     QTranslator translator;
     InstallEnglishTranslation(app, translator);

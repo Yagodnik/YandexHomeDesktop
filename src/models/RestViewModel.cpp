@@ -42,6 +42,13 @@ QString RestViewModel::GetError() const {
   return error_;
 }
 
+int RestViewModel::GetPort() const { return service_->Port(); }
+void RestViewModel::SetPort(int port) {
+  if (IsBusy() || IsRunning() || IsEnabled() || port < 1 || port > 65535) return;
+  service_->SetPort(static_cast<quint16>(port));
+  emit changed();
+}
+
 void RestViewModel::SetEnabled(bool enabled) {
   if (IsBusy() && enabled) {
     return;

@@ -20,6 +20,23 @@ std::expected<StartupOptions, QString> ParseStartupOptions(const QStringList& ar
       break;
     } else if (argument == "--fake-api") {
       options.use_fake_api = true;
+    } else if (argument == "--mcp-port" || argument.startsWith("--mcp-port=")) {
+      if (options.mcp_port)
+        return std::unexpected(StartupMessages::tr("Повторяющийся параметр: --mcp-port."));
+      const auto value = argument == "--mcp-port" ? arguments.value(++i)
+                                                  : argument.mid(QString("--mcp-port=").size());
+      bool valid = false;
+      const auto port = value.toUInt(&valid);
+      if (!valid || port == 0 || port > 65535)
+        return std::unexpected(StartupMessages::tr("--mcp-port должен быть от 1 до 65535."));
+      options.mcp_port = static_cast<quint16>(port);
+    } else if (argument == "--enable-mcp" || argument == "--disable-mcp" ||
+               argument == "--status-mcp") {
+      if (options.mcp_command != StartupOptions::McpCommand::None)
+        return std::unexpected(StartupMessages::tr("Укажите только одну MCP-команду."));
+      options.mcp_command = argument == "--enable-mcp"    ? StartupOptions::McpCommand::Enable
+                            : argument == "--disable-mcp" ? StartupOptions::McpCommand::Disable
+                                                          : StartupOptions::McpCommand::Status;
     } else if (argument == "--enable-rest" || argument == "--disable-rest" ||
                argument == "--status-rest" || argument == "--serve-rest") {
       if (options.rest_command != StartupOptions::RestCommand::None) {
@@ -79,6 +96,11 @@ std::expected<StartupOptions, QString> ParseStartupOptions(const QStringList& ar
   if (custom_fixture && !options.use_fake_api) {
     return std::unexpected("--fake-api-data requires --fake-api");
   }
+  if (options.mcp_command != StartupOptions::McpCommand::None &&
+      options.rest_command != StartupOptions::RestCommand::None)
+    return std::unexpected(StartupMessages::tr("Укажите только одну команду сервера."));
+  if (options.mcp_port && options.mcp_command != StartupOptions::McpCommand::Enable)
+    return std::unexpected(StartupMessages::tr("--mcp-port требует --enable-mcp."));
   if (options.rest_port && options.rest_command != StartupOptions::RestCommand::Enable &&
       options.rest_command != StartupOptions::RestCommand::Serve &&
       !(rest_worker && options.rest_command == StartupOptions::RestCommand::None)) {

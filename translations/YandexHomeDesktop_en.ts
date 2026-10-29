@@ -239,6 +239,13 @@ your devices</translation>
 </context>
 <context>
     <name>CliApp</name>
+    <message><source>MCP-команды допускают только --json.</source><translation>MCP commands accept only --json.</translation></message>
+    <message><source>Не удалось управлять MCP-сервером. Откройте приложение и войдите в аккаунт.</source><translation>Could not control the MCP server. Open the app and sign in.</translation></message>
+    <message><source>MCP-сервер уже работает на другом порту.</source><translation>The MCP server is already running on a different port.</translation></message>
+    <message><source>MCP-сервер остановлен.
+</source><translation>MCP server stopped.
+</translation></message>
+    <message><source>MCP-сервер не включён в эту сборку.</source><translation>The MCP server is not included in this build.</translation></message>
     <message>
         <location filename="../src/app/cli/CliApp.cpp" line="166"/>
         <location filename="../src/app/cli/CliApp.cpp" line="192"/>
@@ -2494,7 +2501,27 @@ Email: %2
     </message>
 </context>
 <context>
+    <name>AdvancedSettingsCard</name>
+    <message><source>Порт</source><translation>Port</translation></message>
+    <message><source>Остановите сервер, чтобы изменить порт.</source><translation>Stop the server to change the port.</translation></message>
+</context>
+<context>
+    <name>McpViewModel</name>
+    <message>
+        <source>Не удалось управлять MCP-сервером. Проверьте вход и доступность порта.</source>
+        <translation>Could not control the MCP server. Check your sign-in and whether the port is available.</translation>
+    </message>
+</context>
+<context>
     <name>SettingsPage</name>
+    <message>
+        <source>MCP-сервер</source>
+        <translation>MCP server</translation>
+    </message>
+    <message>
+        <source>Доступ для AI-агентов</source>
+        <translation>Access for AI agents</translation>
+    </message>
     <message>
         <location filename="../src/qml/pages/SettingsPage.qml" line="19"/>
         <source>Настройки</source>
@@ -2794,6 +2821,12 @@ a window or tray icon</translation>
 </context>
 <context>
     <name>StartupMessages</name>
+    <message><source>Для управления MCP используйте YandexHomeCli.</source><translation>Use YandexHomeCli to control MCP.</translation></message>
+    <message><source>Повторяющийся параметр: --mcp-port.</source><translation>Duplicate option: --mcp-port.</translation></message>
+    <message><source>--mcp-port должен быть от 1 до 65535.</source><translation>--mcp-port must be between 1 and 65535.</translation></message>
+    <message><source>Укажите только одну MCP-команду.</source><translation>Specify only one MCP command.</translation></message>
+    <message><source>Укажите только одну команду сервера.</source><translation>Specify only one server command.</translation></message>
+    <message><source>--mcp-port требует --enable-mcp.</source><translation>--mcp-port requires --enable-mcp.</translation></message>
     <message>
         <location filename="../src/app/common/StartupOptions.cpp" line="26"/>
         <source>Укажите только одну REST-команду.</source>

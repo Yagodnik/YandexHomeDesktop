@@ -2,6 +2,35 @@
   "version": 1,
   "suites": [
     {
+      "id": "McpProcess",
+      "description": "The MCP worker exposes tools and forwards actions through the GUI IPC endpoint.",
+      "features": ["devices", "scenarios"],
+      "layer": "process",
+      "kind": "qt",
+      "source": "tests/McpProcessTests.cpp",
+      "requires": ["YH_BUILD_REST_ADAPTER"],
+      "cases": [
+        {"name": "CliControlsWorker", "description": "Enable, inspect, and disable the worker using the CLI.", "requires": ["BUILD_CLI_APP", "Debug"]},
+        {"name": "PortPreferencesPersist", "description": "Persist the configured MCP port independently of REST."},
+        {"name": "ModelRestrictsPortChangesWhileRunning", "description": "Reject invalid MCP ports and prevent editing while the worker runs."},
+        {"name": "ManagedWorkerLifecycle", "description": "Start and stop the worker through the shared lifecycle client."},
+        {"name": "WorkerServesToolsThroughGui", "description": "Connect to the worker, discover a room, control a lamp, and stop after logout."}
+      ]
+    },
+    {
+      "id": "McpBridge",
+      "description": "MCP IPC request handoff preserves asynchronous completion and cancels on reset.",
+      "features": ["devices", "scenarios"],
+      "layer": "integration",
+      "kind": "qt",
+      "source": "tests/McpBridgeTests.cpp",
+      "cases": [
+        {"name": "AsyncRequestsAndReset", "description": "Poll async results and cancel pending callbacks on reset."},
+        {"name": "DispatchCommandsAndInlineCompletion", "description": "Dispatch device and scenario commands, preserve inline completion, and reject invalid actions."},
+        {"name": "DiscoverRoomAndTurnOnLamp", "description": "Expose device names, aliases, and room IDs and apply a validated on action."}
+      ]
+    },
+    {
       "id": "Serialization",
       "description": "Typed JSON structs, enums, nested objects, and arrays preserve their values.",
       "features": [
@@ -906,7 +935,7 @@
         },
         {
           "name": "ControllerAndViewModelReflectExternalChanges",
-          "description": "Reflect externally changed REST status in the controller and view model."
+          "description": "Reflect REST status and allow valid port changes only while stopped."
         },
         {
           "name": "DisableWaitsForWorkerExit",
@@ -1152,6 +1181,16 @@
           "name": "SavedKeybinds::test_recordingWaitsForShortcutRelease",
           "description": "Block capture until the real shortcut controller confirms release, then save through the actual editor.",
           "source": "tests/qml/tst_SavedKeybinds.qml"
+        },
+        {
+          "name": "PageComposition::test_mcpToggleReachesModel",
+          "description": "Route the MCP settings toggle to its supplied model.",
+          "source": "tests/qml/tst_PageComposition.qml"
+        },
+        {
+          "name": "PageComposition::test_restPortReachesModel",
+          "description": "Save a REST port through the actual settings card and view model.",
+          "source": "tests/qml/tst_PageComposition.qml"
         },
         {
           "name": "PageComposition::test_shortcutSettingsReachController",

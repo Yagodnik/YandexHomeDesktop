@@ -17,6 +17,17 @@ TestCase {
   Component { id: mainPage; Pages.MainPage { width: 350; height: 460 } }
   Component { id: devicePage; Pages.DevicePage { width: 350; height: 460 } }
   Component { id: settingsPage; Pages.SettingsPage { width: 350; height: 460; restModel: restViewModel; transferModel: settingsTransferModel; shortcutModel: shortcutViewModel } }
+  QtObject {
+    id: mcpStub
+    property bool running: false
+    property bool busy: false
+    property int port: 8767
+    property string url: "http://127.0.0.1:8767/mcp"
+    property string error: ""
+    property int calls: 0
+    function setEnabled(enabled) { ++calls; running = enabled; }
+    function setPort(value) { port = value; }
+  }
 
   ListModel { id: households }
   ListModel { id: scenarios }
@@ -402,6 +413,56 @@ TestCase {
       wait(100);
       grabImage(page).save(settingsPreviewPath + "-disabled.png");
     }
+  }
+
+  function test_mcpToggleReachesModel() {
+    mcpStub.running = false;
+    mcpStub.calls = 0;
+    mcpStub.port = 8767;
+    const page = createTemporaryObject(settingsPage, testCase, { height: 460, mcpModel: mcpStub });
+    const content = findChild(page, "settingsContent");
+    const card = findChild(page, "mcpSettings");
+    tryVerify(function() { return card.visible && content.contentHeight > content.height; });
+    content.contentY = content.contentHeight - content.height;
+    waitForRendering(card);
+    const portInput = findChild(card, "serverPortInput");
+    verify(portInput.enabled);
+    portInput.forceActiveFocus();
+    portInput.text = "9876";
+    keyClick(Qt.Key_Return);
+    compare(mcpStub.port, 9876);
+    portInput.text = "0";
+    page.forceActiveFocus();
+    compare(portInput.text, "9876");
+    compare(mcpStub.port, 9876);
+    const toggle = findChild(findChild(card, "restSettingRow"), "settingSwitch");
+    mouseClick(toggle);
+    compare(mcpStub.calls, 1);
+    compare(mcpStub.running, true);
+    verify(!portInput.enabled);
+    if (settingsPreviewPath.length > 0) grabImage(page).save(settingsPreviewPath + "-mcp-port.png");
+    mouseClick(toggle);
+    compare(mcpStub.calls, 2);
+    compare(mcpStub.running, false);
+  }
+
+  function test_restPortReachesModel() {
+    restViewModel.SetEnabled(false);
+    tryCompare(restViewModel, "busy", false);
+    tryCompare(restViewModel, "running", false);
+    const original = restViewModel.port;
+    const page = createTemporaryObject(settingsPage, testCase, { height: 460 });
+    const content = findChild(page, "settingsContent");
+    const card = findChild(page, "advancedSettings");
+    content.contentY = content.contentHeight - content.height;
+    waitForRendering(card);
+    const input = findChild(card, "serverPortInput");
+    verify(input.enabled);
+    input.forceActiveFocus();
+    input.text = "9875";
+    keyClick(Qt.Key_Return);
+    compare(restViewModel.port, 9875);
+    restViewModel.SetPort(original);
   }
 
   function test_shortcutSettingsReachController() {

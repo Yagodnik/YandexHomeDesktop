@@ -63,7 +63,7 @@ without relying on a system font installation. Windows CI forces Qt diagnostics
 to stderr. Failure artifacts include `Testing/WindowsRuntime.txt` with DLL source
 paths and `Testing/WorkerControl.txt` with the worker test's output.
 
-For a local desktop build, install Qt 6.9 or newer with HttpServer, WebSockets, Quick, QuickTest, Multimedia, NetworkAuth, Widgets, Svg, Qt5Compat, ShaderTools, LinguistTools, and Test, plus a C++23 compiler and CMake 3.28 or newer. Configure Qt through the standard CMake prefix path:
+For a local desktop build, install Qt 6.9 or newer with HttpServer, WebSockets, Quick, QuickTest, Multimedia, NetworkAuth, Widgets, Svg, Qt5Compat, ShaderTools, LinguistTools, and Test, plus a C++23 compiler and CMake 3.28 or newer. The [MCP worker](mcp.md) shares the Qt HTTP listener library and is built when `YH_BUILD_REST_ADAPTER` is enabled. Configure Qt through the standard CMake prefix path:
 
 ```sh
 cmake -S . -B build -G Ninja -DCMAKE_PREFIX_PATH=/path/to/Qt/6.x/<kit> -DBUILD_DESKTOP_APP=ON

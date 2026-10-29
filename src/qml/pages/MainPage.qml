@@ -27,7 +27,7 @@ UI.PageSurface {
         keybindSettings: keybindSettingsModel
         showKeybinds: settings.showKeybinds
       }
-      Pages.SettingsPage { id: settingsPage; restModel: restViewModel; transferModel: settingsTransferModel; shortcutModel: shortcutViewModel }
+      Pages.SettingsPage { id: settingsPage; restModel: restViewModel; transferModel: settingsTransferModel; shortcutModel: shortcutViewModel; mcpModel: typeof mcpViewModel === "undefined" ? null : mcpViewModel }
     }
   }
 

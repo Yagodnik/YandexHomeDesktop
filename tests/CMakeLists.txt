@@ -1,5 +1,23 @@
 find_package(Qt6 COMPONENTS Core Network Test Gui REQUIRED)
 
+add_executable(McpBridgeTests McpBridgeTests.cpp)
+target_link_libraries(McpBridgeTests PRIVATE McpBridge Qt6::Test)
+yh_add_test(NAME McpBridge COMMAND McpBridgeTests)
+if(TARGET YandexHomeMcp)
+  add_executable(McpProcessTests McpProcessTests.cpp)
+  target_link_libraries(McpProcessTests PRIVATE McpControl AppRuntime Models Qt6::Network Qt6::Test)
+  add_dependencies(McpProcessTests YandexHomeMcp)
+  target_compile_definitions(McpProcessTests PRIVATE "$<$<CONFIG:Debug>:YH_DEBUG_FAKE_API>")
+  if(TARGET YandexHomeCli)
+    target_compile_definitions(McpProcessTests PRIVATE YH_MCP_CLI_TEST)
+    add_dependencies(McpProcessTests YandexHomeCli)
+    yh_add_test(NAME McpProcess COMMAND McpProcessTests "$<TARGET_FILE:YandexHomeMcp>" "$<TARGET_FILE:YandexHomeCli>")
+  else()
+    yh_add_test(NAME McpProcess COMMAND McpProcessTests "$<TARGET_FILE:YandexHomeMcp>")
+  endif()
+  set_tests_properties(McpProcess PROPERTIES TIMEOUT 90)
+endif()
+
 foreach(_suite Serialization Api ApiBoundary ModelBoundary Capabilities Models)
   add_executable(${_suite}Tests ${_suite}Tests.cpp ${_suite}Tests.h QtTestMain.cpp)
   target_compile_definitions(${_suite}Tests PRIVATE

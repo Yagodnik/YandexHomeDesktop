@@ -6,7 +6,7 @@ endif()
 
 set(_runtime_dlls)
 set(_runtime_targets)
-foreach(_target appYandexHomeDesktop YandexHomeCli YandexHomeRest YandexHomeShortcuts)
+foreach(_target appYandexHomeDesktop YandexHomeCli YandexHomeRest YandexHomeShortcuts YandexHomeMcp)
   if(TARGET ${_target})
     list(APPEND _runtime_targets ${_target})
     list(APPEND _runtime_dlls "$<TARGET_RUNTIME_DLLS:${_target}>")

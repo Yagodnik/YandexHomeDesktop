@@ -3,6 +3,9 @@ add_library(AppStartup STATIC
   src/app/common/StartupOptions.cpp src/app/common/StartupOptions.h
   src/app/common/AppTranslations.h)
 target_link_libraries(AppStartup PUBLIC Qt6::Core)
+add_library(McpControl STATIC src/app/mcp/McpConfiguration.cpp src/app/mcp/McpConfiguration.h
+  src/app/mcp/McpGuiHost.cpp src/app/mcp/McpGuiHost.h)
+target_link_libraries(McpControl PUBLIC McpBridge WorkerControl)
 
 add_library(AppShortcuts SHARED
   src/services/ShortcutActionService.h src/services/ShortcutActionService.cpp
@@ -14,6 +17,11 @@ add_library(ShortcutControlBootstrap STATIC src/app/shortcuts/ShortcutConfigurat
 target_link_libraries(ShortcutControlBootstrap PUBLIC AppStartup AppShortcuts)
 
 qt_add_resources(DEBUG_FIXTURE_RESOURCES resources/debug/debug.qrc)
+if(YH_BUILD_REST_ADAPTER)
+  add_executable(YandexHomeMcp src/app/mcp/McpMain.cpp)
+  target_link_libraries(YandexHomeMcp PRIVATE McpHttp McpControl AppStartup WorkerControl Qt6::Core)
+  install(TARGETS YandexHomeMcp RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+endif()
 if(BUILD_SHORTCUTS_APP)
   include(cmake/QHotkey.cmake)
   yh_add_qhotkey()
@@ -42,7 +50,14 @@ if(BUILD_CLI_APP)
   target_compile_definitions(CliBootstrap PRIVATE "$<$<CONFIG:Debug>:YH_DEBUG_FAKE_API>")
   target_link_libraries(CliBootstrap PUBLIC AppCli AppStartup RestControlBootstrap YandexAuth YandexApiAdapter AppRuntime
     "$<$<CONFIG:Debug>:FixtureApi>")
+  if(TARGET YandexHomeMcp)
+    target_link_libraries(CliBootstrap PUBLIC McpControl)
+    target_compile_definitions(CliBootstrap PRIVATE YH_MCP_ENABLED)
+  endif()
   add_executable(YandexHomeCli src/app/cli/CliMain.cpp)
+  if(TARGET YandexHomeMcp)
+    add_dependencies(YandexHomeCli YandexHomeMcp)
+  endif()
   target_compile_definitions(YandexHomeCli PRIVATE "$<$<CONFIG:Debug>:YH_DEBUG_FAKE_API>")
   target_link_libraries(YandexHomeCli PRIVATE CliBootstrap)
   target_sources(YandexHomeCli PRIVATE "$<$<CONFIG:Debug>:${DEBUG_FIXTURE_RESOURCES}>")

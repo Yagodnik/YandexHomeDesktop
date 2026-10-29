@@ -20,6 +20,8 @@ shares the bundle's deployed Qt frameworks. CLI/REST-only installs use `bin/` wi
 
 ## Commands
 
+Local MCP controls are `--enable-mcp`, `--disable-mcp`, and `--status-mcp`;
+see [mcp.md](mcp.md) for client configuration and the GUI requirement.
 Local REST controls are `--enable-rest`, `--disable-rest`, and `--status-rest`,
 and are available even with the desktop disabled. Run `YandexHomeRest` for the foreground server. They support `--fake-api` in Debug builds.
 Use `--rest-port 9000` with enable/foreground mode to choose a port, or

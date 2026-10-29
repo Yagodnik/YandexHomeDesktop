@@ -6,6 +6,7 @@ add_library(Models STATIC
         AuthorizationModel.cpp
         AuthorizationModel.h
         RestViewModel.h RestViewModel.cpp
+        McpViewModel.h McpViewModel.cpp
         ShortcutViewModel.h ShortcutViewModel.cpp
         AccountModel.cpp
         AccountModel.h

@@ -978,6 +978,10 @@
           "description": "Reflect REST status, reject MCP port conflicts, and allow valid port changes only while stopped."
         },
         {
+          "name": "DisabledPreferenceSurvivesControllerRecreation",
+          "description": "Keep REST disabled across controller recreation and verify status does not launch a worker."
+        },
+        {
           "name": "DisableWaitsForWorkerExit",
           "description": "Keep disable pending until the worker exits and handle shutdown failures."
         },

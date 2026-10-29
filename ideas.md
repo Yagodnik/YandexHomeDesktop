@@ -3,11 +3,10 @@
 5) Improve UI
 2) Making everything testable
 18) There is a bug that app tries to launch rest at the very start for no reason...
-19) Explore 
-20) App allows duplicated port for MCP and Rest server
 21) Consider adding auth/no auth mode for both rest/mcp
-22) Close button appears when we are inside device menu
 
+20) ~App allows duplicated port for MCP and Rest server~
+22) ~Close button appears when we are inside device menu~
 12) ~Fix positioning issues~
 7) ~Fix authorization~
 14) ~Adding MCP server~

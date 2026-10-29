@@ -716,6 +716,38 @@ private slots:
     QTest::newRow("worker-does-not-exit") << true;
   }
 
+  void DisabledPreferenceSurvivesControllerRecreation() {
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    const QDir files(directory.path());
+    const auto name = "yh-rest-unit-" + QUuid::createUuid().toString(QUuid::Id128);
+    const auto settings_path = files.filePath("settings.ini");
+    const RestLaunchConfiguration configuration{name, QCoreApplication::applicationFilePath(),
+                                                 {"--control-worker", name, directory.path()}, false};
+    WorkerCleanup cleanup{directory.path()};
+    {
+      Settings settings(settings_path);
+      settings.SetRestEnabled(true);
+      RestControlService service(&settings, configuration);
+      QSignalSpy finished(&service, &RestControlService::finished);
+      service.Request(RestControlService::Command::Disable);
+      QTRY_COMPARE(finished.size(), 1);
+      QVERIFY(finished.takeFirst().at(0).toJsonObject()["ok"].toBool());
+      QVERIFY(!settings.GetRestEnabled());
+    }
+    Settings reopened(settings_path);
+    QVERIFY(!reopened.GetRestEnabled());
+    RestControlService service(&reopened, configuration);
+    RestViewModel model(&service);
+    QSignalSpy finished(&service, &RestControlService::finished);
+    model.Refresh();
+    QTRY_VERIFY(!finished.isEmpty());
+    QVERIFY(!model.IsEnabled());
+    QVERIFY(!model.IsRunning());
+    QVERIFY(!QFileInfo::exists(files.filePath("pid")));
+    QVERIFY(!reopened.GetRestEnabled());
+  }
+
   void DisableWaitsForWorkerExit() {
     QFETCH(bool, timeout);
     QTemporaryDir directory;

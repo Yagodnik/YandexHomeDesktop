@@ -4,6 +4,7 @@
 2) Making everything testable
 18) There is a bug that app tries to launch rest at the very start for no reason...
 21) Consider adding auth/no auth mode for both rest/mcp
+22) Consider integrating with ChatGPT, Qwen and other agents.
 
 20) ~App allows duplicated port for MCP and Rest server~
 22) ~Close button appears when we are inside device menu~

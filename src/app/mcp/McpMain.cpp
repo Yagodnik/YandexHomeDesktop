@@ -12,15 +12,15 @@ int main(int argc, char** argv) {
   QCoreApplication app(argc, argv);
   app.setApplicationName("YandexHomeMcp");
   if (app.arguments().contains("--help") && app.arguments().contains("--json")) {
-    const auto help = QJsonDocument(QJsonObject{{"ok", true}, {"help", "YandexHomeMcp [--fake-api] [--fake-api-data <path>]"}}).toJson(QJsonDocument::Compact) + '\n';
+    const auto help = QJsonDocument(QJsonObject{{"ok", true}, {"help", "YandexHomeMcp [--fake-api] [--fake-api-data <path>] [--mcp-auth bearer|none]"}}).toJson(QJsonDocument::Compact) + '\n';
     std::fwrite(help.constData(), 1, help.size(), stdout);
     return 0;
   }
   if (app.arguments().contains("--help")) {
-    std::fputs("YandexHomeMcp [--fake-api] [--fake-api-data <path>]\n", stdout);
+    std::fputs("YandexHomeMcp [--fake-api] [--fake-api-data <path>] [--mcp-auth bearer|none]\n", stdout);
     return 0;
   }
-  const auto options = ParseStartupOptions(app.arguments(), true);
+  const auto options = ParseStartupOptions(app.arguments(), true, false, false, true);
   if (!options || options->rest_command != StartupOptions::RestCommand::None ||
       options->mcp_command != StartupOptions::McpCommand::None || options->cli_arguments.size() != 1) return 2;
   const auto configuration = MakeMcpConfiguration(*options);
@@ -30,12 +30,16 @@ int main(int argc, char** argv) {
 
   WorkerControlServer control;
   if (!control.Acquire(worker)) return 1;
-  QByteArray secret;
-  for (int i = 0; i < 8; ++i) {
-    const auto value = QRandomGenerator::system()->generate();
-    secret.append(reinterpret_cast<const char*>(&value), sizeof(value));
+  const bool require_bearer = options->mcp_auth != "none";
+  std::optional<QByteArray> token;
+  if (require_bearer) {
+    QByteArray secret;
+    for (int i = 0; i < 8; ++i) {
+      const auto value = QRandomGenerator::system()->generate();
+      secret.append(reinterpret_cast<const char*>(&value), sizeof(value));
+    }
+    token = secret.toHex();
   }
-  const auto token = secret.toHex();
   McpHttpServer server(gui, token);
   WorkerControlClient gui_client({gui, {}, {}, "stop"});
   bool running = false;
@@ -49,9 +53,13 @@ int main(int argc, char** argv) {
       server.Stop();
       QTimer::singleShot(100, &app, &QCoreApplication::quit);
     }
-    return QJsonObject{{"ok", true}, {"running", running}, {"port", static_cast<int>(port)},
+    QJsonObject status{{"ok", true}, {"running", running}, {"port", static_cast<int>(port)},
                        {"url", QString("http://127.0.0.1:%1/mcp").arg(port)},
-                       {"token", QString::fromLatin1(token)}};
+                       {"auth_mode", require_bearer ? "bearer" : "none"}};
+    if (running && token) {
+      status["token"] = QString::fromLatin1(*token);
+    }
+    return status;
   });
   if (!control.Listen()) return 1;
   QObject::connect(&gui_client, &WorkerControlClient::finished, &app, [&](const QJsonObject& result) {

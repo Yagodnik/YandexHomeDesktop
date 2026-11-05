@@ -1,12 +1,42 @@
 #include "RestServer.h"
 
+#include <QCryptographicHash>
 #include <QTcpSocket>
 
 #include "RestReply.h"
 #include "RestRouter.h"
 
-RestServer::RestServer(const RestRouter& routes, QObject* parent, int timeout_ms)
-    : QObject(parent), routes_(routes), timeout_ms_(timeout_ms) {
+namespace {
+QByteArray TokenDigest(QByteArrayView token) {
+  return QCryptographicHash::hash(token, QCryptographicHash::Sha256);
+}
+
+bool MatchesBearer(const QHttpHeaders& headers, const QByteArray& expected_digest) {
+  const auto values = headers.values(QHttpHeaders::WellKnownHeader::Authorization);
+  if (values.size() != 1) {
+    return false;
+  }
+  constexpr QByteArrayView scheme = "Bearer ";
+  const QByteArrayView authorization = values.first();
+  if (authorization.size() <= scheme.size() ||
+      authorization.first(scheme.size()).compare(scheme, Qt::CaseInsensitive) != 0) {
+    return false;
+  }
+  const auto digest = TokenDigest(authorization.sliced(scheme.size()));
+  unsigned char difference = 0;
+  for (qsizetype i = 0; i < digest.size(); ++i) {
+    difference |= static_cast<unsigned char>(digest[i] ^ expected_digest[i]);
+  }
+  return difference == 0;
+}
+} // namespace
+
+RestServer::RestServer(const RestRouter& routes, QObject* parent, int timeout_ms,
+                       std::optional<QByteArray> bearer_token)
+    : QObject(parent), routes_(routes), timeout_ms_(timeout_ms),
+      bearer_digest_(bearer_token ? std::optional{bearer_token->isEmpty() ? QByteArray{}
+                                                                        : TokenDigest(*bearer_token)}
+                                  : std::nullopt) {
   http_.setMissingHandler(this,
                           [this](const QHttpServerRequest& request,
                                  QHttpServerResponder& responder) { Handle(request, responder); });
@@ -23,6 +53,15 @@ bool RestServer::Start(quint16 port) {
 bool RestServer::Start(quint16 port, const QHostAddress& host) {
   if (tcp_.isListening()) {
     return port == Port() && host == tcp_.serverAddress();
+  }
+  policy_error_.clear();
+  if (bearer_digest_ && bearer_digest_->isEmpty()) {
+    policy_error_ = tr("Bearer authentication requires a token.");
+    return false;
+  }
+  if (!bearer_digest_ && !host.isLoopback()) {
+    policy_error_ = tr("A listener without client authentication must use a loopback address.");
+    return false;
   }
   if (host.isNull() || !tcp_.listen(host, port)) {
     return false;
@@ -52,7 +91,7 @@ quint16 RestServer::Port() const {
 }
 
 QString RestServer::Error() const {
-  return tcp_.errorString();
+  return policy_error_.isEmpty() ? tcp_.errorString() : policy_error_;
 }
 
 void RestServer::Handle(const QHttpServerRequest& request, QHttpServerResponder& responder) {
@@ -78,6 +117,13 @@ void RestServer::Handle(const QHttpServerRequest& request, QHttpServerResponder&
       authority.hasQuery() || authority.hasFragment() || authority.port() != Port() ||
       !matches_address) {
     reply->Fail(RestReply::StatusCode::Forbidden, "host_forbidden", tr("Invalid REST API host."));
+    return;
+  }
+  if (bearer_digest_ && !MatchesBearer(request.headers(), *bearer_digest_)) {
+    QHttpHeaders headers;
+    headers.append(QHttpHeaders::WellKnownHeader::WWWAuthenticate, "Bearer");
+    reply->Fail(RestReply::StatusCode::Unauthorized, "unauthorized",
+                tr("A valid bearer token is required."), std::move(headers));
     return;
   }
   if (request.method() == QHttpServerRequest::Method::Post &&

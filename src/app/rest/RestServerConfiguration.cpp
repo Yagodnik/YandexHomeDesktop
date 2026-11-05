@@ -4,6 +4,7 @@
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QRegularExpression>
 #include <QUrl>
 #include <algorithm>
 #include <cmath>
@@ -14,7 +15,9 @@ class RestConfigurationMessages {
   Q_DECLARE_TR_FUNCTIONS(RestConfigurationMessages)
 };
 
-JSON_STRUCT(RestConfigurationFields, (QString, host), (double, port), (QString, oauth_token));
+JSON_ENUMERATION(ClientAuthMode, ("none", None), ("bearer", Bearer));
+JSON_STRUCT(RestConfigurationFields, (QString, host), (double, port), (QString, oauth_token),
+            (ClientAuthMode, auth_mode), (QString, client_token));
 } // namespace
 
 QString RestServerConfiguration::Url(quint16 port) const {
@@ -46,7 +49,11 @@ std::expected<RestServerConfiguration, QString> LoadRestServerConfiguration(cons
   const auto object = document.object();
   // From leaves absent members untouched; supply every field before decoding.
   auto fields_object = Serialization::To(
-      RestConfigurationFields{.host = configuration.host.toString(), .port = 0, .oauth_token = {}});
+      RestConfigurationFields{.host = configuration.host.toString(),
+                              .port = 0,
+                              .oauth_token = {},
+                              .auth_mode = ClientAuthMode::None,
+                              .client_token = {}});
   for (auto field = object.begin(); field != object.end(); ++field) {
     if (!fields_object.contains(field.key())) {
       return std::unexpected(RestConfigurationMessages::tr("Unknown REST configuration field."));
@@ -72,6 +79,23 @@ std::expected<RestServerConfiguration, QString> LoadRestServerConfiguration(cons
           RestConfigurationMessages::tr("REST port must be an integer from 1 to 65535."));
     }
     configuration.port = static_cast<quint16>(port);
+  }
+  if (fields.auth_mode == ClientAuthMode::Unknown) {
+    return std::unexpected(RestConfigurationMessages::tr("auth_mode must be bearer or none."));
+  }
+  if (fields.auth_mode == ClientAuthMode::Bearer) {
+    static const QRegularExpression token_pattern(QStringLiteral(R"(\A[A-Za-z0-9._~+/-]+=*\z)"));
+    if (!object["client_token"].isString() || !token_pattern.match(fields.client_token).hasMatch()) {
+      return std::unexpected(RestConfigurationMessages::tr(
+          "Bearer authentication requires a valid client_token."));
+    }
+    if (fields.client_token == fields.oauth_token) {
+      return std::unexpected(RestConfigurationMessages::tr("client_token must differ from oauth_token."));
+    }
+    configuration.client_token = fields.client_token.toLatin1();
+  } else if (object.contains("client_token") || !configuration.host.isLoopback()) {
+    return std::unexpected(RestConfigurationMessages::tr(
+        "REST requires auth_mode bearer to use a client_token or a non-loopback host."));
   }
   if (object.contains("oauth_token")) {
     const auto value = object["oauth_token"];

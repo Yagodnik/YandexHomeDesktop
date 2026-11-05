@@ -90,17 +90,14 @@ void Handle(const QHttpServerRequest& request, RestReply* reply, const QString& 
 }
 } // namespace
 
-McpHttpServer::McpHttpServer(QString gui_endpoint, QByteArray token, QObject* parent) : QObject(parent) {
+McpHttpServer::McpHttpServer(QString gui_endpoint, std::optional<QByteArray> token, QObject* parent)
+    : QObject(parent) {
   routes_ = std::make_unique<RestRouter>();
   routes_->Add(QHttpServerRequest::Method::Post, "/mcp",
-             [endpoint = std::move(gui_endpoint), token = std::move(token)](const auto& request, const auto&, RestReply* reply) {
-               if (request.headers().value("Authorization").toByteArray() != "Bearer " + token) {
-                 reply->Fail(RestReply::StatusCode::Unauthorized, "unauthorized", "A valid bearer token is required.");
-                 return;
-               }
-               Handle(request, reply, endpoint);
-             });
-  server_ = std::make_unique<RestServer>(*routes_, nullptr, 30'000);
+               [endpoint = std::move(gui_endpoint)](const auto& request, const auto&, RestReply* reply) {
+                 Handle(request, reply, endpoint);
+               });
+  server_ = std::make_unique<RestServer>(*routes_, nullptr, 30'000, std::move(token));
 }
 McpHttpServer::~McpHttpServer() = default;
 bool McpHttpServer::Start(quint16 port) { return server_->Start(port); }

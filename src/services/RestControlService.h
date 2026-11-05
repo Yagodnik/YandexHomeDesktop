@@ -13,6 +13,7 @@ struct RestLaunchConfiguration {
   QStringList arguments;
   bool fixture = false;
   QString host;
+  QString auth_mode;
 };
 
 // GUI and CLI share this asynchronous lifecycle controller. It never reads OAuth tokens.

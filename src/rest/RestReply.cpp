@@ -21,21 +21,26 @@ void RestReply::Send(QJsonObject result, StatusCode status) {
 }
 
 void RestReply::SendDocument(const QJsonObject& document, StatusCode status) {
+  SendDocument(document, status, {});
+}
+
+void RestReply::SendDocument(const QJsonObject& document, StatusCode status, QHttpHeaders headers) {
   if (finished_) {
     return;
   }
   finished_ = true;
   timer_.stop();
 
-  QHttpHeaders headers;
   headers.append("Cache-Control", "no-store");
   // The QJsonDocument overload supplies Content-Type: application/json.
   responder_.write(QJsonDocument(document), headers, status);
   deleteLater();
 }
 
-void RestReply::Fail(StatusCode status, const QString& code, const QString& message) {
-  Send({{"ok", false}, {"error", QJsonObject{{"code", code}, {"message", message}}}}, status);
+void RestReply::Fail(StatusCode status, const QString& code, const QString& message,
+                     QHttpHeaders headers) {
+  SendDocument({{"ok", false}, {"error", QJsonObject{{"code", code}, {"message", message}}}},
+               status, std::move(headers));
 }
 
 void RestReply::SendEmpty(StatusCode status) {

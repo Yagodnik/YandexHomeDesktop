@@ -1,4 +1,5 @@
 #pragma once
+#include <optional>
 
 #include <QObject>
 #include <QString>
@@ -10,7 +11,7 @@ class RestRouter;
 // Loopback MCP transport. Tool operations are sent to the GUI's WorkerControl endpoint.
 class McpHttpServer final : public QObject {
 public:
-  McpHttpServer(QString gui_endpoint, QByteArray token, QObject* parent = nullptr);
+  McpHttpServer(QString gui_endpoint, std::optional<QByteArray> token, QObject* parent = nullptr);
   ~McpHttpServer() override;
   bool Start(quint16 port);
   void Stop();

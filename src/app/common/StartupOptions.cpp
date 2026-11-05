@@ -8,7 +8,7 @@ class StartupMessages {
 
 std::expected<StartupOptions, QString> ParseStartupOptions(const QStringList& arguments,
                                                            bool allow_fake_api, bool rest_worker,
-                                                           bool allow_fake_auth) {
+                                                           bool allow_fake_auth, bool mcp_worker) {
   StartupOptions options;
   bool custom_fixture = false;
   if (!arguments.isEmpty()) {
@@ -23,6 +23,16 @@ std::expected<StartupOptions, QString> ParseStartupOptions(const QStringList& ar
       options.use_fake_auth = true;
     } else if (argument == "--fake-api") {
       options.use_fake_api = true;
+    } else if (argument == "--mcp-auth" || argument.startsWith("--mcp-auth=")) {
+      if (!options.mcp_auth.isEmpty()) {
+        return std::unexpected(StartupMessages::tr("Duplicate option: --mcp-auth."));
+      }
+      options.mcp_auth = argument == "--mcp-auth"
+                             ? arguments.value(++i)
+                             : argument.mid(QString("--mcp-auth=").size());
+      if (options.mcp_auth != "bearer" && options.mcp_auth != "none") {
+        return std::unexpected(StartupMessages::tr("--mcp-auth must be bearer or none."));
+      }
     } else if (argument == "--mcp-port" || argument.startsWith("--mcp-port=")) {
       if (options.mcp_port) return std::unexpected(StartupMessages::tr("Повторяющийся параметр: --mcp-port."));
       const auto value = argument == "--mcp-port" ? arguments.value(++i) : argument.mid(QString("--mcp-port=").size());
@@ -106,6 +116,10 @@ std::expected<StartupOptions, QString> ParseStartupOptions(const QStringList& ar
     return std::unexpected(StartupMessages::tr("Укажите только одну команду сервера."));
   if (options.mcp_port && options.mcp_command != StartupOptions::McpCommand::Enable)
     return std::unexpected(StartupMessages::tr("--mcp-port требует --enable-mcp."));
+  if (!options.mcp_auth.isEmpty() && options.mcp_command != StartupOptions::McpCommand::Enable &&
+      !mcp_worker) {
+    return std::unexpected(StartupMessages::tr("--mcp-auth requires --enable-mcp."));
+  }
   if (options.rest_port && options.rest_command != StartupOptions::RestCommand::Enable &&
       options.rest_command != StartupOptions::RestCommand::Serve &&
       !(rest_worker && options.rest_command == StartupOptions::RestCommand::None)) {

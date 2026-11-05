@@ -37,6 +37,10 @@ RestControlService::RestControlService(Settings* settings, RestLaunchConfigurati
                  result["host"].toString() != configuration_.host) {
         result = Error("host_conflict",
                        tr("REST API is already running on another host. Disable it first."));
+      } else if (!configuration_.auth_mode.isEmpty() &&
+                 result["auth_mode"].toString("none") != configuration_.auth_mode) {
+        result = Error("auth_mode_conflict",
+                       tr("REST API is already running with a different authentication mode. Disable it first."));
       } else {
         settings_->SetRestPort(static_cast<quint16>(port));
         settings_->SetRestEnabled(true);

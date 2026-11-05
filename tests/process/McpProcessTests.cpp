@@ -115,27 +115,39 @@ private slots:
                      port = value; return true;
                    });
     QVERIFY(gui.Start());
-    const auto run = [&](const QString& command) {
+    const auto run = [&](const QString& command, const QString& auth = QString(),
+                         int expected_exit_code = 0) {
       QProcess process;
       QStringList args{"--fake-api", "--fake-api-data", options.fixture_path, command, "--json"};
       if (command == "--enable-mcp") args << "--mcp-port" << QString::number(*options.mcp_port);
+      if (!auth.isEmpty()) args << "--mcp-auth" << auth;
       process.start(cli_path, args);
       QEventLoop loop;
       QTimer deadline; deadline.setSingleShot(true);
       connect(&process, &QProcess::finished, &loop, &QEventLoop::quit);
       connect(&deadline, &QTimer::timeout, &loop, &QEventLoop::quit);
       deadline.start(15'000); loop.exec();
-      if (process.state() != QProcess::NotRunning || process.exitCode() != 0) return QJsonObject{};
-      return QJsonDocument::fromJson(process.readAllStandardOutput()).object();
+      if (process.state() != QProcess::NotRunning || process.exitCode() != expected_exit_code) {
+        return QJsonObject{};
+      }
+      const auto output = expected_exit_code == 0 ? process.readAllStandardOutput()
+                                                   : process.readAllStandardError();
+      return QJsonDocument::fromJson(output).object();
     };
     const auto available_port = *options.mcp_port;
     options.mcp_port = 8765;
     QVERIFY(run("--enable-mcp").isEmpty());
     QCOMPARE(port, quint16(8767));
     options.mcp_port = available_port;
-    QVERIFY(run("--enable-mcp")["running"].toBool());
+    QVERIFY(run("--enable-mcp", "none")["running"].toBool());
     QCOMPARE(port, *options.mcp_port);
-    QVERIFY(run("--status-mcp")["running"].toBool());
+    const auto status = run("--status-mcp");
+    QVERIFY(status["running"].toBool());
+    QCOMPARE(status["auth_mode"].toString(), QString("none"));
+    QVERIFY(!status.contains("token"));
+    const auto conflict = run("--enable-mcp", "bearer", 1);
+    QCOMPARE(conflict.value("error").toObject().value("code").toString(),
+             QString("auth_mode_conflict"));
     const auto disabled = run("--disable-mcp");
     QVERIFY(disabled["ok"].toBool());
     QVERIFY(!disabled["running"].toBool());
@@ -163,9 +175,16 @@ private slots:
     QVERIFY(stopped["ok"].toBool());
     QVERIFY(!stopped["running"].toBool());
   }
+  void WorkerServesToolsThroughGui_data() {
+    QTest::addColumn<bool>("require_bearer");
+    QTest::newRow("default-bearer") << true;
+    QTest::newRow("no-auth") << false;
+  }
   void WorkerServesToolsThroughGui() {
+    QFETCH(bool, require_bearer);
     QTemporaryDir dir; QVERIFY(dir.isValid());
     StartupOptions options; options.use_fake_api = true; options.fixture_path = dir.filePath("fixture.json");
+    if (!require_bearer) options.mcp_auth = "none";
     auto configuration = MakeMcpConfiguration(options);
     FakeApi api; HomeService home(&api); DeviceService devices(&api); ScenarioService scenarios(&api);
     bool authorized = true;
@@ -189,24 +208,30 @@ private slots:
     control.Request(WorkerControlClient::Command::Status);
     status_loop.exec();
     QVERIFY(status["running"].toBool());
-    worker_token = status["token"].toString().toLatin1();
-    QVERIFY(!worker_token.isEmpty());
+    worker_token = status.value("token").toString().toLatin1();
+    QCOMPARE(status["auth_mode"].toString(), require_bearer ? QString("bearer") : QString("none"));
+    QCOMPARE(status.contains("token"), require_bearer);
+    QCOMPARE(!worker_token.isEmpty(), require_bearer);
     QJsonObject init;
     QTRY_VERIFY_WITH_TIMEOUT(!(init = Post(port, {{"jsonrpc", "2.0"}, {"id", 1}, {"method", "initialize"},
-                                                {"params", QJsonObject{{"protocolVersion", "2025-11-25"}}}})).isEmpty(), 5000);
+                                                {"params", QJsonObject{{"protocolVersion", "2025-11-25"}}}}, require_bearer)).isEmpty(), 5000);
     QCOMPARE(init["result"].toObject()["serverInfo"].toObject()["name"].toString(), "yandex-home");
     int notification_status = 0;
-    Post(port, {{"jsonrpc", "2.0"}, {"method", "notifications/initialized"}}, true, {}, &notification_status);
+    Post(port, {{"jsonrpc", "2.0"}, {"method", "notifications/initialized"}}, require_bearer, {}, &notification_status);
     QCOMPARE(notification_status, 202);
-    const auto unauthorized = Post(port, {{"jsonrpc", "2.0"}, {"id", 1}, {"method", "ping"}}, false);
-    QCOMPARE(unauthorized["error"].toObject()["code"].toString(), "unauthorized");
-    const auto browser = Post(port, {{"jsonrpc", "2.0"}, {"id", 1}, {"method", "ping"}}, true, "https://example.org");
+    const auto without_token = Post(port, {{"jsonrpc", "2.0"}, {"id", 1}, {"method", "ping"}}, false);
+    if (require_bearer) {
+      QCOMPARE(without_token["error"].toObject()["code"].toString(), "unauthorized");
+    } else {
+      QVERIFY(without_token["result"].isObject());
+    }
+    const auto browser = Post(port, {{"jsonrpc", "2.0"}, {"id", 1}, {"method", "ping"}}, require_bearer, "https://example.org");
     QCOMPARE(browser["error"].toObject()["code"].toString(), "origin_forbidden");
-    const auto tools = Post(port, {{"jsonrpc", "2.0"}, {"id", 2}, {"method", "tools/list"}});
+    const auto tools = Post(port, {{"jsonrpc", "2.0"}, {"id", 2}, {"method", "tools/list"}}, require_bearer);
     QCOMPARE(tools["result"].toObject()["tools"].toArray().size(), 5);
-    const auto call = [port](const QString& name, const QJsonObject& arguments) {
+    const auto call = [port, require_bearer](const QString& name, const QJsonObject& arguments) {
       return Post(port, {{"jsonrpc", "2.0"}, {"id", 3}, {"method", "tools/call"},
-                         {"params", QJsonObject{{"name", name}, {"arguments", arguments}}}});
+                         {"params", QJsonObject{{"name", name}, {"arguments", arguments}}}}, require_bearer);
     };
     const auto list = call("list_devices", {});
     const auto text = list["result"].toObject()["content"].toArray()[0].toObject()["text"].toString();

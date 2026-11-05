@@ -287,6 +287,7 @@ private slots:
     QCOMPARE(defaults->host, QHostAddress(QHostAddress::LocalHost));
     QVERIFY(!defaults->port);
     QVERIFY(defaults->oauth_token.isEmpty());
+    QCOMPARE(defaults->AuthMode(), QString("none"));
     QTemporaryDir directory;
     const auto path = directory.filePath("config.json");
     QVERIFY(WriteFile(path, R"({"host":"::1","port":9000,"oauth_token":"synthetic-test-token"})"));
@@ -342,6 +343,17 @@ private slots:
     QTest::newRow("null-token") << QByteArray(R"({"oauth_token":null})");
     QTest::newRow("token-newline") << QByteArray(R"({"oauth_token":"synthetic-test-token\r\n"})");
     QTest::newRow("token-space") << QByteArray(R"({"oauth_token":"synthetic-test-token extra"})");
+    QTest::newRow("unknown-auth-mode") << QByteArray(R"({"auth_mode":"optional"})");
+    QTest::newRow("null-auth-mode") << QByteArray(R"({"auth_mode":null})");
+    QTest::newRow("missing-client-token") << QByteArray(R"({"auth_mode":"bearer"})");
+    QTest::newRow("empty-client-token") << QByteArray(R"({"auth_mode":"bearer","client_token":""})");
+    QTest::newRow("client-token-type") << QByteArray(R"({"auth_mode":"bearer","client_token":1})");
+    QTest::newRow("client-token-space") << QByteArray(R"({"auth_mode":"bearer","client_token":"bad token"})");
+    QTest::newRow("client-token-without-auth") << QByteArray(R"({"client_token":"synthetic-test-token"})");
+    QTest::newRow("reuse-oauth-token") << QByteArray(
+        R"({"auth_mode":"bearer","client_token":"synthetic-test-token","oauth_token":"synthetic-test-token"})");
+    QTest::newRow("implicit-network-no-auth") << QByteArray(R"({"host":"0.0.0.0"})");
+    QTest::newRow("explicit-network-no-auth") << QByteArray(R"({"host":"::","auth_mode":"none"})");
     QTest::newRow("oversized") << QByteArray(64 * 1024 + 1, ' ');
   }
 
@@ -369,7 +381,14 @@ private slots:
     QFETCH(QString, request_host);
     Harness h;
     h.server.Stop();
-    if (!h.server.Start(0, listen_host)) {
+    const bool network_listener = !listen_host.isLoopback();
+    if (network_listener) {
+      QVERIFY(!h.server.Start(0, listen_host));
+    }
+    const std::optional<QByteArray> token = network_listener
+        ? std::optional<QByteArray>("fixture-token") : std::nullopt;
+    RestServer server(h.routes, nullptr, 150, token);
+    if (!server.Start(0, listen_host)) {
       if (listen_host.protocol() == QAbstractSocket::IPv6Protocol) {
         QSKIP("IPv6 loopback is unavailable");
       }
@@ -378,26 +397,27 @@ private slots:
     QUrl url;
     url.setScheme("http");
     url.setHost(request_host);
-    url.setPort(h.server.Port());
+    url.setPort(server.Port());
     url.setPath("/v1/status");
     QNetworkRequest request(url);
+    if (token) request.setRawHeader("Authorization", "Bearer " + *token);
     auto* reply = h.network.get(request);
     QTRY_VERIFY(reply->isFinished());
     QCOMPARE(HttpStatus(reply), 200);
-    auto specification_url = url;
-    specification_url.setPath("/v1/openapi.json");
-    reply = h.network.get(QNetworkRequest(specification_url));
+    url.setPath("/v1/openapi.json");
+    request.setUrl(url);
+    reply = h.network.get(request);
     QTRY_VERIFY(reply->isFinished());
     QCOMPARE(HttpStatus(reply), 200);
     auto expected_server = url;
     expected_server.setPath({});
     QCOMPARE(Body(reply)["servers"].toArray().first().toObject()["url"].toString(),
       expected_server.toString());
-    request.setRawHeader("Host", "example.invalid:" + QByteArray::number(h.server.Port()));
+    request.setRawHeader("Host", "example.invalid:" + QByteArray::number(server.Port()));
     reply = h.network.get(request);
     QTRY_VERIFY(reply->isFinished());
     QCOMPARE(HttpStatus(reply), 403);
-    request.setRawHeader("Host", "localhost:" + QByteArray::number(h.server.Port()));
+    request.setRawHeader("Host", "localhost:" + QByteArray::number(server.Port()));
     reply = h.network.get(request);
     QTRY_VERIFY(reply->isFinished());
     QCOMPARE(HttpStatus(reply), 200);

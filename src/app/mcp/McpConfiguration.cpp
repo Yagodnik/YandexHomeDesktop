@@ -37,5 +37,8 @@ McpConfiguration MakeMcpConfiguration(const StartupOptions& options) {
     const auto path = options.fixture_path.startsWith(":") ? options.fixture_path : QFileInfo(options.fixture_path).absoluteFilePath();
     result.worker.arguments = {"--fake-api", "--fake-api-data", path};
   }
+  if (!options.mcp_auth.isEmpty()) {
+    result.worker.arguments << "--mcp-auth" << options.mcp_auth;
+  }
   return result;
 }

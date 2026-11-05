@@ -67,7 +67,8 @@ private slots:
     const auto port = FreePort();
     QVERIFY(port != 0);
     QJsonObject configuration{{"host", "127.0.0.1"}, {"port", port},
-      {"oauth_token", "synthetic-test-token"}};
+      {"oauth_token", "synthetic-test-token"}, {"auth_mode", "bearer"},
+      {"client_token", "synthetic-client-token"}};
     const auto write_configuration = [&] {
       QFile file(config_path);
       return file.open(QIODevice::WriteOnly) &&
@@ -95,11 +96,25 @@ private slots:
     QCOMPARE(result.json["pid"].toInteger(), foreground.processId());
     QVERIFY(!result.output.contains("synthetic-test-token"));
     QVERIFY(!result.json.contains("oauth_token"));
+    QVERIFY(!result.output.contains("synthetic-client-token"));
+    QCOMPARE(result.json["auth_mode"].toString(), QString("bearer"));
     QNetworkAccessManager network;
-    auto* reply = network.get(QNetworkRequest(QUrl(result.json["url"].toString() + "/status")));
+    const auto base_url = result.json["url"].toString();
+    QNetworkRequest request(QUrl(base_url + "/status"));
+    auto* reply = network.get(request);
+    QTRY_VERIFY_WITH_TIMEOUT(reply->isFinished(), 5000);
+    QCOMPARE(reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(), 401);
+    QCOMPARE(reply->rawHeader("WWW-Authenticate"), QByteArray("Bearer"));
+    request.setRawHeader("Authorization", "Bearer synthetic-test-token");
+    reply = network.get(request);
+    QTRY_VERIFY_WITH_TIMEOUT(reply->isFinished(), 5000);
+    QCOMPARE(reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(), 401);
+    request.setRawHeader("Authorization", "Bearer synthetic-client-token");
+    reply = network.get(request);
     QTRY_VERIFY_WITH_TIMEOUT(reply->isFinished(), 5000);
     QCOMPARE(reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(), 200);
-    reply = network.get(QNetworkRequest(QUrl(result.json["url"].toString() + "/openapi.json")));
+    request.setUrl(QUrl(base_url + "/openapi.json"));
+    reply = network.get(request);
     QTRY_VERIFY_WITH_TIMEOUT(reply->isFinished(), 5000);
     QCOMPARE(reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(), 200);
     const auto specification = reply->readAll();
@@ -109,13 +124,23 @@ private slots:
       result.json["url"].toString().chopped(3));
     QVERIFY(!document.contains("ok"));
     QVERIFY(!specification.contains("synthetic-test-token"));
+    QVERIFY(!specification.contains("synthetic-client-token"));
+    const auto bearer = document["components"].toObject()["securitySchemes"].toObject()
+                            ["bearerAuth"].toObject();
+    QCOMPARE(bearer["scheme"].toString(), QString("bearer"));
+    QVERIFY(document["security"].toArray().first().toObject().contains("bearerAuth"));
     configuration["host"] = "::1";
     QVERIFY(write_configuration());
     result = Run(base + QStringList{"--enable-rest"});
     QCOMPARE(result.code, 1);
     QCOMPARE(result.json["error"].toObject()["code"].toString(), QString("host_conflict"));
     configuration["host"] = "127.0.0.1";
+    configuration["auth_mode"] = "none";
+    configuration.remove("client_token");
     QVERIFY(write_configuration());
+    result = Run(base + QStringList{"--enable-rest"});
+    QCOMPARE(result.code, 1);
+    QCOMPARE(result.json["error"].toObject()["code"].toString(), QString("auth_mode_conflict"));
     QCOMPARE(Run(base + QStringList{"--disable-rest"}).code, 0);
     QVERIFY(foreground.waitForFinished(0));
     QCOMPARE(foreground.exitCode(), 0);
@@ -126,6 +151,10 @@ private slots:
     result = Run(base + QStringList{"--enable-rest", "--rest-port", QString::number(override_port)});
     QCOMPARE(result.code, 0);
     QCOMPARE(result.json["port"].toInt(), override_port);
+    QCOMPARE(result.json["auth_mode"].toString(), QString("none"));
+    reply = network.get(QNetworkRequest(QUrl(result.json["url"].toString() + "/status")));
+    QTRY_VERIFY_WITH_TIMEOUT(reply->isFinished(), 5000);
+    QCOMPARE(reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt(), 200);
     QCOMPARE(result.json["url"].toString(), QString("http://127.0.0.1:%1/v1").arg(override_port));
     const auto worker_pid = result.json["pid"].toInteger();
     // Status/disable use the profile path as identity even if the file is gone.

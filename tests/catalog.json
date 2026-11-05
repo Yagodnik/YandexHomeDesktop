@@ -17,7 +17,7 @@
       "cases": [
         {
           "name": "CliControlsWorker",
-          "description": "Enable, inspect, and disable the worker using the CLI.",
+          "description": "Start MCP without client authentication, inspect its status, reject a conflicting mode, and stop it through the CLI.",
           "requires": [
             "BUILD_CLI_APP",
             "Debug"
@@ -37,7 +37,7 @@
         },
         {
           "name": "WorkerServesToolsThroughGui",
-          "description": "Connect to the worker, discover a room, control a lamp, and stop after logout."
+          "description": "Exercise both client authentication modes, browser Origin rejection, tool execution, and shutdown after logout."
         }
       ]
     },
@@ -990,11 +990,11 @@
         },
         {
           "name": "RejectsInvalidConfiguration",
-          "description": "Reject invalid REST hosts, ports, tokens, timeouts, and JSON field types."
+          "description": "Reject invalid REST hosts, ports, credentials, authentication modes, and JSON field types."
         },
         {
           "name": "ConfiguredHostsValidateTheConnectionDestination",
-          "description": "Validate the configured listener destination, including loopback address variants."
+          "description": "Validate IPv4, IPv6, and wildcard listener destinations and require a token for the wildcard listener."
         },
         {
           "name": "AuthRoutesAndReads",
@@ -1064,7 +1064,7 @@
       "cases": [
         {
           "name": "JsonConfigurationAndExplicitTokenAvoidSecretStorage",
-          "description": "Run headless REST with an explicit synthetic token, reject GUI-platform dependencies, and verify macOS reads an independent background-only worker identity."
+          "description": "Exercise independent OAuth and client tokens, bearer enforcement, redaction, mode changes across restarts, and headless startup."
         },
         {
           "name": "EntryPointControlAndFixtureRest",

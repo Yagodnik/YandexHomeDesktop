@@ -26,11 +26,16 @@ Use `just tests-list --layer ui` to browse the catalog by type.
 Each run prints the path to an offline HTML report under
 `<build-dir>/test-reports/run-*/index.html`. Open it for test descriptions,
 status, duration, labels, and links to test output. Reports are written for failing runs too.
-Spix reports include the app log. Fixture flows also save screenshots at
-named checkpoints and attempt a final screenshot on failure. With FFmpeg on
-PATH, the report links to a GIF assembled from those checkpoints. The encoder
-runs after the test. Pass `--record` when GIF generation is required. GitHub
-Actions uploads the report directories with their linked files.
+Spix reports include the app log. Fixture flows save a PNG at each named
+checkpoint after the window image stays stable for 200 ms. The settling wait
+is capped at one second for continuously animated content. On failure, Spix
+also attempts an immediate screenshot.
+
+With FFmpeg on PATH, fixture flows sample the live window at up to 20 frames
+per second so playback includes transitions between checkpoints. Encoding
+runs after the test, and the report links to the resulting GIF. Pass
+`--record` when GIF generation is required. GitHub Actions uploads the report
+directories with their linked files.
 
 ## Find tests
 
@@ -154,7 +159,7 @@ handling, argument/environment preservation, and real CTest timeouts/failures.
 Each CI platform runs the full enabled CTest suite once in Release, including
 catalog validation and `TestTooling`. Windows/macOS cover desktop/QML suites;
 Linux covers portable suites. Windows also runs a Release Spix smoke test and
-the Cabin lamp flow in a Debug Spix profile. Use the selection recipes above for focused local verification.
+all fixture flows in a Debug Spix profile.
 
 ## Choose verification for a feature
 
@@ -176,6 +181,16 @@ possible, and wait for an observable result after input. `page_ready` checks
 visibility and stack transition state. Use `in_window` for animated items that
 can report visible while offscreen. Each Spix test uses the same CTest
 resource lock for port 9000.
+
+Use a separate fixture flow for each desktop behavior that should be selectable
+on its own. Include inputs a user might make by mistake and check the resulting
+UI state. `session.click_burst` queues clicks together without waiting for a
+response between clicks. Use `mouseClickWithOffset` or
+`mouseClickWithProportion` to click just outside an interactive target.
+
+List the flows with `just tests-list --layer e2e`, run one with
+`just spix=ON test-e2e HouseholdPicker`, or run all of them with
+`just spix=ON test-e2e --record`.
 
 ```python
 from spix_harness import WINDOW, run_flow_cli

@@ -70,8 +70,8 @@ jobs:
           $profile = @('config=Debug', 'build_dir=build-just/spix-debug', 'spix=ON', 'cli_app=OFF', 'rest_app=OFF')
           just @profile configure -DCMAKE_CXX_COMPILER=g++.exe -DBUILD_SHORTCUTS_APP=OFF
           if ($LASTEXITCODE -ne 0) { throw 'Spix fixture configuration failed' }
-          just @profile test-e2e CabinLamp --record
-          if ($LASTEXITCODE -ne 0) { throw 'Spix fixture test failed' }
+          just @profile test-e2e --record
+          if ($LASTEXITCODE -ne 0) { throw 'Spix fixture suite failed' }
 
       - name: Upload Spix test reports
         if: always()

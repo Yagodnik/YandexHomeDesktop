@@ -1959,7 +1959,7 @@
     },
     {
       "id": "CabinLamp",
-      "description": "Select Cabin, favorite its lamp, and verify changed brightness after reopening its controls.",
+      "description": "Open the Cabin lamp from Favorites, miss the brightness slider, and verify the final rapid slider input survives reopening the controls.",
       "features": [
         "devices",
         "desktop"
@@ -1972,6 +1972,51 @@
         "YH_ENABLE_SPIX",
         "Debug"
       ]
+    },
+    {
+      "id": "HouseholdPicker",
+      "description": "Dismiss the picker by clicking an underlying tab, then switch households and verify the device lists after rapid picker reopening.",
+      "features": ["desktop", "home"],
+      "layer": "e2e",
+      "kind": "ctest",
+      "source": "tests/e2e/spix_households.py",
+      "requires": ["BUILD_DESKTOP_APP", "YH_ENABLE_SPIX", "Debug"]
+    },
+    {
+      "id": "Favorites",
+      "description": "Verify the favorite count and synchronized room star after rapid toggles, collapsing and reopening Favorites, and removing a favorite.",
+      "features": ["desktop", "home", "devices"],
+      "layer": "e2e",
+      "kind": "ctest",
+      "source": "tests/e2e/spix_favorites.py",
+      "requires": ["BUILD_DESKTOP_APP", "YH_ENABLE_SPIX", "Debug"]
+    },
+    {
+      "id": "ScenarioExecution",
+      "description": "Ignore clicks on a scenario title and inactive play control, then recover from an execution error and run an active scenario after rapid play clicks.",
+      "features": ["desktop", "scenarios"],
+      "layer": "e2e",
+      "kind": "ctest",
+      "source": "tests/e2e/spix_scenarios.py",
+      "requires": ["BUILD_DESKTOP_APP", "YH_ENABLE_SPIX", "Debug"]
+    },
+    {
+      "id": "KeybindVisibility",
+      "description": "Ignore clicks on the switch label and keep shortcut visibility synchronized with rapid settings toggles and tab changes.",
+      "features": ["desktop", "settings", "keybinds", "scenarios"],
+      "layer": "e2e",
+      "kind": "ctest",
+      "source": "tests/e2e/spix_settings.py",
+      "requires": ["BUILD_DESKTOP_APP", "YH_ENABLE_SPIX", "Debug"]
+    },
+    {
+      "id": "FixtureSignIn",
+      "description": "Miss the sign-in button, cancel a local challenge, reject an invalid confirmation, and sign in successfully on retry.",
+      "features": ["desktop", "auth", "fixtures"],
+      "layer": "e2e",
+      "kind": "ctest",
+      "source": "tests/e2e/spix_sign_in.py",
+      "requires": ["BUILD_DESKTOP_APP", "YH_ENABLE_SPIX", "Debug"]
     }
   ]
 }

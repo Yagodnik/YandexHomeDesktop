@@ -27,6 +27,7 @@ def run_flow(session):
     rpc.mouseClick(HOUSEHOLD_SELECTOR)
     session.wait_for(
         lambda: rpc.getStringProperty(PICKER, "opened") == "true"
+        and rpc.getStringProperty(f"{PICKER}/#SelectDialog", "opacity") == "1"
         and session.in_window(cabin_option),
         "the Cabin picker row to slide into view",
     )
@@ -56,9 +57,17 @@ def run_flow(session):
         raise RuntimeError(f"Expected initial fixture brightness of 45%, got {before:g}%")
     session.checkpoint("Lamp controls opened at 45% brightness")
 
+    rpc.mouseClickWithOffset(BRIGHTNESS, rpc.getBoundingBox(BRIGHTNESS)[2] / 2, -3.0)
+    rpc.wait(0)
+    if float(rpc.getStringProperty(BRIGHTNESS, "value")) != before:
+        raise RuntimeError("A click just above the slider changed brightness")
+
+    rpc.mouseClickWithProportion(BRIGHTNESS, 0.2, 0.5)
+    rpc.mouseClickWithProportion(BRIGHTNESS, 0.9, 0.5)
+    rpc.mouseClickWithProportion(BRIGHTNESS, 0.8, 0.5)
     rpc.mouseClickWithProportion(BRIGHTNESS, 0.8, 0.5)
     session.wait_for(lambda: 78 <= float(rpc.getStringProperty(BRIGHTNESS, "value")) <= 82,
-                     "brightness near 80%")
+                     "brightness near the final 80% click")
     after = float(rpc.getStringProperty(BRIGHTNESS, "value"))
     session.checkpoint(f"Brightness changed to {after:g}%")
 

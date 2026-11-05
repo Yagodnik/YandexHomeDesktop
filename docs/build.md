@@ -283,24 +283,23 @@ with ServerProxy("http://127.0.0.1:9000") as app:
 ```
 
 Windows CI configures the opt-in Release GUI, reconfigures it offline, then
-runs `just test-e2e SpixSmoke` with that profile. It also runs the Cabin lamp
-flow in a separate Debug profile using pinned FFmpeg 7.1.1. The flow switches
-to the Cabin household, favorites the lamp, changes its brightness, and
-checks that the value survives reopening the device. See the
+runs `just test-e2e SpixSmoke` with that profile. It also runs the full Spix
+suite in a separate Debug profile using pinned FFmpeg 7.1.1. See the
 [Spix RPC reference](https://github.com/faaxm/spix/blob/57cf7105e1250b999104d6439df7f449ba1afe93/docs/rpc-api.md)
 for available commands.
 
 ```sh
 just spix=ON test-e2e CabinLamp
-just spix=ON test-e2e CabinLamp --record
+just spix=ON test-e2e --record
 ```
 
 Use a build directory configured with `spix=ON`. If reusing a build directory
 that had Spix disabled, first run `just spix=ON configure`. With FFmpeg on
-PATH, the report includes an **Open GIF** link by default. Pass `--record` to
-require GIF generation. Open the report path printed by the recipe to see
-test output, application logs, and captured media. In Windows CI the same
-files are included in the `windows-spix-test-reports` artifact.
+PATH, the report includes an **Open GIF** link to a live recording of each
+fixture flow. Pass `--record` to require GIF generation. Open the report path
+printed by the recipe to see test output, application logs, and settled
+checkpoint screenshots. In Windows CI the same files are included in the
+`windows-spix-test-reports` artifact.
 
 ### Build ZIP archives
 

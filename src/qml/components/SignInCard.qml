@@ -30,6 +30,7 @@ Item {
     }
 
     UI.AnimatedText {
+      objectName: "signInMessage"
       text: root.message
       wrapWidth: 300
       color: themes.inactive

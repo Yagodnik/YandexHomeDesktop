@@ -218,7 +218,24 @@ just translations-check
 just translations-update                    # Then translate new English messages
 ```
 
-Set variables before the recipe name. `config` defaults to `Debug`; desktop profiles use `build-just/debug`, `build-just/release`, etc. `desktop=OFF` uses separate `build-just/portable/<configuration>` directories and is the default on Linux. `qt_prefix` falls back to `CMAKE_PREFIX_PATH` and then `QT_ROOT_DIR`. `auth_config` falls back to `YH_AUTH_CONFIG_FILE` and then the credential-free example. For local browser sign-in, run `just auth_config=/absolute/path/to/oauth.json configure`. `cli_app=ON`, `rest_app=ON`, `pch=ON`, `jobs=4`, and `generator=Ninja` are the defaults; `build_dir=/path/to/build` selects an existing or custom build directory. Multi-config generators are supported through `--config`/`-C`, and the launch recipes search the configuration subdirectory too.
+Set variables before the recipe name. Just uses five default build slots under
+`build-just/`. `config=Debug` is the default and Linux defaults to `desktop=OFF`.
+
+| Profile | Build directory |
+| --- | --- |
+| Desktop Debug | `build-just/debug` |
+| Desktop Release | `build-just/release` |
+| Portable Debug | `build-just/portable/debug` |
+| Portable Release | `build-just/portable/release` |
+| Native package | `build-just/package` |
+
+Pass `build_dir=/path/to/build` to reuse an existing directory or to configure
+`RelWithDebInfo` or `MinSizeRel`. Multi-config generators are supported through
+`--config`/`-C`, and the launch recipes search the configuration subdirectory too.
+`qt_prefix` falls back to `CMAKE_PREFIX_PATH` and then `QT_ROOT_DIR`. `auth_config`
+falls back to `YH_AUTH_CONFIG_FILE` and then the credential-free example. For local
+browser sign-in, run `just auth_config=/absolute/path/to/oauth.json configure`.
+`cli_app=ON`, `rest_app=ON`, `pch=ON`, `jobs=4`, and `generator=Ninja` are the defaults.
 
 `build` configures only when its directory has no `CMakeCache.txt`. Subsequent builds, launches, and tests preserve configured Qt paths, credentials, and CMake flags. Run `configure` explicitly when changing these settings; append additional CMake options there, for example `just configure -DYH_ENABLE_PCH=OFF`. `build`, `test`, `run`, `cli`, `rest`, `demo`, and `install` forward extra arguments to their corresponding tools. `demo` and `demo-auth` require a Debug desktop profile. `demo` starts signed in; `demo-auth` starts at sign-in and uses a temporary loopback page to confirm the displayed demo code. Both use fixture data and in-memory settings, with no real OAuth or Keychain access. `clean` invokes CMake's clean target and retains the build configuration. The Release CI jobs install pinned just and exercise configuration, builds, translations, tests, and package verification through these recipes. Linux checks C++ formatting; Windows and Linux check justfile formatting.
 
@@ -232,6 +249,51 @@ just build
 If a macOS build fails with `ld: framework 'AGL' not found`, check the cached Qt kit and selected Xcode SDK. Older Qt kits can reference AGL even when the selected SDK no longer supplies it. Use a compatible Qt/SDK combination and configure with `--fresh` as above.
 
 `build-gui`, `build-cli`, and `build-rest` build individual executables and their dependencies. `run`/`demo`/`demo-auth`, `cli`, and `rest` use those targets, respectively. A CLI or GUI target also builds its REST worker when `rest_app=ON`. When changing executable options in an existing profile, run `configure` explicitly.
+
+### Spix UI automation
+
+Enable the desktop-only CMake option `-DYH_ENABLE_SPIX=ON`, or set `spix=ON`
+when configuring with Just. It defaults to OFF. CMake fetches pinned Spix and
+AnyRPC revisions and links them statically into the GUI. Use
+`FETCHCONTENT_SOURCE_DIR_SPIX` and `FETCHCONTENT_SOURCE_DIR_ANYRPC` with pristine
+copies of the revisions in `cmake/Spix.cmake` for an offline configure.
+
+```sh
+just spix=ON configure
+just demo
+```
+
+The GUI exposes Spix XML-RPC on `http://127.0.0.1:9000` while it runs.
+The endpoint gives local clients control of the UI without authentication.
+Use it with the Debug fixtures for automation and keep the port free if
+running the REST worker concurrently. Run `just spix=OFF configure` and rebuild
+to disable it in the same slot.
+
+```python
+from xmlrpc.client import ServerProxy
+
+with ServerProxy("http://127.0.0.1:9000") as app:
+    print(app.getStringProperty("mainWindow", "title"))
+```
+
+Windows CI builds the opt-in GUI and runs `tests/spix_smoke.py` against the real
+QML window. See the [Spix RPC reference](https://github.com/faaxm/spix/blob/57cf7105e1250b999104d6439df7f449ba1afe93/docs/rpc-api.md) for available commands.
+
+### Build ZIP archives
+
+```sh
+just archive-build
+just config=Release archive-build
+just build_dir='/path/to/older build' archive-build
+just archive-package
+```
+
+Each recipe snapshots the selected configured directory into a timestamped
+ZIP under `dist/build-archives/`. Finish any build or packaging job before
+archiving its directory. These are local snapshots that include CMake caches,
+intermediate files, and resources embedded in binaries. Use an example OAuth
+configuration if the ZIP is intended for sharing. Configure a fresh build
+directory when switching checkouts because CMake caches record absolute paths.
 
 The shared `WorkerControl` target uses only the already declared Qt Core and
 Network modules. It is built and installed with the existing SDK targets and
@@ -276,10 +338,10 @@ just package-macos                            # macOS drag-to-Applications .dmg
 just package-linux                            # Linux CLI/REST .tar.gz archive
 just package-macos '-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64'
 just qt_prefix=/path/to/Qt/kit package
-just package_build_dir='build-package/custom profile' package
+just package_build_dir='build-just/custom package' package
 ```
 
-`package_build_dir` defaults to `build-package/<os>`; its `dist/` directory
+`package_build_dir` defaults to `build-just/package`. Its `dist/` directory
 contains `YandexHomeDesktop-<version>-<platform>-<architecture>` with the native
 extension. Version comes from the CMake project. macOS uses the configured
 architecture, or `universal` for `arm64;x86_64`. Packaging always selects Release,
@@ -294,7 +356,7 @@ exist, then let CMake fetch the pinned dependencies into the build directory.
 Existing offline source directories are preserved. An override passed explicitly
 on the command line takes precedence and must point to an existing directory.
 For direct CMake usage, clear a stale override with, for example,
-`cmake -S . -B build-package/macos -U FETCHCONTENT_SOURCE_DIR_QHOTKEY`.
+`cmake -S . -B build-just/package -U FETCHCONTENT_SOURCE_DIR_QHOTKEY`.
 
 Windows packaging requires [NSIS 3.12](https://nsis.sourceforge.io/Docs/AppendixF.html)
 in addition to the normal matching Qt/compiler kit. CI installs the pinned

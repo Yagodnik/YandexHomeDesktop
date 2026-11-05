@@ -24,6 +24,10 @@ qt_add_executable(appYandexHomeDesktop
 )
 target_compile_definitions(appYandexHomeDesktop PRIVATE "$<$<CONFIG:Debug>:YH_DEBUG_FAKE_API>")
 target_sources(appYandexHomeDesktop PRIVATE "$<$<CONFIG:Debug>:${DEBUG_FIXTURE_RESOURCES}>")
+if(YH_ENABLE_SPIX)
+  include(cmake/Spix.cmake)
+  yh_link_spix(appYandexHomeDesktop)
+endif()
 
 set_source_files_properties("${YH_AUTH_CONFIG_FILE}" PROPERTIES QT_RESOURCE_ALIAS "auth/secrets.json")
 qt_add_resources(appYandexHomeDesktop "oauth_config"

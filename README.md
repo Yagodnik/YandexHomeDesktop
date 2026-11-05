@@ -45,7 +45,7 @@ just test
 Для сборки установщика запустите `just package` на целевой ОС: Windows создаёт
 NSIS `.exe`, macOS — `.dmg`, Linux — архив `.tar.gz` с CLI/REST и SDK.
 Также доступны `just package-windows`, `just package-macos` и `just package-linux`.
-Результат находится в `build-package/<os>/dist/`. Команды используют Release,
+Результат находится в `build-just/package/dist/`. Команды используют Release,
 запускают тесты и проверяют пакет. Для Windows нужен NSIS 3.12; Linux-архиву
 нужен установленный совместимый Qt runtime. Параметры и зависимости описаны в
 [docs/build.md](docs/build.md#release-packages).

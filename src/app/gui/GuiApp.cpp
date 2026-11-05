@@ -6,6 +6,10 @@
 #include <QFont>
 #include <QEventLoop>
 #include <QTimer>
+#ifdef YH_ENABLE_SPIX
+#include <Spix/AnyRpcServer.h>
+#include <Spix/QtQmlBot.h>
+#endif
 #include "app/shortcuts/ShortcutConfiguration.h"
 #include "models/ShortcutViewModel.h"
 
@@ -200,8 +204,20 @@ GuiApp::GuiApp(AppContext& app_context, QObject* parent)
 }
 
 int GuiApp::Start() {
+#ifdef YH_ENABLE_SPIX
+  // Keep the bot and QML engine alive until the RPC thread has stopped.
+  spix::QtQmlBot spix_bot;
+  spix::AnyRpcServer spix_server;
+  spix_server.setGenericCommandHandler([](std::string, std::string) {});
+#endif
   engine.loadFromModule("YandexHomeDesktop", "Main");
 
+#ifdef YH_ENABLE_SPIX
+  if (!engine.rootObjects().isEmpty()) {
+    engine.rootObjects().constFirst()->setObjectName(QStringLiteral("mainWindow"));
+    spix_bot.runTestServer(spix_server);
+  }
+#endif
   const auto result = app_context_.app_->exec();
   // Let local IPC finish before destroying the controller. A bounded lease also
   // cleans up foreground workers if the GUI is killed before reaching here.

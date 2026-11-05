@@ -44,33 +44,55 @@ jobs:
       - name: Install pinned NSIS
         run: choco install nsis --version=3.12.0 --no-progress -y
 
+      - name: Build and smoke-test the opt-in Spix desktop
+        shell: pwsh
+        run: |
+          just config=Release spix=ON cli_app=OFF rest_app=OFF configure '-DCMAKE_CXX_COMPILER=g++.exe' -DBUILD_SHORTCUTS_APP=OFF -DBUILD_TESTING=OFF
+          if ($LASTEXITCODE -ne 0) { throw 'Spix configuration failed' }
+          just config=Release build --target yh_windows_runtime
+          if ($LASTEXITCODE -ne 0) { throw 'Spix build failed' }
+          python tests/spix_smoke.py build-just/release/YandexHomeDesktop.exe
+          if ($LASTEXITCODE -ne 0) { throw 'Spix smoke test failed' }
+
+      - name: Check build ZIP recipe
+        shell: pwsh
+        run: |
+          $fixture = Join-Path $env:RUNNER_TEMP 'archive fixture'
+          New-Item -ItemType Directory -Path $fixture -Force | Out-Null
+          Set-Content (Join-Path $fixture 'CMakeCache.txt') 'archive smoke test'
+          just "build_dir=$fixture" archive-build
+          if ($LASTEXITCODE -ne 0) { throw 'Build archive creation failed' }
+          $archive = (Get-ChildItem dist/build-archives -Filter '*.zip' -File).FullName
+          $entries = cmake -E tar tf $archive
+          if ($LASTEXITCODE -ne 0 -or -not ($entries -match '(^|/)archive fixture/CMakeCache\.txt$')) { throw 'Expected CMakeCache.txt in build ZIP' }
+
       - name: Exercise recovery from a stale dependency source override
         shell: pwsh
         run: |
-          New-Item -ItemType Directory -Path build -Force | Out-Null
-          Set-Content build/CMakeCache.txt "FETCHCONTENT_SOURCE_DIR_QHOTKEY:PATH=$env:RUNNER_TEMP/missing-qhotkey-source"
+          New-Item -ItemType Directory -Path build-just/package -Force | Out-Null
+          Set-Content build-just/package/CMakeCache.txt "FETCHCONTENT_SOURCE_DIR_QHOTKEY:PATH=$env:RUNNER_TEMP/missing-qhotkey-source"
 
       - name: Build, test, and package Windows installer
         run: >-
-          just package_build_dir=build generator=Ninja pch=ON
+          just generator=Ninja pch=ON
           package-windows '-DCMAKE_CXX_COMPILER=g++.exe'
 
       - name: Smoke-check the silent installer
         shell: pwsh
         run: |
-          $installers = @(Get-ChildItem build/dist -Filter '*.exe' -File)
+          $installers = @(Get-ChildItem build-just/package/dist -Filter '*.exe' -File)
           if ($installers.Count -ne 1) { throw 'Expected one Windows installer' }
           $installed = Join-Path $env:RUNNER_TEMP 'package installed'
           $installer = Start-Process -FilePath $installers[0].FullName -ArgumentList '/S', "/D=$installed" -Wait -PassThru
           if ($installer.ExitCode -ne 0) { throw 'Silent installer failed' }
-          cmake "-DPACKAGE_ROOT=$installed" -P build/CheckPackage.cmake
+          cmake "-DPACKAGE_ROOT=$installed" -P build-just/package/CheckPackage.cmake
           if ($LASTEXITCODE -ne 0) { throw 'Installed package verification failed' }
 
       - name: Upload Windows package
         uses: actions/upload-artifact@v4
         with:
           name: yandex-home-windows-x86_64
-          path: build/dist/*.exe
+          path: build-just/package/dist/*.exe
           if-no-files-found: error
           compression-level: 0
           retention-days: 7
@@ -81,7 +103,7 @@ jobs:
         with:
           name: windows-build-logs
           path: |
-            build/Testing/Temporary/*.log
-            build/Testing/*.txt
-            build/CMakeFiles/CMakeConfigureLog.yaml
+            build-just/package/Testing/Temporary/*.log
+            build-just/package/Testing/*.txt
+            build-just/*/CMakeFiles/CMakeConfigureLog.yaml
           retention-days: 7

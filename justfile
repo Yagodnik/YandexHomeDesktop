@@ -9,13 +9,15 @@ config := env('YH_JUST_CONFIG', 'Debug')
 cli_app := env('YH_JUST_CLI_APP', 'ON')
 rest_app := env('YH_JUST_REST_APP', 'ON')
 desktop := env('YH_JUST_DESKTOP', if os() == 'linux' { 'OFF' } else { 'ON' })
-build_dir := env('YH_JUST_BUILD_DIR', 'build-just' / if desktop == 'OFF' { 'portable' / lowercase(config) } else { lowercase(config) })
+default_build_dir := if config =~ '^(Debug|Release)$' { 'build-just' / if desktop == 'OFF' { 'portable' / lowercase(config) } else { lowercase(config) } } else { '' }
+build_dir := env('YH_JUST_BUILD_DIR', default_build_dir)
 qt_prefix := env('YH_JUST_QT_PREFIX', env('CMAKE_PREFIX_PATH', env('QT_ROOT_DIR', '')))
 auth_config := env('YH_JUST_AUTH_CONFIG', env('YH_AUTH_CONFIG_FILE', 'resources/auth/example.json'))
 pch := env('YH_JUST_PCH', 'ON')
+spix := env('YH_JUST_SPIX', 'OFF')
 jobs := env('YH_JUST_JOBS', '4')
 generator := env('YH_JUST_GENERATOR', 'Ninja')
-package_build_dir := env('YH_JUST_PACKAGE_BUILD_DIR', 'build-package' / os())
+package_build_dir := env('YH_JUST_PACKAGE_BUILD_DIR', 'build-just/package')
 
 # Propagate overrides when a recipe invokes another recipe through just.
 export YH_JUST_CONFIG := config
@@ -26,6 +28,7 @@ export YH_JUST_BUILD_DIR := build_dir
 export YH_JUST_QT_PREFIX := qt_prefix
 export YH_JUST_AUTH_CONFIG := auth_config
 export YH_JUST_PCH := pch
+export YH_JUST_SPIX := spix
 export YH_JUST_JOBS := jobs
 export YH_JUST_GENERATOR := generator
 export YH_JUST_PACKAGE_BUILD_DIR := package_build_dir
@@ -36,22 +39,23 @@ help:
 
 # Configure the selected profile; append any extra CMake arguments.
 [script]
-configure *args:
+configure *args: _require-build-dir
     case "$YH_JUST_CONFIG" in
         Debug|Release|RelWithDebInfo|MinSizeRel) ;;
         *) echo 'config must be Debug, Release, RelWithDebInfo, or MinSizeRel' >&2; exit 2 ;;
     esac
-    for value in "$YH_JUST_DESKTOP" "$YH_JUST_CLI_APP" "$YH_JUST_REST_APP" "$YH_JUST_PCH"; do
+    for value in "$YH_JUST_DESKTOP" "$YH_JUST_CLI_APP" "$YH_JUST_REST_APP" "$YH_JUST_PCH" "$YH_JUST_SPIX"; do
         case "$value" in
             ON|OFF) ;;
-            *) echo 'desktop, cli_app, rest_app, and pch must be ON or OFF' >&2; exit 2 ;;
+            *) echo 'desktop, cli_app, rest_app, pch, and spix must be ON or OFF' >&2; exit 2 ;;
         esac
     done
     options=(-S . -B "$YH_JUST_BUILD_DIR" -G "$YH_JUST_GENERATOR"
         "-DCMAKE_BUILD_TYPE=$YH_JUST_CONFIG" -DBUILD_TESTING=ON
         "-DBUILD_DESKTOP_APP=$YH_JUST_DESKTOP"
         "-DBUILD_CLI_APP=$YH_JUST_CLI_APP" "-DBUILD_REST_APP=$YH_JUST_REST_APP"
-        "-DYH_BUILD_REST_ADAPTER=$YH_JUST_REST_APP" "-DYH_ENABLE_PCH=$YH_JUST_PCH")
+        "-DYH_BUILD_REST_ADAPTER=$YH_JUST_REST_APP" "-DYH_ENABLE_PCH=$YH_JUST_PCH"
+        "-DYH_ENABLE_SPIX=$YH_JUST_SPIX")
     # Offline source overrides can outlive temporary checkouts. Clear only missing
     # absolute paths from the old cache; explicit arguments below still win.
     if [[ -f "$YH_JUST_BUILD_DIR/CMakeCache.txt" ]]; then
@@ -173,6 +177,33 @@ package-macos *args:
 package-linux *args:
     just _package OFF OFF "$@"
 
+# ZIP the selected configured build folder into dist/build-archives.
+archive-build: _require-build-dir
+    just _archive "$YH_JUST_BUILD_DIR"
+
+# ZIP the configured native packaging folder into dist/build-archives.
+archive-package:
+    just _archive "$YH_JUST_PACKAGE_BUILD_DIR"
+
+[script]
+_archive directory:
+    if [[ ! -f "$1/CMakeCache.txt" ]]; then
+        printf 'No configured build in %s\n' "$1" >&2
+        exit 2
+    fi
+    source_dir=$(cd "$1" && pwd -P)
+    mkdir -p dist/build-archives
+    archive_dir=$(cd dist/build-archives && pwd -P)
+    case "$archive_dir/" in
+        "$source_dir/"*) echo 'Archive output must be outside the build folder' >&2; exit 2 ;;
+    esac
+    temporary_dir=$(mktemp -d "$archive_dir/.archive.XXXXXXXX")
+    name="$(basename "$source_dir")-$(date -u +%Y%m%dT%H%M%SZ)-${temporary_dir##*.}.zip"
+    trap 'rm -f -- "$temporary_dir/$name"; rmdir -- "$temporary_dir"' EXIT
+    (cd "$(dirname "$source_dir")" && cmake -E tar cf "$temporary_dir/$name" --format=zip -- "./$(basename "$source_dir")")
+    mv -- "$temporary_dir/$name" "$archive_dir/$name"
+    printf '%s\n' "$archive_dir/$name"
+
 [script]
 _package desktop_profile shortcuts *args:
     desktop_profile=$1
@@ -187,7 +218,7 @@ _package desktop_profile shortcuts *args:
     cmake -P "$YH_JUST_PACKAGE_BUILD_DIR/CheckPackage.cmake"
 
 # Remove compiled outputs with CMake's clean target, retaining configuration.
-clean:
+clean: _require-build-dir
     cmake --build "$YH_JUST_BUILD_DIR" --config "$YH_JUST_CONFIG" --target clean
 
 # Format C++ startup code; pass files or folders to select a different scope.
@@ -221,5 +252,8 @@ translations-update:
 # Check formatting, translations, build, and run the tests for the selected profile.
 check: format-check translations-check test
 
-_configure-if-needed:
+_configure-if-needed: _require-build-dir
     if [[ ! -f "$YH_JUST_BUILD_DIR/CMakeCache.txt" ]]; then just configure; fi
+
+_require-build-dir:
+    if [[ -z "$YH_JUST_BUILD_DIR" ]]; then echo 'Set build_dir for configurations other than Debug and Release' >&2; exit 2; fi

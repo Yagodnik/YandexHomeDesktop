@@ -11,6 +11,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(YH_ENABLE_PCH "Use precompiled headers for C++ targets" ON)
 option(YH_ENABLE_PACKAGING "Configure the native release installer or archive" OFF)
+option(YH_ENABLE_SPIX "Enable the local Spix UI automation server in the desktop application" OFF)
 
 include(CTest)
 include(GNUInstallDirs)
@@ -30,6 +31,9 @@ if(APPLE OR WIN32)
   set(_desktop_default ON)
 endif()
 option(BUILD_DESKTOP_APP "Build the Windows or macOS desktop application" ${_desktop_default})
+if(YH_ENABLE_SPIX AND NOT BUILD_DESKTOP_APP)
+  message(FATAL_ERROR "YH_ENABLE_SPIX requires BUILD_DESKTOP_APP=ON")
+endif()
 
 option(BUILD_CLI_APP "Build the console CLI" ON)
 option(BUILD_REST_APP "Build the headless REST worker" ON)

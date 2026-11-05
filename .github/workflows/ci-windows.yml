@@ -49,11 +49,11 @@ jobs:
       - name: Install pinned NSIS
         run: choco install nsis --version=3.12.0 --no-progress -y
 
-      - name: Build and smoke-test the opt-in Spix desktop
+      - name: Build the native tray helper and smoke-test the Spix desktop
         shell: pwsh
         run: |
           $profile = @('config=Release', 'spix=ON', 'cli_app=OFF', 'rest_app=OFF')
-          $options = @('-DCMAKE_CXX_COMPILER=g++.exe', '-DBUILD_SHORTCUTS_APP=OFF')
+          $options = @('-DCMAKE_CXX_COMPILER=g++.exe', '-DBUILD_SHORTCUTS_APP=OFF', '-DYH_TEST_NATIVE_TRAY=ON')
           just @profile configure @options
           if ($LASTEXITCODE -ne 0) { throw 'Spix configuration failed' }
           # Reproduce the copy timestamp collision even on a slower runner.

@@ -14,7 +14,7 @@ from test_report import CATALOG, run_with_report
 
 ROOT = Path(__file__).resolve().parents[1]
 KINDS = {"qt", "quick", "ctest"}
-REQUIREMENTS = {"BUILD_DESKTOP_APP", "BUILD_CLI_APP", "BUILD_REST_APP", "BUILD_SHORTCUTS_APP", "YH_BUILD_REST_ADAPTER", "YH_ENABLE_SPIX", "Debug"}
+REQUIREMENTS = {"BUILD_DESKTOP_APP", "BUILD_CLI_APP", "BUILD_REST_APP", "BUILD_SHORTCUTS_APP", "YH_BUILD_REST_ADAPTER", "YH_ENABLE_SPIX", "YH_TEST_NATIVE_TRAY", "Debug"}
 
 
 class CatalogError(ValueError):

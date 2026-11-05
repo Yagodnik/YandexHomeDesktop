@@ -1,0 +1,98 @@
+name: Native tray placement
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, dev, refactoring]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-tray
+  cancel-in-progress: false
+
+jobs:
+  tray-placement:
+    if: >-
+      github.ref_name == github.event.repository.default_branch &&
+      (github.event_name == 'workflow_dispatch' || vars.CI_NATIVE_TRAY == 'true')
+    name: Tray placement (${{ matrix.os }}, ${{ matrix.profile }})
+    runs-on: [self-hosted, "${{ matrix.os }}", "${{ matrix.profile }}"]
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: Windows
+            qt-host: windows
+            profile: tray-compact
+            layout-var: TRAY_WINDOWS_COMPACT_LAYOUT
+          - os: Windows
+            qt-host: windows
+            profile: tray-mixed
+            layout-var: TRAY_WINDOWS_MIXED_LAYOUT
+          - os: macOS
+            qt-host: mac
+            profile: tray-compact
+            layout-var: TRAY_MACOS_COMPACT_LAYOUT
+          - os: macOS
+            qt-host: mac
+            profile: tray-mixed
+            layout-var: TRAY_MACOS_MIXED_LAYOUT
+    env:
+      YH_JUST_BUILD_DIR: build-just/native-tray
+      YH_JUST_CONFIG: Debug
+      YH_JUST_SPIX: 'ON'
+      YH_JUST_CLI_APP: 'OFF'
+      YH_JUST_REST_APP: 'OFF'
+      YH_TRAY_DISPLAY_PROFILE: ${{ matrix.profile }}
+      YH_TRAY_DISPLAY_LAYOUT: ${{ vars[matrix.layout-var] }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Select Git Bash for Windows recipes
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $bashDirectory = Join-Path $env:ProgramFiles 'Git\bin'
+          if (-not (Test-Path "$bashDirectory\bash.exe")) { throw 'Git Bash is required' }
+          $bashDirectory >> $env:GITHUB_PATH
+
+      - name: Check configured layout
+        shell: bash
+        run: |
+          if [[ -z "$YH_TRAY_DISPLAY_LAYOUT" ]]; then
+            echo 'Set the repository variable for this runner layout.' >&2
+            exit 1
+          fi
+
+      - uses: extractions/setup-just@v4
+        with:
+          just-version: '1.51.0'
+
+      - uses: ./.github/actions/setup-qt
+        with:
+          host: ${{ matrix.qt-host }}
+
+      - name: Configure Debug desktop with native tray testing
+        shell: bash
+        run: |
+          options=(-DYH_TEST_NATIVE_TRAY=ON)
+          if [[ "$RUNNER_OS" == Windows ]]; then
+            options+=(-DCMAKE_CXX_COMPILER=g++.exe)
+          fi
+          just configure "${options[@]}"
+
+      - name: Check tray placement and capture every display
+        run: just test-e2e TrayPlacement
+
+      - name: Upload native tray test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-tray-${{ matrix.os }}-${{ matrix.profile }}
+          path: build-just/native-tray/test-reports/
+          retention-days: 7

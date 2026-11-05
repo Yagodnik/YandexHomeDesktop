@@ -116,6 +116,16 @@ void ModelsTests::WindowPlacementEdges() {
   QCOMPARE(WindowPlacementInArea(QRect(-1920, 1000, 24, 20), size, screen, area, {}), QPoint(-1891, 580));
   QCOMPARE(WindowPlacementInArea({}, size, screen, area, QPoint(-10, 1070)), QPoint(-350, 580));
   QCOMPARE(WindowPlacementInArea(QRect(-1000, 0, 20, 24), QSize(3000, 2000), screen, area, {}), area.topLeft());
+
+  const QRect scaled_screen(-1920, -1080, 1280, 720);
+  const QRect scaled_area(-1920, -1080, 1280, 680);
+  const QRect native_icon(-120, -48, 30, 30);
+  const QRect logical_icon = WindowsTrayAnchorInScreen(native_icon, scaled_screen, 1.5);
+  QCOMPARE(logical_icon, QRect(-720, -392, 20, 20));
+  QCOMPARE(WindowPlacementInArea(logical_icon, size, scaled_screen, scaled_area, {}), QPoint(-990, -860));
+  QCOMPARE(WindowsTrayAnchorInScreen(native_icon, screen.translated(0, -1080), 1.0), native_icon);
+  QVERIFY(WindowsTrayAnchorInScreen(native_icon, QRect(0, 0, 1920, 1080), 1.0).isEmpty());
+  QVERIFY(WindowsTrayAnchorInScreen({}, scaled_screen, 1.5).isEmpty());
 }
 
 void ModelsTests::NotchActivationArea() {

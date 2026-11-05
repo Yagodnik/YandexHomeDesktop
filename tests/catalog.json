@@ -341,7 +341,7 @@
         },
         {
           "name": "WindowPlacementEdges",
-          "description": "Clamp tray placement on negative-coordinate screens, panel edges, missing anchors and oversized windows."
+          "description": "Clamp tray placement on negative-coordinate screens, panel edges, missing anchors and oversized windows, and map Windows native tray coordinates on scaled displays."
         }
       ]
     },
@@ -2017,6 +2017,15 @@
       "kind": "ctest",
       "source": "tests/e2e/spix_sign_in.py",
       "requires": ["BUILD_DESKTOP_APP", "YH_ENABLE_SPIX", "Debug"]
+    },
+    {
+      "id": "TrayPlacement",
+      "description": "On a verified Windows or macOS display layout, click the native tray icon, check popup placement in the display work area, and capture every full display.",
+      "features": ["desktop", "settings"],
+      "layer": "e2e",
+      "kind": "ctest",
+      "source": "tests/e2e/spix_tray_placement.py",
+      "requires": ["BUILD_DESKTOP_APP", "YH_ENABLE_SPIX", "YH_TEST_NATIVE_TRAY", "Debug"]
     }
   ]
 }

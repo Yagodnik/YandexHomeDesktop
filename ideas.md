@@ -1,14 +1,17 @@
+* Making everything testable
+
 * Linux support
 * Make apps signed
 * Improve UI
-* Making everything testable
 * There is a bug that app tries to launch rest at the very start for no reason...
 * Consider researching how 
-* When try to close app it acts weird
 * Consider adding auth/no auth mode for both rest/mcp
 * Consider integrating with ChatGPT, Qwen and other agents.
 * Consider reworking ipc and pid related thing
-* When shorts are disable I can't change option "keep service after closing app"
+* In some builds I see pointer as a cursor instead of pointing hand
+
+* ~When try to close app it acts weird~
+* ~When shorts are disable I can't change option "keep service after closing app"~
 * ~After startup shortcuts face weird bug~
 * ~It is not possible to turn on/off certain settings~
 * ~App allows duplicated port for MCP and Rest server~

@@ -31,7 +31,9 @@ crashed owners. A private launch receipt records the child PID atomically, so
 another controller can find a process before its control socket exists or after
 the launching controller times out or exits. Foreground workers write the same
 receipt. The receipt survives socket/server cleanup until process exit is
-observed; a stale dead-process receipt is replaced on the next successful start.
+observed. On macOS, Windows, and Linux the controller checks the process start
+time when available. A process that started after the receipt or ownership lock
+was written is treated as a different process, even if it has the same PID.
 
 Independent endpoint names have independent locks, receipts, and workers. REST
 keeps its per-user live/config/fixture identities. Absolute Unix endpoints use a

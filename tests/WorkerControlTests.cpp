@@ -2,6 +2,7 @@
 #include "worker/WorkerControlServer.h"
 
 #include <QCoreApplication>
+#include <QCryptographicHash>
 #include <QDir>
 #include <QEventLoop>
 #include <QFile>
@@ -11,6 +12,7 @@
 #include <QPointer>
 #include <QProcess>
 #include <QSignalSpy>
+#include <QStandardPaths>
 #include <QTemporaryDir>
 #include <QTest>
 #include <QTimer>
@@ -212,6 +214,55 @@ private slots:
       QVERIFY(!client.IsBusy());
     }
     QCOMPARE(QDir(directory.path()).entryList({"spawned-*"}, QDir::Files).size(), 0);
+  }
+
+  void ReusedPidDoesNotBlockWorkerStartup() {
+    QTemporaryDir directory;
+    Cleanup cleanup{directory.path()};
+    const auto name = Endpoint(directory);
+#ifdef Q_OS_WIN
+    const auto digest = QCryptographicHash::hash((QDir::homePath() + '/' + name).toUtf8(),
+                                                 QCryptographicHash::Sha256)
+                            .toHex();
+    const auto base = QDir(QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation))
+                          .filePath("YandexHome/run/" + QString::fromLatin1(digest));
+#else
+    const auto base = name;
+#endif
+    WorkerControlClient client(Configuration(name, directory.path()));
+    QSignalSpy results(&client, &WorkerControlClient::finished);
+    const auto lock_path = base + ".lock";
+    QByteArray lock_contents;
+    {
+      WorkerControlServer former_owner;
+      QVERIFY(former_owner.Acquire(name));
+      QFile lock(lock_path);
+      QVERIFY(lock.open(QIODevice::ReadOnly));
+      lock_contents = lock.readAll();
+    }
+    auto lock_fields = lock_contents.split('\n');
+    QVERIFY(lock_fields.size() >= 3);
+    lock_fields[1] = "retired-worker";
+    QVERIFY(Write(lock_path, lock_fields.join('\n')));
+    // Backdate records with our live PID to simulate PID reuse without waiting
+    // for the OS to recycle a particular PID.
+    for (const auto& path : {lock_path, base + ".launch"}) {
+      QFile file(path);
+      QVERIFY(file.open(QIODevice::ReadWrite));
+      QVERIFY(file.setFileTime(QDateTime::fromMSecsSinceEpoch(946'684'800'000),
+                               QFileDevice::FileModificationTime));
+    }
+    client.Request(Command::Status);
+    QTRY_COMPARE(results.size(), 1);
+    QVERIFY(Result(results)["ok"].toBool());
+    QVERIFY(!Result(results)["starting"].toBool());
+    client.Request(Command::Start, {}, {}, 5'000);
+    QTRY_COMPARE(results.size(), 2);
+    QVERIFY(Result(results)["running"].toBool());
+    QVERIFY(Result(results)["pid"].toInteger() != QCoreApplication::applicationPid());
+    client.Request(Command::Stop, {}, {}, 5'000);
+    QTRY_COMPARE(results.size(), 3);
+    QVERIFY(Result(results)["ok"].toBool());
   }
 
   void LaunchFailureCompletesOnceAndCanRetry() {

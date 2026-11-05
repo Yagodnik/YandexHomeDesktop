@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QDateTime>
 #include <QJsonObject>
 #include <QString>
 
@@ -17,7 +18,7 @@ struct Paths {
 
 Paths ControlPaths(const QString& name);
 bool PrepareDirectory(const Paths& paths);
-bool ProcessIsRunning(qint64 pid);
+bool ProcessIsRunning(qint64 pid, const QDateTime& observed);
 qint64 LaunchPid(const Paths& paths);
 void ClearLaunch(const Paths& paths, qint64 pid);
 QJsonObject Error(const QString& code);

@@ -33,6 +33,7 @@ struct WorkerControlClient::Operation : QObject {
   QStringList launch_arguments;
   Command command = Command::Status;
   qint64 pid = 0;
+  QDateTime pid_observed;
   bool launched = false;
 };
 
@@ -59,6 +60,7 @@ void WorkerControlClient::Request(Command command, const QJsonObject& message,
   auto* operation = new Operation(this, configuration_.control_name);
   operation_ = operation;
   operation->pid = launched_pid_;
+  operation->pid_observed = pid_observed_;
   operation->command = command;
   operation->launch_arguments = launch_arguments;
   operation->message =
@@ -77,30 +79,34 @@ void WorkerControlClient::Request(Command command, const QJsonObject& message,
   Probe(operation);
 }
 
-qint64 WorkerControlClient::KnownProcess(Operation* operation, bool* owned) {
-  if (owned) {
-    *owned = false;
-  }
+bool WorkerControlClient::HasPendingWorker(Operation* operation) {
   QLockFile ownership(operation->paths.ownership);
   // Observation must never acquire the worker's lock: even a momentary probe
   // could make a concurrently starting foreground worker reject ownership.
   qint64 owner_pid = 0;
   QString host, app;
+  bool writing_lock = false;
   if (ownership.getLockInfo(&owner_pid, &host, &app)) {
-    if (ProcessIsRunning(owner_pid)) {
-      if (owned)
-        *owned = true;
-      return owner_pid;
+    const auto lock_time = QFileInfo(operation->paths.ownership).lastModified();
+    if (ProcessIsRunning(owner_pid, lock_time)) {
+      operation->pid = owner_pid;
+      operation->pid_observed = lock_time;
+      return true;
     }
-  } else if (owned && QFileInfo::exists(operation->paths.ownership)) {
+  } else if (QFileInfo::exists(operation->paths.ownership)) {
     // A worker may still be writing its ownership record.
-    *owned = true;
+    writing_lock = true;
   }
-  if (ProcessIsRunning(operation->pid)) {
-    return operation->pid;
+  if (ProcessIsRunning(operation->pid, operation->pid_observed)) {
+    return true;
   }
+  const auto receipt_time = QFileInfo(operation->paths.launch).lastModified();
   const auto pid = LaunchPid(operation->paths);
-  return ProcessIsRunning(pid) ? pid : 0;
+  if (!ProcessIsRunning(pid, receipt_time))
+    return writing_lock;
+  operation->pid = pid;
+  operation->pid_observed = receipt_time;
+  return true;
 }
 
 void WorkerControlClient::Probe(Operation* operation) {
@@ -118,7 +124,7 @@ void WorkerControlClient::Probe(Operation* operation) {
     }
   }
   if (!operation->stopped.isEmpty()) {
-    if (ProcessIsRunning(operation->pid)) {
+    if (ProcessIsRunning(operation->pid, operation->pid_observed)) {
       operation->retry.start(RetryIntervalMs);
       return;
     }
@@ -174,10 +180,9 @@ void WorkerControlClient::Probe(Operation* operation) {
 }
 
 void WorkerControlClient::Unavailable(Operation* operation) {
-  bool owned = false;
-  const auto pid = KnownProcess(operation, &owned);
+  const bool starting = HasPendingWorker(operation);
   if (operation->command == Command::Start) {
-    if (pid > 0 || owned) {
+    if (starting) {
       operation->retry.start(RetryIntervalMs);
       return;
     }
@@ -207,6 +212,7 @@ void WorkerControlClient::Unavailable(Operation* operation) {
     }
     operation->launched = true;
     launched_pid_ = operation->pid;
+    pid_observed_ = operation->pid_observed = QDateTime::currentDateTimeUtc();
     const auto bytes = QByteArray::number(operation->pid);
     if (receipt.write(bytes) != bytes.size() || !receipt.commit()) {
       // Retain the PID so this controller can still issue Stop; never claim
@@ -215,8 +221,7 @@ void WorkerControlClient::Unavailable(Operation* operation) {
       return;
     }
     operation->retry.start(RetryIntervalMs);
-  } else if (operation->command == Command::Stop && (pid > 0 || owned)) {
-    operation->pid = pid;
+  } else if (operation->command == Command::Stop && starting) {
     operation->retry.start(RetryIntervalMs);
   } else if (operation->command == Command::Send) {
     Finish(operation, Error("control_error"));
@@ -225,7 +230,7 @@ void WorkerControlClient::Unavailable(Operation* operation) {
     if (operation->command == Command::Stop) {
       ClearLaunch(operation->paths, recorded);
     }
-    Finish(operation, {{"ok", true}, {"running", false}, {"starting", pid > 0 || owned}});
+    Finish(operation, {{"ok", true}, {"running", false}, {"starting", starting}});
   }
 }
 
@@ -257,6 +262,7 @@ void WorkerControlClient::Receive(Operation* operation) {
   if (pid.toInteger() > 0) {
     operation->pid = pid.toInteger();
     launched_pid_ = operation->pid;
+    pid_observed_ = operation->pid_observed = QDateTime::currentDateTimeUtc();
   }
   if (operation->command == Command::Start && result["ok"].toBool() &&
       !result["running"].toBool()) {

@@ -1586,6 +1586,10 @@
           "description": "Report an absent worker without launching it and accept repeated stop requests."
         },
         {
+          "name": "ReusedPidDoesNotBlockWorkerStartup",
+          "description": "Ignore ownership and launch records for a recycled PID and start and stop a new worker."
+        },
+        {
           "name": "LaunchFailureCompletesOnceAndCanRetry",
           "description": "Report spawn failures exactly once and allow a subsequent retry."
         },

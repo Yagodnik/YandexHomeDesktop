@@ -2,6 +2,7 @@
 
 #include "yh/workercontrol_export.h"
 
+#include <QDateTime>
 #include <QJsonObject>
 #include <QObject>
 #include <QStringList>
@@ -36,8 +37,9 @@ private:
   void Receive(Operation* operation);
   void Finish(Operation* operation, QJsonObject result);
   static void Retire(Operation* operation);
-  qint64 KnownProcess(Operation* operation, bool* owned = nullptr);
+  bool HasPendingWorker(Operation* operation);
   WorkerLaunchConfiguration configuration_;
   Operation* operation_ = nullptr;
   qint64 launched_pid_ = 0;
+  QDateTime pid_observed_;
 };

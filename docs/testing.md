@@ -138,3 +138,35 @@ for verification; use concrete cases to reproduce or investigate a failure.
 Changes to shared contracts or test infrastructure usually warrant all tests
 in the affected desktop and portable profiles. Report the selected IDs/tags,
 configuration, result, and unavailable or skipped coverage.
+
+## Standalone Spix flows
+
+Use Spix for end-to-end checks of the running desktop executable over XML-RPC.
+See the [build guide](build.md#spix-ui-automation) for the opt-in build and
+recording commands. The Release smoke test in Windows CI uses
+`desktop_session` directly. Debug fixture flows use the same harness with
+`run_fixture_cli` to launch a fresh app with `--fake-api` and expose the optional
+`--gif` argument.
+
+```python
+from spix_harness import WINDOW, run_fixture_cli
+
+
+def run_flow(session):
+    devices = f"{WINDOW}/devicesTab"
+    session.wait_for(lambda: session.page_ready(devices), "the Devices tab")
+    session.checkpoint("Devices tab is ready")
+
+
+if __name__ == "__main__":
+    run_fixture_cli(run_flow, "Verify the fixture app reaches the Devices tab")
+```
+
+Put standalone scripts alongside `tests/spix_device_flow.py`. Keep selectors
+and assertions in the flow, using existing QML object names when possible.
+Use `session.rpc` for input and property reads, then wait for an observable
+result. `page_ready` checks visibility and stack transition state. Use
+`in_window` when an animated item can report visible while it is offscreen.
+Checkpoints optionally record the window and add no recording delays when
+running without `--gif`. Run these scripts one at a time because each app
+instance uses the same loopback port.

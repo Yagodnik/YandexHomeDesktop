@@ -63,6 +63,18 @@ print unavailable suites; platform skips may also occur inside a Qt case.
 Report those gaps with the run result. Discovery, metadata validation, and a
 dry run are not evidence that assertions passed.
 
+## Exercise the desktop through Spix
+
+For an end-to-end check of the running GUI over XML-RPC, reuse
+[`tests/spix_harness.py`](../../../tests/spix_harness.py). Pass a
+`flow(session)` callback to `run_fixture_cli` for Debug fixture flows.
+Keep selectors and assertions in the flow. Use `session.rpc` for Spix calls,
+`session.wait_for` for observable state, and `session.checkpoint` for optional
+GIF capture. Run flows serially on port 9000. Use `desktop_session` directly
+for a smoke check that must also run in Release. See the
+[Spix example](../../../docs/testing.md#standalone-spix-flows) and
+[build commands](../../../docs/build.md#spix-ui-automation).
+
 ## Maintain discovery
 
 When adding/renaming a case, update `tests/catalog.json` with its native name

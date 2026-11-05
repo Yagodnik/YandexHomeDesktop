@@ -263,6 +263,11 @@ just spix=ON configure
 just demo
 ```
 
+If the build cache has `FETCHCONTENT_FULLY_DISCONNECTED=ON`, run
+`just spix=ON configure -DFETCHCONTENT_FULLY_DISCONNECTED=OFF` once to fetch the
+new dependencies. After that, the same build directory can be configured with
+`FETCHCONTENT_FULLY_DISCONNECTED=ON` again.
+
 The GUI exposes Spix XML-RPC on `http://127.0.0.1:9000` while it runs.
 The endpoint gives local clients control of the UI without authentication.
 Use it with the Debug fixtures for automation and keep the port free if
@@ -276,8 +281,26 @@ with ServerProxy("http://127.0.0.1:9000") as app:
     print(app.getStringProperty("mainWindow", "title"))
 ```
 
-Windows CI builds the opt-in GUI and runs `tests/spix_smoke.py` against the real
-QML window. See the [Spix RPC reference](https://github.com/faaxm/spix/blob/57cf7105e1250b999104d6439df7f449ba1afe93/docs/rpc-api.md) for available commands.
+Windows CI configures the opt-in GUI, reconfigures it offline, builds it, and
+runs `tests/spix_smoke.py` against the real QML window. See the
+[Spix RPC reference](https://github.com/faaxm/spix/blob/57cf7105e1250b999104d6439df7f449ba1afe93/docs/rpc-api.md) for available commands.
+
+The standalone Debug fixture test `tests/spix_device_flow.py` switches to the
+Cabin household, adds its lamp to Favorites, changes the brightness, and
+checks that the new value survives reopening the device. It starts its own
+app instance, so keep port 9000 free. Pass the desktop executable for your
+platform. The macOS command below records the app window through Spix and uses
+FFmpeg on PATH to encode the GIF.
+
+```sh
+just spix=ON configure
+just build-gui
+python3 tests/spix_device_flow.py \
+  build-just/debug/YandexHomeDesktop.app/Contents/MacOS/YandexHomeDesktop \
+  --gif build-just/spix-device-flow.gif
+```
+
+Omit `--gif` to run the same assertions using only Python's standard library.
 
 ### Build ZIP archives
 

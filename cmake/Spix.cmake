@@ -46,6 +46,8 @@ function(yh_link_spix target)
   # the original sources come from an offline FetchContent override.
   find_package(Git REQUIRED)
   set(_patched "${spix_BINARY_DIR}/patched")
+  # COPY can skip patched files whose timestamps match the originals.
+  file(REMOVE_RECURSE "${_patched}")
   file(MAKE_DIRECTORY "${_patched}")
   file(COPY "${spix_SOURCE_DIR}/" DESTINATION "${_patched}" PATTERN ".git" EXCLUDE)
   set(_patch "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/Spix.patch")

@@ -47,8 +47,17 @@ jobs:
       - name: Build and smoke-test the opt-in Spix desktop
         shell: pwsh
         run: |
-          just config=Release spix=ON cli_app=OFF rest_app=OFF configure '-DCMAKE_CXX_COMPILER=g++.exe' -DBUILD_SHORTCUTS_APP=OFF -DBUILD_TESTING=OFF
+          $profile = @('config=Release', 'spix=ON', 'cli_app=OFF', 'rest_app=OFF')
+          $options = @('-DCMAKE_CXX_COMPILER=g++.exe', '-DBUILD_SHORTCUTS_APP=OFF', '-DBUILD_TESTING=OFF')
+          just @profile configure @options
           if ($LASTEXITCODE -ne 0) { throw 'Spix configuration failed' }
+          # Reproduce the copy timestamp collision even on a slower runner.
+          $deps = 'build-just/release/_deps'
+          $original = Get-Item "$deps/spix-src/libs/Core/src/AnyRpcServer.cpp"
+          $patched = Get-Item "$deps/spix-build/patched/libs/Core/src/AnyRpcServer.cpp"
+          $patched.LastWriteTimeUtc = $original.LastWriteTimeUtc
+          just @profile configure @options -DFETCHCONTENT_FULLY_DISCONNECTED=ON
+          if ($LASTEXITCODE -ne 0) { throw 'Offline Spix reconfiguration failed' }
           just config=Release build --target yh_windows_runtime
           if ($LASTEXITCODE -ne 0) { throw 'Spix build failed' }
           python tests/spix_smoke.py build-just/release/YandexHomeDesktop.exe

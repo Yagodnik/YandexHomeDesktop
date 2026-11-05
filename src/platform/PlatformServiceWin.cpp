@@ -3,7 +3,13 @@
 
 void PlatformServiceWin::ShowWindow(const QRect& icon) {
   if (!window_) return;
-  window_->setPosition(WindowPlacement(icon, window_->size()));
+  // Qt Labs exposes the native Windows shell rectangle.
+  QRect logical_icon;
+  for (const auto* screen : QGuiApplication::screens()) {
+    logical_icon = WindowsTrayAnchorInScreen(icon, screen->geometry(), screen->devicePixelRatio());
+    if (logical_icon.isValid()) break;
+  }
+  window_->setPosition(WindowPlacement(logical_icon, window_->size()));
   window_->show();
   window_->raise();
   window_->requestActivate();

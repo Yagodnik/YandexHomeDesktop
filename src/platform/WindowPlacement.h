@@ -5,6 +5,18 @@
 #include <QCursor>
 #include <algorithm>
 
+// Windows keeps the screen origin in native pixels when it scales Qt screen sizes.
+inline QRect WindowsTrayAnchorInScreen(const QRect& native_anchor, const QRect& logical_screen,
+                                       qreal scale) {
+  const QPoint origin = logical_screen.topLeft();
+  const QRect native_screen(origin, logical_screen.size() * scale);
+  if (!native_anchor.isValid() || !native_screen.contains(native_anchor.center())) return {};
+
+  const QPointF offset = QPointF(native_anchor.topLeft() - origin) / scale;
+  const QSizeF size = QSizeF(native_anchor.size()) / scale;
+  return QRectF(QPointF(origin) + offset, size).toRect();
+}
+
 // All coordinates are Qt logical coordinates, including on mixed-DPI desktops.
 inline QPoint WindowPlacementInArea(const QRect& anchor, const QSize& size,
                                     const QRect& bounds, const QRect& area, const QPoint& fallback) {

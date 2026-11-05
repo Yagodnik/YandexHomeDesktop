@@ -224,6 +224,86 @@ if __name__ == "__main__":
     run_flow_cli("ExampleFlow", run_flow, "Verify the Devices tab", fixture=True)
 ```
 
+### Native tray placement
+
+`TrayPlacement` opens the running fixture app from its native tray icon on Windows or macOS,
+checks that the popup fits inside the icon's display work area, and checks its
+alignment with the icon. The report includes an uncropped PNG for every
+connected display. If the flow fails, it also attempts to capture the desktop
+at the point of failure.
+
+Use a dedicated, unlocked desktop. The test sends a native click and
+captures the entire desktop. On macOS, the runner needs Xcode command-line
+tools, Accessibility and Screen Recording permissions, and a visible menu
+bar with room for the app icon. On Windows, use an interactive runner in the
+same desktop session as Explorer, keep the bottom taskbar visible, and pin
+the app's notification icon outside the overflow. To pin it, launch the
+fixture app from the same build path the test will use, enable tray mode
+in Settings, and move the icon to the visible notification area.
+
+Configure a separate Debug build to opt in. On macOS, run the following
+commands with the expected values for the display you have configured.
+
+```sh
+just build_dir=build-just/native-tray spix=ON configure -DYH_TEST_NATIVE_TRAY=ON
+xcrun swift tests/e2e/macos_desktop.swift displays
+YH_TRAY_DISPLAY_LAYOUT='[[0,0,1440,900,2]]' \
+  just build_dir=build-just/native-tray spix=ON test-e2e TrayPlacement
+```
+
+On Windows, use PowerShell with the Qt and MinGW paths configured.
+
+```powershell
+just build_dir=build-just/native-tray spix=ON configure '-DCMAKE_CXX_COMPILER=g++.exe' -DYH_TEST_NATIVE_TRAY=ON
+just build_dir=build-just/native-tray spix=ON build --target yh_windows_runtime
+& ./build-just/native-tray/yh_tray_windows_desktop.exe displays
+$env:YH_TRAY_DISPLAY_LAYOUT = '[[0,0,1280,800,1]]'
+just build_dir=build-just/native-tray spix=ON test-e2e TrayPlacement
+```
+
+Set `YH_TRAY_DISPLAY_LAYOUT` to the expected list of
+`[x, y, width, height, scale]` values from the platform's display probe.
+Display sizes are in logical units. Windows retains the monitor origins in
+physical pixels. The origin of the main display is `[0,0]` on both platforms.
+The test fails if the active layout differs.
+Repeat on separate configured desktops or change the arrangement in System
+Settings between runs. Useful profiles include a compact single display, a
+larger single display, and mixed-scale dual displays with the secondary
+display left of or above the main one. Swap the main display in a dual setup
+to exercise the popup from both physical displays. For example, a secondary
+1920×1080 display to the left of a 1440×900 main display could use
+`[[0,0,1440,900,2],[-1920,0,1920,1080,1]]`. Each run saves its own
+report under the build directory's `test-reports/` directory. Linux builds the
+headless CLI and REST applications. The desktop tray suite is available on
+Windows and macOS.
+
+#### Native tray CI
+
+The **Native tray placement** workflow runs four jobs across dedicated
+self-hosted Windows and macOS desktops. Register runners with the standard OS
+label and the profile label in the table. Provision CMake, Ninja, Git Bash on
+Windows, and the interactive desktop prerequisites above. The workflow
+installs the pinned Qt kit and builds from the example OAuth configuration.
+Set each Actions repository variable to the expected layout JSON.
+
+| OS label | Profile label | Layout variable |
+| --- | --- | --- |
+| `Windows` | `tray-compact` | `TRAY_WINDOWS_COMPACT_LAYOUT` |
+| `Windows` | `tray-mixed` | `TRAY_WINDOWS_MIXED_LAYOUT` |
+| `macOS` | `tray-compact` | `TRAY_MACOS_COMPACT_LAYOUT` |
+| `macOS` | `tray-mixed` | `TRAY_MACOS_MIXED_LAYOUT` |
+
+For `tray-compact`, configure one compact display. For `tray-mixed`, use two
+extended displays at different scales, with the secondary left of or above
+the main display. Scale the main Windows display above 100% so the
+notification icon exercises the DPI conversion. On Windows, pin the icon
+for the checkout's `build-just/native-tray/YandexHomeDesktop.exe`.
+
+Keep the dedicated runners restricted to trusted workflows. Dispatch the
+workflow from the default branch, or set `CI_NATIVE_TRAY` to `true` to run
+it on pushes to that branch. Each job uploads its report and available
+full-display screenshots as a separate artifact.
+
 The desktop logger includes UTC timestamps, severity, process ID, and Qt log
 category. Set `QT_LOGGING_RULES` to control categories such as
 `yh.devices.commands`. To enable Qt diagnostics for the CLI or REST executable,

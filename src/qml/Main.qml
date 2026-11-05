@@ -74,6 +74,7 @@ TrayWindow {
   }
 
   SystemTrayIcon {
+    id: trayIcon
     visible: settings.trayModeEnabled
     icon.name: "Yandex Home Desktop"
     icon.source: "qrc:/images/icon.png"
@@ -81,6 +82,11 @@ TrayWindow {
     onActivated: function(reason) {
       platformService.ShowWindow(geometry);
     }
+  }
+
+  function trayIconBounds(): string {
+    const bounds = trayIcon.geometry;
+    return [bounds.x, bounds.y, bounds.width, bounds.height].join(",");
   }
 
   QtObject {

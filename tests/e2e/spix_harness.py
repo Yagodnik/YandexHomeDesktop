@@ -139,18 +139,19 @@ class SpixSession:
 
 
 @contextmanager
-def desktop_session(executable, arguments=(), *, artifacts=None, capture_ui=False, recorder=None):
+def desktop_session(executable, arguments=(), *, artifacts=None, capture_ui=False, recorder=None,
+                    platform="offscreen"):
     executable = Path(executable).resolve(strict=True)
     with socket.socket() as probe:
         probe.settimeout(1)
         if probe.connect_ex((HOST, PORT)) == 0:
             raise RuntimeError(f"Spix tests need port {PORT} to be free")
-    env = dict(
-        os.environ,
-        QT_QPA_PLATFORM="offscreen",
-        QT_QUICK_BACKEND="software",
-        QT_QPA_FONTDIR=str(Path(__file__).resolve().parents[2] / "resources" / "fonts"),
-    )
+    env = dict(os.environ, QT_QPA_PLATFORM=platform)
+    if platform == "offscreen":
+        env.update(
+            QT_QUICK_BACKEND="software",
+            QT_QPA_FONTDIR=str(Path(__file__).resolve().parents[2] / "resources" / "fonts"),
+        )
     log = (artifacts / "app.log").open("wb") if artifacts is not None else nullcontext()
     with log as output, subprocess.Popen(
         [str(executable), *arguments], env=env,

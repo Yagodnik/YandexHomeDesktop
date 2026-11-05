@@ -1,4 +1,5 @@
 #include <QApplication>
+#include <QLoggingCategory>
 #include <QTranslator>
 #include <exception>
 #include <iostream>
@@ -7,6 +8,8 @@
 #include "TrayRecovery.h"
 #include "app/common/StartupOptions.h"
 #include "utils/LogManager.h"
+
+Q_LOGGING_CATEGORY(guiStartupLog, "yh.gui.startup")
 
 int main(int argc, char* argv[]) {
 #ifdef YH_DEBUG_FAKE_API
@@ -42,9 +45,11 @@ int main(int argc, char* argv[]) {
         << '\n';
     return 2;
   }
+  LogManager log_manager(LoggingMode::Console);
   QApplication app(argc, argv);
-  static LogManager log_manager(LoggingMode::Console);
-  qInstallMessageHandler(LOGGING_CALLBACK(log_manager));
+  log_manager.InstallMessageHandler();
+  qCInfo(guiStartupLog) << "Starting desktop in" << (options->use_fake_api ? "fixture" : "live")
+                        << "mode";
   QTranslator translator;
   InstallEnglishTranslation(app, translator);
   try {

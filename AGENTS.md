@@ -12,6 +12,13 @@ Read the relevant repository skill before implementing or reviewing work in thes
 
 Use the QML composition and application architecture skills together when a feature crosses the QML/C++ boundary. These skills describe the intended architecture; existing compatibility wiring is migrated only within the requested scope.
 
+## Running tests
+
+Use the root Just recipes to configure, build, and run project tests. Use
+`just test-unit`, `just test-ui`, `just test-e2e`, and `just test-process`
+for suites, or `just tests-run` for exact test IDs. The recipes invoke CMake
+and CTest with the selected profile. See [docs/testing.md](docs/testing.md).
+
 ## Reproducible builds
 
 A clean checkout must configure, build, and test in CI using only committed source, declared tools, and pinned external dependencies. Do not make the build depend on a developer's ignored `libs/` directory, an absolute machine path, a temporary script, a stale generated file, or an uncommitted credential. Keep build outputs in the build directory; validate any intentionally committed generated source in CI. If a new dependency or generator is needed, declare its version in CMake or the workflow and update the clean-checkout build instructions in `docs/build.md`.

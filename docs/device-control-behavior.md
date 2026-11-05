@@ -1,7 +1,7 @@
 # Device control: desktop and external changes
 
 This records the existing behavior captured before extracting a device service.
-The characterization tests in `tests/DeviceControlTests.cpp` now exercise the
+The characterization tests in `tests/unit/DeviceControlTests.cpp` now exercise the
 production `DeviceViewModel`, `DeviceSession`, and its QML-facing
 `CapabilitiesModel`, `PropertiesModel`, and `DeviceDataModel`. Their original
 expected outcomes are unchanged. See [device-control-architecture.md](device-control-architecture.md)

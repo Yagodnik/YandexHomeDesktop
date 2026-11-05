@@ -48,7 +48,7 @@ jobs:
         shell: pwsh
         run: |
           $profile = @('config=Release', 'spix=ON', 'cli_app=OFF', 'rest_app=OFF')
-          $options = @('-DCMAKE_CXX_COMPILER=g++.exe', '-DBUILD_SHORTCUTS_APP=OFF', '-DBUILD_TESTING=OFF')
+          $options = @('-DCMAKE_CXX_COMPILER=g++.exe', '-DBUILD_SHORTCUTS_APP=OFF')
           just @profile configure @options
           if ($LASTEXITCODE -ne 0) { throw 'Spix configuration failed' }
           # Reproduce the copy timestamp collision even on a slower runner.
@@ -58,10 +58,30 @@ jobs:
           $patched.LastWriteTimeUtc = $original.LastWriteTimeUtc
           just @profile configure @options -DFETCHCONTENT_FULLY_DISCONNECTED=ON
           if ($LASTEXITCODE -ne 0) { throw 'Offline Spix reconfiguration failed' }
-          just config=Release build --target yh_windows_runtime
-          if ($LASTEXITCODE -ne 0) { throw 'Spix build failed' }
-          python tests/spix_smoke.py build-just/release/YandexHomeDesktop.exe
+          just @profile test-e2e SpixSmoke
           if ($LASTEXITCODE -ne 0) { throw 'Spix smoke test failed' }
+
+      - name: Install pinned FFmpeg for Spix playback
+        run: choco install ffmpeg --version=7.1.1 --allow-downgrade --no-progress -y
+
+      - name: Run the Debug fixture through the Spix suite
+        shell: pwsh
+        run: |
+          $profile = @('config=Debug', 'build_dir=build-just/spix-debug', 'spix=ON', 'cli_app=OFF', 'rest_app=OFF')
+          just @profile configure -DCMAKE_CXX_COMPILER=g++.exe -DBUILD_SHORTCUTS_APP=OFF
+          if ($LASTEXITCODE -ne 0) { throw 'Spix fixture configuration failed' }
+          just @profile test-e2e CabinLamp --record
+          if ($LASTEXITCODE -ne 0) { throw 'Spix fixture test failed' }
+
+      - name: Upload Spix test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-spix-test-reports
+          path: |
+            build-just/release/test-reports/
+            build-just/spix-debug/test-reports/
+          retention-days: 7
 
       - name: Check build ZIP recipe
         shell: pwsh
@@ -104,6 +124,14 @@ jobs:
           path: build-just/package/dist/*.exe
           if-no-files-found: error
           compression-level: 0
+          retention-days: 7
+
+      - name: Upload windows test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-test-report
+          path: build-just/package/test-reports/
           retention-days: 7
 
       - name: Upload failure logs

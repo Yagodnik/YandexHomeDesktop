@@ -1,8 +1,11 @@
 #include "DeviceService.h"
 
+#include <QLoggingCategory>
 #include <QPointer>
 
 #include "iot/core/CapabilityRules.h"
+
+Q_LOGGING_CATEGORY(deviceServiceLog, "yh.devices.commands")
 
 DeviceService::DeviceService(IHomeApi* api, QObject* parent) : QObject(parent), api_(api) {}
 
@@ -18,6 +21,7 @@ void DeviceService::GetDeviceInfo(
 
 void DeviceService::UseCapability(const QString& device_id, CapabilityType type,
   const QVariantMap& state, QObject* context, ApiResultHandler<void> handler) {
+  qCDebug(deviceServiceLog) << "Submitting device capability command";
   const CapabilityObject action{.type = type, .state = state};
   api_->PerformActions(
     {DeviceActionsObject{.id = device_id, .actions = {action}}}, context, std::move(handler));
@@ -79,9 +83,11 @@ void DeviceService::ApplyCapability(const QString& device_id, CapabilityType typ
       service->UseCapability(device_id, rules->Type(), state, context,
         [handler = std::move(handler)](ApiResult<void> result) {
           if (!result) {
+            qCWarning(deviceServiceLog) << "Device capability command failed";
             handler(std::unexpected(result.error()));
             return;
           }
+          qCDebug(deviceServiceLog) << "Device capability command completed";
           handler(CommandResult{});
         });
     });

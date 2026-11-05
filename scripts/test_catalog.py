@@ -10,10 +10,11 @@ import subprocess
 import sys
 import tempfile
 
+from test_report import CATALOG, run_with_report
+
 ROOT = Path(__file__).resolve().parents[1]
-CATALOG = ROOT / "tests" / "catalog.json"
 KINDS = {"qt", "quick", "ctest"}
-REQUIREMENTS = {"BUILD_DESKTOP_APP", "BUILD_CLI_APP", "BUILD_REST_APP", "BUILD_SHORTCUTS_APP", "YH_BUILD_REST_ADAPTER", "Debug"}
+REQUIREMENTS = {"BUILD_DESKTOP_APP", "BUILD_CLI_APP", "BUILD_REST_APP", "BUILD_SHORTCUTS_APP", "YH_BUILD_REST_ADAPTER", "YH_ENABLE_SPIX", "Debug"}
 
 
 class CatalogError(ValueError):
@@ -290,7 +291,7 @@ def write_selection(directory, tests, chosen):
     (directory / "CTestTestfile.cmake").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def run_selection(build_dir, configuration, ctest, tests, chosen, jobs):
+def run_selection(build_dir, configuration, ctest, tests, chosen, jobs, *, record=False, catalog_path=CATALOG):
     # CTest still enforces timeouts, environments, locks, and working directories.
     with tempfile.TemporaryDirectory(prefix="test-selection-", dir=build_dir) as temporary:
         directory = Path(temporary)
@@ -298,7 +299,7 @@ def run_selection(build_dir, configuration, ctest, tests, chosen, jobs):
         command = [ctest, "--test-dir", str(directory), "--output-on-failure", "--no-tests=error", "--parallel", str(jobs)]
         if configuration:
             command += ["-C", configuration]
-        return subprocess.run(command).returncode
+        return run_with_report(command, build_dir.resolve(), record=record, catalog_path=catalog_path)
 
 
 def parser():
@@ -314,6 +315,7 @@ def parser():
             command.add_argument("--json", action="store_true")
         if name in ("list", "run"):
             command.add_argument("--feature", action="append", default=[])
+            command.add_argument("--layer", choices=("unit", "ui", "e2e", "process", "tooling"))
         if name == "list":
             command.add_argument("--suites", action="store_true", help="List suites instead of individual cases")
             command.add_argument("--available", action="store_true", help="Only cases compiled into --build-dir")
@@ -323,6 +325,7 @@ def parser():
             command.add_argument("ids", nargs="*")
             command.add_argument("--all", action="store_true")
             command.add_argument("--dry-run", action="store_true")
+            command.add_argument("--record", action="store_true", help="Require GIFs for selected Spix fixture flows")
             command.add_argument("--jobs", type=int, default=4)
     return result
 
@@ -338,7 +341,9 @@ def main(argv=None):
         if args.action == "list":
             if args.available and profile is None:
                 raise CatalogError("--available requires --build-dir")
-            items = records(filter_features(suites, args.feature), profile, args.suites)
+            selection = filter_features(suites, args.feature)
+            items = records([suite for suite in selection if not args.layer or suite["layer"] == args.layer],
+                            profile, args.suites)
             if args.available:
                 items = [item for item in items if item["available"]]
         elif args.action == "show":
@@ -356,14 +361,23 @@ def main(argv=None):
                 raise CatalogError("run requires --build-dir")
             if args.jobs < 1:
                 raise CatalogError("--jobs must be positive")
-            chosen, unavailable = select(suites, args.ids, args.feature, args.all, profile)
+            selection = suites
+            if args.layer:
+                selection = [suite for suite in suites if suite["layer"] == args.layer]
+            run_all = args.all or bool(args.layer and not args.ids and not args.feature)
+            chosen, unavailable = select(selection, args.ids, args.feature, run_all, profile)
+            if args.record and not any(suite["id"] in chosen and suite["layer"] == "e2e" for suite in selection):
+                raise CatalogError("--record requires a selected Spix flow")
             tests = inventory(build_dir, configuration, args.ctest)
             check_inventory(suites, tests, profile, chosen)
             for name, functions in chosen.items():
                 print("Selected: " + (name if functions is None else ", ".join(name + "::" + function for function in sorted(functions))), flush=True)
             if unavailable:
                 print("Unavailable suites in this profile: " + ", ".join(unavailable), flush=True)
-            return 0 if args.dry_run else run_selection(build_dir, configuration, args.ctest, tests, chosen, args.jobs)
+            if args.dry_run:
+                return 0
+            return run_selection(build_dir, configuration, args.ctest, tests, chosen, args.jobs,
+                                 record=args.record, catalog_path=args.catalog)
         if args.json:
             print(json.dumps(items[0] if args.action == "show" else items, indent=2))
         else:

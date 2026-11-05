@@ -49,6 +49,14 @@ jobs:
           compression-level: 0
           retention-days: 7
 
+      - name: Upload macos test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-test-report
+          path: build/test-reports/
+          retention-days: 7
+
       - name: Upload failure logs
         if: failure()
         uses: actions/upload-artifact@v4

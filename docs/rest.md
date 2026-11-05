@@ -32,6 +32,8 @@ Pass `--rest-config /absolute/path/to/rest.local.json` to either console executa
 {
   "host": "127.0.0.1",
   "port": 9000,
+  "auth_mode": "bearer",
+  "client_token": "YOUR_RANDOM_REST_CLIENT_TOKEN",
   "oauth_token": "YOUR_YANDEX_OAUTH_ACCESS_TOKEN"
 }
 ```
@@ -39,14 +41,14 @@ Pass `--rest-config /absolute/path/to/rest.local.json` to either console executa
 ```sh
 YandexHomeCli --rest-config ./rest.local.json --enable-rest
 YandexHomeCli --rest-config ./rest.local.json --status-rest --json
-curl http://127.0.0.1:9000/v1/status
+curl -H "Authorization: Bearer YOUR_RANDOM_REST_CLIENT_TOKEN" http://127.0.0.1:9000/v1/status
 YandexHomeCli --rest-config ./rest.local.json --disable-rest
 
 # Foreground mode:
 YandexHomeRest --rest-config ./rest.local.json
 ```
 
-All fields are optional. `host` defaults to `127.0.0.1` and accepts IPv4/IPv6
+`host` defaults to `127.0.0.1` and accepts IPv4/IPv6
 addresses or `localhost`; for example, `::1` binds IPv6 loopback. `port` is an
 integer from 1 to 65535. An explicit `--rest-port` overrides the JSON value.
 Without a port in the file, config profiles default to 8765 (8766 in fixture mode).
@@ -70,16 +72,29 @@ becomes invalid. The file is loaded at startup rather than watched for changes.
 
 Start from [the credential-free example](../resources/rest/example.json). Keep a
 file containing an actual token private; the repository ignores `rest.local.json`
-at its root. A wildcard host (`0.0.0.0` or `::`) binds all corresponding interfaces.
-Clients then use the machine's actual address. The listener uses HTTP and has no
-client authentication, so a non-loopback host makes its controls reachable on
-that network.
+at its root.
+
+Set `auth_mode` to `bearer` and use a separate, randomly generated
+`client_token` (for example, 32 random bytes encoded as hex). Every endpoint
+then requires `Authorization: Bearer <client_token>`. The token is read from
+the profile at worker startup and stays out of command-line arguments, status,
+and the served OpenAPI document. Use a token distinct from any Yandex OAuth
+credential. Restart the profile to apply a mode or token change.
+
+Set `auth_mode` to `none` for loopback access without a client token. Omitted
+modes preserve the existing no-auth behavior on loopback. Any process that can
+reach the loopback port can read home data and issue commands in this mode.
+
+A non-loopback address, including `0.0.0.0` or `::`, requires bearer mode.
+Add `auth_mode` and `client_token` to existing network profiles before restarting.
+The listener uses plain HTTP, so use TLS termination for remote clients and
+restrict direct access to the listener.
 
 The default live profile listens on `127.0.0.1:8765`; Debug fixtures default to
 `127.0.0.1:8766`. Select another port with `--enable-rest --rest-port 9000`.
 Changing an active listener's port requires disabling first. Occupied ports
 produce an error. Status includes `enabled`, `running`, `fixture`, `host`, `port`, and
-`url`, and never includes a token. `enabled` is the saved preference and
+`url`. A running worker also reports `auth_mode`. `enabled` is the saved preference and
 `running` is the process state; a stopped process may still have an enabled
 preference. `YandexHomeRest [--rest-port 9000]` runs in the foreground for a
 terminal or process supervisor. It accepts the same fixture, JSON, timeout, and
@@ -87,7 +102,7 @@ control flags. The CLI directs users of `--serve-rest` to this executable. Disab
 
 ## Access and endpoints
 
-The API requires no REST access token. The default listener binds to `127.0.0.1`.
+The default listener binds to `127.0.0.1` and accepts requests without a client token.
 It validates the `Host` header against the connection's destination address and
 port (with `localhost` accepted for loopback), rejects browser Origin requests,
 and disables CORS. A JSON profile can select a different bind address.
@@ -131,8 +146,8 @@ also installed under `share/YandexHome/rest/openapi.json`.
 
 The specification is returned as raw OpenAPI JSON, without an `ok` success
 envelope. The normal JSON error envelope still applies to errors at this path.
-The local REST API has no client authentication; the server's Yandex OAuth token
-belongs in server configuration and is never returned in the document.
+In bearer mode, use the same client Authorization header to download the document.
+The served document declares the bearer security scheme for that listener.
 
 ## Device actions and errors
 
@@ -179,7 +194,7 @@ python3 examples/rest_client.py --cli /path/to/YandexHomeCli --scenario-id eveni
 ```
 
 It retrieves status through the CLI, lists devices, and optionally reads/controls
-a device or runs a scenario. HTTP requests need no key or authentication header.
+a device or runs a scenario using the default loopback listener.
 
 For a credential-free Debug example:
 

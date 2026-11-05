@@ -4,7 +4,7 @@
   "info": {
     "title": "Yandex Home REST API",
     "version": "1.0.0",
-    "description": "Headless REST adapter for Yandex Home devices, scenarios, and account data. The default listener is http://127.0.0.1:8765 (Debug fixtures use 8766). Host and port can be configured. Clients send no REST key or OAuth Authorization header: Yandex OAuth is configured on the server through a saved login or an oauth_token JSON profile. Browser Origin requests are rejected and CORS is disabled. Request bodies are limited to 65536 bytes. The default response deadline is 30000 ms and can be changed with the worker --timeout option. All responses use Cache-Control: no-store."
+    "description": "Headless REST adapter for Yandex Home devices, scenarios, and account data. The default listener is http://127.0.0.1:8765 (Debug fixtures use 8766). Host and port can be configured. Loopback profiles can run without client authentication. Bearer profiles use a separate REST client token. Yandex OAuth is configured on the server through a saved login or an oauth_token JSON profile. Browser Origin requests are rejected and CORS is disabled. Request bodies are limited to 65536 bytes. The default response deadline is 30000 ms and can be changed with the worker --timeout option. All responses use Cache-Control: no-store."
   },
   "servers": [
     {

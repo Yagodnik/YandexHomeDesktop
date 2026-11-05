@@ -257,6 +257,7 @@ your devices</translation>
 </context>
 <context>
     <name>CliApp</name>
+    <message><source>MCP is already running with a different authentication mode. Disable it first.</source><translation>MCP is already running with a different authentication mode. Disable it first.</translation></message>
     <message><source>MCP-команды допускают только --json.</source><translation>MCP commands accept only --json.</translation></message>
     <message><source>Не удалось управлять MCP-сервером. Откройте приложение и войдите в аккаунт.</source><translation>Could not control the MCP server. Open the app and sign in.</translation></message>
     <message><source>MCP-сервер уже работает на другом порту.</source><translation>The MCP server is already running on a different port.</translation></message>
@@ -2247,6 +2248,10 @@ Email: %2
 </context>
 <context>
     <name>RestConfigurationMessages</name>
+    <message><source>auth_mode must be bearer or none.</source><translation>auth_mode must be bearer or none.</translation></message>
+    <message><source>Bearer authentication requires a valid client_token.</source><translation>Bearer authentication requires a valid client_token.</translation></message>
+    <message><source>client_token must differ from oauth_token.</source><translation>client_token must differ from oauth_token.</translation></message>
+    <message><source>REST requires auth_mode bearer to use a client_token or a non-loopback host.</source><translation>REST requires auth_mode bearer to use a client_token or a non-loopback host.</translation></message>
     <message>
         <location filename="../src/app/rest/RestServerConfiguration.cpp" line="36"/>
         <source>Cannot read REST configuration file.</source>
@@ -2280,6 +2285,7 @@ Email: %2
 </context>
 <context>
     <name>RestControlService</name>
+    <message><source>REST API is already running with a different authentication mode. Disable it first.</source><translation>REST API is already running with a different authentication mode. Disable it first.</translation></message>
     <message>
         <source>Порты REST API и MCP-сервера должны различаться.</source>
         <translation>The REST API and MCP server ports must be different.</translation>
@@ -2322,6 +2328,9 @@ Email: %2
 </context>
 <context>
     <name>RestServer</name>
+    <message><source>Bearer authentication requires a token.</source><translation>Bearer authentication requires a token.</translation></message>
+    <message><source>A listener without client authentication must use a loopback address.</source><translation>A listener without client authentication must use a loopback address.</translation></message>
+    <message><source>A valid bearer token is required.</source><translation>A valid bearer token is required.</translation></message>
     <message>
         <location filename="../src/rest/RestReply.cpp" line="11"/>
         <source>Время выполнения запроса истекло.</source>
@@ -2859,6 +2868,9 @@ a window or tray icon</translation>
 </context>
 <context>
     <name>StartupMessages</name>
+    <message><source>Duplicate option: --mcp-auth.</source><translation>Duplicate option: --mcp-auth.</translation></message>
+    <message><source>--mcp-auth must be bearer or none.</source><translation>--mcp-auth must be bearer or none.</translation></message>
+    <message><source>--mcp-auth requires --enable-mcp.</source><translation>--mcp-auth requires --enable-mcp.</translation></message>
     <message><source>Для управления MCP используйте YandexHomeCli.</source><translation>Use YandexHomeCli to control MCP.</translation></message>
     <message><source>Повторяющийся параметр: --mcp-port.</source><translation>Duplicate option: --mcp-port.</translation></message>
     <message><source>--mcp-port должен быть от 1 до 65535.</source><translation>--mcp-port must be between 1 and 65535.</translation></message>

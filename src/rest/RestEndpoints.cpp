@@ -16,7 +16,7 @@
 #include "services/ScenarioService.h"
 
 namespace {
-void SendOpenApi(const QHttpServerRequest& request, RestReply* reply) {
+void SendOpenApi(const QHttpServerRequest& request, RestReply* reply, bool require_bearer) {
   static const auto document = [] {
     QFile file(":/rest/openapi.json");
     if (!file.open(QIODevice::ReadOnly)) {
@@ -38,6 +38,31 @@ void SendOpenApi(const QHttpServerRequest& request, RestReply* reply) {
       {"url", server.toString()},
       {"description", QCoreApplication::translate("RestServer", "This REST listener")}});
   result["servers"] = servers;
+  if (require_bearer) {
+    auto components = result["components"].toObject();
+    components["securitySchemes"] = QJsonObject{
+        {"bearerAuth", QJsonObject{{"type", "http"}, {"scheme", "bearer"}}}};
+    auto responses = components["responses"].toObject();
+    auto unauthorized = responses["Unauthorized"].toObject();
+    unauthorized["description"] = "The listener requires a valid client bearer token "
+                                  "(unauthorized, with a WWW-Authenticate header), or "
+                                  "the upstream OAuth session is unavailable (authorization_required).";
+    responses["Unauthorized"] = unauthorized;
+    components["responses"] = responses;
+    result["components"] = components;
+    auto paths = result["paths"].toObject();
+    for (const auto* path : {"/v1/status", "/v1/openapi.json"}) {
+      auto path_item = paths[path].toObject();
+      auto operation = path_item["get"].toObject();
+      auto operation_responses = operation["responses"].toObject();
+      operation_responses["401"] = QJsonObject{{"$ref", "#/components/responses/Unauthorized"}};
+      operation["responses"] = operation_responses;
+      path_item["get"] = operation;
+      paths[path] = path_item;
+    }
+    result["paths"] = paths;
+    result["security"] = QJsonArray{QJsonObject{{"bearerAuth", QJsonArray{}}}};
+  }
   // An OpenAPI document has its own top-level contract and no success envelope.
   reply->SendDocument(result);
 }
@@ -148,12 +173,14 @@ void ReadAccount(AccountService& account, RestReply* reply) {
 } // namespace
 
 RestRouter CreateRestRoutes(HomeService& home, DeviceService& devices, ScenarioService& scenarios,
-                            AccountService& account) {
+                            AccountService& account, bool require_bearer) {
   using Method = QHttpServerRequest::Method;
   RestRouter routes;
   routes.Add(
       Method::Get, "/v1/openapi.json",
-      [](const auto& request, const auto&, RestReply* reply) { SendOpenApi(request, reply); });
+      [require_bearer](const auto& request, const auto&, RestReply* reply) {
+        SendOpenApi(request, reply, require_bearer);
+      });
   routes.Add(Method::Get, "/v1/status", [](const auto&, const auto&, RestReply* reply) {
     reply->Send({{"running", true}, {"version", RestProtocol::Version}});
   });

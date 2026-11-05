@@ -113,6 +113,9 @@ int RunRestControl(QCoreApplication& app, const StartupOptions& options) {
   Settings settings(nullptr, options.use_fake_api || !options.rest_config_file.isEmpty());
   auto launch_configuration = RestConfiguration(options);
   auto port = options.rest_port;
+  if (server_configuration) {
+    launch_configuration.auth_mode = server_configuration->AuthMode();
+  }
   if (server_configuration && !options.rest_config_file.isEmpty()) {
     launch_configuration.host = server_configuration->host.toString();
     if (!port) {

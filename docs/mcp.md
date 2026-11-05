@@ -20,14 +20,21 @@ Set the port in Settings → Advanced while the server is stopped, or use
 control channel before starting. Subsequent starts use the saved port. Stop the
 server before changing the port.
 
-The JSON status contains `url` and `token` while the worker is running. Add the
+Bearer authentication is the default. The JSON status contains `url`,
+`auth_mode`, and a `token` while a bearer-mode worker is running. Add the
 URL to a client that supports MCP Streamable HTTP and configure its HTTP
 `Authorization` header as `Bearer <token>`. Treat the token as a password: it
 allows control of the home. A new token is generated each time the worker starts,
 so update client configuration after a restart. The control channel is limited
 to the current local user; other processes running as that user can request the
 token. The listener rejects browser Origin requests and invalid Host headers.
-It is not intended for network exposure.
+To use a loopback client without a custom Authorization header, stop MCP and
+start it with `YandexHomeCli --enable-mcp --mcp-auth none`. In this mode status
+reports `auth_mode: none` and the URL alone is enough to connect. Any process
+that can reach the port can read home data and issue commands. The mode applies
+to that worker instance. Stop it before switching modes, and start it with
+`--mcp-auth bearer` to require a token again. Both modes require the GUI to be
+signed in.
 
 For clients using an `mcpServers` JSON configuration with HTTP headers, the
 entry has this shape (replace the token and use the client's documented syntax):

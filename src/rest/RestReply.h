@@ -17,9 +17,12 @@ public:
   void Send(QJsonObject result, StatusCode status = StatusCode::Ok);
   void SendDocument(const QJsonObject& document, StatusCode status = StatusCode::Ok);
   void SendEmpty(StatusCode status);
-  void Fail(StatusCode status, const QString& code, const QString& message);
+  void Fail(StatusCode status, const QString& code, const QString& message,
+            QHttpHeaders headers = {});
 
 private:
+  void SendDocument(const QJsonObject& document, StatusCode status, QHttpHeaders headers);
+
   QHttpServerResponder responder_;
   QTimer timer_;
   bool finished_ = false;

@@ -77,6 +77,14 @@ int RunCli(QCoreApplication& app, const StartupOptions& options) {
       } else if (options.mcp_port && result.value("port").toInt() != *options.mcp_port) {
         Write(CliRunner::FormatError(json, "port_conflict", QCoreApplication::translate("CliApp", "MCP-сервер уже работает на другом порту.")), true);
         app.exit(CliRunner::RequestFailed);
+      } else if (!options.mcp_auth.isEmpty() &&
+                 result.value("auth_mode").toString("bearer") != options.mcp_auth) {
+        Write(CliRunner::FormatError(
+                  json, "auth_mode_conflict",
+                  QCoreApplication::translate(
+                      "CliApp", "MCP is already running with a different authentication mode. Disable it first.")),
+              true);
+        app.exit(CliRunner::RequestFailed);
       } else {
         Write(json ? QJsonDocument(result).toJson(QJsonDocument::Compact) + '\n'
                    : (result.value("running").toBool() ? result.value("url").toString().toUtf8() + '\n' : QCoreApplication::translate("CliApp", "MCP-сервер остановлен.\n").toUtf8()), false);

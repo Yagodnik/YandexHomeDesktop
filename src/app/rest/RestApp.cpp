@@ -58,8 +58,9 @@ int Serve(QCoreApplication& app, const StartupOptions& options, Settings& settin
   DeviceService devices(home_api);
   ScenarioService scenarios(home_api);
   AccountService account(account_api);
-  const auto routes = CreateRestRoutes(home, devices, scenarios, account);
-  RestServer rest(routes, nullptr, timeout_ms);
+  const auto routes = CreateRestRoutes(home, devices, scenarios, account,
+                                      server_configuration.client_token.has_value());
+  RestServer rest(routes, nullptr, timeout_ms, server_configuration.client_token);
   const auto port =
       options.rest_port.value_or(server_configuration.port.value_or(settings.GetRestPort()));
   bool running = false;
@@ -76,6 +77,7 @@ int Serve(QCoreApplication& app, const StartupOptions& options, Settings& settin
                        {"pid", QCoreApplication::applicationPid()},
                        {"fixture", options.use_fake_api},
                        {"host", server_configuration.host.toString()},
+                       {"auth_mode", server_configuration.AuthMode()},
                        {"port", port},
                        {"url", server_configuration.Url(port)}};
   };

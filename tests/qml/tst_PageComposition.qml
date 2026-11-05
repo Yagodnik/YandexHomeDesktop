@@ -529,6 +529,11 @@ TestCase {
     mouseClick(toggle);
     tryCompare(shortcutViewModel, "enabled", false);
     tryCompare(shortcutViewModel, "busy", false);
+    mouseClick(background);
+    compare(shortcutViewModel.background, true);
+    compare(shortcutViewModel.enabled, false);
+    mouseClick(background);
+    compare(shortcutViewModel.background, false);
   }
 
   function test_scenariosScrollingAndAction() {

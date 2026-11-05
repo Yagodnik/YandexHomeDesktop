@@ -30,7 +30,6 @@ Item {
       title: qsTr("После закрытия приложения")
       description: qsTr("Оставлять службу сочетаний работающей\nбез окна и иконки в трее")
       checked: root.backgroundEnabled
-      enabled: root.shortcutsEnabled
       onToggled: function(checked) { root.backgroundToggled(checked); }
     }
     UI.SubheadingText {

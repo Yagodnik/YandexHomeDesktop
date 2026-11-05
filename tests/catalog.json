@@ -1242,7 +1242,7 @@
         },
         {
           "name": "PageComposition::test_shortcutSettingsReachController",
-          "description": "Route enable and background switches through the settings page into the real shortcut controller.",
+          "description": "Route both settings switches to the shortcut controller and allow changing the background preference while global shortcuts are disabled.",
           "source": "tests/qml/tst_PageComposition.qml"
         },
         {

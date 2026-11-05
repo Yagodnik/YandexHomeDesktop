@@ -4,13 +4,15 @@
 #include "cli/CliRunner.h"
 #include <cstdio>
 #include <exception>
+#include "utils/LogManager.h"
 
 int main(int argc, char* argv[]) {
   PrepareCliApplication();
+  LogManager diagnostics(qEnvironmentVariable("YH_DIAGNOSTIC_LOG"));
   QCoreApplication app(argc, argv);
   app.setApplicationName("YandexHomeCli");
   // CLI output is owned by the runner; diagnostic logs must not enter JSON.
-  qInstallMessageHandler([](QtMsgType, const QMessageLogContext&, const QString&) {});
+  diagnostics.InstallMessageHandler();
   QTranslator translator;
   InstallEnglishTranslation(app, translator);
 #ifdef YH_DEBUG_FAKE_API

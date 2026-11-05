@@ -2,10 +2,13 @@
 #include "auth/AuthorizationFactory.h"
 #include "auth/DeviceAuthorizationFlow.h"
 #include <QDir>
+#include <QLoggingCategory>
 #include <stdexcept>
 #ifdef YH_DEBUG_FAKE_API
 #include "api/debug/FixtureApi.h"
 #endif
+
+Q_LOGGING_CATEGORY(guiFixtureLog, "yh.gui.fixture")
 
 AppContext::AppContext(QGuiApplication* app, const StartupOptions& options)
     : app_(app),
@@ -29,6 +32,7 @@ AppContext::AppContext(QGuiApplication* app, const StartupOptions& options)
     if (!result) {
       throw std::runtime_error(result.error().message.toStdString());
     }
+    qCInfo(guiFixtureLog) << "Fixture API data validated";
     yandex_api = fixture;
     account_api = fixture;
 #else

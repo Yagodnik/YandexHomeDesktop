@@ -30,6 +30,9 @@ in the catalog in the same change.
 
 Use an existing configured profile when suitable. Supply its actual
 configuration; do not overwrite cached Qt/auth settings just to run a test.
+Use Just as the entry point for configuring, building, and running tests.
+Use `just test-unit`, `just test-ui`, `just test-e2e`, or `just test-process`
+to run one layer. Add a suite or case ID to narrow the run.
 
 ```sh
 just tests-run DeviceControl DeviceService
@@ -66,13 +69,14 @@ dry run are not evidence that assertions passed.
 ## Exercise the desktop through Spix
 
 For an end-to-end check of the running GUI over XML-RPC, reuse
-[`tests/spix_harness.py`](../../../tests/spix_harness.py). Pass a
-`flow(session)` callback to `run_fixture_cli` for Debug fixture flows.
+[`tests/e2e/spix_harness.py`](../../../tests/e2e/spix_harness.py). Pass a
+`flow(session)` callback to `run_flow_cli` with `fixture=True` for Debug flows.
 Keep selectors and assertions in the flow. Use `session.rpc` for Spix calls,
-`session.wait_for` for observable state, and `session.checkpoint` for optional
-GIF capture. Run flows serially on port 9000. Use `desktop_session` directly
-for a smoke check that must also run in Release. See the
-[Spix example](../../../docs/testing.md#standalone-spix-flows) and
+`session.wait_for` for observable state, and `session.checkpoint` for screenshots.
+Fixture reports link to a checkpoint GIF when FFmpeg is available.
+Use `just spix=ON test-e2e CabinLamp --record` to require GIF generation.
+Flows share a CTest lock for port 9000. See the
+[Spix example](../../../docs/testing.md#spix-flows) and
 [build commands](../../../docs/build.md#spix-ui-automation).
 
 ## Maintain discovery

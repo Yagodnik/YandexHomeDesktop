@@ -3,12 +3,14 @@
 #include "RestApp.h"
 #include "RestCommand.h"
 #include <exception>
+#include "utils/LogManager.h"
 
 int main(int argc, char* argv[]) {
   PrepareCliApplication();
+  LogManager diagnostics(qEnvironmentVariable("YH_DIAGNOSTIC_LOG"));
   QCoreApplication app(argc, argv);
   app.setApplicationName("YandexHomeRest");
-  qInstallMessageHandler([](QtMsgType, const QMessageLogContext&, const QString&) {});
+  diagnostics.InstallMessageHandler();
   QTranslator translator;
   InstallEnglishTranslation(app, translator);
 #ifdef YH_DEBUG_FAKE_API
@@ -23,8 +25,10 @@ int main(int argc, char* argv[]) {
     return RestConsole::Usage;
   }
   if (options->mcp_command != StartupOptions::McpCommand::None) {
-    RestPrint(RestError(json, "usage", QCoreApplication::translate(
-        "StartupMessages", "Для управления MCP используйте YandexHomeCli.")), true);
+    RestPrint(RestError(json, "usage",
+                        QCoreApplication::translate(
+                            "StartupMessages", "Для управления MCP используйте YandexHomeCli.")),
+              true);
     return RestConsole::Usage;
   }
   if (options->rest_command == StartupOptions::RestCommand::None)

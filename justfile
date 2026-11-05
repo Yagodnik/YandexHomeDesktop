@@ -92,7 +92,7 @@ build *args: _configure-if-needed
 
 # Build and run CTest; append filters such as -R Authorization.
 test *args: build
-    ctest --test-dir "$YH_JUST_BUILD_DIR" -C "$YH_JUST_CONFIG" --output-on-failure --parallel "$YH_JUST_JOBS" "$@"
+    {{ if os() == "windows" { "python" } else { "python3" } }} scripts/test_report.py "$YH_JUST_BUILD_DIR" ctest --test-dir "$YH_JUST_BUILD_DIR" -C "$YH_JUST_CONFIG" --output-on-failure --parallel "$YH_JUST_JOBS" "$@"
 
 # List described test cases without configuring or building; use --suites to group.
 tests-list *args:
@@ -104,7 +104,29 @@ tests-show id *args:
 
 # Build and run suite/case IDs, --feature tags, or --all through CTest.
 tests-run *args: build
+    just _run-tests "$@"
+
+# Run the in-process C++ suite or selected unit tests.
+test-unit *args:
+    just tests-run --layer unit "$@"
+
+# Run the QML suite or selected UI tests.
+test-ui *args:
+    just tests-run --layer ui "$@"
+
+# Run the Spix suite in a Spix-enabled build profile.
+test-e2e *args: _build-spix
+    just _run-tests --layer e2e "$@"
+
+# Run external executable and SDK integration checks.
+test-process *args:
+    just tests-run --layer process "$@"
+
+_run-tests *args:
     {{ if os() == "windows" { "python" } else { "python3" } }} scripts/test_catalog.py run --build-dir "$YH_JUST_BUILD_DIR" --config "$YH_JUST_CONFIG" --jobs "$YH_JUST_JOBS" "$@"
+
+_build-spix:
+    just build --target {{ if os() == "windows" { "yh_windows_runtime" } else { "appYandexHomeDesktop" } }}
 
 # Build and reconcile the catalog with CTest and actual Qt function discovery.
 tests-check *args: build

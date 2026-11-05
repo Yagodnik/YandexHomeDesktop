@@ -171,5 +171,5 @@ and discards pending snapshots when switching devices.
 
 - `DevicePage.qml` starts in the loading state; its model initialization signals select the loaded or offline state.
 - The FPS overlay in `Main.qml` is commented out.
-- `tests/qml/` covers device-control spacing, settings scrolling and actions, scenario scrolling and execution signals, household selection, sign-in, and device retry/initialization. Desktop builds also create every page with local test models and fail on QML warnings. These checks run through CTest; see `docs/build.md`.
+- `tests/ui/qml/` covers device-control spacing, settings scrolling and actions, scenario scrolling and execution signals, household selection, sign-in, and device retry/initialization. Desktop builds also create every page with local test models and fail on QML warnings. These checks run through CTest; see `docs/build.md`.
 - The clean build uses the credential-free auth template; see `docs/build.md` for local sign-in configuration.

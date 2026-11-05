@@ -8,8 +8,9 @@ executable and runs the worker with an invalid GUI platform to check headless st
 
 The CI workflows are `.github/workflows/ci-windows.yml`, `ci-macos.yml`, and
 `ci-linux.yml`. They run for pull requests targeting `main`, `dev`, or
-`refactoring`, or when started manually. Each workflow runs one Release build
-using Ninja and precompiled headers, then runs CTest and verifies its package.
+`refactoring`, or when started manually. Each workflow builds Release with Ninja and precompiled headers, runs the
+tests through Just, and verifies its package. Windows also runs Spix checks
+in opt-in Release and Debug builds.
 Ordinary branch pushes do not trigger CI.
 
 | Workflow | Build profile | Actions artifact |
@@ -46,7 +47,7 @@ CMake fetches pinned Boost.Hana, QtKeychain, and (for the shortcut worker) QHotk
 sources into the build directory. No ignored `libs/` directory or
 machine-specific CMake file is required. Debug fixtures, builds with PCH disabled,
 standalone CLI/REST profiles, and clang-tidy analysis remain available locally;
-regular CI uses the single Release profile above.
+package CI uses the Release profiles above.
 
 QtKeychain is pinned to 0.16.0. Its Windows build applies `/utf-8` only to MSVC
 and uses GCC-compatible UTF-8 flags for MinGW. CI and local builds use the same
@@ -281,26 +282,25 @@ with ServerProxy("http://127.0.0.1:9000") as app:
     print(app.getStringProperty("mainWindow", "title"))
 ```
 
-Windows CI configures the opt-in GUI, reconfigures it offline, builds it, and
-runs `tests/spix_smoke.py` against the real QML window. See the
-[Spix RPC reference](https://github.com/faaxm/spix/blob/57cf7105e1250b999104d6439df7f449ba1afe93/docs/rpc-api.md) for available commands.
-
-The standalone Debug fixture test `tests/spix_device_flow.py` switches to the
-Cabin household, adds its lamp to Favorites, changes the brightness, and
-checks that the new value survives reopening the device. It starts its own
-app instance, so keep port 9000 free. Pass the desktop executable for your
-platform. The macOS command below records the app window through Spix and uses
-FFmpeg on PATH to encode the GIF.
+Windows CI configures the opt-in Release GUI, reconfigures it offline, then
+runs `just test-e2e SpixSmoke` with that profile. It also runs the Cabin lamp
+flow in a separate Debug profile using pinned FFmpeg 7.1.1. The flow switches
+to the Cabin household, favorites the lamp, changes its brightness, and
+checks that the value survives reopening the device. See the
+[Spix RPC reference](https://github.com/faaxm/spix/blob/57cf7105e1250b999104d6439df7f449ba1afe93/docs/rpc-api.md)
+for available commands.
 
 ```sh
-just spix=ON configure
-just build-gui
-python3 tests/spix_device_flow.py \
-  build-just/debug/YandexHomeDesktop.app/Contents/MacOS/YandexHomeDesktop \
-  --gif build-just/spix-device-flow.gif
+just spix=ON test-e2e CabinLamp
+just spix=ON test-e2e CabinLamp --record
 ```
 
-Omit `--gif` to run the same assertions using only Python's standard library.
+Use a build directory configured with `spix=ON`. If reusing a build directory
+that had Spix disabled, first run `just spix=ON configure`. With FFmpeg on
+PATH, the report includes an **Open GIF** link by default. Pass `--record` to
+require GIF generation. Open the report path printed by the recipe to see
+test output, application logs, and captured media. In Windows CI the same
+files are included in the `windows-spix-test-reports` artifact.
 
 ### Build ZIP archives
 

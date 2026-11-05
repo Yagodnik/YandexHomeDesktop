@@ -13,6 +13,7 @@ import time
 import unittest
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "test_catalog.py"
+sys.path.insert(0, str(SCRIPT.parent))
 spec = importlib.util.spec_from_file_location("test_catalog", SCRIPT)
 catalog = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(catalog)
@@ -189,6 +190,36 @@ class CTestExecutionTests(unittest.TestCase):
                                         "directory": str(directory), "value": "a value;with semicolon"})
             self.assertNotEqual(catalog.run_selection(directory, "", self.ctest, tests, {"Example": {"Fail"}}, 1), 0)
             self.assertEqual(list(directory.glob("test-selection-*")), [])
+
+    def test_failed_test_report_keeps_output_and_artifact_links(self):
+        with tempfile.TemporaryDirectory() as temp:
+            directory = Path(temp).resolve()
+            script = (
+                "import os, pathlib, sys\n"
+                "artifacts = pathlib.Path(os.environ['YH_TEST_ARTIFACT_DIR']) / 'Example'\n"
+                "artifacts.mkdir()\n"
+                "(artifacts / 'app.log').write_text('app startup')\n"
+                "(artifacts / 'failure.png').touch()\n"
+                "(artifacts / 'playback.gif').touch()\n"
+                "print('failed <check>')\n"
+                "sys.exit(1)\n"
+            )
+            record = test_record(command=[sys.executable, "-c", script])
+            catalog_path = directory / "catalog.json"
+            entry = dict(suite(), description="Checks <example> behavior")
+            catalog_path.write_text(json.dumps({"suites": [entry]}), encoding="utf-8")
+            status = catalog.run_selection(directory, "", self.ctest, {"Example": record},
+                                           {"Example": None}, 1, catalog_path=catalog_path)
+            self.assertNotEqual(status, 0)
+            report, = (directory / "test-reports").iterdir()
+            html = (report / "index.html").read_text(encoding="utf-8")
+            self.assertIn("<td>failed</td>", html)
+            for filename in ("app.log", "failure.png", "playback.gif"):
+                self.assertIn(f'href="Example/{filename}"', html)
+            self.assertIn('href="Example/playback.gif">Open GIF</a>', html)
+            self.assertIn("Checks &lt;example&gt; behavior", html)
+            self.assertNotIn("<img", html)
+            self.assertIn("failed <check>", (report / "output-1.txt").read_text(encoding="utf-8"))
 
     def test_ctest_enforces_the_registered_timeout(self):
         with tempfile.TemporaryDirectory() as temp:

@@ -6,6 +6,32 @@ owns execution, environments, working directories, and timeouts.
 `scripts/test_catalog.py` discovers actual runners instead of parsing C++/QML.
 The tool uses Python 3.9+ and the standard library only.
 
+## Test suites and reports
+
+Use the Just recipes locally and in CI. The recipes build the selected profile
+and invoke CTest with the registered test commands, environments, and timeouts.
+
+| Directory | Recipe | Scope |
+| --- | --- | --- |
+| `tests/unit/` | `just test-unit` | In-process C++ checks, including model and service integration with local dependencies |
+| `tests/ui/` | `just test-ui` | Offscreen QML page and component checks |
+| `tests/e2e/` | `just spix=ON test-e2e` | Spix checks against the running desktop executable |
+| `tests/process/` | `just test-process` | External executable, local IPC, and SDK checks |
+
+Run `just test` for all tests enabled in the current profile. Use a suite or
+case ID to narrow any of the suite recipes, for example `just test-ui HomeUi`
+or `just test-unit DeviceControl::EmptyAttributesStillInitializeViewModel`.
+Use `just tests-list --layer ui` to browse the catalog by type.
+
+Each run prints the path to an offline HTML report under
+`<build-dir>/test-reports/run-*/index.html`. Open it for test descriptions,
+status, duration, labels, and links to test output. Reports are written for failing runs too.
+Spix reports include the app log. Fixture flows also save screenshots at
+named checkpoints and attempt a final screenshot on failure. With FFmpeg on
+PATH, the report links to a GIF assembled from those checkpoints. The encoder
+runs after the test. Pass `--record` when GIF generation is required. GitHub
+Actions uploads the report directories with their linked files.
+
 ## Find tests
 
 These commands work before a build is configured:
@@ -89,7 +115,7 @@ CTest installation.
 The former `All` runner is split into `Serialization`, `Api`, `ApiBoundary`,
 `ModelBoundary`, `Capabilities`, and `Models`. Each invokes one Qt test class;
 all existing assertions remain in their original source files. The catalog
-groups suites into `unit`, `integration`, `ui`, `process`, and `tooling` layers.
+groups suites into `unit`, `ui`, `e2e`, `process`, and `tooling` layers.
 Feature tags and layer names are also CTest labels.
 
 Each suite entry has an `id`, behavior `description`, `features`, `layer`,
@@ -99,11 +125,12 @@ of the guarantee checked. A case can override `source` when a suite spans
 multiple files. Legacy smoke cases without assertions are described as such.
 Suite/case `requires` arrays identify actual compile
 conditions: `BUILD_DESKTOP_APP`, `BUILD_CLI_APP`, `BUILD_REST_APP`,
-`YH_BUILD_REST_ADAPTER`, and `Debug`. Requirements describe whether the test is
+`YH_BUILD_REST_ADAPTER`, `YH_ENABLE_SPIX`, and `Debug`. Requirements describe whether the test is
 compiled, rather than suppressing a test whose assertions fail.
 
 When adding a test, add its description to the catalog in the same change.
-Preserve case IDs when the checked behavior is unchanged. For a new suite,
+Preserve test names when the checked behavior is unchanged. Moved UI cases use
+their new suite prefix, such as `HomeUi::PageStateAndHouseholdClicksReachViewModel`. For a new suite,
 register it with `yh_add_test(NAME ... COMMAND ...)`; this reads labels from the
 catalog and supplies a default 30-second timeout. Override properties with
 `set_tests_properties` when needed. Custom Qt runners must forward `-functions`
@@ -126,8 +153,8 @@ dependency. `TestTooling` checks exact selection, profile filtering, error
 handling, argument/environment preservation, and real CTest timeouts/failures.
 Each CI platform runs the full enabled CTest suite once in Release, including
 catalog validation and `TestTooling`. Windows/macOS cover desktop/QML suites;
-Linux covers portable suites. Debug-only fixture process cases require a local
-Debug profile. Use the selection recipes above for focused local verification.
+Linux covers portable suites. Windows also runs a Release Spix smoke test and
+the Cabin lamp flow in a Debug Spix profile. Use the selection recipes above for focused local verification.
 
 ## Choose verification for a feature
 
@@ -139,17 +166,19 @@ Changes to shared contracts or test infrastructure usually warrant all tests
 in the affected desktop and portable profiles. Report the selected IDs/tags,
 configuration, result, and unavailable or skipped coverage.
 
-## Standalone Spix flows
+## Spix flows
 
 Use Spix for end-to-end checks of the running desktop executable over XML-RPC.
 See the [build guide](build.md#spix-ui-automation) for the opt-in build and
-recording commands. The Release smoke test in Windows CI uses
-`desktop_session` directly. Debug fixture flows use the same harness with
-`run_fixture_cli` to launch a fresh app with `--fake-api` and expose the optional
-`--gif` argument.
+recording commands. Register flows in `tests/e2e/CMakeLists.txt` and in the
+catalog. Keep fixtures credential-free, use existing QML object names when
+possible, and wait for an observable result after input. `page_ready` checks
+visibility and stack transition state. Use `in_window` for animated items that
+can report visible while offscreen. Each Spix test uses the same CTest
+resource lock for port 9000.
 
 ```python
-from spix_harness import WINDOW, run_fixture_cli
+from spix_harness import WINDOW, run_flow_cli
 
 
 def run_flow(session):
@@ -159,14 +188,11 @@ def run_flow(session):
 
 
 if __name__ == "__main__":
-    run_fixture_cli(run_flow, "Verify the fixture app reaches the Devices tab")
+    run_flow_cli("ExampleFlow", run_flow, "Verify the Devices tab", fixture=True)
 ```
 
-Put standalone scripts alongside `tests/spix_device_flow.py`. Keep selectors
-and assertions in the flow, using existing QML object names when possible.
-Use `session.rpc` for input and property reads, then wait for an observable
-result. `page_ready` checks visibility and stack transition state. Use
-`in_window` when an animated item can report visible while it is offscreen.
-Checkpoints optionally record the window and add no recording delays when
-running without `--gif`. Run these scripts one at a time because each app
-instance uses the same loopback port.
+The desktop logger includes UTC timestamps, severity, process ID, and Qt log
+category. Set `QT_LOGGING_RULES` to control categories such as
+`yh.devices.commands`. To enable Qt diagnostics for the CLI or REST executable,
+set `YH_DIAGNOSTIC_LOG` to a writable file path. They append diagnostics to
+that file while preserving their normal stdout and stderr output.

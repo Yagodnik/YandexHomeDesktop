@@ -37,6 +37,24 @@ runs after the test, and the report links to the resulting GIF. Pass
 `--record` when GIF generation is required. GitHub Actions uploads the report
 directories with their linked files.
 
+### GitHub Actions
+
+The Linux, macOS, and Windows Release workflows run their configured suites and
+upload a platform-specific test report. Windows also runs the Spix smoke test.
+
+To run the full Windows Debug suite, open **Actions → Windows Release build →
+Run workflow** and enable `full_tests`. To enable it for pull requests, set the
+repository Actions variable `CI_FULL_TESTS` to `true` under **Settings → Secrets
+and variables → Actions → Variables**. Unset it or set it to `false` to turn off
+the extra PR job. The manual checkbox controls manual runs independently.
+
+The Debug job runs unit, QML UI, process, and Spix end-to-end tests, including
+fixture flows, using the example OAuth configuration. Download and extract
+`windows-full-test-report` from the run's **Artifacts** section and open
+`run-*/index.html`. The bundle includes JUnit XML, test logs, and available Spix
+screenshots and GIFs. It is retained for seven days and is uploaded even when
+tests fail.
+
 ## Find tests
 
 These commands work before a build is configured:

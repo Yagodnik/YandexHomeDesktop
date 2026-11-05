@@ -9,8 +9,8 @@ executable and runs the worker with an invalid GUI platform to check headless st
 The CI workflows are `.github/workflows/ci-windows.yml`, `ci-macos.yml`, and
 `ci-linux.yml`. They run for pull requests targeting `main`, `dev`, or
 `refactoring`, or when started manually. Each workflow builds Release with Ninja and precompiled headers, runs the
-tests through Just, and verifies its package. Windows also runs Spix checks
-in opt-in Release and Debug builds.
+tests through Just, and verifies its package. Windows also runs the Spix smoke
+test and offers an [opt-in full Debug test job](testing.md#github-actions).
 Ordinary branch pushes do not trigger CI.
 
 | Workflow | Build profile | Actions artifact |
@@ -282,9 +282,9 @@ with ServerProxy("http://127.0.0.1:9000") as app:
     print(app.getStringProperty("mainWindow", "title"))
 ```
 
-Windows CI configures the opt-in Release GUI, reconfigures it offline, then
-runs `just test-e2e SpixSmoke` with that profile. It also runs the full Spix
-suite in a separate Debug profile using pinned FFmpeg 7.1.1. See the
+Windows CI configures the Spix-enabled Release GUI, reconfigures it offline,
+then runs `just test-e2e SpixSmoke` with that profile. The opt-in Debug job
+runs `just tests-run --all --record` using pinned FFmpeg 7.1.1. See the
 [Spix RPC reference](https://github.com/faaxm/spix/blob/57cf7105e1250b999104d6439df7f449ba1afe93/docs/rpc-api.md)
 for available commands.
 
@@ -298,8 +298,9 @@ that had Spix disabled, first run `just spix=ON configure`. With FFmpeg on
 PATH, the report includes an **Open GIF** link to a live recording of each
 fixture flow. Pass `--record` to require GIF generation. Open the report path
 printed by the recipe to see test output, application logs, and settled
-checkpoint screenshots. In Windows CI the same files are included in the
-`windows-spix-test-reports` artifact.
+checkpoint screenshots. The Windows Debug job uploads these files in
+`windows-full-test-report`. The Release smoke report is available in
+`windows-spix-test-reports`.
 
 ### Build ZIP archives
 

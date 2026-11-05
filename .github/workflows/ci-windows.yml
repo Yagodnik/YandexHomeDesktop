@@ -4,6 +4,11 @@ on:
   pull_request:
     branches: [main, dev, refactoring]
   workflow_dispatch:
+    inputs:
+      full_tests:
+        description: Run the full Debug suite, including Spix end-to-end tests
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -61,26 +66,12 @@ jobs:
           just @profile test-e2e SpixSmoke
           if ($LASTEXITCODE -ne 0) { throw 'Spix smoke test failed' }
 
-      - name: Install pinned FFmpeg for Spix playback
-        run: choco install ffmpeg --version=7.1.1 --allow-downgrade --no-progress -y
-
-      - name: Run the Debug fixture through the Spix suite
-        shell: pwsh
-        run: |
-          $profile = @('config=Debug', 'build_dir=build-just/spix-debug', 'spix=ON', 'cli_app=OFF', 'rest_app=OFF')
-          just @profile configure -DCMAKE_CXX_COMPILER=g++.exe -DBUILD_SHORTCUTS_APP=OFF
-          if ($LASTEXITCODE -ne 0) { throw 'Spix fixture configuration failed' }
-          just @profile test-e2e --record
-          if ($LASTEXITCODE -ne 0) { throw 'Spix fixture suite failed' }
-
-      - name: Upload Spix test reports
+      - name: Upload Spix smoke test report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: windows-spix-test-reports
-          path: |
-            build-just/release/test-reports/
-            build-just/spix-debug/test-reports/
+          path: build-just/release/test-reports/
           retention-days: 7
 
       - name: Check build ZIP recipe
@@ -143,4 +134,53 @@ jobs:
             build-just/package/Testing/Temporary/*.log
             build-just/package/Testing/*.txt
             build-just/*/CMakeFiles/CMakeConfigureLog.yaml
+          retention-days: 7
+
+  full-tests:
+    name: Windows Debug full test suite
+    if: >-
+      (github.event_name == 'workflow_dispatch' && inputs.full_tests) ||
+      (github.event_name == 'pull_request' && vars.CI_FULL_TESTS == 'true')
+    runs-on: windows-2022
+    env:
+      QT_FORCE_STDERR_LOGGING: '1'
+      YH_JUST_BUILD_DIR: build-just/full-tests
+      YH_JUST_CONFIG: Debug
+      YH_JUST_SPIX: 'ON'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install just
+        uses: extractions/setup-just@v4
+        with:
+          just-version: '1.51.0'
+
+      - name: Select Git Bash for recipes (Bash 3.2+)
+        shell: pwsh
+        run: |
+          $bashDirectory = Join-Path $env:ProgramFiles 'Git\bin'
+          if (-not (Test-Path "$bashDirectory\bash.exe")) { throw 'Git Bash is required' }
+          $bashDirectory >> $env:GITHUB_PATH
+
+      - name: Install Qt and matching MinGW
+        uses: ./.github/actions/setup-qt
+        with:
+          host: windows
+
+      - name: Install pinned FFmpeg for Spix playback
+        run: choco install ffmpeg --version=7.1.1 --allow-downgrade --no-progress -y
+
+      - name: Configure Debug desktop with Spix
+        run: just configure '-DCMAKE_CXX_COMPILER=g++.exe'
+
+      - name: Run all Debug test suites and record Spix playback
+        id: run-tests
+        run: just tests-run --all --record
+
+      - name: Upload full test report
+        if: ${{ !cancelled() && steps.run-tests.outcome != 'skipped' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-full-test-report
+          path: build-just/full-tests/test-reports/
           retention-days: 7

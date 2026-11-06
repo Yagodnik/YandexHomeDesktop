@@ -1,21 +1,10 @@
 name: macOS Release build
 
 on:
-  pull_request:
-    branches: [main, dev, refactoring]
-  workflow_dispatch:
-    inputs:
-      tray_tests:
-        description: Run native tray tests on dedicated interactive macOS runners
-        type: boolean
-        default: false
+  workflow_call:
 
 permissions:
   contents: read
-
-concurrency:
-  group: macos-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   test:
@@ -42,7 +31,7 @@ jobs:
 
       - name: Build, test, and package macOS installer
         run: >-
-          just package_build_dir=build generator=Ninja pch=ON jobs=3
+          just package_build_dir=build generator=Ninja pch=ON spix=OFF jobs=3
           package-macos -DCMAKE_OSX_ARCHITECTURES=arm64
 
       - name: Upload macOS package
@@ -53,6 +42,11 @@ jobs:
           if-no-files-found: error
           compression-level: 0
           retention-days: 7
+
+      - name: Smoke-test the macOS desktop window
+        run: |
+          just config=Release build_dir=build spix=ON configure -DYH_ENABLE_PACKAGING=OFF
+          just config=Release build_dir=build spix=ON jobs=3 test-e2e SpixSmoke
 
       - name: Upload macos test report
         if: always()
@@ -71,9 +65,3 @@ jobs:
             build/Testing/Temporary/*.log
             build/CMakeFiles/CMakeConfigureLog.yaml
           retention-days: 7
-
-  native-tray:
-    uses: ./.github/workflows/ci-native-tray.yml
-    with:
-      platform: macOS
-      manual: ${{ inputs.tray_tests == true }}

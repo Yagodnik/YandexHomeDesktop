@@ -1,0 +1,125 @@
+name: Desktop CI
+
+on:
+  pull_request:
+    branches: [main, dev, refactoring]
+  workflow_dispatch:
+    inputs:
+      full_tests:
+        description: Run Debug fixture E2E on all platforms and the full Windows Debug suite
+        type: boolean
+        default: false
+      tray_tests:
+        description: Run native tray tests on dedicated interactive Windows and macOS runners
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows:
+    uses: ./.github/workflows/ci-windows.yml
+
+  macos:
+    uses: ./.github/workflows/ci-macos.yml
+
+  linux:
+    uses: ./.github/workflows/ci-linux.yml
+
+  debug-tests:
+    name: Debug tests (${{ matrix.platform }})
+    if: >-
+      (github.event_name == 'workflow_dispatch' && inputs.full_tests) ||
+      (github.event_name == 'pull_request' && vars.CI_FULL_TESTS == 'true')
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: windows
+            runner: windows-2022
+            qt-host: windows
+            compiler: g++.exe
+          - platform: macos
+            runner: macos-15
+            qt-host: mac
+            compiler: clang++
+          - platform: linux
+            runner: ubuntu-24.04
+            qt-host: linux
+            compiler: g++-13
+    runs-on: ${{ matrix.runner }}
+    env:
+      QT_FORCE_STDERR_LOGGING: '1'
+      YH_JUST_BUILD_DIR: build-just/full-tests
+      YH_JUST_CONFIG: Debug
+      YH_JUST_DESKTOP: 'ON'
+      YH_JUST_SPIX: 'ON'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: extractions/setup-just@v4
+        with:
+          just-version: '1.51.0'
+
+      - name: Select Git Bash for Windows recipes
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $bashDirectory = Join-Path $env:ProgramFiles 'Git\bin'
+          if (-not (Test-Path "$bashDirectory\bash.exe")) { throw 'Git Bash is required' }
+          $bashDirectory >> $env:GITHUB_PATH
+
+      - name: Select Xcode on macOS
+        if: runner.os == 'macOS'
+        run: echo 'DEVELOPER_DIR=/Applications/Xcode_16.4.app/Contents/Developer' >> "$GITHUB_ENV"
+
+      - uses: ./.github/actions/setup-qt
+        with:
+          host: ${{ matrix.qt-host }}
+
+      - name: Install Linux desktop dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libsecret-1-dev libgl-dev libegl-dev libxkbcommon-dev libxcb-cursor0
+
+      - name: Install pinned FFmpeg for Windows playback
+        if: runner.os == 'Windows'
+        run: choco install ffmpeg --version=7.1.1 --allow-downgrade --no-progress -y
+
+      - name: Configure Debug desktop with Spix
+        env:
+          YH_CI_COMPILER: ${{ matrix.compiler }}
+        shell: bash
+        run: just configure "-DCMAKE_CXX_COMPILER=$YH_CI_COMPILER"
+
+      - name: Run all Windows Debug suites and record Spix playback
+        if: runner.os == 'Windows'
+        run: just tests-run --all --record
+
+      - name: Run Debug fixture E2E
+        if: runner.os != 'Windows'
+        run: just test-e2e
+
+      - name: Upload Debug test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform }}-full-test-report
+          path: build-just/full-tests/test-reports/
+          retention-days: 7
+
+  native-tray:
+    if: github.event_name == 'workflow_dispatch' && inputs.tray_tests
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [Windows, macOS]
+    uses: ./.github/workflows/ci-native-tray.yml
+    with:
+      platform: ${{ matrix.platform }}

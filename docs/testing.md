@@ -39,21 +39,22 @@ directories with their linked files.
 
 ### GitHub Actions
 
-The Linux, macOS, and Windows Release workflows run their configured suites and
-upload a platform-specific test report. Windows and Linux also run the Spix smoke test.
+**Desktop CI** runs Release tests, packaging, and the Spix smoke test on
+Linux, macOS, and Windows. Each platform uploads a test report with its
+Release test and smoke results.
 
-To run the full Windows Debug suite, open **Actions → Windows Release build →
-Run workflow** and enable `full_tests`. To enable it for pull requests, set the
+For Debug E2E, open **Actions → Desktop CI → Run workflow** and enable
+`full_tests`. To enable it for pull requests, set the
 repository Actions variable `CI_FULL_TESTS` to `true` under **Settings → Secrets
 and variables → Actions → Variables**. Unset it or set it to `false` to turn off
 the extra PR job. The manual checkbox controls manual runs independently.
 
-The Debug job runs unit, QML UI, process, and Spix end-to-end tests, including
-fixture flows, using the example OAuth configuration. Download and extract
-`windows-full-test-report` from the run's **Artifacts** section and open
-`run-*/index.html`. The bundle includes JUnit XML, test logs, and available Spix
-screenshots and GIFs. It is retained for seven days and is uploaded even when
-tests fail.
+All three Debug jobs run the supported Spix fixture flows with the example
+OAuth configuration. Windows also runs the full unit, QML UI, and process
+suites and requires GIF recording. Download and extract the platform's
+`*-full-test-report` artifact, then open `run-*/index.html`. The bundle
+includes JUnit XML, test logs, and available screenshots and GIFs. Reports
+are retained for seven days and uploaded even when tests fail.
 
 ## Find tests
 
@@ -176,8 +177,8 @@ dependency. `TestTooling` checks exact selection, profile filtering, error
 handling, argument/environment preservation, and real CTest timeouts/failures.
 Each CI platform runs the full enabled CTest suite once in Release, including
 catalog validation and `TestTooling`. Windows, macOS, and Linux cover
-desktop/QML suites. Windows and Linux run a Release Spix smoke test, and the
-optional Windows Debug job runs all fixture flows.
+desktop/QML suites and a Release Spix smoke test. Optional Debug jobs run
+the fixture flows on all three platforms.
 
 ## Choose verification for a feature
 
@@ -278,8 +279,8 @@ tray suite is available on Windows and macOS.
 
 #### Native tray CI
 
-The Windows and macOS build workflows each run two optional native tray jobs
-on dedicated self-hosted desktops. Register runners with the standard OS
+Desktop CI can run two optional native tray jobs per platform on dedicated
+Windows and macOS self-hosted desktops. Register runners with the standard OS
 label and the profile label in the table. Provision CMake, Ninja, Git Bash on
 Windows, and the interactive desktop prerequisites above. The jobs install
 the pinned Qt kit and build from the example OAuth configuration.
@@ -299,7 +300,7 @@ notification icon exercises the DPI conversion. On Windows, pin the icon
 for the checkout's `build-just/native-tray/YandexHomeDesktop.exe`.
 
 Keep the dedicated runners restricted to trusted workflows. Enable
-`tray_tests` when manually running a Windows or macOS build on `main` or
+`tray_tests` when manually running Desktop CI on `main` or
 `dev`. Pull-request runs use the hosted build jobs. Each tray job uploads its report and
 available full-display screenshots to the same build run.
 

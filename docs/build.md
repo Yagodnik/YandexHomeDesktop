@@ -6,13 +6,12 @@ and keeps REST startup out of the Dock. No external plist installation is needed
 The REST process test asks CoreFoundation to read that identity from the built
 executable and runs the worker with an invalid GUI platform to check headless startup.
 
-The CI workflows are `.github/workflows/ci-windows.yml`, `ci-macos.yml`, and
-`ci-linux.yml`. They run for pull requests targeting `main`, `dev`, or
-`refactoring`, or when started manually. Each workflow builds Release with Ninja and precompiled headers, runs the
-tests through Just, and verifies its package. Windows also runs the Spix smoke
-test and offers an [opt-in full Debug test job](testing.md#github-actions).
-The Windows and macOS builds can include [native tray jobs](testing.md#native-tray-ci)
-on dedicated desktops when enabled for a manual run on `main` or `dev`.
+The **Desktop CI** workflow runs for pull requests targeting `main`, `dev`,
+or `refactoring`, or when started manually. It builds Release on Windows,
+macOS, and Linux with Ninja and precompiled headers, runs the tests through
+Just, verifies the packages, and smoke-tests the desktop with Spix.
+The same run can include [Debug fixture tests](testing.md#github-actions)
+and [native tray jobs](testing.md#native-tray-ci).
 
 | Workflow | Build profile | Actions artifact |
 | --- | --- | --- |
@@ -303,9 +302,12 @@ with ServerProxy("http://127.0.0.1:9000") as app:
     print(app.getStringProperty("mainWindow", "title"))
 ```
 
-Windows CI configures the Spix-enabled Release GUI and native tray test helper,
-reconfigures it offline, then runs `just test-e2e SpixSmoke` with that profile. The opt-in Debug job
-runs `just tests-run --all --record` using pinned FFmpeg 7.1.1. See the
+After packaging with Spix disabled, each Release job enables Spix in the same
+build directory and runs `just test-e2e SpixSmoke`. Ninja reuses the existing
+objects and dependencies where their build inputs are unchanged. Windows also
+builds its tray helper and checks offline Spix reconfiguration. The opt-in
+Windows Debug job runs `just tests-run --all --record` using pinned FFmpeg
+7.1.1. See the
 [Spix RPC reference](https://github.com/faaxm/spix/blob/57cf7105e1250b999104d6439df7f449ba1afe93/docs/rpc-api.md)
 for available commands.
 
@@ -319,9 +321,9 @@ that had Spix disabled, first run `just spix=ON configure`. With FFmpeg on
 PATH, the report includes an **Open GIF** link to a live recording of each
 fixture flow. Pass `--record` to require GIF generation. Open the report path
 printed by the recipe to see test output, application logs, and settled
-checkpoint screenshots. The Windows Debug job uploads these files in
-`windows-full-test-report`. The Release smoke report is available in
-`windows-spix-test-reports`.
+checkpoint screenshots. Debug CI uploads them in the platform's
+`*-full-test-report` artifact. The Release smoke report is included in the
+platform's `*-test-report` artifact.
 
 ### Build ZIP archives
 

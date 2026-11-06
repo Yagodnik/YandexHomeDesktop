@@ -6,9 +6,6 @@ on:
       platform:
         required: true
         type: string
-      manual:
-        type: boolean
-        default: false
 
 permissions:
   contents: read
@@ -17,8 +14,8 @@ jobs:
   tray-placement:
     if: >-
       (github.ref_name == github.event.repository.default_branch || github.ref_name == 'dev') &&
-      github.event_name == 'workflow_dispatch' && inputs.manual
-    name: Tray placement (${{ matrix.profile }})
+      github.event_name == 'workflow_dispatch'
+    name: Tray placement (${{ inputs.platform }}, ${{ matrix.profile }})
     runs-on: [self-hosted, "${{ inputs.platform }}", "${{ matrix.profile }}"]
     timeout-minutes: 45
     strategy:

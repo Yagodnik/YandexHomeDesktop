@@ -1,17 +1,10 @@
 name: Linux Release build
 
 on:
-  pull_request:
-    branches: [main, dev, refactoring]
-  workflow_dispatch:
   workflow_call:
 
 permissions:
   contents: read
-
-concurrency:
-  group: linux-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   test:
@@ -41,13 +34,8 @@ jobs:
 
       - name: Build, test, and package Linux desktop and console applications
         run: >-
-          just desktop=ON package_build_dir=build generator=Ninja pch=ON
+          just desktop=ON package_build_dir=build generator=Ninja pch=ON spix=OFF
           package-linux -DCMAKE_CXX_COMPILER=g++-13
-
-      - name: Smoke-test the Linux desktop window
-        run: |
-          just desktop=ON config=Release build_dir=build spix=ON configure -DYH_ENABLE_PACKAGING=OFF
-          just desktop=ON config=Release build_dir=build spix=ON test-e2e SpixSmoke
 
       - name: Upload Linux package
         uses: actions/upload-artifact@v4
@@ -57,6 +45,11 @@ jobs:
           if-no-files-found: error
           compression-level: 0
           retention-days: 7
+
+      - name: Smoke-test the Linux desktop window
+        run: |
+          just desktop=ON config=Release build_dir=build spix=ON configure -DYH_ENABLE_PACKAGING=OFF
+          just desktop=ON config=Release build_dir=build spix=ON test-e2e SpixSmoke
 
       - name: Upload linux test report
         if: always()

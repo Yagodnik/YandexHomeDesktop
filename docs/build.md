@@ -12,7 +12,7 @@ The CI workflows are `.github/workflows/ci-windows.yml`, `ci-macos.yml`, and
 tests through Just, and verifies its package. Windows also runs the Spix smoke
 test and offers an [opt-in full Debug test job](testing.md#github-actions).
 The Windows and macOS builds can include [native tray jobs](testing.md#native-tray-ci)
-on dedicated desktops when enabled for a manual run or a push to `main` or `dev`.
+on dedicated desktops when enabled for a manual run on `main` or `dev`.
 
 | Workflow | Build profile | Actions artifact |
 | --- | --- | --- |

@@ -300,9 +300,7 @@ for the checkout's `build-just/native-tray/YandexHomeDesktop.exe`.
 
 Keep the dedicated runners restricted to trusted workflows. Enable
 `tray_tests` when manually running a Windows or macOS build on `main` or
-`dev`, or set the repository Actions variable `CI_NATIVE_TRAY` to `true`
-to run the build and tray jobs on pushes to those branches. Pull-request
-runs use the hosted build jobs. Each tray job uploads its report and
+`dev`. Pull-request runs use the hosted build jobs. Each tray job uploads its report and
 available full-display screenshots to the same build run.
 
 The desktop logger includes UTC timestamps, severity, process ID, and Qt log

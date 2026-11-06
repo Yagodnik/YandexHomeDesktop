@@ -3,8 +3,6 @@ name: Windows Release build
 on:
   pull_request:
     branches: [main, dev, refactoring]
-  push:
-    branches: [main, dev]
   workflow_dispatch:
     inputs:
       full_tests:
@@ -26,7 +24,6 @@ concurrency:
 jobs:
   test:
     name: Windows Release
-    if: github.event_name != 'push' || vars.CI_NATIVE_TRAY == 'true'
     runs-on: windows-2022
     env:
       QT_FORCE_STDERR_LOGGING: '1'

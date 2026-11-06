@@ -59,7 +59,7 @@ int Serve(QCoreApplication& app, const StartupOptions& options, Settings& settin
   ScenarioService scenarios(home_api);
   AccountService account(account_api);
   const auto routes = CreateRestRoutes(home, devices, scenarios, account,
-                                      server_configuration.client_token.has_value());
+                                       server_configuration.client_token.has_value());
   RestServer rest(routes, nullptr, timeout_ms, server_configuration.client_token);
   const auto port =
       options.rest_port.value_or(server_configuration.port.value_or(settings.GetRestPort()));

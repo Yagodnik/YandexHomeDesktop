@@ -10,7 +10,9 @@ struct RestServerConfiguration {
   std::optional<quint16> port;
   QString oauth_token;
   std::optional<QByteArray> client_token;
-  QString AuthMode() const { return client_token ? QStringLiteral("bearer") : QStringLiteral("none"); }
+  QString AuthMode() const {
+    return client_token ? QStringLiteral("bearer") : QStringLiteral("none");
+  }
   QString Url(quint16 port) const;
 };
 

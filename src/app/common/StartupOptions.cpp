@@ -27,23 +27,26 @@ std::expected<StartupOptions, QString> ParseStartupOptions(const QStringList& ar
       if (!options.mcp_auth.isEmpty()) {
         return std::unexpected(StartupMessages::tr("Duplicate option: --mcp-auth."));
       }
-      options.mcp_auth = argument == "--mcp-auth"
-                             ? arguments.value(++i)
-                             : argument.mid(QString("--mcp-auth=").size());
+      options.mcp_auth = argument == "--mcp-auth" ? arguments.value(++i)
+                                                  : argument.mid(QString("--mcp-auth=").size());
       if (options.mcp_auth != "bearer" && options.mcp_auth != "none") {
         return std::unexpected(StartupMessages::tr("--mcp-auth must be bearer or none."));
       }
     } else if (argument == "--mcp-port" || argument.startsWith("--mcp-port=")) {
-      if (options.mcp_port) return std::unexpected(StartupMessages::tr("Повторяющийся параметр: --mcp-port."));
-      const auto value = argument == "--mcp-port" ? arguments.value(++i) : argument.mid(QString("--mcp-port=").size());
+      if (options.mcp_port)
+        return std::unexpected(StartupMessages::tr("Повторяющийся параметр: --mcp-port."));
+      const auto value = argument == "--mcp-port" ? arguments.value(++i)
+                                                  : argument.mid(QString("--mcp-port=").size());
       bool valid = false;
       const auto port = value.toUInt(&valid);
-      if (!valid || port == 0 || port > 65535) return std::unexpected(StartupMessages::tr("--mcp-port должен быть от 1 до 65535."));
+      if (!valid || port == 0 || port > 65535)
+        return std::unexpected(StartupMessages::tr("--mcp-port должен быть от 1 до 65535."));
       options.mcp_port = static_cast<quint16>(port);
-    } else if (argument == "--enable-mcp" || argument == "--disable-mcp" || argument == "--status-mcp") {
+    } else if (argument == "--enable-mcp" || argument == "--disable-mcp" ||
+               argument == "--status-mcp") {
       if (options.mcp_command != StartupOptions::McpCommand::None)
         return std::unexpected(StartupMessages::tr("Укажите только одну MCP-команду."));
-      options.mcp_command = argument == "--enable-mcp" ? StartupOptions::McpCommand::Enable
+      options.mcp_command = argument == "--enable-mcp"    ? StartupOptions::McpCommand::Enable
                             : argument == "--disable-mcp" ? StartupOptions::McpCommand::Disable
                                                           : StartupOptions::McpCommand::Status;
     } else if (argument == "--enable-rest" || argument == "--disable-rest" ||

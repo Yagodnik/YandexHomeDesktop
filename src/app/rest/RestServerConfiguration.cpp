@@ -48,12 +48,12 @@ std::expected<RestServerConfiguration, QString> LoadRestServerConfiguration(cons
   }
   const auto object = document.object();
   // From leaves absent members untouched; supply every field before decoding.
-  auto fields_object = Serialization::To(
-      RestConfigurationFields{.host = configuration.host.toString(),
-                              .port = 0,
-                              .oauth_token = {},
-                              .auth_mode = ClientAuthMode::None,
-                              .client_token = {}});
+  auto fields_object =
+      Serialization::To(RestConfigurationFields{.host = configuration.host.toString(),
+                                                .port = 0,
+                                                .oauth_token = {},
+                                                .auth_mode = ClientAuthMode::None,
+                                                .client_token = {}});
   for (auto field = object.begin(); field != object.end(); ++field) {
     if (!fields_object.contains(field.key())) {
       return std::unexpected(RestConfigurationMessages::tr("Unknown REST configuration field."));
@@ -85,12 +85,14 @@ std::expected<RestServerConfiguration, QString> LoadRestServerConfiguration(cons
   }
   if (fields.auth_mode == ClientAuthMode::Bearer) {
     static const QRegularExpression token_pattern(QStringLiteral(R"(\A[A-Za-z0-9._~+/-]+=*\z)"));
-    if (!object["client_token"].isString() || !token_pattern.match(fields.client_token).hasMatch()) {
-      return std::unexpected(RestConfigurationMessages::tr(
-          "Bearer authentication requires a valid client_token."));
+    if (!object["client_token"].isString() ||
+        !token_pattern.match(fields.client_token).hasMatch()) {
+      return std::unexpected(
+          RestConfigurationMessages::tr("Bearer authentication requires a valid client_token."));
     }
     if (fields.client_token == fields.oauth_token) {
-      return std::unexpected(RestConfigurationMessages::tr("client_token must differ from oauth_token."));
+      return std::unexpected(
+          RestConfigurationMessages::tr("client_token must differ from oauth_token."));
     }
     configuration.client_token = fields.client_token.toLatin1();
   } else if (object.contains("client_token") || !configuration.host.isLoopback()) {

@@ -12,24 +12,35 @@ int main(int argc, char** argv) {
   QCoreApplication app(argc, argv);
   app.setApplicationName("YandexHomeMcp");
   if (app.arguments().contains("--help") && app.arguments().contains("--json")) {
-    const auto help = QJsonDocument(QJsonObject{{"ok", true}, {"help", "YandexHomeMcp [--fake-api] [--fake-api-data <path>] [--mcp-auth bearer|none]"}}).toJson(QJsonDocument::Compact) + '\n';
+    const auto help =
+        QJsonDocument(
+            QJsonObject{
+                {"ok", true},
+                {"help",
+                 "YandexHomeMcp [--fake-api] [--fake-api-data <path>] [--mcp-auth bearer|none]"}})
+            .toJson(QJsonDocument::Compact) +
+        '\n';
     std::fwrite(help.constData(), 1, help.size(), stdout);
     return 0;
   }
   if (app.arguments().contains("--help")) {
-    std::fputs("YandexHomeMcp [--fake-api] [--fake-api-data <path>] [--mcp-auth bearer|none]\n", stdout);
+    std::fputs("YandexHomeMcp [--fake-api] [--fake-api-data <path>] [--mcp-auth bearer|none]\n",
+               stdout);
     return 0;
   }
   const auto options = ParseStartupOptions(app.arguments(), true, false, false, true);
   if (!options || options->rest_command != StartupOptions::RestCommand::None ||
-      options->mcp_command != StartupOptions::McpCommand::None || options->cli_arguments.size() != 1) return 2;
+      options->mcp_command != StartupOptions::McpCommand::None ||
+      options->cli_arguments.size() != 1)
+    return 2;
   const auto configuration = MakeMcpConfiguration(*options);
   const auto& gui = configuration.gui_endpoint;
   const auto& worker = configuration.worker.control_name;
   quint16 port = 0;
 
   WorkerControlServer control;
-  if (!control.Acquire(worker)) return 1;
+  if (!control.Acquire(worker))
+    return 1;
   const bool require_bearer = options->mcp_auth != "none";
   std::optional<QByteArray> token;
   if (require_bearer) {
@@ -53,7 +64,9 @@ int main(int argc, char** argv) {
       server.Stop();
       QTimer::singleShot(100, &app, &QCoreApplication::quit);
     }
-    QJsonObject status{{"ok", true}, {"running", running}, {"port", static_cast<int>(port)},
+    QJsonObject status{{"ok", true},
+                       {"running", running},
+                       {"port", static_cast<int>(port)},
                        {"url", QString("http://127.0.0.1:%1/mcp").arg(port)},
                        {"auth_mode", require_bearer ? "bearer" : "none"}};
     if (running && token) {
@@ -61,26 +74,36 @@ int main(int argc, char** argv) {
     }
     return status;
   });
-  if (!control.Listen()) return 1;
-  QObject::connect(&gui_client, &WorkerControlClient::finished, &app, [&](const QJsonObject& result) {
-    if (stopping) return;
-    if (!result.value("ok").toBool() || !result.value("running").toBool()) {
-      server.Stop();
-      app.exit(1);
-      return;
-    }
-    if (!running) {
-      const auto gui_port = result.value("port").toInt();
-      if (gui_port < 1 || gui_port > 65535) { app.exit(1); return; }
-      port = static_cast<quint16>(gui_port);
-      if (!server.Start(port)) { app.exit(1); return; }
-      running = true;
-    }
-  });
+  if (!control.Listen())
+    return 1;
+  QObject::connect(&gui_client, &WorkerControlClient::finished, &app,
+                   [&](const QJsonObject& result) {
+                     if (stopping)
+                       return;
+                     if (!result.value("ok").toBool() || !result.value("running").toBool()) {
+                       server.Stop();
+                       app.exit(1);
+                       return;
+                     }
+                     if (!running) {
+                       const auto gui_port = result.value("port").toInt();
+                       if (gui_port < 1 || gui_port > 65535) {
+                         app.exit(1);
+                         return;
+                       }
+                       port = static_cast<quint16>(gui_port);
+                       if (!server.Start(port)) {
+                         app.exit(1);
+                         return;
+                       }
+                       running = true;
+                     }
+                   });
   QTimer heartbeat;
   heartbeat.setInterval(5'000);
   QObject::connect(&heartbeat, &QTimer::timeout, &app, [&] {
-    if (!gui_client.IsBusy()) gui_client.Request(WorkerControlClient::Command::Send, {{"command", "status"}}, {}, 3'000);
+    if (!gui_client.IsBusy())
+      gui_client.Request(WorkerControlClient::Command::Send, {{"command", "status"}}, {}, 3'000);
   });
   QTimer::singleShot(0, &app, [&] {
     gui_client.Request(WorkerControlClient::Command::Send, {{"command", "status"}}, {}, 3'000);

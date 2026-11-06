@@ -9,7 +9,8 @@ config := env('YH_JUST_CONFIG', 'Debug')
 cli_app := env('YH_JUST_CLI_APP', 'ON')
 rest_app := env('YH_JUST_REST_APP', 'ON')
 desktop := env('YH_JUST_DESKTOP', if os() == 'linux' { 'OFF' } else { 'ON' })
-gui_executable := if os() == 'macos' { 'YandexHomeDesktop.app/Contents/MacOS/YandexHomeDesktop' } else if os() == 'windows' { 'YandexHomeDesktop.exe' } else { 'YandexHomeDesktop' }
+linux_desktop_bin := if os() == 'linux' { if desktop == 'ON' { 'bin/' } else { '' } } else { '' }
+gui_executable := if os() == 'macos' { 'YandexHomeDesktop.app/Contents/MacOS/YandexHomeDesktop' } else if os() == 'windows' { 'YandexHomeDesktop.exe' } else { 'bin/YandexHomeDesktop' }
 default_build_dir := if config =~ '^(Debug|Release)$' { 'build-just' / if desktop == 'OFF' { 'portable' / lowercase(config) } else { lowercase(config) } } else { '' }
 build_dir := env('YH_JUST_BUILD_DIR', default_build_dir)
 qt_prefix := env('YH_JUST_QT_PREFIX', env('CMAKE_PREFIX_PATH', env('QT_ROOT_DIR', '')))
@@ -159,11 +160,11 @@ demo-auth *args:
 
 # Build and run the console CLI, e.g. cli --fake-api devices list --json.
 cli *args: build-cli
-    bash scripts/launch.sh '{{ if os() == "windows" { "YandexHomeCli.exe" } else { "YandexHomeCli" } }}' "$@"
+    bash scripts/launch.sh '{{ if os() == "windows" { "YandexHomeCli.exe" } else { linux_desktop_bin + "YandexHomeCli" } }}' "$@"
 
 # Build and run the foreground REST worker, e.g. rest --fake-api --rest-port 9000.
 rest *args: build-rest
-    bash scripts/launch.sh '{{ if os() == "windows" { "YandexHomeRest.exe" } else { "YandexHomeRest" } }}' "$@"
+    bash scripts/launch.sh '{{ if os() == "windows" { "YandexHomeRest.exe" } else { linux_desktop_bin + "YandexHomeRest" } }}' "$@"
 
 # Build only the GUI and its background REST worker when enabled.
 build-gui: _configure-if-needed

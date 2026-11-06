@@ -1,5 +1,6 @@
 #include "GuiApp.h"
 
+#include <QCoreApplication>
 #include <QQmlContext>
 #include <QQuickStyle>
 #include <QFontDatabase>
@@ -63,24 +64,33 @@ GuiApp::GuiApp(AppContext& app_context, QObject* parent)
     : QObject(parent), app_context_(app_context) {
   QQuickStyle::setStyle("Basic");
 
+#ifdef YH_BUILD_QML_IMPORT_PATH
+  engine.addImportPath(QCoreApplication::applicationDirPath() + "/" YH_BUILD_QML_IMPORT_PATH);
+#endif
   const auto root_context = engine.rootContext();
 #ifdef YH_MCP_ENABLED
   const auto mcp_configuration = MakeMcpConfiguration(app_context.startup_options);
-  auto* mcp_host = new McpGuiHost(mcp_configuration.gui_endpoint, app_context.home_service,
-                                  app_context.device_service, app_context.scenario_service,
-                                  [auth = app_context.authorization_service] { return auth->IsAuthorized(); },
-                                  [settings = app_context.settings] { return settings->GetMcpPort(); },
-                                  [settings = app_context.settings](quint16 port) {
-                                    if (port == settings->GetRestPort()) return false;
-                                    settings->SetMcpPort(port);
-                                    return true;
-                                  },
-                                  app_context.app_);
+  auto* mcp_host = new McpGuiHost(
+      mcp_configuration.gui_endpoint, app_context.home_service, app_context.device_service,
+      app_context.scenario_service,
+      [auth = app_context.authorization_service] { return auth->IsAuthorized(); },
+      [settings = app_context.settings] { return settings->GetMcpPort(); },
+      [settings = app_context.settings](quint16 port) {
+        if (port == settings->GetRestPort())
+          return false;
+        settings->SetMcpPort(port);
+        return true;
+      },
+      app_context.app_);
   mcp_host->Start();
-  auto* mcp_model = new McpViewModel(mcp_configuration.worker, app_context.settings, app_context.app_);
+  auto* mcp_model =
+      new McpViewModel(mcp_configuration.worker, app_context.settings, app_context.app_);
   root_context->setContextProperty("mcpViewModel", mcp_model);
   connect(app_context.authorization_service, &IAuthorizationService::logout, mcp_model,
-          [mcp_model, mcp_host] { mcp_host->Reset(); mcp_model->SetEnabled(false); });
+          [mcp_model, mcp_host] {
+            mcp_host->Reset();
+            mcp_model->SetEnabled(false);
+          });
 #else
   root_context->setContextProperty("mcpViewModel", QVariant{});
 #endif
@@ -133,10 +143,12 @@ GuiApp::GuiApp(AppContext& app_context, QObject* parent)
     else
       app_context.platform_service->ShowAsApp();
   };
-  connect(app_context.settings, &Settings::trayModeEnabledChanged, app_context.app_, update_window_mode);
-  connect(app_context.settings, &Settings::notchEnabledChanged, app_context.app_, update_window_mode);
-  connect(app_context.platform_service, &PlatformService::notchSupportedChanged,
-          app_context.app_, update_window_mode);
+  connect(app_context.settings, &Settings::trayModeEnabledChanged, app_context.app_,
+          update_window_mode);
+  connect(app_context.settings, &Settings::notchEnabledChanged, app_context.app_,
+          update_window_mode);
+  connect(app_context.platform_service, &PlatformService::notchSupportedChanged, app_context.app_,
+          update_window_mode);
   const auto router = new Router(app_context.app_);
   const auto scenarios_view_model =
       new ScenariosViewModel(app_context.scenario_service, app_context.app_);

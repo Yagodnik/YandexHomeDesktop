@@ -22,6 +22,18 @@ qt_add_executable(appYandexHomeDesktop
   src/app/gui/GuiApp.cpp
   src/app/gui/GuiApp.h
 )
+add_dependencies(appYandexHomeDesktop YandexHomeDesktopUiplugin
+  YandexHomeDesktopPagesplugin YandexHomeDesktopComponentsplugin)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  # Resolve build-tree QML modules from the executable's location.
+  if(_multi_config)
+    set(_qml_relative_import_path "../..")
+  else()
+    set(_qml_relative_import_path "..")
+  endif()
+  target_compile_definitions(appYandexHomeDesktop PRIVATE
+    YH_BUILD_QML_IMPORT_PATH="${_qml_relative_import_path}")
+endif()
 target_compile_definitions(appYandexHomeDesktop PRIVATE "$<$<CONFIG:Debug>:YH_DEBUG_FAKE_API>")
 target_sources(appYandexHomeDesktop PRIVATE "$<$<CONFIG:Debug>:${DEBUG_FIXTURE_RESOURCES}>")
 if(YH_ENABLE_SPIX)

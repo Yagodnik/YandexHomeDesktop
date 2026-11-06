@@ -19,8 +19,6 @@ struct StartupOptions {
   QStringList cli_arguments;
 };
 
-std::expected<StartupOptions, QString> ParseStartupOptions(const QStringList& arguments,
-                                                           bool allow_fake_api,
-                                                           bool rest_worker = false,
-                                                           bool allow_fake_auth = false,
-                                                           bool mcp_worker = false);
+std::expected<StartupOptions, QString>
+ParseStartupOptions(const QStringList& arguments, bool allow_fake_api, bool rest_worker = false,
+                    bool allow_fake_auth = false, bool mcp_worker = false);

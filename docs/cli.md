@@ -12,7 +12,8 @@ before constructing the application. QtKeychain delivers completion callbacks
 through the native main queue; the default console dispatcher would leave these
 callbacks pending after the password prompt.
 
-The build produces `<build-dir>/YandexHomeCli` on macOS/Linux and
+The build produces `<build-dir>/YandexHomeCli` on macOS and in Linux headless
+profiles, `<build-dir>/bin/YandexHomeCli` in Linux desktop profiles, and
 `<build-dir>/YandexHomeCli.exe` on Windows. Installation places it alongside the
 Windows desktop executable, or inside
 `YandexHomeDesktop.app/Contents/MacOS/YandexHomeCli` on macOS. The macOS binary

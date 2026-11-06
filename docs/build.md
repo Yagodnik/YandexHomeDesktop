@@ -162,7 +162,7 @@ YandexHomeDesktop --fake-api --fake-api-data /path/to/fixture.json
 YandexHomeCli --fake-api --list-devices
 ```
 
-On macOS the executable is `<build-dir>/YandexHomeDesktop.app/Contents/MacOS/YandexHomeDesktop`; on Windows it is `<build-dir>/YandexHomeDesktop.exe`. Each executable accepts fixture flags: the GUI opens its UI, the CLI executes a command, and REST serves in the foreground. Release builds reject the flags and do not link the fixture API or bundle its data.
+The build-tree GUI is `<build-dir>/YandexHomeDesktop.app/Contents/MacOS/YandexHomeDesktop` on macOS, `<build-dir>/YandexHomeDesktop.exe` on Windows, and `<build-dir>/bin/YandexHomeDesktop` on Linux. Linux desktop builds place the CLI and workers alongside the GUI. With a multi-config Linux generator, `bin/` is inside the configuration directory. Each executable accepts fixture flags: the GUI opens its UI, the CLI executes a command, and REST serves in the foreground. Release builds reject the flags and do not link the fixture API or bundle its data.
 
 Copy `resources/debug/api.json` as the starting point for a custom fixture. `user_info` contains the usual home API response with devices, rooms, households, and scenarios. `account_info` provides a dummy display name, email, and stable `id` for account-specific room/favorite preferences. `device_info` maps device IDs to device-detail API responses. `latency_ms` controls the queued response delay (0–60000 ms). `scenario_errors` maps scenario IDs to execution failure messages; other active scenarios succeed locally. Set `user_info.status` to `error` and supply `message` to exercise loading failures.
 

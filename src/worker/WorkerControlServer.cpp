@@ -43,10 +43,11 @@ bool WorkerControlServer::Acquire(const QString& control_name) {
   // worker can acquire ownership before its launcher has committed its receipt.
   QSaveFile receipt(paths.worker);
   receipt.setDirectWriteFallback(false);
-  const auto pid = QByteArray::number(QCoreApplication::applicationPid());
+  const auto pid = QCoreApplication::applicationPid();
+  const auto bytes = EncodeReceipt({pid, ObserveProcess(pid)});
   if (!receipt.open(QIODevice::WriteOnly) ||
       !receipt.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner) ||
-      receipt.write(pid) != pid.size() || !receipt.commit()) {
+      receipt.write(bytes) != bytes.size() || !receipt.commit()) {
     error_ = "control_error";
     return false;
   }

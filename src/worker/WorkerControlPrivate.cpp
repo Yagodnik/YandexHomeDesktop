@@ -61,6 +61,27 @@ bool PrepareDirectory(const Paths& paths) {
 #endif
 }
 
+QDateTime ObserveProcess(qint64 pid) {
+#ifdef Q_OS_WIN
+  if (pid > 0 && pid <= std::numeric_limits<DWORD>::max()) {
+    // Use the same clock as the liveness check. A fresh child's creation
+    // time can be ahead of the wall clock or its receipt's file timestamp.
+    const auto process = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE,
+                                     static_cast<DWORD>(pid));
+    if (process) {
+      FILETIME creation, exit, kernel, user;
+      const bool has_creation = GetProcessTimes(process, &creation, &exit, &kernel, &user);
+      CloseHandle(process);
+      if (has_creation)
+        return QDateTime::fromMSecsSinceEpoch(UnixMilliseconds(creation));
+    }
+  }
+#else
+  Q_UNUSED(pid);
+#endif
+  return QDateTime::currentDateTimeUtc();
+}
+
 bool ProcessIsRunning(qint64 pid, const QDateTime& observed) {
   if (pid <= 0) {
     return false;
@@ -133,6 +154,11 @@ bool ProcessIsRunning(qint64 pid, const QDateTime& observed) {
 #endif
 }
 
+QByteArray EncodeReceipt(const Receipt& receipt) {
+  return QByteArray::number(receipt.pid) + '\n' +
+         QByteArray::number(receipt.observed.toMSecsSinceEpoch());
+}
+
 Receipt ReadReceipt(const QString& path) {
   QByteArray bytes;
   QDateTime written;
@@ -163,10 +189,16 @@ Receipt ReadReceipt(const QString& path) {
   written = record.fileTime(QFileDevice::FileModificationTime);
 #endif
   bool valid = false;
-  const auto pid = bytes.trimmed().toLongLong(&valid);
+  const auto fields = bytes.trimmed().split('\n');
+  const auto pid = fields.constFirst().toLongLong(&valid);
   if (!valid || pid <= 0)
     return {};
-  return {pid, written};
+  if (fields.size() == 1)
+    return {pid, written}; // Older receipts only stored the PID.
+  const auto observed = fields.at(1).toLongLong(&valid);
+  if (fields.size() != 2 || !valid)
+    return {};
+  return {pid, QDateTime::fromMSecsSinceEpoch(observed)};
 }
 
 void ClearReceipts(const Paths& paths, qint64 pid) {
@@ -174,7 +206,7 @@ void ClearReceipts(const Paths& paths, qint64 pid) {
   for (const auto& path : {paths.launch, paths.worker}) {
     const auto receipt = ReadReceipt(path);
     if (receipt.pid > 0 &&
-        (pid > 0 ? receipt.pid == pid : !ProcessIsRunning(receipt.pid, receipt.written)))
+        (pid > 0 ? receipt.pid == pid : !ProcessIsRunning(receipt.pid, receipt.observed)))
       QFile::remove(path);
   }
 }

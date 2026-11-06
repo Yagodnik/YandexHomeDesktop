@@ -37,6 +37,18 @@ QString Endpoint(const QTemporaryDir& directory) {
 #endif
 }
 
+QString EndpointFileBase(const QString& name) {
+#ifdef Q_OS_WIN
+  const auto digest =
+      QCryptographicHash::hash((QDir::homePath() + '/' + name).toUtf8(), QCryptographicHash::Sha256)
+          .toHex();
+  return QDir(QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation))
+      .filePath("YandexHome/run/" + QString::fromLatin1(digest));
+#else
+  return name;
+#endif
+}
+
 WorkerLaunchConfiguration Configuration(const QString& name, const QString& directory,
                                         const QString& behavior = "normal") {
   return {
@@ -220,15 +232,7 @@ private slots:
     QTemporaryDir directory;
     Cleanup cleanup{directory.path()};
     const auto name = Endpoint(directory);
-#ifdef Q_OS_WIN
-    const auto digest = QCryptographicHash::hash((QDir::homePath() + '/' + name).toUtf8(),
-                                                 QCryptographicHash::Sha256)
-                            .toHex();
-    const auto base = QDir(QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation))
-                          .filePath("YandexHome/run/" + QString::fromLatin1(digest));
-#else
-    const auto base = name;
-#endif
+    const auto base = EndpointFileBase(name);
     WorkerControlClient client(Configuration(name, directory.path()));
     QSignalSpy results(&client, &WorkerControlClient::finished);
     const auto lock_path = base + ".lock";
@@ -252,7 +256,8 @@ private slots:
     // Backdate records with our live PID to simulate PID reuse without waiting
     // for the OS to recycle a particular PID.
     QVERIFY(Write(launch_path, reused_pid));
-    for (const auto& path : {lock_path, launch_path, worker_path}) {
+    QVERIFY(Write(worker_path, reused_pid + "\n946684800000"));
+    for (const auto& path : {lock_path, launch_path}) {
       QFile file(path);
       QVERIFY(file.open(QIODevice::ReadWrite));
       QVERIFY(file.setFileTime(QDateTime::fromMSecsSinceEpoch(946'684'800'000),
@@ -719,6 +724,13 @@ private slots:
     QTRY_COMPARE(files.entryList({"spawned-*"}, QDir::Files).size(), 1);
     QTRY_COMPARE(start_results.size(), 1);
     QCOMPARE(Code(start_results), QString("timeout"));
+    {
+      QFile receipt(EndpointFileBase(configuration.control_name) + ".launch");
+      QVERIFY(receipt.open(QIODevice::ReadWrite));
+      // Filesystem time can precede the live child's creation timestamp.
+      QVERIFY(receipt.setFileTime(QDateTime::fromMSecsSinceEpoch(946'684'800'000),
+                                  QFileDevice::FileModificationTime));
+    }
     WorkerControlClient stopper(configuration);
     QSignalSpy stop_results(&stopper, &WorkerControlClient::finished);
     stopper.Request(Command::Stop, {}, {}, 5000);

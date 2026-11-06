@@ -102,9 +102,9 @@ bool WorkerControlClient::HasPendingWorker(Operation* operation) {
   }
   for (const auto& path : {operation->paths.worker, operation->paths.launch}) {
     const auto receipt = ReadReceipt(path);
-    if (ProcessIsRunning(receipt.pid, receipt.written)) {
+    if (ProcessIsRunning(receipt.pid, receipt.observed)) {
       operation->pid = receipt.pid;
-      operation->pid_observed = receipt.written;
+      operation->pid_observed = receipt.observed;
       return true;
     }
   }
@@ -214,8 +214,8 @@ void WorkerControlClient::Unavailable(Operation* operation) {
     }
     operation->launched = true;
     launched_pid_ = operation->pid;
-    pid_observed_ = operation->pid_observed = QDateTime::currentDateTimeUtc();
-    const auto bytes = QByteArray::number(operation->pid);
+    pid_observed_ = operation->pid_observed = ObserveProcess(operation->pid);
+    const auto bytes = EncodeReceipt({operation->pid, operation->pid_observed});
     if (receipt.write(bytes) != bytes.size() || !receipt.commit()) {
       // Retain the PID so this controller can still issue Stop; never claim
       // that a launched process has stopped when its receipt cannot be saved.
@@ -263,7 +263,7 @@ void WorkerControlClient::Receive(Operation* operation) {
   if (pid.toInteger() > 0) {
     operation->pid = pid.toInteger();
     launched_pid_ = operation->pid;
-    pid_observed_ = operation->pid_observed = QDateTime::currentDateTimeUtc();
+    pid_observed_ = operation->pid_observed = ObserveProcess(operation->pid);
   }
   if (operation->command == Command::Start && result["ok"].toBool() &&
       !result["running"].toBool()) {

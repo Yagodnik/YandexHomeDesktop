@@ -32,9 +32,10 @@ another controller can find a process before its control socket exists or after
 the launching controller times out or exits. Workers write a separate
 ownership receipt so both processes can publish independently. The receipts
 survive socket/server cleanup until process exit is
-observed. On macOS, Windows, and Linux the controller checks the process start
-time when available. A process that started after the receipt or ownership lock
-was written is treated as a different process, even if it has the same PID.
+observed. Receipts record the time the PID was observed. Windows uses the
+process creation time from the OS when available, avoiding a comparison with
+the filesystem clock. The controller rejects a newer process that reused the
+same PID. Legacy PID-only receipts use the file timestamp.
 
 Independent endpoint names have independent locks, receipts, and workers. REST
 keeps its per-user live/config/fixture identities. Absolute Unix endpoints use a

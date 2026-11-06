@@ -1714,7 +1714,7 @@
         },
         {
           "name": "DifferentControllerFindsTimedOutLaunchBeforeSocketExists",
-          "description": "Recover a pending child from its launch receipt after another controller times out."
+          "description": "Recover a pending child from its launch receipt after another controller times out, even when the file timestamp predates the child."
         },
         {
           "name": "StopTimeoutDoesNotClaimSuccessAndCanBeRetried",

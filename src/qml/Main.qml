@@ -14,7 +14,7 @@ TrayWindow {
   visible: false
   title: qsTr("Yandex Home Desktop")
   color: "transparent"
-  trayModeEnabled: settings.trayModeEnabled
+  trayModeEnabled: platformService.traySupported && settings.trayModeEnabled
   notchModeEnabled: settings.notchEnabled && !settings.trayModeEnabled && platformService.notchSupported
   popupMenuInHeader: pages.currentItem ? pages.currentItem.popupMenuInHeader : false
   popupQuitVisible: pages.currentItem ? pages.currentItem.popupQuitVisible : true
@@ -75,7 +75,7 @@ TrayWindow {
 
   SystemTrayIcon {
     id: trayIcon
-    visible: settings.trayModeEnabled
+    visible: window.trayModeEnabled
     icon.name: "Yandex Home Desktop"
     icon.source: "qrc:/images/icon.png"
 

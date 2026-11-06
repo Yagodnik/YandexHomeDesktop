@@ -13,7 +13,7 @@ Windows            |  MacOS
 
 # Сборка
 
-Для сборки на macOS и Windows нужны CMake 3.28+, Ninja, Qt 6.9+ (Quick, NetworkAuth, Widgets, Svg, Qt5Compat и LinguistTools) и компилятор C++23. CMake загрузит закреплённые версии Boost.Hana и QtKeychain. По умолчанию в приложение включается тестовая OAuth-конфигурация `resources/auth/example.json`: приложение соберётся, но вход в аккаунт с ней не работает.
+Для сборки на macOS, Windows и Linux нужны CMake 3.28+, Ninja, Qt 6.9+ и компилятор C++23. CMake загрузит закреплённые версии Boost.Hana и QtKeychain. По умолчанию в приложение включается тестовая OAuth-конфигурация `resources/auth/example.json`: приложение соберётся, но вход в аккаунт с ней не работает.
 
 ```sh
 cmake -S . -B build -G Ninja -DCMAKE_PREFIX_PATH=/path/to/Qt/6.x/macos -DBUILD_DESKTOP_APP=ON
@@ -34,6 +34,10 @@ just test
 
 Профили Debug, Release и переносимые тесты используют отдельные каталоги сборки. Параметры и дополнительные флаги описаны в [docs/build.md](docs/build.md#just-commands).
 
+На Linux GUI включается через `desktop=ON`. После установки зависимостей
+запустите `just desktop=ON qt_prefix=/path/to/Qt/6.9.1/gcc_64 demo`.
+Глобальные сочетания клавиш доступны на Windows и macOS. [Инструкция для Linux](docs/build.md#linux-desktop)
+
 Для ускорения сборки по умолчанию включены предкомпилированные заголовки (PCH).
 Их можно отключить при конфигурации CMake с помощью `-DYH_ENABLE_PCH=OFF`.
 Объявления сериализуемых типов находятся в `serialization/SerializationTypes.h`;
@@ -43,15 +47,16 @@ just test
 Для работающего входа создайте свою конфигурацию OAuth и передайте `-DYH_AUTH_CONFIG_FILE=/path/to/oauth.json` (или `-DAUTH_CONFIG_FILE=...`). Файл встраивается в приложение. Инструкции и вариант для Linux-тестов приведены в [docs/build.md](docs/build.md).
 
 Для сборки установщика запустите `just package` на целевой ОС: Windows создаёт
-NSIS `.exe`, macOS — `.dmg`, Linux — архив `.tar.gz` с CLI/REST и SDK.
+NSIS `.exe`, macOS — `.dmg`, Linux — архив `.tar.gz`. Для архива с GUI
+на Linux используйте `just desktop=ON package-linux`.
 Также доступны `just package-windows`, `just package-macos` и `just package-linux`.
 Результат находится в `build-just/package/dist/`. Команды используют Release,
-запускают тесты и проверяют пакет. Для Windows нужен NSIS 3.12; Linux-архиву
-нужен установленный совместимый Qt runtime. Параметры и зависимости описаны в
+запускают тесты и проверяют пакет. Для Windows нужен NSIS 3.12. Параметры
+и зависимости описаны в
 [docs/build.md](docs/build.md#release-packages).
 
-CI собирает, тестирует и упаковывает приложение на macOS и Windows, а на Linux —
-консольные приложения. Для каждой ОС выполняется одна Release-сборка с Ninja и PCH;
+CI собирает, тестирует и упаковывает приложение на macOS, Windows и Linux.
+Для каждой ОС используется Release-профиль с Ninja и PCH;
 macOS собирается для arm64. Пакеты доступны в Artifacts запуска в течение 7 дней.
 Сборки CI используют тестовую OAuth-конфигурацию.
 Для релизов используется тег `vMAJOR.MINOR.PATCH`; все три пакета публикуются

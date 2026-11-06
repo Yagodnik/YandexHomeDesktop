@@ -66,16 +66,16 @@ if(BUILD_DESKTOP_APP)
   endif()
 endif()
 
-# Console-only Windows packages need their own Qt runtime deployment. REST's
-# HttpServer/WebSockets dependencies are absent from the GUI dependency graph.
-if(WIN32)
+# Windows and Linux desktop archives deploy the console runtimes separately.
+# REST's HttpServer/WebSockets dependencies are absent from the GUI graph.
+if(WIN32 OR (CMAKE_SYSTEM_NAME STREQUAL "Linux" AND BUILD_DESKTOP_APP))
   foreach(_console YandexHomeCli YandexHomeRest YandexHomeShortcuts YandexHomeMcp)
     if(TARGET ${_console})
       qt_generate_deploy_app_script(TARGET ${_console} OUTPUT_SCRIPT _console_deploy)
       install(SCRIPT ${_console_deploy})
     endif()
   endforeach()
-  if(BUILD_DESKTOP_APP)
+  if(WIN32 AND BUILD_DESKTOP_APP)
     install(SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/CheckConsoleInstall.cmake")
   endif()
 endif()

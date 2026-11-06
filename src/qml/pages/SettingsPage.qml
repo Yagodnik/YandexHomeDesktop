@@ -29,6 +29,7 @@ UI.PageSurface {
       trayTitle: qsTr("Tray-режим")
       trayDescription: qsTr("Приложение будет отображаться\nкак иконка на панели задач")
       trayModeEnabled: settings.trayModeEnabled
+      trayAvailable: platformService.traySupported
       notchAvailable: platformService.notchSupported
       notchEnabled: settings.notchEnabled
       notchTitle: qsTr("Открывать у выреза экрана")
@@ -40,6 +41,7 @@ UI.PageSurface {
       keybindsTitle: qsTr("Сочетания клавиш")
       keybindsDescription: qsTr("Показывать кнопки назначения\nрядом с умениями устройств")
       showKeybinds: settings.showKeybinds
+      keybindsAvailable: root.shortcutModel !== null
       projectLinkText: qsTr("GitHub")
 
       onTrayModeToggled: function(enabled) { settings.trayModeEnabled = enabled; }
@@ -78,11 +80,12 @@ UI.PageSurface {
     Components.ShortcutSettingsCard {
       objectName: "shortcutSettings"
       width: parent.width
-      shortcutsEnabled: root.shortcutModel.enabled
-      backgroundEnabled: root.shortcutModel.background
-      busy: root.shortcutModel.busy
-      statusText: root.shortcutModel.status
-      errorText: root.shortcutModel.error
+      visible: root.shortcutModel !== null
+      shortcutsEnabled: visible && root.shortcutModel.enabled
+      backgroundEnabled: visible && root.shortcutModel.background
+      busy: visible && root.shortcutModel.busy
+      statusText: visible ? root.shortcutModel.status : ""
+      errorText: visible ? root.shortcutModel.error : ""
       onEnabledToggled: function(enabled) { root.shortcutModel.SetEnabled(enabled); }
       onBackgroundToggled: function(enabled) { root.shortcutModel.SetBackground(enabled); }
     }

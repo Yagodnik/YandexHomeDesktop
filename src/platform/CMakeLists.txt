@@ -20,6 +20,7 @@ elseif(UNIX)
           PlatformService.cpp
           PlatformServiceLinux.cpp
   )
+  target_link_libraries(PlatformService PRIVATE Qt6::Widgets)
 elseif(WIN32)
   add_library(PlatformService STATIC
           PlatformService.cpp

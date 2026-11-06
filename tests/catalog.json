@@ -1192,6 +1192,10 @@
           "source": "tests/ui/qml/tst_PageComposition.qml"
         },
         {
+          "name": "PageComposition::test_unavailableDesktopSettingsAreHidden",
+          "description": "Settings hide tray and shortcut controls when the desktop lacks those features, preserving the saved tray preference and leaving REST available."
+        },
+        {
           "name": "PageComposition::test_notchSettingIndependentOfTray",
           "description": "The notch and tray settings switch between mutually exclusive popup modes."
         },
@@ -1945,7 +1949,7 @@
     },
     {
       "id": "SpixSmoke",
-      "description": "Launch the desktop and verify that Spix can update the QML window title.",
+      "description": "Launch the desktop and verify that Spix can update the QML window title. On Linux, verify that a saved tray preference still opens a regular window in a session without a tray.",
       "features": [
         "desktop"
       ],
@@ -2007,7 +2011,7 @@
       "layer": "e2e",
       "kind": "ctest",
       "source": "tests/e2e/spix_settings.py",
-      "requires": ["BUILD_DESKTOP_APP", "YH_ENABLE_SPIX", "Debug"]
+      "requires": ["BUILD_DESKTOP_APP", "BUILD_SHORTCUTS_APP", "YH_ENABLE_SPIX", "Debug"]
     },
     {
       "id": "FixtureSignIn",

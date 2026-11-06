@@ -142,11 +142,20 @@ jobs:
         with:
           host: linux
 
-      - name: Install credential-store development dependency
-        run: sudo apt-get update && sudo apt-get install -y libsecret-1-dev
+      - name: Install Linux desktop dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libsecret-1-dev libgl-dev libegl-dev libxkbcommon-dev libxcb-cursor0
+
+      - name: Create release OAuth config
+        env:
+          RELEASE_OAUTH_CONFIG_JSON: ${{ secrets.RELEASE_OAUTH_CONFIG_JSON }}
+        run: python3 scripts/write-oauth-config.py --from-env --output "$RUNNER_TEMP/oauth.json"
 
       - name: Build, test, and package Linux archive
-        run: just package_build_dir=build package-linux -DCMAKE_CXX_COMPILER=g++-13
+        env:
+          YH_AUTH_CONFIG_FILE: ${{ runner.temp }}/oauth.json
+        run: just desktop=ON package_build_dir=build package-linux -DCMAKE_CXX_COMPILER=g++-13
 
       - uses: actions/upload-artifact@v4
         with:

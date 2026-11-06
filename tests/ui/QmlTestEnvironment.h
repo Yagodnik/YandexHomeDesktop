@@ -193,6 +193,7 @@ class QmlTestModel : public QStandardItemModel {
   Q_PROPERTY(QString currentHousehold MEMBER currentHousehold NOTIFY currentHouseholdChanged)
   Q_PROPERTY(QString currentHouseholdName MEMBER currentHouseholdName CONSTANT)
   Q_PROPERTY(bool notchSupported MEMBER notchSupported NOTIFY notchSupportedChanged)
+  Q_PROPERTY(bool traySupported MEMBER traySupported NOTIFY traySupportedChanged)
   Q_PROPERTY(bool trayModeEnabled MEMBER trayModeEnabled NOTIFY trayModeEnabledChanged)
   Q_PROPERTY(int currentTheme MEMBER currentTheme NOTIFY currentThemeChanged)
   Q_PROPERTY(int callCount MEMBER callCount NOTIFY called)
@@ -207,6 +208,7 @@ public:
   QString currentHouseholdName = "Test home";
   bool trayModeEnabled = false;
   bool notchSupported = false;
+  bool traySupported = true;
   int currentTheme = 0;
   int callCount = 0;
   Q_PROPERTY(bool authorizationPending MEMBER authorizationPending NOTIFY called)
@@ -257,6 +259,7 @@ signals:
   void currentHouseholdChanged();
   void trayModeEnabledChanged();
   void notchSupportedChanged();
+  void traySupportedChanged();
   void currentThemeChanged();
   void called();
 

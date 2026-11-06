@@ -18,7 +18,7 @@ Windows and macOS desktops and can run on default-branch pushes when enabled.
 | --- | --- | --- |
 | Windows | x86_64, MinGW 13.1, desktop/CLI/REST/shortcuts | `yandex-home-windows-x86_64` (`.exe`) |
 | macOS | native arm64, desktop/CLI/REST/shortcuts | `yandex-home-macos-arm64` (`.dmg`) |
-| Linux | x86_64, GCC 13, headless CLI/REST and portable tests | `yandex-home-linux-x86_64` (`.tar.gz`) |
+| Linux | Ubuntu 24.04 x86_64, GCC 13, desktop/CLI/REST and offscreen UI tests | `yandex-home-linux-x86_64` (`.tar.gz`) |
 
 Download packages from the **Artifacts** section of the workflow run. They are
 retained for seven days, use `resources/auth/example.json`, and cannot sign in.
@@ -34,9 +34,9 @@ Tag builds use the validated `RELEASE_OAUTH_CONFIG_JSON` public-client config.
 `.github/actions/setup-qt/action.yml` shares Qt setup between CI and tag builds.
 It pins Qt 6.9.1, Python 3.13, aqtinstall 3.3.0, and py7zr 1.1.0, and retains the
 Qt download cache. The Qt action uses the selected Python instead of installing
-its own default version. Linux requests the `qthttpserver` and `qtwebsockets`
-add-ons; Windows/macOS also request `qt5compat`, `qtshadertools`, `qtnetworkauth`,
-and `qtmultimedia`. ShaderTools is a runtime dependency of
+its own default version. The desktop workflows request `qthttpserver`,
+`qtwebsockets`, `qt5compat`, `qtshadertools`, `qtnetworkauth`, and
+`qtmultimedia`. ShaderTools is a runtime dependency of
 `Qt5Compat.GraphicalEffects`; desktop configuration requires both modules so an
 incomplete Qt kit fails before building or running QML tests.
 `qttools` (including LinguistTools) and `qtsvg` are installed by the
@@ -77,7 +77,27 @@ Precompiled headers are enabled by default for the main C++ targets. Configure w
 
 On Windows, use the compiler kit that matches the Qt binaries and add `--config Release` to build and `-C Release` to CTest if using a multi-config generator. CMake downloads the pinned sources on the first configure. `FETCHCONTENT_SOURCE_DIR_HANA` and `FETCHCONTENT_SOURCE_DIR_QTKEYCHAIN` (and `FETCHCONTENT_SOURCE_DIR_QHOTKEY` for desktop builds) can point at already downloaded copies when working offline; use the revisions in `cmake/Dependencies.cmake` and `cmake/QHotkey.cmake`. All test builds require Python 3.9+ for catalog validation and tooling tests (CI pins Python 3.13). Portable tests also require the Qt HttpServer and WebSockets modules (the CI kit is pinned to Qt 6.9.1). On Linux, install `libsecret-1-dev` for QtKeychain and configure with `-DBUILD_DESKTOP_APP=OFF -DBUILD_TESTING=ON`. This builds CLI, REST, and the portable tests. Headless applications require Qt Core, Network, and LinguistTools; REST also requires HttpServer/WebSockets. Qt Gui is needed only for the desktop or the existing presentation-model tests.
 
-Desktop CTest runs the C++ suite, creates all nine QML pages with local test models, and runs Qt Quick layout and interaction tests. The QML tests use the offscreen platform, software renderer, and bundled font/assets; they need no sign-in or live API access and run in both Windows and macOS CI. No OAuth configuration is included in the QML test executables.
+### Linux desktop
+
+On Ubuntu 24.04 x86_64, install the desktop Qt kit described above, a C++23
+compiler, and the dependencies used by Linux CI. An interactive desktop session
+needs the system dependencies of its Qt platform plugin and a running Secret
+Service for saved Yandex sign-in. For a credential-free first launch:
+
+```sh
+sudo apt-get install libsecret-1-dev libgl-dev libegl-dev libxkbcommon-dev libxcb-cursor0
+just desktop=ON qt_prefix=/path/to/Qt/6.9.1/gcc_64 configure
+just desktop=ON demo
+just desktop=ON test-ui
+```
+
+Use `just desktop=ON demo-auth` for mock sign-in or set `auth_config` at configure
+time and use `just desktop=ON run` for live sign-in. Direct CMake builds use
+`-DBUILD_DESKTOP_APP=ON`. Linux keeps the headless build as the local default.
+Tray mode is available when Qt detects a tray at startup. Global shortcuts are
+available on Windows and macOS.
+
+Desktop CTest runs the C++ suite, creates all nine QML pages with local test models, and runs Qt Quick layout and interaction tests. The QML tests use the offscreen platform, software renderer, and bundled font/assets. They need no sign-in or live API access and run in Windows, macOS, and Linux CI. No OAuth configuration is included in the QML test executables.
 
 The same `QmlLayouts` runner checks saved capability keybinds: key capture,
 cancel/clear, page recreation, cross-device conflicts, account switching, no
@@ -359,7 +379,8 @@ and verify its deployed executables. Run each command on its target OS:
 just package                                  # Select the current OS
 just package-windows                          # Windows NSIS .exe installer
 just package-macos                            # macOS drag-to-Applications .dmg
-just package-linux                            # Linux CLI/REST .tar.gz archive
+just desktop=ON package-linux                 # Linux desktop and console .tar.gz
+just desktop=OFF package-linux                # Linux console-only .tar.gz
 just package-macos '-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64'
 just qt_prefix=/path/to/Qt/kit package
 just package_build_dir='build-just/custom package' package
@@ -369,7 +390,8 @@ just package_build_dir='build-just/custom package' package
 contains `YandexHomeDesktop-<version>-<platform>-<architecture>` with the native
 extension. Version comes from the CMake project. macOS uses the configured
 architecture, or `universal` for `arm64;x86_64`. Packaging always selects Release,
-CLI, and REST, plus the desktop and shortcut worker on Windows/macOS. Extra
+CLI, and REST, plus the desktop and shortcut worker on Windows/macOS. Linux
+includes the desktop when `desktop=ON`, as used by CI and tag releases. Extra
 arguments go to CMake configuration; `qt_prefix`, `auth_config`, `pch`, `jobs`,
 and `generator` work as with other recipes. An explicit `package_build_dir` can
 reuse a Release build; the normal Debug profile is untouched.
@@ -404,13 +426,14 @@ configured. Windows includes the installed applications, SDK, and deployed Qt
 and compiler runtime in one installer. CPack stages these together so the
 installed entry-point checks can load the SDK DLLs before creating the installer.
 SDK-only installation remains available with `cmake --install <build-dir> --component SDK`.
-Linux includes CLI/REST, project shared libraries, and
-SDK, with a [runtime requirements README](linux-package.md). It requires a
-matching shared Qt runtime and compatible system libraries; it is not a
-self-contained Linux desktop application. Debian packaging is deferred.
+Linux includes CLI/REST, project shared libraries, and the SDK, with a
+[runtime requirements README](linux-package.md). Desktop archives include the
+GUI and its Qt deployment. Console-only archives use a matching installed
+Qt runtime. Both need compatible system libraries. Debian packaging is deferred.
 
 Verification mounts the finished DMG or extracts the finished tar archive and
-runs console help without credentials. macOS also checks every application and
+runs console help without credentials. The Linux desktop archive also checks
+the installed GUI entry point. macOS checks every application and
 QtCore for the requested architectures. Windows checks CPack's deployed payload;
 Windows CI additionally silently installs the generated installer into a
 temporary directory and verifies the installed executables and runtimes.
@@ -497,7 +520,7 @@ QML modules and portable test targets exist. The Release CI jobs and the local
 desktop, CLI-only, REST-only, and packaging commands use this same layout.
 The fixture test generates its own resources in the test build directory so
 portable Release builds work without generated files from a desktop build.
-Linux CI builds and runs `ApiFixture` with all other portable suites.
+Linux CI builds and runs `ApiFixture` with the desktop profile.
 
 ## Separate executables and shared SDK
 
@@ -580,8 +603,8 @@ Windows CI builds/deploys the worker, runs its Release tests once,
 and checks installed help. See [shortcuts.md](shortcuts.md) for runtime behavior.
 
 Tray window placement uses Qt screen coordinates and the screen's available area.
-On Linux, the desktop environment must provide a system tray and its icon geometry;
-when it does not, placement falls back to the cursor's screen. Wayland compositors
+On Linux, the desktop environment must provide a system tray for tray mode.
+When icon geometry is unavailable, placement falls back to the cursor's screen. Wayland compositors
 may ignore requests to position top-level windows. On macOS, the optional notch
 hover setting provides an alternative to tray mode on displays that report a notch through
 macOS 12 or later; it is off by default.

@@ -40,7 +40,7 @@ directories with their linked files.
 ### GitHub Actions
 
 The Linux, macOS, and Windows Release workflows run their configured suites and
-upload a platform-specific test report. Windows also runs the Spix smoke test.
+upload a platform-specific test report. Windows and Linux also run the Spix smoke test.
 
 To run the full Windows Debug suite, open **Actions → Windows Release build →
 Run workflow** and enable `full_tests`. To enable it for pull requests, set the
@@ -175,9 +175,9 @@ Reconfigure after suite/label changes; CMake tracks the catalog as a configure
 dependency. `TestTooling` checks exact selection, profile filtering, error
 handling, argument/environment preservation, and real CTest timeouts/failures.
 Each CI platform runs the full enabled CTest suite once in Release, including
-catalog validation and `TestTooling`. Windows/macOS cover desktop/QML suites;
-Linux covers portable suites. Windows also runs a Release Spix smoke test and
-all fixture flows in a Debug Spix profile.
+catalog validation and `TestTooling`. Windows, macOS, and Linux cover
+desktop/QML suites. Windows and Linux run a Release Spix smoke test, and the
+optional Windows Debug job runs all fixture flows.
 
 ## Choose verification for a feature
 
@@ -273,9 +273,8 @@ display left of or above the main one. Swap the main display in a dual setup
 to exercise the popup from both physical displays. For example, a secondary
 1920×1080 display to the left of a 1440×900 main display could use
 `[[0,0,1440,900,2],[-1920,0,1920,1080,1]]`. Each run saves its own
-report under the build directory's `test-reports/` directory. Linux builds the
-headless CLI and REST applications. The desktop tray suite is available on
-Windows and macOS.
+report under the build directory's `test-reports/` directory. The native
+tray suite is available on Windows and macOS.
 
 #### Native tray CI
 

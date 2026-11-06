@@ -34,22 +34,20 @@ jobs:
         with:
           host: linux
 
-      - name: Install pinned C++ formatting and analysis tools
-        run: >-
-          python -m pip install --only-binary=:all: -r requirements-clang-tools.txt
-
-      - name: Check C++ formatting and clang-tidy configuration
+      - name: Install Linux desktop dependencies
         run: |
-          just format-check
-          clang-tidy --verify-config
+          sudo apt-get update
+          sudo apt-get install -y libsecret-1-dev libgl-dev libegl-dev libxkbcommon-dev libxcb-cursor0
 
-      - name: Install credential-store development dependency
-        run: sudo apt-get update && sudo apt-get install -y libsecret-1-dev
-
-      - name: Build, test, and package Linux CLI and REST archive
+      - name: Build, test, and package Linux desktop and console applications
         run: >-
-          just package_build_dir=build generator=Ninja pch=ON
+          just desktop=ON package_build_dir=build generator=Ninja pch=ON
           package-linux -DCMAKE_CXX_COMPILER=g++-13
+
+      - name: Smoke-test the Linux desktop window
+        run: |
+          just desktop=ON config=Release build_dir=build spix=ON configure -DYH_ENABLE_PACKAGING=OFF
+          just desktop=ON config=Release build_dir=build spix=ON test-e2e SpixSmoke
 
       - name: Upload Linux package
         uses: actions/upload-artifact@v4
@@ -67,6 +65,12 @@ jobs:
           name: linux-test-report
           path: build/test-reports/
           retention-days: 7
+
+      - name: Check C++ formatting and clang-tidy configuration
+        run: |
+          python -m pip install --only-binary=:all: -r requirements-clang-tools.txt
+          just format-check
+          clang-tidy --verify-config
 
       - name: Upload failure logs
         if: failure()

@@ -57,6 +57,7 @@ if(TARGET YandexHomeMcp)
 endif()
 if(TARGET YandexHomeShortcuts)
   add_dependencies(appYandexHomeDesktop YandexHomeShortcuts)
+  target_compile_definitions(appYandexHomeDesktop PRIVATE YH_SHORTCUTS_ENABLED)
 endif()
 
 qt_add_qml_module(appYandexHomeDesktop

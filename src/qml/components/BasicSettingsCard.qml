@@ -7,12 +7,14 @@ Item {
   property string trayTitle
   property string trayDescription
   property bool trayModeEnabled: false
+  property bool trayAvailable: true
   property string themeTitle
   property var themeNames
   property int currentTheme: 0
   property string keybindsTitle
   property string keybindsDescription
   property bool showKeybinds: true
+  property bool keybindsAvailable: true
   property bool notchAvailable: false
   property bool notchEnabled: false
   property string notchTitle
@@ -32,6 +34,7 @@ Item {
 
     UI.SettingSwitchRow {
       objectName: "traySettingRow"
+      visible: root.trayAvailable
       width: parent.width
       title: root.trayTitle
       description: root.trayDescription
@@ -59,6 +62,7 @@ Item {
 
     UI.SettingSwitchRow {
       objectName: "keybindsSettingRow"
+      visible: root.keybindsAvailable
       width: parent.width
       title: root.keybindsTitle
       description: root.keybindsDescription

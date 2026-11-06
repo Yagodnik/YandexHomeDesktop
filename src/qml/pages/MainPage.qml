@@ -26,7 +26,7 @@ UI.PageSurface {
       Pages.ScenariosPage {
         viewModel: scenariosViewModel
         keybindSettings: keybindSettingsModel
-        showKeybinds: settings.showKeybinds
+        showKeybinds: shortcutViewModel !== null && settings.showKeybinds
       }
       Pages.SettingsPage { id: settingsPage; restModel: restViewModel; transferModel: settingsTransferModel; shortcutModel: shortcutViewModel; mcpModel: typeof mcpViewModel === "undefined" ? null : mcpViewModel }
     }

@@ -2,12 +2,18 @@
 #include "PlatformServiceFactory.h"
 #include "NotchActivation.h"
 #include <QGuiApplication>
+#ifdef Q_OS_LINUX
+#include <QSystemTrayIcon>
+#endif
 #ifdef Q_OS_MACOS
 #include "macos/MacOSIntegration.h"
 #endif
 
 PlatformService::PlatformService(QObject *parent)
   : QObject(parent), impl_(PlatformServiceFactory::Create()) {
+#ifdef Q_OS_LINUX
+  tray_supported_ = QSystemTrayIcon::isSystemTrayAvailable();
+#endif
 #ifdef Q_OS_MACOS
   const auto screensChanged = [this] {
     QTimer::singleShot(0, this, [this] { emit notchSupportedChanged(); });

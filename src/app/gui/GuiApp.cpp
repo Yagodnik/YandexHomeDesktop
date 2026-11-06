@@ -88,14 +88,15 @@ GuiApp::GuiApp(AppContext& app_context, QObject* parent)
       "settingsTransferModel",
       new SettingsTransferModel(new SettingsTransferService(app_context.settings, app_context.app_),
                                 app_context.yandex_account, app_context.app_));
+  const auto keybind_settings =
+      new KeybindSettingsModel(app_context.settings, app_context.yandex_account, app_context.app_);
+  root_context->setContextProperty("keybindSettingsModel", keybind_settings);
+#ifdef YH_SHORTCUTS_ENABLED
   shortcuts_ = new ShortcutControlService(
       app_context.settings, ShortcutConfiguration(app_context.startup_options), app_context.app_);
   root_context->setContextProperty("shortcutViewModel",
                                    new ShortcutViewModel(shortcuts_, app_context.app_));
-  const auto keybind_settings =
-      new KeybindSettingsModel(app_context.settings, app_context.yandex_account, app_context.app_);
   keybind_settings->SetShortcutControl(shortcuts_);
-  root_context->setContextProperty("keybindSettingsModel", keybind_settings);
   connect(app_context.yandex_account, &AccountModel::dataLoaded, shortcuts_,
           [this, account = app_context.yandex_account] {
             shortcuts_->SetAccountId(account->GetAccountId());
@@ -104,6 +105,9 @@ GuiApp::GuiApp(AppContext& app_context, QObject* parent)
     shortcuts_->SetEnabled(false);
     shortcuts_->SetAccountId({});
   });
+#else
+  root_context->setContextProperty("shortcutViewModel", static_cast<QObject*>(nullptr));
+#endif
   const auto rest_control = new RestControlService(
       app_context.settings, RestConfiguration(app_context.startup_options), app_context.app_);
   const auto rest_model = new RestViewModel(rest_control, app_context.app_);
@@ -121,7 +125,9 @@ GuiApp::GuiApp(AppContext& app_context, QObject* parent)
             themes->SetTheme(app_context.settings->GetCurrentTheme());
           });
   const auto update_window_mode = [app_context] {
-    if (app_context.settings->GetTrayModeEnabled() ||
+    const bool use_tray =
+        app_context.platform_service->TraySupported() && app_context.settings->GetTrayModeEnabled();
+    if (use_tray ||
         (app_context.platform_service->NotchSupported() && app_context.settings->GetNotchEnabled()))
       app_context.platform_service->ShowOnlyInTray();
     else
@@ -219,6 +225,8 @@ int GuiApp::Start() {
   }
 #endif
   const auto result = app_context_.app_->exec();
+  if (!shortcuts_)
+    return result;
   // Let local IPC finish before destroying the controller. A bounded lease also
   // cleans up foreground workers if the GUI is killed before reaching here.
   QEventLoop shutdown;

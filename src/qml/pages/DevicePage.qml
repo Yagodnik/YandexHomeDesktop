@@ -79,7 +79,7 @@ UI.PageSurface {
     }
 
     Components.DeviceControlsPane {
-      showKeybinds: settings.showKeybinds
+      showKeybinds: shortcutViewModel !== null && settings.showKeybinds
       keybindSettings: keybindSettingsModel
       deviceId: deviceViewModel.deviceId
       deviceName: deviceViewModel.deviceData.name

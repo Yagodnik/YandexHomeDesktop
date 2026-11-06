@@ -9,6 +9,7 @@ config := env('YH_JUST_CONFIG', 'Debug')
 cli_app := env('YH_JUST_CLI_APP', 'ON')
 rest_app := env('YH_JUST_REST_APP', 'ON')
 desktop := env('YH_JUST_DESKTOP', if os() == 'linux' { 'OFF' } else { 'ON' })
+gui_executable := if os() == 'macos' { 'YandexHomeDesktop.app/Contents/MacOS/YandexHomeDesktop' } else if os() == 'windows' { 'YandexHomeDesktop.exe' } else { 'YandexHomeDesktop' }
 default_build_dir := if config =~ '^(Debug|Release)$' { 'build-just' / if desktop == 'OFF' { 'portable' / lowercase(config) } else { lowercase(config) } } else { '' }
 build_dir := env('YH_JUST_BUILD_DIR', default_build_dir)
 qt_prefix := env('YH_JUST_QT_PREFIX', env('CMAKE_PREFIX_PATH', env('QT_ROOT_DIR', '')))
@@ -134,7 +135,7 @@ tests-check *args: build
 
 # Build and launch the desktop executable with extra app arguments.
 run *args: build-gui
-    bash scripts/launch.sh '{{ if os() == "macos" { "YandexHomeDesktop.app/Contents/MacOS/YandexHomeDesktop" } else { "YandexHomeDesktop.exe" } }}' "$@"
+    bash scripts/launch.sh '{{ gui_executable }}' "$@"
 
 # Launch the Debug GUI with local fixture data; accepts --fake-api-data.
 [script]
@@ -144,7 +145,7 @@ demo *args:
         exit 2
     fi
     just build-gui
-    exec bash scripts/launch.sh '{{ if os() == "macos" { "YandexHomeDesktop.app/Contents/MacOS/YandexHomeDesktop" } else { "YandexHomeDesktop.exe" } }}' --fake-api "$@"
+    exec bash scripts/launch.sh '{{ gui_executable }}' --fake-api "$@"
 
 # Launch the Debug GUI with fixture data and interactive local sign-in.
 [script]
@@ -154,7 +155,7 @@ demo-auth *args:
         exit 2
     fi
     just build-gui
-    exec bash scripts/launch.sh '{{ if os() == "macos" { "YandexHomeDesktop.app/Contents/MacOS/YandexHomeDesktop" } else { "YandexHomeDesktop.exe" } }}' --fake-api --fake-auth "$@"
+    exec bash scripts/launch.sh '{{ gui_executable }}' --fake-api --fake-auth "$@"
 
 # Build and run the console CLI, e.g. cli --fake-api devices list --json.
 cli *args: build-cli
@@ -194,10 +195,10 @@ package-windows *args:
 package-macos *args:
     just _package ON ON "$@"
 
-# Build a Linux CLI/REST .tar.gz archive (requires a matching Qt runtime to run).
+# Build a Linux .tar.gz archive. Pass desktop=ON for the GUI.
 [linux]
 package-linux *args:
-    just _package OFF OFF "$@"
+    just _package "$YH_JUST_DESKTOP" OFF "$@"
 
 # ZIP the selected configured build folder into dist/build-archives.
 archive-build: _require-build-dir

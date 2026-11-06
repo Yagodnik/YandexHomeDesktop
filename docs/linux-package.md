@@ -1,12 +1,31 @@
 # Linux archive
 
-This archive contains the headless `YandexHomeCli` and `YandexHomeRest`
-applications, the project's shared libraries, and the C++ SDK. Extract it to
-a writable directory and run the applications from `bin/`:
+The Linux desktop archive contains `YandexHomeDesktop`, the CLI, REST and MCP
+workers, the project's shared libraries, and the C++ SDK. Extract it to a
+writable directory and launch the app from a desktop session:
 
 ```sh
 tar -xzf YandexHomeDesktop-<version>-linux-<architecture>.tar.gz
 cd YandexHomeDesktop-<version>-linux-<architecture>
+./bin/YandexHomeDesktop
+./bin/YandexHomeCli --help --json
+```
+
+The desktop archive deploys the Qt libraries, plugins, and QML modules used by
+the GUI. Use a compatible Linux system with the dependencies of your Qt
+platform plugin, such as XCB libraries for X11 or XWayland. For live sign-in,
+use a package built with working OAuth configuration and a desktop session
+with a Secret Service keyring and `libsecret-1`. CI archives use the example
+OAuth configuration. The app uses a normal window when Qt detects no system
+tray at startup. Wayland may limit tray popup positioning. Global shortcuts
+are unavailable on Linux.
+
+### Console-only archive
+
+A local archive built with `just desktop=OFF package-linux` contains the console
+tools and SDK. Run them from `bin/`:
+
+```sh
 ./bin/YandexHomeCli --help --json
 ./bin/YandexHomeRest --help --json
 ```

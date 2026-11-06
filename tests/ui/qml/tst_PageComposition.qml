@@ -69,6 +69,7 @@ TestCase {
     settings.trayModeEnabled = false;
     settings.notchEnabled = false;
     platformService.notchSupported = false;
+    platformService.traySupported = true;
     settings.currentTheme = 0;
     settings.showKeybinds = true;
     themes.SetTheme(0);
@@ -331,6 +332,18 @@ TestCase {
     mouseClick(row);
     compare(householdSpy.count, 1);
     compare(householdSpy.signalArguments[0][0], "two");
+  }
+
+  function test_unavailableDesktopSettingsAreHidden() {
+    platformService.traySupported = false;
+    settings.trayModeEnabled = true;
+    const page = createTemporaryObject(settingsPage, testCase, { shortcutModel: null });
+    verify(page !== null);
+    verify(!findChild(page, "traySettingRow").visible);
+    verify(!findChild(page, "keybindsSettingRow").visible);
+    verify(!findChild(page, "shortcutSettings").visible);
+    compare(settings.trayModeEnabled, true);
+    verify(findChild(page, "advancedSettings").visible);
   }
 
   function test_notchSettingIndependentOfTray() {

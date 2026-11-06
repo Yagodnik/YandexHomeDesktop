@@ -39,9 +39,9 @@ bool WorkerControlServer::Acquire(const QString& control_name) {
     error_ = lock->error() == QLockFile::LockFailedError ? "already_running" : "control_error";
     return false;
   }
-  // Foreground workers need the same cleanup receipt as detached workers: the
-  // socket and ownership object may be destroyed before the process exits.
-  QSaveFile receipt(paths.launch);
+  // Keep the worker's receipt separate from the controller's. A detached
+  // worker can acquire ownership before its launcher has committed its receipt.
+  QSaveFile receipt(paths.worker);
   receipt.setDirectWriteFallback(false);
   const auto pid = QByteArray::number(QCoreApplication::applicationPid());
   if (!receipt.open(QIODevice::WriteOnly) ||

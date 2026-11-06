@@ -232,10 +232,15 @@ private slots:
     WorkerControlClient client(Configuration(name, directory.path()));
     QSignalSpy results(&client, &WorkerControlClient::finished);
     const auto lock_path = base + ".lock";
+    const auto launch_path = base + ".launch";
+    const auto worker_path = base + ".worker";
+    const auto reused_pid = QByteArray::number(QCoreApplication::applicationPid());
     QByteArray lock_contents;
     {
       WorkerControlServer former_owner;
       QVERIFY(former_owner.Acquire(name));
+      QVERIFY(!QFile::exists(launch_path));
+      QVERIFY(QFile::exists(worker_path));
       QFile lock(lock_path);
       QVERIFY(lock.open(QIODevice::ReadOnly));
       lock_contents = lock.readAll();
@@ -246,7 +251,8 @@ private slots:
     QVERIFY(Write(lock_path, lock_fields.join('\n')));
     // Backdate records with our live PID to simulate PID reuse without waiting
     // for the OS to recycle a particular PID.
-    for (const auto& path : {lock_path, base + ".launch"}) {
+    QVERIFY(Write(launch_path, reused_pid));
+    for (const auto& path : {lock_path, launch_path, worker_path}) {
       QFile file(path);
       QVERIFY(file.open(QIODevice::ReadWrite));
       QVERIFY(file.setFileTime(QDateTime::fromMSecsSinceEpoch(946'684'800'000),
@@ -756,7 +762,9 @@ private slots:
       starter.Request(Command::Start);
     }
     QTRY_COMPARE(started.size(), 1);
-    QVERIFY(Result(started)["ok"].toBool());
+    const auto start_result = Result(started);
+    QVERIFY2(start_result["ok"].toBool(),
+             QJsonDocument(start_result).toJson(QJsonDocument::Compact).constData());
     WorkerControlClient stopper(configuration);
     QSignalSpy results(&stopper, &WorkerControlClient::finished);
     stopper.Request(Command::Stop, {}, {}, 150);

@@ -21,6 +21,14 @@
 #endif
 
 namespace WorkerControlPrivate {
+#ifdef Q_OS_WIN
+static qint64 UnixMilliseconds(const FILETIME& time) {
+  constexpr qint64 windows_epoch_ms = 11'644'473'600'000;
+  const auto ticks = (quint64(time.dwHighDateTime) << 32) | time.dwLowDateTime;
+  return qint64(ticks / 10'000) - windows_epoch_ms;
+}
+#endif
+
 Paths ControlPaths(const QString& name) {
   QString base;
 #ifdef Q_OS_UNIX
@@ -37,7 +45,8 @@ Paths ControlPaths(const QString& name) {
     base = QDir(QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation))
                .filePath("YandexHome/run/" + digest);
   }
-  return {QFileInfo(base).absolutePath(), base + ".lock", base + ".control.lock", base + ".launch"};
+  return {QFileInfo(base).absolutePath(), base + ".lock", base + ".control.lock", base + ".launch",
+          base + ".worker"};
 }
 
 bool PrepareDirectory(const Paths& paths) {
@@ -72,12 +81,8 @@ bool ProcessIsRunning(qint64 pid, const QDateTime& observed) {
   const bool has_creation =
       observed.isValid() && GetProcessTimes(process, &creation, &exit, &kernel, &user);
   CloseHandle(process);
-  if (has_creation) {
-    constexpr qint64 windows_epoch_ms = 11'644'473'600'000;
-    const auto ticks = (quint64(creation.dwHighDateTime) << 32) | creation.dwLowDateTime;
-    if (qint64(ticks / 10'000) - windows_epoch_ms > observed.toMSecsSinceEpoch())
-      return false;
-  }
+  if (has_creation && UnixMilliseconds(creation) > observed.toMSecsSinceEpoch())
+    return false;
   return state != WAIT_OBJECT_0;
 #else
   if (pid > std::numeric_limits<pid_t>::max()) {
@@ -128,20 +133,49 @@ bool ProcessIsRunning(qint64 pid, const QDateTime& observed) {
 #endif
 }
 
-qint64 LaunchPid(const Paths& paths) {
-  QFile record(paths.launch);
+Receipt ReadReceipt(const QString& path) {
+  QByteArray bytes;
+  QDateTime written;
+#ifdef Q_OS_WIN
+  // Reading a receipt must not block an atomic replacement by QSaveFile.
+  const auto file = CreateFileW(reinterpret_cast<LPCWSTR>(path.utf16()), GENERIC_READ,
+                               FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr,
+                               OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+  if (file == INVALID_HANDLE_VALUE)
+    return {};
+  char buffer[65];
+  DWORD size = 0;
+  FILETIME modified{};
+  const bool read = ReadFile(file, buffer, sizeof(buffer), &size, nullptr);
+  const bool has_time = GetFileTime(file, nullptr, nullptr, &modified);
+  CloseHandle(file);
+  if (!read || size >= sizeof(buffer))
+    return {};
+  bytes = QByteArray(buffer, size);
+  if (has_time)
+    written = QDateTime::fromMSecsSinceEpoch(UnixMilliseconds(modified));
+#else
+  QFile record(path);
   if (!record.open(QIODevice::ReadOnly) || record.size() > 64) {
-    return 0;
+    return {};
   }
+  bytes = record.readAll();
+  written = record.fileTime(QFileDevice::FileModificationTime);
+#endif
   bool valid = false;
-  const auto pid = record.readAll().trimmed().toLongLong(&valid);
-  return valid && pid > 0 ? pid : 0;
+  const auto pid = bytes.trimmed().toLongLong(&valid);
+  if (!valid || pid <= 0)
+    return {};
+  return {pid, written};
 }
 
-void ClearLaunch(const Paths& paths, qint64 pid) {
+void ClearReceipts(const Paths& paths, qint64 pid) {
   // A replacement worker may already have written a new receipt.
-  if (pid > 0 && LaunchPid(paths) == pid) {
-    QFile::remove(paths.launch);
+  for (const auto& path : {paths.launch, paths.worker}) {
+    const auto receipt = ReadReceipt(path);
+    if (receipt.pid > 0 &&
+        (pid > 0 ? receipt.pid == pid : !ProcessIsRunning(receipt.pid, receipt.written)))
+      QFile::remove(path);
   }
 }
 

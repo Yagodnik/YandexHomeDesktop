@@ -29,8 +29,9 @@ The lock's stale age is disabled: live long-running workers do not become stale
 merely because time has passed. Qt's process-based stale-lock recovery handles
 crashed owners. A private launch receipt records the child PID atomically, so
 another controller can find a process before its control socket exists or after
-the launching controller times out or exits. Foreground workers write the same
-receipt. The receipt survives socket/server cleanup until process exit is
+the launching controller times out or exits. Workers write a separate
+ownership receipt so both processes can publish independently. The receipts
+survive socket/server cleanup until process exit is
 observed. On macOS, Windows, and Linux the controller checks the process start
 time when available. A process that started after the receipt or ownership lock
 was written is treated as a different process, even if it has the same PID.

@@ -100,13 +100,15 @@ bool WorkerControlClient::HasPendingWorker(Operation* operation) {
   if (ProcessIsRunning(operation->pid, operation->pid_observed)) {
     return true;
   }
-  const auto receipt_time = QFileInfo(operation->paths.launch).lastModified();
-  const auto pid = LaunchPid(operation->paths);
-  if (!ProcessIsRunning(pid, receipt_time))
-    return writing_lock;
-  operation->pid = pid;
-  operation->pid_observed = receipt_time;
-  return true;
+  for (const auto& path : {operation->paths.worker, operation->paths.launch}) {
+    const auto receipt = ReadReceipt(path);
+    if (ProcessIsRunning(receipt.pid, receipt.written)) {
+      operation->pid = receipt.pid;
+      operation->pid_observed = receipt.written;
+      return true;
+    }
+  }
+  return writing_lock;
 }
 
 void WorkerControlClient::Probe(Operation* operation) {
@@ -128,7 +130,7 @@ void WorkerControlClient::Probe(Operation* operation) {
       operation->retry.start(RetryIntervalMs);
       return;
     }
-    ClearLaunch(operation->paths, operation->pid);
+    ClearReceipts(operation->paths, operation->pid);
     Finish(operation, operation->stopped);
     return;
   }
@@ -187,7 +189,7 @@ void WorkerControlClient::Unavailable(Operation* operation) {
       return;
     }
     if (operation->launched) {
-      ClearLaunch(operation->paths, operation->pid);
+      ClearReceipts(operation->paths, operation->pid);
       Finish(operation, Error("startup_error"));
       return;
     }
@@ -226,9 +228,8 @@ void WorkerControlClient::Unavailable(Operation* operation) {
   } else if (operation->command == Command::Send) {
     Finish(operation, Error("control_error"));
   } else {
-    const auto recorded = LaunchPid(operation->paths);
     if (operation->command == Command::Stop) {
-      ClearLaunch(operation->paths, recorded);
+      ClearReceipts(operation->paths);
     }
     Finish(operation, {{"ok", true}, {"running", false}, {"starting", starting}});
   }

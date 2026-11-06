@@ -3,7 +3,14 @@ name: macOS Release build
 on:
   pull_request:
     branches: [main, dev, refactoring]
+  push:
+    branches: [main, dev]
   workflow_dispatch:
+    inputs:
+      tray_tests:
+        description: Run native tray tests on dedicated interactive macOS runners
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -15,6 +22,7 @@ concurrency:
 jobs:
   test:
     name: macOS Release
+    if: github.event_name != 'push' || vars.CI_NATIVE_TRAY == 'true'
     runs-on: macos-15
     env:
       DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
@@ -66,3 +74,9 @@ jobs:
             build/Testing/Temporary/*.log
             build/CMakeFiles/CMakeConfigureLog.yaml
           retention-days: 7
+
+  native-tray:
+    uses: ./.github/workflows/ci-native-tray.yml
+    with:
+      platform: macOS
+      manual: ${{ inputs.tray_tests == true }}

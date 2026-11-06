@@ -1,45 +1,35 @@
-name: Native tray placement
+name: Native tray jobs
 
 on:
-  workflow_dispatch:
-  push:
-    branches: [main, dev, refactoring]
+  workflow_call:
+    inputs:
+      platform:
+        required: true
+        type: string
+      manual:
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
-concurrency:
-  group: native-tray
-  cancel-in-progress: false
-
 jobs:
   tray-placement:
     if: >-
-      github.ref_name == github.event.repository.default_branch &&
-      (github.event_name == 'workflow_dispatch' || vars.CI_NATIVE_TRAY == 'true')
-    name: Tray placement (${{ matrix.os }}, ${{ matrix.profile }})
-    runs-on: [self-hosted, "${{ matrix.os }}", "${{ matrix.profile }}"]
+      (github.ref_name == github.event.repository.default_branch || github.ref_name == 'dev') &&
+      ((github.event_name == 'workflow_dispatch' && inputs.manual) ||
+       (github.event_name == 'push' && vars.CI_NATIVE_TRAY == 'true'))
+    name: Tray placement (${{ matrix.profile }})
+    runs-on: [self-hosted, "${{ inputs.platform }}", "${{ matrix.profile }}"]
     timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
         include:
-          - os: Windows
-            qt-host: windows
-            profile: tray-compact
-            layout-var: TRAY_WINDOWS_COMPACT_LAYOUT
-          - os: Windows
-            qt-host: windows
-            profile: tray-mixed
-            layout-var: TRAY_WINDOWS_MIXED_LAYOUT
-          - os: macOS
-            qt-host: mac
-            profile: tray-compact
-            layout-var: TRAY_MACOS_COMPACT_LAYOUT
-          - os: macOS
-            qt-host: mac
-            profile: tray-mixed
-            layout-var: TRAY_MACOS_MIXED_LAYOUT
+          - profile: tray-compact
+            layout: COMPACT
+          - profile: tray-mixed
+            layout: MIXED
     env:
       YH_JUST_BUILD_DIR: build-just/native-tray
       YH_JUST_CONFIG: Debug
@@ -47,7 +37,7 @@ jobs:
       YH_JUST_CLI_APP: 'OFF'
       YH_JUST_REST_APP: 'OFF'
       YH_TRAY_DISPLAY_PROFILE: ${{ matrix.profile }}
-      YH_TRAY_DISPLAY_LAYOUT: ${{ vars[matrix.layout-var] }}
+      YH_TRAY_DISPLAY_LAYOUT: ${{ vars[format('TRAY_{0}_{1}_LAYOUT', inputs.platform == 'Windows' && 'WINDOWS' || 'MACOS', matrix.layout)] }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -75,7 +65,7 @@ jobs:
 
       - uses: ./.github/actions/setup-qt
         with:
-          host: ${{ matrix.qt-host }}
+          host: ${{ inputs.platform == 'Windows' && 'windows' || 'mac' }}
 
       - name: Configure Debug desktop with native tray testing
         shell: bash
@@ -93,6 +83,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: native-tray-${{ matrix.os }}-${{ matrix.profile }}
+          name: native-tray-${{ inputs.platform }}-${{ matrix.profile }}
           path: build-just/native-tray/test-reports/
           retention-days: 7

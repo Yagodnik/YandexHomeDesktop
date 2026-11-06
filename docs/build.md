@@ -11,8 +11,8 @@ The CI workflows are `.github/workflows/ci-windows.yml`, `ci-macos.yml`, and
 `refactoring`, or when started manually. Each workflow builds Release with Ninja and precompiled headers, runs the
 tests through Just, and verifies its package. Windows also runs the Spix smoke
 test and offers an [opt-in full Debug test job](testing.md#github-actions).
-The [native tray workflow](testing.md#native-tray-ci) uses dedicated
-Windows and macOS desktops and can run on default-branch pushes when enabled.
+The Windows and macOS builds can include [native tray jobs](testing.md#native-tray-ci)
+on dedicated desktops when enabled for a manual run or a push to `main` or `dev`.
 
 | Workflow | Build profile | Actions artifact |
 | --- | --- | --- |

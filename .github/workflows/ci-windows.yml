@@ -3,10 +3,16 @@ name: Windows Release build
 on:
   pull_request:
     branches: [main, dev, refactoring]
+  push:
+    branches: [main, dev]
   workflow_dispatch:
     inputs:
       full_tests:
         description: Run the full Debug suite, including Spix end-to-end tests
+        type: boolean
+        default: false
+      tray_tests:
+        description: Run native tray tests on dedicated interactive Windows runners
         type: boolean
         default: false
 
@@ -20,6 +26,7 @@ concurrency:
 jobs:
   test:
     name: Windows Release
+    if: github.event_name != 'push' || vars.CI_NATIVE_TRAY == 'true'
     runs-on: windows-2022
     env:
       QT_FORCE_STDERR_LOGGING: '1'
@@ -184,3 +191,9 @@ jobs:
           name: windows-full-test-report
           path: build-just/full-tests/test-reports/
           retention-days: 7
+
+  native-tray:
+    uses: ./.github/workflows/ci-native-tray.yml
+    with:
+      platform: Windows
+      manual: ${{ inputs.tray_tests == true }}

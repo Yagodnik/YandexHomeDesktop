@@ -43,8 +43,15 @@ TestCase {
   }
 
   function init() {
-    // CTest's software renderer converts snapshots on the CPU and reports this once.
-    failOnWarning(/^(?!.*No RHI backend\. Using CPU conversion\.$).*/);
+    const expectedWarnings = [".*No RHI backend\\. Using CPU conversion\\."];
+    if (Qt.platform.os === "linux") {
+      // Headless Linux can decode the video fixture in software without VA-API or an audio server.
+      const va = "va(?:-x11|-drm|\\(in plugin\\))?";
+      expectedWarnings.push("Couldn't load " + va + " library",
+                            "Couldn't resolve " + va + " symbols",
+                            "PulseAudioService: pa_context_connect\\(\\) failed");
+    }
+    failOnWarning(new RegExp("^(?!(?:" + expectedWarnings.join("|") + ")$).*$"));
     deviceViewModel.ForgetDevice();
     deviceTestApi.reset();
     deviceTestApi.SetCapability("video", {}, { protocols: ["hls"] });

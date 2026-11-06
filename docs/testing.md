@@ -278,11 +278,11 @@ tray suite is available on Windows and macOS.
 
 #### Native tray CI
 
-The **Native tray placement** workflow runs four jobs across dedicated
-self-hosted Windows and macOS desktops. Register runners with the standard OS
+The Windows and macOS build workflows each run two optional native tray jobs
+on dedicated self-hosted desktops. Register runners with the standard OS
 label and the profile label in the table. Provision CMake, Ninja, Git Bash on
-Windows, and the interactive desktop prerequisites above. The workflow
-installs the pinned Qt kit and builds from the example OAuth configuration.
+Windows, and the interactive desktop prerequisites above. The jobs install
+the pinned Qt kit and build from the example OAuth configuration.
 Set each Actions repository variable to the expected layout JSON.
 
 | OS label | Profile label | Layout variable |
@@ -298,10 +298,12 @@ the main display. Scale the main Windows display above 100% so the
 notification icon exercises the DPI conversion. On Windows, pin the icon
 for the checkout's `build-just/native-tray/YandexHomeDesktop.exe`.
 
-Keep the dedicated runners restricted to trusted workflows. Dispatch the
-workflow from the default branch, or set `CI_NATIVE_TRAY` to `true` to run
-it on pushes to that branch. Each job uploads its report and available
-full-display screenshots as a separate artifact.
+Keep the dedicated runners restricted to trusted workflows. Enable
+`tray_tests` when manually running a Windows or macOS build on `main` or
+`dev`, or set the repository Actions variable `CI_NATIVE_TRAY` to `true`
+to run the build and tray jobs on pushes to those branches. Pull-request
+runs use the hosted build jobs. Each tray job uploads its report and
+available full-display screenshots to the same build run.
 
 The desktop logger includes UTC timestamps, severity, process ID, and Qt log
 category. Set `QT_LOGGING_RULES` to control categories such as

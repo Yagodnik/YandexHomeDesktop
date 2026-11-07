@@ -24,6 +24,10 @@ jobs:
       DEVELOPER_DIR: ${{ inputs.xcode_developer_dir }}
     steps:
       - uses: actions/checkout@v4
+        if: ${{ !inputs.source_sha }}
+
+      - uses: actions/checkout@v4
+        if: ${{ inputs.source_sha }}
         with:
           ref: ${{ inputs.source_sha }}
 

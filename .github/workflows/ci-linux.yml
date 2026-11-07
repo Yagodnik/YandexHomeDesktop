@@ -9,7 +9,7 @@ permissions:
 jobs:
   test:
     name: Linux Release
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     env:
       QT_QPA_PLATFORM: offscreen
     steps:

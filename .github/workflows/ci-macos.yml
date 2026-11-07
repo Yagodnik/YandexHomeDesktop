@@ -5,7 +5,7 @@ on:
     inputs:
       runner_label:
         type: string
-        default: macos-15
+        default: macos-latest
       source_sha:
         type: string
         default: ''

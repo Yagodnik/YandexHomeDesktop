@@ -1,0 +1,79 @@
+#pragma once
+
+#include "yh/appservices_export.h"
+
+#include <QTimer>
+#include <QUrl>
+#include <functional>
+#include <optional>
+#include "DeviceService.h"
+
+// One consumer's observation of a device. Separate sessions can share a service
+// without sharing their selection, timers, or capability suppression windows.
+class APPSERVICES_EXPORT DeviceSession final : public QObject {
+  Q_OBJECT
+public:
+  using CapabilitiesList = QList<std::optional<CapabilityObject>>;
+  using PropertiesList = QList<std::optional<PropertyObject>>;
+  using TimeProvider = std::function<double()>;
+
+  explicit DeviceSession(DeviceService* service, QObject* parent = nullptr,
+                         TimeProvider time_provider = {});
+
+  void LoadDevice(const QString& device_id);
+  void TryReloadDevice();
+  void ContinuePollingIfNeeded();
+  void StopPolling();
+  void ForgetDevice();
+  void ResetSession();
+  [[nodiscard]] bool IsPolling() const;
+  void Refresh();
+  void UseCapability(int index, CapabilityType type, const QVariantMap& state);
+  void RequestVideoStream();
+  void StopVideoStream();
+  [[nodiscard]] QUrl VideoStreamUrl() const {
+    return video_stream_url_;
+  }
+  [[nodiscard]] bool VideoStreamLoading() const {
+    return video_stream_loading_;
+  }
+  [[nodiscard]] bool VideoStreamFailed() const {
+    return video_stream_failed_;
+  }
+
+signals:
+  void videoStreamChanged();
+  void loadRequestMade();
+  void capabilitiesUpdateReady(const CapabilitiesList& capabilities);
+  void propertiesUpdateReady(const PropertiesList& properties);
+  void deviceDataReady(const DeviceInfo& info);
+  void errorOccurred(const QString& error_message);
+  void deviceInfoReceived(const DeviceInfo& info);
+  void deviceInfoReceivingFailed(const QString& message);
+
+private:
+  struct CapabilityUpdate {
+    bool pending = false;
+    double start_time = 0;
+    double finish_time = 0;
+    [[nodiscard]] bool Contains(double time) const;
+  };
+
+  void ReceiveDeviceInfo(ApiResult<DeviceInfo> result);
+  void ApplyDeviceInfo(const DeviceInfo& info);
+  void FinishAction(int index, ApiResult<void> result);
+
+  DeviceService* service_;
+  TimeProvider time_provider_;
+  QTimer polling_timer_;
+  QString device_id_;
+  bool is_in_use_ = false;
+  quint64 session_generation_ = 0;
+  quint64 video_stream_generation_ = 0;
+  QUrl video_stream_url_;
+  bool video_stream_loading_ = false;
+  bool video_stream_failed_ = false;
+  QList<CapabilityUpdate> capabilities_updates_;
+  // Intentionally shared across reads, matching the characterized controller.
+  double last_update_start_time_ = 0;
+};

@@ -4,7 +4,10 @@
 
 RoomsFilterModel::RoomsFilterModel(QObject *parent)
   : QSortFilterProxyModel(parent)
-{}
+{
+  setSortRole(RoomsModel::NameRole);
+  sort(0);
+}
 
 QString RoomsFilterModel::householdId() const {
   return household_id_;
@@ -28,5 +31,13 @@ bool RoomsFilterModel::filterAcceptsRow(int row, const QModelIndex &parent) cons
   const auto household_id = sourceModel()->data(index,
     RoomsModel::HouseholdIdRole).toString();
 
-  return (household_id == household_id_) ;
+  return household_id == household_id_;
+}
+
+bool RoomsFilterModel::lessThan(const QModelIndex& left, const QModelIndex& right) const {
+  const auto comparison = QString::compare(sourceModel()->data(left, RoomsModel::NameRole).toString(),
+    sourceModel()->data(right, RoomsModel::NameRole).toString(), Qt::CaseSensitive);
+  if (comparison != 0) { return comparison < 0; }
+  return sourceModel()->data(left, RoomsModel::IdRole).toString()
+    < sourceModel()->data(right, RoomsModel::IdRole).toString();
 }

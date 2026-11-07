@@ -1,11 +1,10 @@
 #pragma once
 
-#include <QFile>
+#include <QDebug>
+#include "JsonLoaderRaw.h"
 #include "serialization/Serialization.h"
 
 namespace JsonLoader {
-  [[nodiscard]] std::optional<QJsonObject> LoadRaw(const QString& path);
-
   template<Serialization::Serializable T>
   [[nodiscard]] std::optional<T> Load(const QString& path) {
     const auto temp = LoadRaw(path);

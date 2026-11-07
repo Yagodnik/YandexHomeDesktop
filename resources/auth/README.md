@@ -1,7 +1,4 @@
-Для генерации ```secrets.json``` нужно запустить из корневой директории проекта:
-
-```bash
-YANDEX_CLIENT_ID=... python3 scripts/generate-secrets.py 
-```
-
-**YANDEX_CLIENT_ID** - client id для oauth2 приложения
+Use `example.json` for a credential-free build. To sign in locally, create an ignored
+`secrets.json` with the same fields and configure CMake with
+`-DYH_AUTH_CONFIG_FILE=/absolute/path/to/secrets.json`. The selected file is embedded
+in the executable; do not publish a build containing real credentials.

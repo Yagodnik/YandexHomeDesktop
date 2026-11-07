@@ -1,0 +1,3 @@
+interface:
+  display_name: "YandexHomeDesktop Architecture"
+  short_description: "Keep view models, services, and APIs clearly separated"

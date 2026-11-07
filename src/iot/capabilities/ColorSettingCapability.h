@@ -33,6 +33,7 @@ public:
   Q_INVOKABLE [[nodiscard]] QVariantMap Create(const QColor& value);
   Q_INVOKABLE [[nodiscard]] QVariantMap Create(int value);
   Q_INVOKABLE [[nodiscard]] QVariantMap Create(const QString& value);
+  Q_INVOKABLE [[nodiscard]] bool MatchesColor(const QColor& value) const;
 
   [[nodiscard]] int GetTemperatureMin() const;
   [[nodiscard]] int GetTemperatureMax() const;

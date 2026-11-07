@@ -1,0 +1,84 @@
+name: Native tray jobs
+
+on:
+  workflow_call:
+    inputs:
+      platform:
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  tray-placement:
+    if: >-
+      (github.ref_name == github.event.repository.default_branch || github.ref_name == 'dev') &&
+      github.event_name == 'workflow_dispatch'
+    name: Tray placement (${{ inputs.platform }}, ${{ matrix.profile }})
+    runs-on: [self-hosted, "${{ inputs.platform }}", "${{ matrix.profile }}"]
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - profile: tray-compact
+            layout: COMPACT
+          - profile: tray-mixed
+            layout: MIXED
+    env:
+      YH_JUST_BUILD_DIR: build-just/native-tray
+      YH_JUST_CONFIG: Debug
+      YH_JUST_SPIX: 'ON'
+      YH_JUST_CLI_APP: 'OFF'
+      YH_JUST_REST_APP: 'OFF'
+      YH_TRAY_DISPLAY_PROFILE: ${{ matrix.profile }}
+      YH_TRAY_DISPLAY_LAYOUT: ${{ vars[format('TRAY_{0}_{1}_LAYOUT', inputs.platform == 'Windows' && 'WINDOWS' || 'MACOS', matrix.layout)] }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Select Git Bash for Windows recipes
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $bashDirectory = Join-Path $env:ProgramFiles 'Git\bin'
+          if (-not (Test-Path "$bashDirectory\bash.exe")) { throw 'Git Bash is required' }
+          $bashDirectory >> $env:GITHUB_PATH
+
+      - name: Check configured layout
+        shell: bash
+        run: |
+          if [[ -z "$YH_TRAY_DISPLAY_LAYOUT" ]]; then
+            echo 'Set the repository variable for this runner layout.' >&2
+            exit 1
+          fi
+
+      - uses: extractions/setup-just@v4
+        with:
+          just-version: '1.51.0'
+
+      - uses: ./.github/actions/setup-qt
+        with:
+          host: ${{ inputs.platform == 'Windows' && 'windows' || 'mac' }}
+
+      - name: Configure Debug desktop with native tray testing
+        shell: bash
+        run: |
+          options=(-DYH_TEST_NATIVE_TRAY=ON)
+          if [[ "$RUNNER_OS" == Windows ]]; then
+            options+=(-DCMAKE_CXX_COMPILER=g++.exe)
+          fi
+          just configure "${options[@]}"
+
+      - name: Check tray placement and capture every display
+        run: just test-e2e TrayPlacement
+
+      - name: Upload native tray test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-tray-${{ inputs.platform }}-${{ matrix.profile }}
+          path: build-just/native-tray/test-reports/
+          retention-days: 7

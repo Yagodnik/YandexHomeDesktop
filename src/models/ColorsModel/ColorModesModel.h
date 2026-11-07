@@ -2,7 +2,7 @@
 
 #include <QAbstractListModel>
 
-#include "serialization/Serialization.h"
+#include "serialization/SerializationTypes.h"
 
 class ColorModesModel : public QAbstractListModel {
   Q_OBJECT

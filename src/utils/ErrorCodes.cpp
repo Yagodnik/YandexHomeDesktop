@@ -1,6 +1,7 @@
 #include "ErrorCodes.h"
 
 #include "JsonLoader.h"
+#include "TranslateCatalog.h"
 
 ErrorCodes::ErrorCodes(QObject *parent) : QObject(parent) {
   const auto list = JsonLoader::Load<ErrorCodesFile>(kErrorCodesPath);
@@ -15,8 +16,8 @@ QVariant ErrorCodes::GetDeviceError(const QString &error_code) {
   for (const auto& error : iot_errors_) {
     if (error.error_code == error_code) {
       QVariantMap temp = {
-        { "short_description", error.short_description },
-        { "full_description", error.full_description }
+        { "short_description", TranslateCatalog("DataErrors", error.short_description) },
+        { "full_description", TranslateCatalog("DataErrors", error.full_description) }
       };
 
       return temp;
@@ -27,4 +28,3 @@ QVariant ErrorCodes::GetDeviceError(const QString &error_code) {
 
   return {};
 }
-

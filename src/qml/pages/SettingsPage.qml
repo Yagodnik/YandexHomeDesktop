@@ -1,171 +1,127 @@
-import QtQuick 2.15
-import QtQuick.Layouts 2.15
-import Qt5Compat.GraphicalEffects
+import QtQuick
+import YandexHomeDesktop.ViewModels
 import YandexHomeDesktop.Ui as UI
 import YandexHomeDesktop.Components as Components
 
-Item {
-  QtObject {
-    id: shaderParams
-    property real t: 0
-
-    SequentialAnimation on t {
-      loops: Animation.Infinite
-      NumberAnimation {
-        to: 1
-        duration: 600
-        easing.type: Easing.InBack
-      }
-      NumberAnimation {
-        to: 0
-        duration: 600
-        easing.type: Easing.InBack
-      }
-    }
-  }
-
-  Flickable {
-    id: flickable
+UI.PageSurface {
+  id: root
+  required property RestViewModel restModel
+  required property SettingsTransferModel transferModel
+  required property ShortcutViewModel shortcutModel
+  property var mcpModel: null
+  modalDialogOpen: transferDialogs.dialogOpen
+  Components.SettingsTransferDialogs { id: transferDialogs; viewModel: root.transferModel }
+  UI.ScrollColumn {
+    objectName: "settingsContent"
     anchors.fill: parent
-    contentWidth: parent.width
-    contentHeight: contentItem.implicitHeight
+    spacing: 12
 
-    interactive: true
-    flickableDirection: Flickable.VerticalFlick
+    UI.HeadingText {
+      text: qsTr("Настройки")
+      width: parent.width
+    }
 
-    Item {
-      id: contentItem
-      width: flickable.width
+    Components.AccountDetails {}
 
-      UI.HeadingText {
-        id: heading
-        text: "Настройки"
-        width: parent.width
+    Components.BasicSettingsCard {
+      objectName: "basicSettings"
+      width: parent.width
+      trayTitle: qsTr("Tray-режим")
+      trayDescription: qsTr("Приложение будет отображаться\nкак иконка на панели задач")
+      trayModeEnabled: settings.trayModeEnabled
+      trayAvailable: platformService.traySupported
+      notchAvailable: platformService.notchSupported
+      notchEnabled: settings.notchEnabled
+      notchTitle: qsTr("Открывать у выреза экрана")
+      notchDescription: qsTr("Показывать приложение при наведении\nна вырез экрана")
+      onNotchToggled: function(enabled) { settings.notchEnabled = enabled; }
+      themeTitle: qsTr("Тема")
+      themeNames: [qsTr("Светлая"), qsTr("Тёмная")]
+      currentTheme: settings.currentTheme
+      keybindsTitle: qsTr("Сочетания клавиш")
+      keybindsDescription: qsTr("Показывать кнопки назначения\nрядом с умениями устройств")
+      showKeybinds: settings.showKeybinds
+      keybindsAvailable: root.shortcutModel !== null
+      projectLinkText: qsTr("GitHub")
+
+      onTrayModeToggled: function(enabled) { settings.trayModeEnabled = enabled; }
+
+      onThemeSelected: function(index) {
+        settings.currentTheme = index;
+        themes.SetTheme(index);
       }
 
-      Column {
-        width: parent.width
-        anchors.top: heading.bottom
-        anchors.topMargin: 12
-        spacing: 8
+      onKeybindsToggled: function(visible) { settings.showKeybinds = visible; }
 
-        Components.AccountDetails {}
+      onProjectLinkClicked: Qt.openUrlExternally("https://github.com/Yagodnik/YandexHomeDesktop")
+    }
 
-        Item {
-          id: basicSettings
-          width: parent.width
-          height: elements.implicitHeight
+    UI.HeadingText {
+      objectName: "settingsTransferHeading"
+      text: qsTr("Перенос настроек")
+      width: parent.width
+    }
 
-          Rectangle {
-            id: background2
-            anchors.fill: parent
-            color: themes.headerBackground
-            radius: 16
-          }
+    Components.SettingsTransferCard {
+      objectName: "settingsTransferCard"
+      width: parent.width
+      available: root.transferModel.available
+      statusText: root.transferModel.status
+      failed: root.transferModel.failed
+      onExportRequested: transferDialogs.openExport()
+      onImportRequested: transferDialogs.openImport()
+    }
 
-          Column {
-            id: elements
-            anchors.fill: parent
+    UI.HeadingText {
+      text: qsTr("Дополнительно")
+      width: parent.width
+    }
 
-            Item {
-              width: parent.width
-              height: details2.height + 20
+    Components.ShortcutSettingsCard {
+      objectName: "shortcutSettings"
+      width: parent.width
+      visible: root.shortcutModel !== null
+      shortcutsEnabled: visible && root.shortcutModel.enabled
+      backgroundEnabled: visible && root.shortcutModel.background
+      busy: visible && root.shortcutModel.busy
+      statusText: visible ? root.shortcutModel.status : ""
+      errorText: visible ? root.shortcutModel.error : ""
+      onEnabledToggled: function(enabled) { root.shortcutModel.SetEnabled(enabled); }
+      onBackgroundToggled: function(enabled) { root.shortcutModel.SetBackground(enabled); }
+    }
 
-              Column {
-                id: details2
-                anchors.left: parent.left
-                anchors.leftMargin: 10
-                anchors.verticalCenter: parent.verticalCenter
+    Components.AdvancedSettingsCard {
+      objectName: "advancedSettings"
+      width: parent.width
+      title: qsTr("REST API")
+      description: qsTr("Локальный доступ для скриптов")
+      restEnabled: root.restModel.enabled
+      port: root.restModel.port
+      portEditable: !root.restModel.running
+      busy: root.restModel.busy
+      statusText: root.restModel.busy ? qsTr("Подождите…")
+        : root.restModel.running ? root.restModel.url
+        : qsTr("Сервер остановлен")
+      errorText: root.restModel.error
+      onRestToggled: function(enabled) { root.restModel.SetEnabled(enabled); }
+      onPortChangedByUser: function(port) { root.restModel.SetPort(port); }
+    }
 
-                UI.DefaultText {
-                  text: "Tray-режим"
-                }
-
-                UI.SubheadingText {
-                  text: "Приложение будет отображаться\nкак иконка на панели задач"
-                }
-              }
-
-              UI.MySwitch {
-                anchors.right: parent.right
-                anchors.rightMargin: 10
-                anchors.verticalCenter: parent.verticalCenter
-                checked: settings.trayModeEnabled
-
-                onToggled: function (checked) {
-                  settings.trayModeEnabled = checked
-                  if (checked) {
-                    platformService.ShowOnlyInTray();
-                  } else {
-                    platformService.ShowAsApp();
-                  }
-                }
-              }
-            }
-
-            Item {
-              width: parent.width
-              height: 50
-
-              UI.DefaultText {
-                text: "Тема"
-                anchors.left: parent.left
-                anchors.leftMargin: 10
-                anchors.verticalCenter: parent.verticalCenter
-              }
-
-              UI.MyComboBox {
-                anchors.right: parent.right
-                anchors.rightMargin: 10
-                anchors.verticalCenter: parent.verticalCenter
-
-                currentIndex: settings.currentTheme
-
-                model: ListModel {
-                  ListElement {
-                    displayText: "Светлая"
-                  }
-
-                  ListElement {
-                    displayText: "Тёмная"
-                  }
-                }
-
-                onActivated: {
-                  console.log("Selected index:", currentIndex, "value:", currentText)
-
-                  settings.currentTheme = currentIndex;
-                  themes.SetTheme(currentIndex);
-                }
-              }
-            }
-
-            Item {
-              width: parent.width
-              height: 48
-
-              UI.DefaultText {
-                id: githubLink
-
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.left: parent.left
-                anchors.leftMargin: 10
-
-                text: "GitHub"
-
-                MouseArea {
-                  anchors.fill: parent
-                  cursorShape: Qt.PointingHandCursor
-
-                  onClicked: {
-                    Qt.openUrlExternally("https://github.com/Yagodnik/YandexHomeDesktop")
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+    Components.AdvancedSettingsCard {
+      objectName: "mcpSettings"
+      width: parent.width
+      visible: root.mcpModel !== null && root.mcpModel !== undefined
+      height: visible ? implicitHeight : 0
+      title: qsTr("MCP-сервер")
+      description: qsTr("Доступ для AI-агентов")
+      restEnabled: visible ? root.mcpModel.running : false
+      port: visible ? root.mcpModel.port : 8767
+      busy: visible ? root.mcpModel.busy : false
+      statusText: !visible ? "" : root.mcpModel.busy ? qsTr("Подождите…")
+        : root.mcpModel.running ? root.mcpModel.url : qsTr("Сервер остановлен")
+      errorText: visible ? root.mcpModel.error : ""
+      onRestToggled: function(enabled) { root.mcpModel.setEnabled(enabled); }
+      onPortChangedByUser: function(port) { root.mcpModel.setPort(port); }
     }
   }
 }

@@ -2,7 +2,7 @@
 
 #include <QObject>
 
-#include "../serialization/Serialization.h"
+#include "../serialization/SerializationTypes.h"
 
 class ErrorCodes : public QObject {
   Q_OBJECT

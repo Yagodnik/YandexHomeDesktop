@@ -1,0 +1,38 @@
+name: Set up Qt
+description: Install the pinned Qt kit and add-ons shared by CI and tag releases
+
+inputs:
+  host:
+    description: Qt host (windows, mac, or linux)
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+
+    - name: Use the shared Qt kit in the local macOS lab
+      if: inputs.host == 'mac' && env.ACT && env.YH_LAB_QT_PREFIX
+      shell: bash
+      run: |
+        "$YH_LAB_QT_PREFIX/bin/qtpaths" --qt-version
+        printf 'QT_ROOT_DIR=%s\n' "$YH_LAB_QT_PREFIX" >> "$GITHUB_ENV"
+
+    # Call the installer directly because act cannot resolve the wrapper's $/action reference.
+    - uses: jurplel/install-qt-action/action@v4.5.0
+      if: ${{ !(inputs.host == 'mac' && env.ACT && env.YH_LAB_QT_PREFIX) }}
+      with:
+        dir: ${{ github.workspace }}/..
+        version: '6.9.1'
+        host: ${{ inputs.host }}
+        target: desktop
+        arch: ${{ inputs.host == 'windows' && 'win64_mingw' || inputs.host == 'mac' && 'clang_64' || 'linux_gcc_64' }}
+        # qttools (including LinguistTools) and qtsvg are in the base kit.
+        # Only separately distributed add-ons belong in the modules list.
+        modules: qt5compat qtshadertools qtnetworkauth qthttpserver qtwebsockets qtmultimedia
+        tools: ${{ inputs.host == 'windows' && 'tools_mingw1310,qt.tools.win64_mingw1310' || '' }}
+        aqtversion: '==3.3.0'
+        py7zrversion: '==1.1.0'
+        cache: true

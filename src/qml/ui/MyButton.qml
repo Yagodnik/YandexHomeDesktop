@@ -5,6 +5,7 @@ Item {
   id: root
 
   property alias text: label.text
+  property alias font: label.font
   signal clicked()
 
   property var horizontalMargin: 20

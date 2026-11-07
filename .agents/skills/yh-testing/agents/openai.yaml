@@ -1,0 +1,3 @@
+interface:
+  display_name: "YandexHomeDesktop Tests"
+  short_description: "Discover and run feature suites or individual tests"

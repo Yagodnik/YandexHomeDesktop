@@ -1,4 +1,5 @@
 #include "ColorModesFilterModel.h"
+#include <algorithm>
 #include "ColorModesModel.h"
 
 ColorModesFilterModel::ColorModesFilterModel(QObject *parent) : QSortFilterProxyModel(parent ) {}

@@ -1,5 +1,6 @@
 #include "ColorsModel.h"
 #include "utils/JsonLoader.h"
+#include "utils/TranslateCatalog.h"
 #include <QColor>
 
 void ColorsModel::ProcessData(const ColorsFile &data) {
@@ -56,7 +57,7 @@ QVariant ColorsModel::data(const QModelIndex &index, int role) const {
     case IndexRole:
       return index.row();
     case NameRole:
-      return color.name;
+      return TranslateCatalog("DataColors", color.name);
     case ColorRole:
       return QColor(
         color_data.r,

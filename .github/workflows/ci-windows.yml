@@ -1,0 +1,118 @@
+name: Windows Release build
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Windows Release
+    runs-on: windows-latest
+    env:
+      QT_FORCE_STDERR_LOGGING: '1'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install just
+        uses: extractions/setup-just@v4
+        with:
+          just-version: '1.51.0'
+
+      - name: Check justfile formatting
+        run: just --fmt --check
+
+      - name: Select Git Bash for recipes (Bash 3.2+)
+        shell: pwsh
+        run: |
+          $bashDirectory = Join-Path $env:ProgramFiles 'Git\bin'
+          if (-not (Test-Path "$bashDirectory\bash.exe")) { throw 'Git Bash is required' }
+          $bashDirectory >> $env:GITHUB_PATH
+
+      - name: Install Qt and matching MinGW
+        uses: ./.github/actions/setup-qt
+        with:
+          host: windows
+
+      - name: Install pinned NSIS
+        run: choco install nsis --version=3.12.0 --no-progress -y
+
+      - name: Check build ZIP recipe
+        shell: pwsh
+        run: |
+          $fixture = Join-Path $env:RUNNER_TEMP 'archive fixture'
+          New-Item -ItemType Directory -Path $fixture -Force | Out-Null
+          Set-Content (Join-Path $fixture 'CMakeCache.txt') 'archive smoke test'
+          just "build_dir=$fixture" archive-build
+          if ($LASTEXITCODE -ne 0) { throw 'Build archive creation failed' }
+          $archive = (Get-ChildItem dist/build-archives -Filter '*.zip' -File).FullName
+          $entries = cmake -E tar tf $archive
+          if ($LASTEXITCODE -ne 0 -or -not ($entries -match '(^|/)archive fixture/CMakeCache\.txt$')) { throw 'Expected CMakeCache.txt in build ZIP' }
+
+      - name: Exercise recovery from a stale dependency source override
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path build-just/package -Force | Out-Null
+          Set-Content build-just/package/CMakeCache.txt "FETCHCONTENT_SOURCE_DIR_QHOTKEY:PATH=$env:RUNNER_TEMP/missing-qhotkey-source"
+
+      - name: Build, test, and package Windows installer
+        run: >-
+          just generator=Ninja pch=ON spix=OFF
+          package-windows '-DCMAKE_CXX_COMPILER=g++.exe'
+
+      - name: Smoke-check the silent installer
+        shell: pwsh
+        run: |
+          $installers = @(Get-ChildItem build-just/package/dist -Filter '*.exe' -File)
+          if ($installers.Count -ne 1) { throw 'Expected one Windows installer' }
+          $installed = Join-Path $env:RUNNER_TEMP 'package installed'
+          $installer = Start-Process -FilePath $installers[0].FullName -ArgumentList '/S', "/D=$installed" -Wait -PassThru
+          if ($installer.ExitCode -ne 0) { throw 'Silent installer failed' }
+          cmake "-DPACKAGE_ROOT=$installed" -P build-just/package/CheckPackage.cmake
+          if ($LASTEXITCODE -ne 0) { throw 'Installed package verification failed' }
+
+      - name: Upload Windows package
+        uses: actions/upload-artifact@v4
+        with:
+          name: yandex-home-windows-x86_64
+          path: build-just/package/dist/*.exe
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
+
+      - name: Build the native tray helper and smoke-test the Spix desktop
+        shell: pwsh
+        run: |
+          $profile = @('build_dir=build-just/package', 'config=Release', 'spix=ON')
+          $options = @('-DCMAKE_CXX_COMPILER=g++.exe', '-DYH_ENABLE_PACKAGING=OFF', '-DYH_TEST_NATIVE_TRAY=ON')
+          just @profile configure @options
+          if ($LASTEXITCODE -ne 0) { throw 'Spix configuration failed' }
+          # Reproduce the copy timestamp collision even on a slower runner.
+          $deps = 'build-just/package/_deps'
+          $original = Get-Item "$deps/spix-src/libs/Core/src/AnyRpcServer.cpp"
+          $patched = Get-Item "$deps/spix-build/patched/libs/Core/src/AnyRpcServer.cpp"
+          $patched.LastWriteTimeUtc = $original.LastWriteTimeUtc
+          just @profile configure @options -DFETCHCONTENT_FULLY_DISCONNECTED=ON
+          if ($LASTEXITCODE -ne 0) { throw 'Offline Spix reconfiguration failed' }
+          just @profile test-e2e SpixSmoke
+          if ($LASTEXITCODE -ne 0) { throw 'Spix smoke test failed' }
+
+      - name: Upload windows test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-test-report
+          path: build-just/package/test-reports/
+          retention-days: 7
+
+      - name: Upload failure logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build-logs
+          path: |
+            build-just/package/Testing/Temporary/*.log
+            build-just/package/Testing/*.txt
+            build-just/*/CMakeFiles/CMakeConfigureLog.yaml
+          retention-days: 7

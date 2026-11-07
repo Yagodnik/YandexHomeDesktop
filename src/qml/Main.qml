@@ -5,15 +5,21 @@ import Qt5Compat.GraphicalEffects
 import YandexHomeDesktop.Pages
 import YandexHomeDesktop.Ui
 
-Window {
+TrayWindow {
   id: window
   width: 350
   height: 460
   minimumWidth: 350
   minimumHeight: 460
-  visible: !settings.trayModeEnabled
+  visible: false
   title: qsTr("Yandex Home Desktop")
   color: "transparent"
+  trayModeEnabled: platformService.traySupported && settings.trayModeEnabled
+  notchModeEnabled: settings.notchEnabled && !settings.trayModeEnabled && platformService.notchSupported
+  popupMenuInHeader: pages.currentItem ? pages.currentItem.popupMenuInHeader : false
+  popupQuitVisible: pages.currentItem ? pages.currentItem.popupQuitVisible : true
+  onQuitRequested: Qt.quit()
+  modalDialogOpen: pages.currentItem ? pages.currentItem.modalDialogOpen : false
 
   /* FPS Counter
   property int frames: 0
@@ -40,31 +46,47 @@ Window {
 
   Component.onCompleted: {
     platformService.SetWindow(window);
+    platformService.SetNotchEnabled(settings.notchEnabled && !settings.trayModeEnabled);
+    if (!window.popupModeEnabled) window.show();
   }
 
-  onActiveFocusItemChanged: {
-    if (!activeFocusItem && settings.trayModeEnabled) {
-      window.hide();
+  Connections {
+    target: settings
+    function onNotchEnabledChanged() { platformService.SetNotchEnabled(settings.notchEnabled && !settings.trayModeEnabled); }
+    function onTrayModeEnabledChanged() { platformService.SetNotchEnabled(settings.notchEnabled && !settings.trayModeEnabled); }
+  }
+  Connections {
+    target: platformService
+    ignoreUnknownSignals: true
+    function onNotchSupportedChanged() {
+      platformService.SetNotchEnabled(settings.notchEnabled && !settings.trayModeEnabled);
+      if (!platformService.notchSupported && settings.notchEnabled && !settings.trayModeEnabled)
+        window.show();
     }
   }
 
   onActiveChanged: {
     if (active) {
-      deviceController.ContinuePollingIfNeeded();
+      deviceViewModel.ContinuePollingIfNeeded();
     } else {
-      deviceController.StopPolling();
+      deviceViewModel.StopPolling();
     }
   }
 
   SystemTrayIcon {
-    visible: settings.trayModeEnabled
+    id: trayIcon
+    visible: window.trayModeEnabled
     icon.name: "Yandex Home Desktop"
     icon.source: "qrc:/images/icon.png"
 
     onActivated: function(reason) {
-      console.log("Position:", geometry.x, geometry.y);
       platformService.ShowWindow(geometry);
     }
+  }
+
+  function trayIconBounds(): string {
+    const bounds = trayIcon.geometry;
+    return [bounds.x, bounds.y, bounds.width, bounds.height].join(",");
   }
 
   QtObject {
@@ -114,14 +136,15 @@ Window {
     id: background
     anchors.fill: parent
     color: themes.background
-    radius: settings.trayModeEnabled ? 12 : 0
+    radius: window.popupModeEnabled ? 12 : 0
   }
 
   StackView {
     id: pages
     anchors.fill: parent
+    anchors.topMargin: window.popupModeEnabled && window.popupQuitVisible && !window.popupMenuInHeader ? 28 : 0
 
-    layer.enabled: settings.trayModeEnabled
+    layer.enabled: window.popupModeEnabled
     layer.smooth: true
     layer.effect: OpacityMask {
       maskSource: background

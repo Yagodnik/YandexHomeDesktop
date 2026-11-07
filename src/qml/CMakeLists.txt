@@ -16,8 +16,31 @@ qt_add_qml_module(YandexHomeDesktopUi
         ui/MyComboBox.qml
         ui/MySlider.qml
         ui/ImageButton.qml
+        ui/IconButton.qml
+        ui/FavoriteButton.qml
+        ui/KeybindEditor.qml
+        ui/AnimatedDialog.qml
         ui/ErrorDialog.qml
         ui/Skeleton.qml
+        ui/CardSurface.qml
+        ui/RefreshHeader.qml
+        ui/LoadingPane.qml
+        ui/LoadErrorPane.qml
+        ui/PageSurface.qml
+        ui/TrayWindow.qml
+        ui/PageStates.qml
+        ui/InsetPane.qml
+        ui/ScrollColumn.qml
+        ui/ListScrollBar.qml
+        ui/RetryPane.qml
+        ui/MessageActionsPane.qml
+        ui/LinkLabel.qml
+        ui/LinkFooter.qml
+        ui/SettingSwitchRow.qml
+        ui/SettingChoiceRow.qml
+        ui/SettingLinkRow.qml
+        ui/SettingActionRow.qml
+        ui/Shadow.qml
 )
 
 qt_add_qml_module(YandexHomeDesktopPages
@@ -33,6 +56,7 @@ qt_add_qml_module(YandexHomeDesktopPages
         pages/AuthCanceledPage.qml
         pages/LoadingPage.qml
         pages/MainPage.qml
+        pages/DevicePage.qml
 )
 
 qt_add_qml_module(YandexHomeDesktopComponents
@@ -45,6 +69,27 @@ qt_add_qml_module(YandexHomeDesktopComponents
         components/ScenariosList.qml
         components/AccountDetails.qml
         components/DeviceDelegate.qml
+        components/DeviceListSection.qml
         components/RoomDevicesList.qml
+        components/CollapsibleSectionHeader.qml
+        components/FavoriteDevicesList.qml
         components/AdaptiveGrid.qml
+        components/DeviceHeader.qml
+        components/DeviceAttributeSection.qml
+        components/CapabilityKeybind.qml
+        components/CapabilityOptionTile.qml
+        components/DeviceControlsPane.qml
+        components/VideoStreamPlayer.qml
+        components/CameraSnapshotDialog.qml
+        components/PropertyValueCard.qml
+        components/SignInCard.qml
+        components/HouseholdDelegate.qml
+        components/HouseholdPicker.qml
+        components/BasicSettingsCard.qml
+        components/AdvancedSettingsCard.qml
+        components/ShortcutSettingsCard.qml
+        components/SettingsTransferCard.qml
+        components/SettingsTransferDialogs.qml
+        components/RoomsPane.qml
+        components/ScenariosPane.qml
 )

@@ -1,17 +1,10 @@
 #include "PlatformServiceMac.h"
+#include "WindowPlacement.h"
 #include "macos/MacOSIntegration.h"
 
 void PlatformServiceMac::ShowWindow(const QRect& icon) {
-  if (window_ == nullptr) {
-    qCritical() << "PlatformServiceMac: Nullptr window";
-    return;
-  }
-
-  window_->setPosition(
-    icon.x() - window_->width() / 2 + icon.width() / 2,
-    icon.y() + 50
-  );
-
+  if (!window_) return;
+  window_->setPosition(WindowPlacement(icon, window_->size()));
   window_->show();
   window_->raise();
   window_->requestActivate();
@@ -20,15 +13,19 @@ void PlatformServiceMac::ShowWindow(const QRect& icon) {
 void PlatformServiceMac::ShowAsApp() {
   MacOSIntegration::ShowAppFromTheDock();
 
-  if (window_ != nullptr) {
+  if (window_ && window_->flags().testFlag(Qt::FramelessWindowHint)) {
+    const bool visible = window_->isVisible();
     window_->setFlags(Qt::Window);
+    if (visible) window_->show();
   }
 }
 
 void PlatformServiceMac::ShowOnlyInTray() {
   MacOSIntegration::HideAppFromTheDock();
 
-  if (window_ != nullptr) {
+  if (window_ && !window_->flags().testFlag(Qt::FramelessWindowHint)) {
+    const bool visible = window_->isVisible();
     window_->setFlags(Qt::FramelessWindowHint);
+    if (visible) window_->show();
   }
 }

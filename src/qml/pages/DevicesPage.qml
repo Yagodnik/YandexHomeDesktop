@@ -1,179 +1,55 @@
 import QtQuick
-import QtQuick.Layouts
-import QtQuick.Controls
 import YandexHomeDesktop.Ui as UI
 import YandexHomeDesktop.Components as Components
-import YandexHomeDesktop.Models 1.0
+import YandexHomeDesktop.ViewModels as ViewModels
 
-Item {
-  id: rooms
+UI.PageSurface {
+  id: root
+  required property ViewModels.HomeViewModel viewModel
 
-  Item {
+  Component.onCompleted: viewModel.EnsureLoaded()
+
+  UI.RefreshHeader {
     id: heading
+    objectName: "homeRefreshButton"
     width: parent.width
-    height: 32
+    title: qsTr("Комнаты")
+    enabled: !root.viewModel.loading
 
-    UI.HeadingText {
-      id: roomsText
-      text: "Комнаты"
-      anchors.left: parent.left
-      anchors.verticalCenter: parent.verticalCenter
-    }
-
-    UI.ImageButton {
-      id: reloadButton
-      source: "qrc:/images/reload.svg"
-
-      property real rotationAngle: 0
-
-      transform: Rotation {
-        id: rot
-        origin.x: reloadButton.width / 2
-        origin.y: reloadButton.height / 2
-        angle: reloadButton.rotationAngle
-      }
-
-      anchors.verticalCenter: parent.verticalCenter
-      anchors.right: parent.right
-      anchors.rightMargin: 8
-
-      onClicked: {
-        if (rooms.isLoading) {
-          return;
-        }
-
-        rooms.isLoading = true;
-        devicesStack.currentIndex = 0;
-        devicesModel.RequestData();
-
-        reloadButton.rotationAngle += 360;
-      }
-
-      Behavior on rotationAngle {
-        NumberAnimation {
-          duration: 500
-          easing.type: Easing.InOutCubic
-        }
-      }
+    onRefreshClicked: {
+      root.viewModel.Refresh();
+      heading.rotationAngle += 360;
     }
   }
 
-  Component.onCompleted: {
-    isLoading = true;
-    devicesModel.RequestData();
-  }
-
-  property var isLoading: false
-
-  Connections {
-    target: devicesModel
-
-    function onDataLoadingFailed() {
-      rooms.isLoading = false;
-      console.log("Devices Model: Data Load - FAIL");
-      devicesStack.currentIndex = 1;
-    }
-
-    function onDataLoaded() {
-      rooms.isLoading = false;
-      console.log("Devices Model: Data Load - OK");
-      devicesStack.currentIndex = 2;
-    }
-  }
-
-  StackLayout {
+  UI.PageStates {
     id: devicesStack
+    objectName: "homeStates"
     width: parent.width
-
     anchors.top: heading.bottom
     anchors.topMargin: 2
     anchors.bottom: parent.bottom
+    currentIndex: root.viewModel.state === ViewModels.HomeViewModel.Ready ? 2
+                : root.viewModel.state === ViewModels.HomeViewModel.Error ? 1 : 0
 
-    Item {
-      UI.MyProgressIndicator {
-        id: loadingProgress
-
-        anchors.centerIn: parent
-        width: 30
-        height: 30
-        strokeWidth: 2
-        opacity: (devicesStack.currentIndex === 0) ? 1 : 0
-        visible: opacity > 0
-
-        Behavior on opacity {
-          NumberAnimation {
-            duration: 200
-            easing.type: Easing.InOutQuad
-          }
-        }
-      }
+    UI.LoadingPane { active: devicesStack.currentIndex === 0 }
+    UI.LoadErrorPane {
+      active: devicesStack.currentIndex === 1
+      message: qsTr("Что-то пошло не так!")
     }
-
-    Item {
-      opacity: (devicesStack.currentIndex === 1) ? 1 : 0
-      visible: opacity > 0
-
-      Behavior on opacity {
-        NumberAnimation {
-          duration: 200
-          easing.type: Easing.InOutQuad
-        }
-      }
-
-      Column {
-        id: errorMessage
-        anchors.centerIn: parent
-        spacing: 15
-
-        UI.DefaultText {
-          text: qsTr("Что-то пошло не так!")
-          color: themes.inactive
-
-          anchors.horizontalCenter: errorMessage.horizontalCenter
-        }
-      }
-    }
-
-    Item {
-      ListView {
-        id: roomsList
-        anchors.fill: parent
-
-        clip: true
-
-        spacing: 8
-
-        ScrollBar.vertical: scrollBar
-
-        // flickableDirection: Flickable.VerticalFlick
-        // boundsBehavior: Flickable.StopAtBounds
-
-        model: RoomsFilterModel {
-          sourceModel: roomsModel
-          householdId: householdsModel.currentHousehold
-        }
-
-        delegate: Components.RoomDevicesList {
-          width: roomsList.width
-        }
-      }
-
-      ScrollBar {
-        id: scrollBar
-
-        width: 10
-        height: roomsList.height
-        anchors.left: roomsList.right
-        anchors.leftMargin: 4
-        policy: roomsList.contentHeight > roomsList.height ? ScrollBar.AlwaysOn : ScrollBar.AlwaysOff
-
-        contentItem: Rectangle {
-          implicitWidth: 10
-          radius: 4
-          color: themes.headerBackground
-        }
-
-        background: Item {}
+    Components.RoomsPane {
+      sourceModel: root.viewModel.rooms
+      devicesModel: root.viewModel.devices
+      favoritesModel: root.viewModel.favorites
+      favoritesTitle: qsTr("Избранное")
+      favoritesCollapsed: root.viewModel.favoritesCollapsed
+      preferencesAvailable: root.viewModel.preferencesAvailable
+      onCollapseRequested: function(id, collapsed) { root.viewModel.SetRoomCollapsed(id, collapsed); }
+      onFavoritesCollapseRequested: function(collapsed) { root.viewModel.favoritesCollapsed = collapsed; }
+      onFavoriteRequested: function(id, favorite) { root.viewModel.SetDeviceFavorite(id, favorite); }
+      onDeviceRequested: function(id) {
+        deviceViewModel.LoadDevice(id);
+        router.navigateTo("device");
       }
     }
   }

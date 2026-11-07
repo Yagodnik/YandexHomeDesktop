@@ -6,7 +6,7 @@ Item {
   property var leftCorner: false
   property var rightCorner: false
 
-  property var text: "My Tab"
+  property var text: qsTr("Вкладка")
   property var active: false
 
   property var tabHeight: 48

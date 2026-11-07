@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleIdentifier</key>
+  <string>com.artemyagodnik.YandexHomeDesktop.rest</string>
+  <key>CFBundleName</key>
+  <string>YandexHomeRest</string>
+  <key>CFBundleExecutable</key>
+  <string>YandexHomeRest</string>
+  <key>CFBundleVersion</key>
+  <string>@PROJECT_VERSION@</string>
+  <key>LSBackgroundOnly</key>
+  <true/>
+</dict>
+</plist>

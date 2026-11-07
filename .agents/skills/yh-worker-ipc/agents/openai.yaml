@@ -1,0 +1,3 @@
+interface:
+  display_name: "YandexHomeDesktop Worker IPC"
+  short_description: "Reuse local IPC and detached worker lifecycle"

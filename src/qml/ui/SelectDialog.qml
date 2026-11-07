@@ -25,6 +25,7 @@ Item {
   }
 
   visible: true
+  enabled: myVisible
   anchors.left: parent.left
   anchors.right: parent.right
   z: 600
@@ -209,6 +210,7 @@ Item {
 
     anchors.top: selectTitle.bottom
     anchors.topMargin: 12
+    anchors.bottom: parent.bottom
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.margins: 16

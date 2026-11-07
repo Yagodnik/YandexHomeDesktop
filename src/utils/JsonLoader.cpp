@@ -1,4 +1,8 @@
-#include "JsonLoader.h"
+#include "JsonLoaderRaw.h"
+
+#include <QDebug>
+#include <QFile>
+#include <QJsonDocument>
 
 std::optional<QJsonObject> JsonLoader::LoadRaw(const QString &path)  {
   QFile file(path);

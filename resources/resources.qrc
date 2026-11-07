@@ -3,6 +3,8 @@
     <file>images/icon.png</file>
     <file>images/login_github.svg</file>
     <file>images/play.svg</file>
+    <file>images/video-stop.svg</file>
+    <file>images/video-snapshot.svg</file>
     <file>images/logout.svg</file>
     <file>images/reload.svg</file>
     <file>images/light.svg</file>
@@ -12,7 +14,6 @@
     <file>images/warning.svg</file>
     <file>images/on.svg</file>
 
-    <file>auth/secrets.json</file>
     <file>callback/index.html</file>
 
     <file>themes/light.json</file>
@@ -137,6 +138,7 @@
     <file alias="Toggle.qml">../src/qml/controls/Toggle.qml</file>
     <file alias="ColorSetting.qml">../src/qml/controls/ColorSetting.qml</file>
     <file alias="Unsupported.qml">../src/qml/controls/Unsupported.qml</file>
+    <file alias="VideoStream.qml">../src/qml/controls/VideoStream.qml</file>
     <file alias="PropertyFloat.qml">../src/qml/controls/PropertyFloat.qml</file>
     <file alias="PropertyEvent.qml">../src/qml/controls/PropertyEvent.qml</file>
   </qresource>

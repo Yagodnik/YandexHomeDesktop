@@ -1,0 +1,3 @@
+interface:
+  display_name: "YandexHomeDesktop JSON Serialization"
+  short_description: "Use the project's JSON structs, enums, and codecs"

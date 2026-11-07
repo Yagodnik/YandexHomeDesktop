@@ -1,25 +1,13 @@
 #include "DeviceDataModel.h"
+#include "DeviceController.h"
 
-DeviceDataModel::DeviceDataModel(DeviceController *controller, QObject *parent) :
-  QObject(parent),
-  controller_(controller),
-  device_state_(DeviceState::Offline),
-  is_initialized_(false)
-{
-  connect(controller_,
-    &DeviceController::loadRequestMade,
-    this,
-    &DeviceDataModel::ResetModel);
+DeviceDataModel::DeviceDataModel(QObject* parent) : QObject(parent) {}
 
-  connect(controller_,
-    &DeviceController::deviceDataReady,
-    this,
-    &DeviceDataModel::OnDeviceInfoReceived);
-
-  connect(controller_,
-    &DeviceController::errorOccurred,
-    this,
-    &DeviceDataModel::OnDeviceInfoReceivingFailed);
+DeviceDataModel::DeviceDataModel(DeviceController* controller, QObject* parent)
+  : DeviceDataModel(parent) {
+  connect(controller, &DeviceController::loadRequestMade, this, &DeviceDataModel::ResetModel);
+  connect(controller, &DeviceController::deviceDataReady, this, &DeviceDataModel::OnDeviceInfoReceived);
+  connect(controller, &DeviceController::errorOccurred, this, &DeviceDataModel::OnDeviceInfoReceivingFailed);
 }
 
 QString DeviceDataModel::GetDeviceName() const {

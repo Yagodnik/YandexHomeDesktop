@@ -1,0 +1,161 @@
+diff --git a/libs/Core/include/Spix/CommandExecuter/CommandExecuter.h b/libs/Core/include/Spix/CommandExecuter/CommandExecuter.h
+index ff59a61..0d40224 100644
+--- a/libs/Core/include/Spix/CommandExecuter/CommandExecuter.h
++++ b/libs/Core/include/Spix/CommandExecuter/CommandExecuter.h
+@@ -37,6 +37,7 @@ public:
+ 
+     void enqueueCommand(std::unique_ptr<cmd::Command> command);
+     void processCommands(Scene& scene);
++    void stop();
+ 
+     template <typename CmdType, typename... Args>
+     void enqueueCommand(Args&&... args)
+@@ -50,6 +51,7 @@ private:
+ 
+     std::queue<std::unique_ptr<cmd::Command>> m_commandQueue;
+ 
++    bool m_stopped = false;
+     ExecuterState m_state;
+ };
+ 
+diff --git a/libs/Core/include/Spix/TestServer.h b/libs/Core/include/Spix/TestServer.h
+index 9ff7819..e4e5fa3 100644
+--- a/libs/Core/include/Spix/TestServer.h
++++ b/libs/Core/include/Spix/TestServer.h
+@@ -74,9 +74,11 @@ public:
+ 
+ protected:
+     virtual void executeTest() = 0;
++    void join();
++    void stopAcceptingCommands();
+ 
+ private:
+-    CommandExecuter* m_cmdExec;
++    CommandExecuter* m_cmdExec = nullptr;
+     std::thread m_thread;
+     std::function<void(std::string, std::string)> m_handler;
+ };
+diff --git a/libs/Core/src/AnyRpcServer.cpp b/libs/Core/src/AnyRpcServer.cpp
+index 6916697..e630972 100644
+--- a/libs/Core/src/AnyRpcServer.cpp
++++ b/libs/Core/src/AnyRpcServer.cpp
+@@ -8,12 +8,15 @@
+ #include <Spix/Data/Variant.h>
+ #include <Utils/AnyRpcFunction.h>
+ #include <atomic>
++#include <stdexcept>
++#ifndef WIN32
++#include <arpa/inet.h>
++#endif
+ 
+ namespace spix {
+ 
+ struct AnyRpcServerPimpl {
+     std::unique_ptr<anyrpc::Server> server;
+-    std::mutex serverAccessMutex;
+     std::atomic<bool> keepRunning {true};
+ };
+ 
+@@ -134,21 +137,22 @@ AnyRpcServer::AnyRpcServer(int anyrpcPort)
+         "Executes a generic/custom command | command(string command, string payload)",
+         [this](std::string command, std::string payload) { genericCommand(command, payload); });
+ 
+-    m_pimpl->server->BindAndListen(anyrpcPort);
++    m_pimpl->server->SetBindAddress(htonl(INADDR_LOOPBACK));
++    if (!m_pimpl->server->BindAndListen(anyrpcPort))
++        throw std::runtime_error("Could not bind the Spix RPC server to loopback");
+ }
+ 
+ AnyRpcServer::~AnyRpcServer()
+ {
+     m_pimpl->keepRunning.store(false);
+-    // make sure we exited executeTest at which point we get a lock
+-    std::lock_guard<std::mutex> lock(m_pimpl->serverAccessMutex);
++    stopAcceptingCommands();
++    join();
+ }
+ 
+ void AnyRpcServer::executeTest()
+ {
+-    std::lock_guard<std::mutex> lock(m_pimpl->serverAccessMutex);
+     while (m_pimpl->keepRunning.load()) {
+-        m_pimpl->server->Work(1000);
++        m_pimpl->server->Work(100);
+     }
+ }
+ 
+diff --git a/libs/Core/src/CommandExecuter/CommandExecuter.cpp b/libs/Core/src/CommandExecuter/CommandExecuter.cpp
+index f823e72..d588aac 100644
+--- a/libs/Core/src/CommandExecuter/CommandExecuter.cpp
++++ b/libs/Core/src/CommandExecuter/CommandExecuter.cpp
+@@ -27,7 +27,16 @@ ExecuterState& CommandExecuter::state()
+ void CommandExecuter::enqueueCommand(std::unique_ptr<cmd::Command> command)
+ {
+     std::lock_guard<std::mutex> lock(m_mutex);
+-    m_commandQueue.emplace(std::move(command));
++    if (!m_stopped)
++        m_commandQueue.emplace(std::move(command));
++}
++
++void CommandExecuter::stop()
++{
++    std::lock_guard<std::mutex> lock(m_mutex);
++    m_stopped = true;
++    // Destroy pending promises so a synchronous RPC can return during shutdown.
++    m_commandQueue = {};
+ }
+ 
+ void CommandExecuter::processCommands(Scene& scene)
+diff --git a/libs/Core/src/TestServer.cpp b/libs/Core/src/TestServer.cpp
+index 6a20e28..9b259e0 100644
+--- a/libs/Core/src/TestServer.cpp
++++ b/libs/Core/src/TestServer.cpp
+@@ -32,12 +32,23 @@
+ namespace spix {
+ 
+ TestServer::~TestServer()
++{
++    join();
++}
++
++void TestServer::join()
+ {
+     if (m_thread.joinable()) {
+         m_thread.join();
+     }
+ }
+ 
++void TestServer::stopAcceptingCommands()
++{
++    if (m_cmdExec)
++        m_cmdExec->stop();
++}
++
+ void TestServer::start()
+ {
+     if (!m_cmdExec) {
+diff --git a/libs/Core/src/Utils/AnyRpcFunction.h b/libs/Core/src/Utils/AnyRpcFunction.h
+index 40a055b..e37a37d 100644
+--- a/libs/Core/src/Utils/AnyRpcFunction.h
++++ b/libs/Core/src/Utils/AnyRpcFunction.h
+@@ -10,6 +10,7 @@
+ #include <Utils/AnyRpcUtils.h>
+ #include <anyrpc/anyrpc.h>
+ #include <functional>
++#include <future>
+ 
+ /**
+  * Utility type traits
+@@ -178,7 +179,11 @@ public:
+                 anyrpc::AnyRpcErrorInvalidParams, "Invalid parameters. Number of parameters incorrect.");
+         }
+ 
+-        unpackCallAndAssignAnyRpcResult<Args...>(m_func, result, std::make_index_sequence<sizeof...(Args)>(), params);
++        try {
++            unpackCallAndAssignAnyRpcResult<Args...>(m_func, result, std::make_index_sequence<sizeof...(Args)>(), params);
++        } catch (const std::future_error&) {
++            throw anyrpc::AnyRpcException(anyrpc::AnyRpcErrorInternalError, "Spix command cancelled");
++        }
+     }
+ 
+ private:

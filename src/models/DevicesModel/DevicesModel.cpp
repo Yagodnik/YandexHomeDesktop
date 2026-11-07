@@ -1,84 +1,61 @@
 #include "DevicesModel.h"
 
-DevicesModel::DevicesModel(YandexHomeApi *api, QObject *parent)
-  : QAbstractListModel(parent), api_(api)
-{
-  connect(api_,
-    &YandexHomeApi::userInfoReceived,
-    this,
-    &DevicesModel::OnUserInfoReceived);
+DevicesModel::DevicesModel(QObject* parent) : QAbstractListModel(parent) {}
 
-  connect(api_,
-    &YandexHomeApi::userInfoReceivingFailed,
-    this,
-    &DevicesModel::OnUserInfoReceivingFailed);
+int DevicesModel::rowCount(const QModelIndex& parent) const {
+  return parent.isValid() ? 0 : devices_.size();
 }
 
-int DevicesModel::rowCount(const QModelIndex &parent) const {
-  if (parent.isValid()) {
-    return 0;
-  }
-
-  return devices_.size();
-}
-
-QVariant DevicesModel::data(const QModelIndex &index, int role) const {
-  if (!index.isValid() || index.row() >= devices_.size()) {
+QVariant DevicesModel::data(const QModelIndex& index, int role) const {
+  if (!index.isValid() || index.model() != this || index.row() < 0 ||
+      index.row() >= devices_.size() || index.column() != 0) {
     return {};
   }
-
   const auto& device = devices_.at(index.row());
-
   switch (role) {
-    case NameRole:
-      return device.name;
-    case IdRole:
-      return device.id;
-    case RoomIdRole:
-      return device.room;
-    case HouseholdIdRole:
-      return device.household_id;
-    case TypeRole:
-      return device.type;
-    default:
-      return {};
+    case IdRole: return device.id;
+    case NameRole: return device.name;
+    case RoomIdRole: return device.room;
+    case HouseholdIdRole: return device.household_id;
+    case TypeRole: return device.type;
+    case FavoriteRole: return favorite_ids_.contains(device.id);
+    default: return {};
   }
 }
 
 QHash<int, QByteArray> DevicesModel::roleNames() const {
   return {
-    { NameRole, "name" },
-    { IdRole, "deviceId" },
-    { RoomIdRole, "deviceRoomId" },
-    { HouseholdIdRole, "deviceHouseholdId" },
-    { TypeRole, "deviceType" }
+    {IdRole, "deviceId"},
+    {NameRole, "name"},
+    {RoomIdRole, "deviceRoomId"},
+    {HouseholdIdRole, "deviceHouseholdId"},
+    {TypeRole, "deviceType"},
+    {FavoriteRole, "isFavorite"}
   };
 }
 
-void DevicesModel::RequestData() {
-  beginResetModel();
-
-  devices_.clear();
-
-  endResetModel();
-
-  api_->GetUserInfo();
+void DevicesModel::SetFavoriteDevices(const QStringList& ids) {
+  if (favorite_ids_ == ids) { return; }
+  const auto previous = favorite_ids_;
+  favorite_ids_ = ids;
+  for (int row = 0; row < devices_.size(); ++row) {
+    const auto& id = devices_.at(row).id;
+    if (previous.contains(id) != favorite_ids_.contains(id)) {
+      emit dataChanged(index(row, 0), index(row, 0), {FavoriteRole});
+    }
+  }
 }
 
-void DevicesModel::OnUserInfoReceived(const UserInfo &info) {
-  beginResetModel();
-
-  devices_.clear();
-
-  devices_ = info.devices;
-
-  endResetModel();
-
-  emit dataLoaded();
+int DevicesModel::GetCount() const {
+  return devices_.size();
 }
 
-void DevicesModel::OnUserInfoReceivingFailed(const QString &message) {
-  qWarning() << "DevicesModel: Error receiving devices:" << message;
-
-  emit dataLoadingFailed();
+void DevicesModel::SetDevices(const QList<DeviceObject>& items) {
+  const auto old_count = GetCount();
+  beginResetModel();
+  devices_ = items;
+  endResetModel();
+  if (old_count != GetCount()) {
+    emit countChanged();
+  }
 }

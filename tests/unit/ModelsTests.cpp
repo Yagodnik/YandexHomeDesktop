@@ -1,0 +1,145 @@
+#include "ModelsTests.h"
+#include "platform/WindowPlacement.h"
+#include "platform/NotchActivation.h"
+
+#include "models/ColorsModel/ColorsFilterModel.h"
+#include "models/ColorsModel/ColorsModel.h"
+
+void ModelsTests::TestColors() {
+  const auto gen_colors_file = []() {
+    ColorsModel::ColorsFile test_data;
+
+    test_data.temperatures.push_back({ .name = "1500K", .temperature = 1500 });
+    test_data.temperatures.push_back({ .name = "2700K", .temperature = 2700 });
+    test_data.temperatures.push_back({ .name = "3400K", .temperature = 3400 });
+    test_data.temperatures.push_back({ .name = "4500K", .temperature = 4500 });
+    test_data.temperatures.push_back({ .name = "5600K", .temperature = 5600 });
+    test_data.temperatures.push_back({ .name = "6500K", .temperature = 6500 });
+    test_data.temperatures.push_back({ .name = "7500K", .temperature = 7500 });
+    test_data.temperatures.push_back({ .name = "9000K", .temperature = 9000 });
+
+    test_data.colors.push_back({ .name = "color1", .rgb = { .r = 1, .g = 2, .b = 3}});
+    test_data.colors.push_back({ .name = "color2", .rgb = { .r = 121, .g = 2, .b = 3}});
+    test_data.colors.push_back({ .name = "color3", .rgb = { .r = 4, .g = 210, .b = 234}});
+
+    return test_data;
+  };
+
+  ColorsModel::ColorsFile colors_file = gen_colors_file();
+
+  /* Test single temperature mode */
+
+  // Note: We can meet situation like: min = 1200 = (2700 - 1500) / 2
+  // Then, we can't definitely say which mode is the closest.
+  // Docs doesn't give any notes on that, so can be a reason of a bug
+
+  {
+    ColorsModel source_model(colors_file);
+    ColorsFilterModel filter_model;
+    constexpr int single_value = 3321; // Closest number is 3400
+    constexpr int target_value = 3400;
+
+    filter_model.SetMin(single_value);
+    filter_model.SetMax(single_value);
+    filter_model.SetSupportsTemperature(true);
+    filter_model.setSourceModel(&source_model);
+
+    QCOMPARE(filter_model.rowCount(), 1);
+    const QModelIndex index = filter_model.index(0, 0);
+    QVariant color = filter_model.data(index, ColorsModel::TemperatureRole);
+    QCOMPARE(color.toInt(), target_value);
+  }
+
+  {
+    ColorsModel source_model(colors_file);
+    ColorsFilterModel filter_model;
+    constexpr int single_value = 4706; // Closest number is 4500
+    constexpr int target_value = 4500;
+
+    filter_model.SetMin(single_value);
+    filter_model.SetMax(single_value);
+    filter_model.SetSupportsTemperature(true);
+    filter_model.setSourceModel(&source_model);
+
+    QCOMPARE(filter_model.rowCount(), 1);
+    const QModelIndex index = filter_model.index(0, 0);
+    QVariant color = filter_model.data(index, ColorsModel::TemperatureRole);
+    QCOMPARE(color.toInt(), target_value);
+  }
+
+  /* Test no temperatures/colors support */
+
+  {
+    ColorsModel source_model(colors_file);
+    ColorsFilterModel filter_model;
+
+    filter_model.SetSupportsTemperature(true);
+    filter_model.SetSupportsColors(false);
+    filter_model.setSourceModel(&source_model);
+
+    QCOMPARE(filter_model.rowCount(), colors_file.temperatures.size());
+  }
+
+  {
+    ColorsModel source_model(colors_file);
+    ColorsFilterModel filter_model;
+
+    filter_model.SetSupportsTemperature(false);
+    filter_model.SetSupportsColors(true);
+    filter_model.setSourceModel(&source_model);
+
+    QCOMPARE(filter_model.rowCount(), colors_file.colors.size());
+  }
+
+  /* Just filtering */
+
+  {
+    ColorsModel source_model(colors_file);
+    ColorsFilterModel filter_model;
+
+    filter_model.SetMin(2000);
+    filter_model.SetMax(7000);
+    filter_model.SetSupportsTemperature(true);
+    filter_model.SetSupportsColors(true);
+    filter_model.setSourceModel(&source_model);
+
+    // 5 - number of available temperatures for this case (min 200, max 7000)
+    QCOMPARE(filter_model.rowCount(), 5 + colors_file.colors.size());
+  }
+}
+
+void ModelsTests::WindowPlacementEdges() {
+  const QRect screen(-1920, 0, 1920, 1080);
+  const QRect area(-1920, 24, 1920, 1016);
+  const QSize size(350, 460);
+  QCOMPARE(WindowPlacementInArea(QRect(-20, 0, 20, 24), size, screen, area, {}), QPoint(-350, 29));
+  QCOMPARE(WindowPlacementInArea(QRect(-1920, 1000, 24, 20), size, screen, area, {}), QPoint(-1891, 580));
+  QCOMPARE(WindowPlacementInArea({}, size, screen, area, QPoint(-10, 1070)), QPoint(-350, 580));
+  QCOMPARE(WindowPlacementInArea(QRect(-1000, 0, 20, 24), QSize(3000, 2000), screen, area, {}), area.topLeft());
+
+  const QRect scaled_screen(-1920, -1080, 1280, 720);
+  const QRect scaled_area(-1920, -1080, 1280, 680);
+  const QRect native_icon(-120, -48, 30, 30);
+  const QRect logical_icon = WindowsTrayAnchorInScreen(native_icon, scaled_screen, 1.5);
+  QCOMPARE(logical_icon, QRect(-720, -392, 20, 20));
+  QCOMPARE(WindowPlacementInArea(logical_icon, size, scaled_screen, scaled_area, {}), QPoint(-990, -860));
+  QCOMPARE(WindowsTrayAnchorInScreen(native_icon, screen.translated(0, -1080), 1.0), native_icon);
+  QVERIFY(WindowsTrayAnchorInScreen(native_icon, QRect(0, 0, 1920, 1080), 1.0).isEmpty());
+  QVERIFY(WindowsTrayAnchorInScreen({}, scaled_screen, 1.5).isEmpty());
+}
+
+void ModelsTests::NotchActivationArea() {
+  const QRectF notch(664, 0, 184, 32);
+  QVERIFY(IsNotchActivationPoint(notch, QPointF(756, 32)));
+  QVERIFY(IsNotchActivationPoint(notch, QPointF(756, 43)));
+  QVERIFY(!IsNotchActivationPoint(notch, QPointF(756, 45)));
+  QVERIFY(!IsNotchActivationPoint(notch, QPointF(650, 35)));
+  QVERIFY(!IsNotchActivationPoint({}, QPointF(0, 0)));
+}
+
+void ModelsTests::NotchActivationWindowStates() {
+  QVERIFY(ShouldActivateFromNotch(true, false));
+  QVERIFY(!ShouldActivateFromNotch(true, true));
+  QVERIFY(!ShouldActivateFromNotch(false, false));
+  QVERIFY(!ShouldActivateFromNotch(false, true));
+}

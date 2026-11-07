@@ -1,0 +1,83 @@
+name: macOS Release build
+
+on:
+  workflow_call:
+    inputs:
+      runner_label:
+        type: string
+        default: macos-latest
+      source_sha:
+        type: string
+        default: ''
+      xcode_developer_dir:
+        type: string
+        default: /Applications/Xcode_16.4.app/Contents/Developer
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: macOS Release
+    runs-on: ${{ inputs.runner_label }}
+    env:
+      DEVELOPER_DIR: ${{ inputs.xcode_developer_dir }}
+    steps:
+      - uses: actions/checkout@v4
+        if: ${{ !inputs.source_sha }}
+
+      - uses: actions/checkout@v4
+        if: ${{ inputs.source_sha }}
+        with:
+          ref: ${{ inputs.source_sha }}
+
+      - uses: extractions/setup-just@v4
+        with:
+          just-version: '1.51.0'
+
+      - name: Install Qt
+        uses: ./.github/actions/setup-qt
+        with:
+          host: mac
+
+      - name: Exercise recovery from a stale dependency source override
+        run: |
+          mkdir -p build
+          printf 'FETCHCONTENT_SOURCE_DIR_QHOTKEY:PATH=%s/missing-qhotkey-source\n' "$RUNNER_TEMP" > build/CMakeCache.txt
+
+      - name: Build, test, and package macOS installer
+        run: >-
+          just package_build_dir=build generator=Ninja pch=ON spix=OFF jobs=3
+          package-macos -DCMAKE_OSX_ARCHITECTURES=arm64
+
+      - name: Upload macOS package
+        uses: actions/upload-artifact@v4
+        with:
+          name: yandex-home-macos-arm64
+          path: build/dist/*.dmg
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
+
+      - name: Smoke-test the macOS desktop window
+        run: |
+          just config=Release build_dir=build spix=ON configure -DYH_ENABLE_PACKAGING=OFF
+          just config=Release build_dir=build spix=ON jobs=3 test-e2e SpixSmoke
+
+      - name: Upload macos test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-test-report
+          path: build/test-reports/
+          retention-days: 7
+
+      - name: Upload failure logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-build-logs
+          path: |
+            build/Testing/Temporary/*.log
+            build/CMakeFiles/CMakeConfigureLog.yaml
+          retention-days: 7

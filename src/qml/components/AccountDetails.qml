@@ -27,14 +27,12 @@ Item {
     }
   }
 
-  Rectangle {
+  UI.CardSurface {
     id: background
     anchors.fill: parent
-    color: themes.headerBackground
-    radius: 16
   }
 
-  DropShadow {
+  UI.Shadow {
     anchors.fill: background
     source: background
     horizontalOffset: 0
@@ -58,7 +56,7 @@ Item {
     height: avatarImage.height
 
     anchors.left: parent.left
-    anchors.leftMargin: 8
+    anchors.leftMargin: 10
     anchors.verticalCenter: parent.verticalCenter
 
     Image {
@@ -133,7 +131,7 @@ Item {
     fillMode: Image.PreserveAspectFit
     scale: 0.6
     anchors.right: parent.right
-    anchors.rightMargin: 5
+    anchors.rightMargin: 10
     anchors.verticalCenter: parent.verticalCenter
 
     MouseArea {

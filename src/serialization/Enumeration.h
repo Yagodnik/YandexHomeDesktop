@@ -1,5 +1,9 @@
 #pragma once
 
+#include <QMap>
+#include <QString>
+#include <utility>
+
 #define JSON_ENUM_ITEM_NAME(str, val) val
 #define JSON_ENUM_ITEM_PAIR(str, val) std::make_pair(str, val)
 #define JSON_ENUM_ITEM_BI_PAIR(str, val) std::make_pair(val, str)

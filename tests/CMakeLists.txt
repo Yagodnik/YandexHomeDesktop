@@ -1,16 +1,150 @@
 find_package(Qt6 COMPONENTS Core Network Test Gui REQUIRED)
 
-add_executable(AppTests
-        SerializationTests.cpp
-        ApiTests.cpp
-        TestsMain.cpp
-        SerializationTests.h
-        CapabilitiesTests.cpp
-        CapabilitiesTests.h
-        ModelsTests.cpp
-        ModelsTests.h
-)
+add_executable(McpBridgeTests unit/McpBridgeTests.cpp)
+target_link_libraries(McpBridgeTests PRIVATE McpBridge Qt6::Test)
+yh_add_test(NAME McpBridge COMMAND McpBridgeTests)
+if(TARGET YandexHomeMcp)
+  add_executable(McpProcessTests process/McpProcessTests.cpp)
+  target_link_libraries(McpProcessTests PRIVATE McpControl AppRuntime Models Qt6::Network Qt6::Test)
+  add_dependencies(McpProcessTests YandexHomeMcp)
+  target_compile_definitions(McpProcessTests PRIVATE "$<$<CONFIG:Debug>:YH_DEBUG_FAKE_API>")
+  if(TARGET YandexHomeCli)
+    target_compile_definitions(McpProcessTests PRIVATE YH_MCP_CLI_TEST)
+    add_dependencies(McpProcessTests YandexHomeCli)
+    yh_add_test(NAME McpProcess COMMAND McpProcessTests "$<TARGET_FILE:YandexHomeMcp>" "$<TARGET_FILE:YandexHomeCli>")
+  else()
+    yh_add_test(NAME McpProcess COMMAND McpProcessTests "$<TARGET_FILE:YandexHomeMcp>")
+  endif()
+  set_tests_properties(McpProcess PROPERTIES TIMEOUT 90)
+endif()
 
-target_link_libraries(AppTests PRIVATE Qt6::Core Qt6::Network Qt6::Test Qt6::Gui YandexHomeApi Iot Utils Models)
+foreach(_suite Serialization Api ApiBoundary ModelBoundary Capabilities Models)
+  add_executable(${_suite}Tests unit/${_suite}Tests.cpp unit/${_suite}Tests.h QtTestMain.cpp)
+  target_include_directories(${_suite}Tests PRIVATE unit)
+  target_compile_definitions(${_suite}Tests PRIVATE
+    YH_TEST_HEADER="${_suite}Tests.h" YH_TEST_CLASS=${_suite}Tests)
+  target_link_libraries(${_suite}Tests PRIVATE
+    Qt6::Core Qt6::Network Qt6::Test Qt6::Gui YandexApiAdapter Iot Utils Models)
+  yh_add_test(NAME ${_suite} COMMAND ${_suite}Tests)
+endforeach()
 
-add_test(NAME All COMMAND AppTests)
+yh_add_test(NAME TestTooling COMMAND "${Python3_EXECUTABLE}"
+  "${CMAKE_CURRENT_SOURCE_DIR}/TestCatalogToolTests.py")
+yh_add_test(NAME TestCatalog COMMAND "${Python3_EXECUTABLE}"
+  "${PROJECT_SOURCE_DIR}/scripts/test_catalog.py" check
+  --build-dir "${PROJECT_BINARY_DIR}" --config "$<CONFIG>" --ctest "${CMAKE_CTEST_COMMAND}")
+set_tests_properties(TestCatalog PROPERTIES TIMEOUT 90)
+
+if(BUILD_SHORTCUTS_APP)
+  add_executable(NativeShortcutTests unit/NativeShortcutTests.cpp ../src/app/shortcuts/QHotkeyRegistrar.cpp)
+  target_link_libraries(NativeShortcutTests PRIVATE Qt6::Test QHotkey::QHotkey AppShortcuts)
+  yh_add_test(NAME NativeShortcuts COMMAND NativeShortcutTests)
+  set_tests_properties(NativeShortcuts PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+  add_executable(ShortcutProcessTests process/ShortcutProcessTests.cpp)
+  target_link_libraries(ShortcutProcessTests PRIVATE Qt6::Test ShortcutControlBootstrap)
+  target_compile_definitions(ShortcutProcessTests PRIVATE FIXTURE_PATH="${CMAKE_SOURCE_DIR}/resources/debug/api.json")
+  add_dependencies(ShortcutProcessTests YandexHomeShortcuts)
+  yh_add_test(NAME ShortcutProcess COMMAND ShortcutProcessTests $<TARGET_FILE:YandexHomeShortcuts> "$<IF:$<CONFIG:Debug>,1,0>")
+  set_tests_properties(ShortcutProcess PROPERTIES TIMEOUT 90 ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+endif()
+
+add_executable(ShortcutTests unit/ShortcutTests.cpp)
+target_link_libraries(ShortcutTests PRIVATE Qt6::Test AppShortcuts)
+yh_add_test(NAME Shortcuts COMMAND ShortcutTests)
+
+add_executable(WorkerControlTests process/WorkerControlTests.cpp)
+target_link_libraries(WorkerControlTests PRIVATE Qt6::Test WorkerControl)
+yh_add_test(NAME WorkerControl COMMAND WorkerControlTests
+  -o -,txt -o "${PROJECT_BINARY_DIR}/Testing/WorkerControl.txt,txt")
+set_tests_properties(WorkerControl PROPERTIES TIMEOUT 90)
+
+add_executable(AuthorizationTests unit/AuthorizationTests.cpp)
+target_link_libraries(AuthorizationTests PRIVATE Qt6::Test AuthCore Models)
+yh_add_test(NAME Authorization COMMAND AuthorizationTests)
+
+if(BUILD_DESKTOP_APP)
+  add_executable(OAuthAdapterTests unit/OAuthAdapterTests.cpp)
+  target_link_libraries(OAuthAdapterTests PRIVATE Qt6::Test YandexAuth YandexOAuth)
+  yh_add_test(NAME OAuthAdapter COMMAND OAuthAdapterTests)
+endif()
+
+add_executable(DeviceControlTests unit/DeviceControlTests.cpp)
+target_link_libraries(DeviceControlTests PRIVATE Qt6::Test Models)
+yh_add_test(NAME DeviceControl COMMAND DeviceControlTests)
+
+add_executable(DeviceServiceTests unit/DeviceServiceTests.cpp)
+target_link_libraries(DeviceServiceTests PRIVATE Qt6::Test AppServices)
+yh_add_test(NAME DeviceService COMMAND DeviceServiceTests)
+
+add_executable(HomeTests unit/HomeTests.cpp)
+target_link_libraries(HomeTests PRIVATE Qt6::Test Models)
+yh_add_test(NAME Home COMMAND HomeTests)
+
+add_executable(ApiFixtureTests unit/ApiFixtureTests.cpp)
+qt_add_resources(API_FIXTURE_RESOURCES "${PROJECT_SOURCE_DIR}/resources/debug/debug.qrc")
+target_sources(ApiFixtureTests PRIVATE ${API_FIXTURE_RESOURCES})
+target_link_libraries(ApiFixtureTests PRIVATE Qt6::Test FixtureApi AppStartup Utils)
+target_compile_definitions(ApiFixtureTests PRIVATE FIXTURE_PATH="${CMAKE_SOURCE_DIR}/resources/debug/api.json")
+yh_add_test(NAME ApiFixture COMMAND ApiFixtureTests)
+
+add_executable(KeybindSettingsTests unit/KeybindSettingsTests.cpp)
+target_link_libraries(KeybindSettingsTests PRIVATE Qt6::Test Models)
+yh_add_test(NAME KeybindSettings COMMAND KeybindSettingsTests)
+
+add_executable(SettingsTransferTests unit/SettingsTransferTests.cpp)
+target_link_libraries(SettingsTransferTests PRIVATE Qt6::Test Models)
+yh_add_test(NAME SettingsTransfer COMMAND SettingsTransferTests)
+
+add_executable(ScenariosTests unit/ScenariosTests.cpp)
+target_link_libraries(ScenariosTests PRIVATE Qt6::Test Models)
+yh_add_test(NAME Scenarios COMMAND ScenariosTests)
+add_executable(CliTests unit/CliTests.cpp)
+target_link_libraries(CliTests PRIVATE Qt6::Test AppCli AppStartup)
+yh_add_test(NAME Cli COMMAND CliTests)
+
+add_executable(CapabilityRulesTests unit/CapabilityRulesTests.cpp)
+target_link_libraries(CapabilityRulesTests PRIVATE Qt6::Test IotCore)
+yh_add_test(NAME CapabilityRules COMMAND CapabilityRulesTests)
+
+if(YH_BUILD_REST_ADAPTER)
+add_executable(RestTests unit/RestTests.cpp)
+target_link_libraries(RestTests PRIVATE Qt6::Test AppRest AppRestControl AppStartup RestControlBootstrap Models)
+target_compile_definitions(RestTests PRIVATE OPENAPI_PATH="${PROJECT_SOURCE_DIR}/resources/rest/openapi.json")
+yh_add_test(NAME Rest COMMAND RestTests)
+
+endif()
+
+if(BUILD_CLI_APP AND BUILD_REST_APP)
+  find_package(Python3 3.9 REQUIRED COMPONENTS Interpreter)
+  add_executable(RestProcessTests process/RestProcessTests.cpp)
+  target_link_libraries(RestProcessTests PRIVATE Qt6::Test Qt6::Network)
+  if(APPLE)
+    target_link_libraries(RestProcessTests PRIVATE "-framework CoreFoundation")
+  endif()
+  target_compile_definitions(RestProcessTests PRIVATE FIXTURE_PATH="${CMAKE_SOURCE_DIR}/resources/debug/api.json")
+  target_compile_definitions(RestProcessTests PRIVATE PYTHON_PATH="${Python3_EXECUTABLE}"
+    EXAMPLE_PATH="${CMAKE_SOURCE_DIR}/examples/rest_client.py")
+endif()
+
+if(BUILD_CLI_APP)
+  yh_add_test(NAME CliProcess_YandexHomeCli COMMAND "${CMAKE_COMMAND}"
+    "-DAPP_PATH=$<TARGET_FILE:YandexHomeCli>" "-DCONFIGURATION=$<CONFIG>"
+    -P "${CMAKE_CURRENT_SOURCE_DIR}/process/CliSmoke.cmake")
+endif()
+if(BUILD_CLI_APP AND BUILD_REST_APP)
+  yh_add_test(NAME RestProcess COMMAND RestProcessTests
+    "$<TARGET_FILE:YandexHomeCli>" "$<TARGET_FILE:YandexHomeRest>" "$<CONFIG>")
+  set_tests_properties(RestProcess PROPERTIES TIMEOUT 90)
+endif()
+if(BUILD_DESKTOP_APP)
+  yh_add_test(NAME GuiRejectsCommands COMMAND "${CMAKE_COMMAND}"
+    "-DAPP_PATH=$<TARGET_FILE:appYandexHomeDesktop>"
+    -P "${CMAKE_CURRENT_SOURCE_DIR}/process/GuiEntryPoint.cmake")
+endif()
+
+yh_add_test(NAME InstalledSdkConsumer COMMAND "${CMAKE_COMMAND}"
+  "-DBUILD_PATH=${PROJECT_BINARY_DIR}" "-DSOURCE_PATH=${PROJECT_SOURCE_DIR}"
+  "-DCONFIGURATION=$<CONFIG>" "-DGENERATOR=${CMAKE_GENERATOR}"
+  "-DCOMPILER=${CMAKE_CXX_COMPILER}" "-DQT_PACKAGE_PATH=${Qt6_DIR}"
+  -P "${CMAKE_CURRENT_SOURCE_DIR}/process/SdkConsumer.cmake")
+set_tests_properties(InstalledSdkConsumer PROPERTIES TIMEOUT 90)

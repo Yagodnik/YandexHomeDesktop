@@ -1,6 +1,6 @@
 #pragma once
 
-#include "serialization/Serialization.h"
+#include "serialization/SerializationTypes.h"
 
 JSON_ENUMERATION(Status,
   ("ok", Ok),

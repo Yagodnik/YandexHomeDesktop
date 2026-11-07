@@ -1,4 +1,5 @@
 #include "ModesCapability.h"
+#include "iot/core/CapabilityState.h"
 
 ModesCapability::ModesCapability(QObject *parent)
   : IotObject("mode", parent) {}
@@ -20,10 +21,5 @@ QVariant ModesCapability::GetValue() const {
 }
 
 QVariantMap ModesCapability::Create(const QString& value) {
-  const auto instance = GetInstance();
-
-  return {
-    { "instance", instance },
-    { "value", value }
-  };
+  return Iot::State::Mode(GetInstance(), value);
 }

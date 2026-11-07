@@ -13,8 +13,10 @@ runs:
       with:
         python-version: '3.13'
 
-    - uses: jurplel/install-qt-action@v4
+    # Call the installer directly because act cannot resolve the wrapper's $/action reference.
+    - uses: jurplel/install-qt-action/action@v4.5.0
       with:
+        dir: ${{ github.workspace }}/..
         version: '6.9.1'
         host: ${{ inputs.host }}
         target: desktop
@@ -23,7 +25,6 @@ runs:
         # Only separately distributed add-ons belong in the modules list.
         modules: qt5compat qtshadertools qtnetworkauth qthttpserver qtwebsockets qtmultimedia
         tools: ${{ inputs.host == 'windows' && 'tools_mingw1310,qt.tools.win64_mingw1310' || '' }}
-        setup-python: false
         aqtversion: '==3.3.0'
         py7zrversion: '==1.1.0'
         cache: true

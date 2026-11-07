@@ -2,6 +2,16 @@ name: macOS Release build
 
 on:
   workflow_call:
+    inputs:
+      runner_label:
+        type: string
+        default: macos-15
+      source_sha:
+        type: string
+        default: ''
+      xcode_developer_dir:
+        type: string
+        default: /Applications/Xcode_16.4.app/Contents/Developer
 
 permissions:
   contents: read
@@ -9,11 +19,13 @@ permissions:
 jobs:
   test:
     name: macOS Release
-    runs-on: macos-15
+    runs-on: ${{ inputs.runner_label }}
     env:
-      DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
+      DEVELOPER_DIR: ${{ inputs.xcode_developer_dir }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source_sha }}
 
       - uses: extractions/setup-just@v4
         with:
